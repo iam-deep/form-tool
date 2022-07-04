@@ -1,0 +1,26 @@
+{
+    "name": "biswadeep/form-tool",
+    "description": "A lightweight Laravel form tool to create your admin panel easily",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Biswadeep\\FormTool\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Biswadeep Sarkar",
+            "email": "biswadeepoffice@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Biswadeep\\FormTool\\FormToolServiceProvider"
+            ]
+        }
+    }
+}
