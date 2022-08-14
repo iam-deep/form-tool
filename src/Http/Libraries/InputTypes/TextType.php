@@ -62,10 +62,7 @@ class TextType extends BaseInputType
                 );
             }
         }
-
-        /*if ($this->isSlug)
-            $validations[] = new RuleSlug($this->dbField);*/
-
+        
         return $validations;
     }
 
