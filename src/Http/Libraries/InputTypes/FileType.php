@@ -135,7 +135,7 @@ class FileType extends BaseInputType
                 if ($ext == $file->getClientOriginalExtension()) {
                     $flagCheck = false;
 
-                    $destinationPath = $pathinfo['dirname'] . '/';
+                    $destinationPath = \ltrim($pathinfo['dirname'], '/') . '/';
                     $filename = $pathinfo['basename'];
                 }
 
