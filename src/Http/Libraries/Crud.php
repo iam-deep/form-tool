@@ -12,12 +12,12 @@ class Crud
     private static $_form;
     private static $_table;
 
-    public static function createModel(Object $resource, string $model, Closure $callback)
+    public static function createModel(object $resource, string $model, Closure $callback)
     {
         self::$_resource = $resource;
         self::$_model = $model;
 
-        self::$_dataModel  = new DataModel();
+        self::$_dataModel = new DataModel();
         $callback(self::$_dataModel);
 
         self::$_form = new Form(self::$_resource, self::$_model, self::$_dataModel);

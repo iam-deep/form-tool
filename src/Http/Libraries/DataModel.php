@@ -33,12 +33,12 @@ class DataModel
         $this->parentDataModel = $parentDataModel;
     }
 
-    public function getList() : array
+    public function getList(): array
     {
         return $this->_dataTypeList;
     }
 
-    public function text(string $dbField, string $label = null) : InputTypes\TextType
+    public function text(string $dbField, string $label = null): InputTypes\TextType
     {
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
@@ -47,7 +47,7 @@ class DataModel
         return $inputType;
     }
 
-    public function hidden(string $dbField, string $label = null) : InputTypes\HiddenType
+    public function hidden(string $dbField, string $label = null): InputTypes\HiddenType
     {
         $inputType = new InputTypes\HiddenType();
         $inputType->init($this, $dbField, $label);
@@ -56,7 +56,7 @@ class DataModel
         return $inputType;
     }
 
-    public function file(string $dbField, string $label = null) : InputTypes\FileType
+    public function file(string $dbField, string $label = null): InputTypes\FileType
     {
         $inputType = new InputTypes\FileType();
         $inputType->init($this, $dbField, $label);
@@ -65,7 +65,7 @@ class DataModel
         return $inputType;
     }
 
-    public function image(string $dbField, string $label = null) : InputTypes\ImageType
+    public function image(string $dbField, string $label = null): InputTypes\ImageType
     {
         $inputType = new InputTypes\ImageType();
         $inputType->init($this, $dbField, $label);
@@ -74,7 +74,7 @@ class DataModel
         return $inputType;
     }
 
-    public function textarea(string $dbField, string $label = null) : InputTypes\TextareaType
+    public function textarea(string $dbField, string $label = null): InputTypes\TextareaType
     {
         $inputType = new InputTypes\TextareaType();
         $inputType->init($this, $dbField, $label);
@@ -88,11 +88,11 @@ class DataModel
         $inputType = new $class();
 
         if (!$inputType instanceof InputTypes\BaseInputType) {
-            throw new \Exception($class . ' should extends Biswadeep\FormTool\Http\Libraries\InputTypes\BaseInputType');
+            throw new \Exception($class.' should extends Biswadeep\FormTool\Http\Libraries\InputTypes\BaseInputType');
         }
 
         if (!$inputType instanceof InputTypes\ICustomType) {
-            throw new \Exception($class . ' should implements Biswadeep\FormTool\Http\Libraries\InputTypes\ICustomType');
+            throw new \Exception($class.' should implements Biswadeep\FormTool\Http\Libraries\InputTypes\ICustomType');
         }
 
         $this->_dataTypeList[] = $inputType;
@@ -104,14 +104,15 @@ class DataModel
     public function getInputTypeByDbField(string $dbField)
     {
         foreach ($this->_dataTypeList as $input) {
-            if (! $input instanceof DataModel && $input->getDbField() == $dbField)
+            if (!$input instanceof DataModel && $input->getDbField() == $dbField) {
                 return $input;
+            }
         }
-        
+
         return null;
     }
 
-    #region later
+    //region later
 
     /*public function date(string $dbField, string $label = null) : DataType
     {
@@ -153,7 +154,7 @@ class DataModel
         return $dataType;
     }*/
 
-    public function select(string $dbField, string $label = null) : InputTypes\SelectType
+    public function select(string $dbField, string $label = null): InputTypes\SelectType
     {
         $inputType = new InputTypes\SelectType();
         $inputType->init($this, $dbField, $label);
@@ -176,9 +177,9 @@ class DataModel
         return $dataType;
     }*/
 
-    #endregion
+    //endregion
 
-    #region Multiple
+    //region Multiple
 
     public function multiple(string $dbField, string $label, Closure $field)
     {
@@ -224,22 +225,22 @@ class DataModel
     public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null)
     {
         if ($idCol && $foreignKeyCol) {
-            $this->multipleTable = (object)[
+            $this->multipleTable = (object) [
                 'table'         => \trim($model),
                 'id'            => \trim($idCol),
                 'foreignKey'    => \trim($foreignKeyCol),
-                'orderBy'       => \trim($orderBy)
+                'orderBy'       => \trim($orderBy),
             ];
-        }
-        else {
+        } else {
             if (class_exists($model)) {
-                throw new \Exception('Class not found. Class: ' . $model);
+                throw new \Exception('Class not found. Class: '.$model);
             }
 
             $this->multipleModel = $model;
 
-            if ($model && ! isset($model::$foreignKey))
-                throw new \Exception('$foreignKey property not defined at ' . $model);
+            if ($model && !isset($model::$foreignKey)) {
+                throw new \Exception('$foreignKey property not defined at '.$model);
+            }
         }
 
         return $this;
@@ -247,20 +248,22 @@ class DataModel
 
     public function keepId()
     {
-        if (! $this->multipleModel && ! $this->multipleTable)
+        if (!$this->multipleModel && !$this->multipleTable) {
             throw new \Exception('keepId only works with db table, Please assign the table first. And keepId must called at last.');
+        }
 
-        if ($this->isMultipleSortable && ! $this->multipleSortableField)
+        if ($this->isMultipleSortable && !$this->multipleSortableField) {
             throw new \Exception('You must pass a dbField in sortable to make work with keepId. And keepId must called at last.');
+        }
 
-        if ($this->multipleModel)
+        if ($this->multipleModel) {
             $this->hidden($this->multipleModel::$primaryId);
-        elseif ($this->multipleTable)
+        } elseif ($this->multipleTable) {
             $this->hidden($this->multipleTable->id);
+        }
 
         return $this;
     }
-
 
     public function getRequired()
     {
@@ -279,8 +282,9 @@ class DataModel
 
     public function getModel()
     {
-        if ($this->multipleTable)
+        if ($this->multipleTable) {
             return $this->multipleTable;
+        }
 
         return $this->multipleModel;
     }
@@ -290,7 +294,7 @@ class DataModel
         return $this->multipleSortableField;
     }
 
-    #endregion
+    //endregion
 
     public function getKey()
     {
@@ -303,17 +307,19 @@ class DataModel
             $key .= $this->parentDataModel->getKey($key);
 
             // Preventing array brackets for the first $key
-            if (! $this->parentDataModel->isMultiple) {
+            if (!$this->parentDataModel->isMultiple) {
                 $key .= $this->key;
+
                 return $key;
             }
         }
 
-        if ($this->key)
-            $key .= '[' . $this->key;
-        else
+        if ($this->key) {
+            $key .= '['.$this->key;
+        } else {
             return '';
+        }
 
-        return $key . ']';
+        return $key.']';
     }
 }

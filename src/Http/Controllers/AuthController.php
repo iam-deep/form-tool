@@ -4,10 +4,10 @@ namespace Biswadeep\FormTool\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
@@ -26,7 +26,7 @@ class AuthController extends Controller
     public function loginPost(Request $request)
     {
         $postData = $request->validate([
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
 
@@ -43,7 +43,7 @@ class AuthController extends Controller
             }
             */
 
-            $user->adminLoginToken = Hash::make($user->password . $user->email . $_SERVER['HTTP_USER_AGENT']);
+            $user->adminLoginToken = Hash::make($user->password.$user->email.$_SERVER['HTTP_USER_AGENT']);
 
             unset($user->password);
 
@@ -51,10 +51,11 @@ class AuthController extends Controller
             Cookie::make('i_am_admin', $user->userId, now()->addDays(90)->diffInSeconds());
 
             $loginRedirect = config('form-tool.loginRedirect');
-            if (!$loginRedirect)
+            if (!$loginRedirect) {
                 dd('loginRedirect not set in config/form-tool.php');
+            }
 
-            $loginRedirect = config('form-tool.adminURL') . $loginRedirect;
+            $loginRedirect = config('form-tool.adminURL').$loginRedirect;
 
             return redirect($loginRedirect);
         }

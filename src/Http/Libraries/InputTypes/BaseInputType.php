@@ -28,7 +28,7 @@ abstract class InputType
     // File Browser
     const Image = 30;
     const File = 31;
-    
+
     // DateTime
     const Date = 40;
     const Time = 41;
@@ -79,92 +79,92 @@ class BaseInputType
         $this->label = $label ?: \ucfirst($this->dbField);
     }
 
-    public function label($label) : BaseInputType
+    public function label($label): BaseInputType
     {
         $this->label = $label;
 
         return $this;
     }
 
-    public function default($value) : BaseInputType
+    public function default($value): BaseInputType
     {
         $this->value = $this->defaultValue = $value;
 
         return $this;
     }
 
-    public function placeholder($text) : BaseInputType
+    public function placeholder($text): BaseInputType
     {
         $this->placeholder = $text;
 
         return $this;
     }
 
-    public function help($helpText) : BaseInputType
+    public function help($helpText): BaseInputType
     {
         $this->help = $helpText;
 
         return $this;
     }
 
-    public function raw($rawAttributes) : BaseInputType
+    public function raw($rawAttributes): BaseInputType
     {
-        $this->raw .= $rawAttributes . ' ';
+        $this->raw .= $rawAttributes.' ';
 
         return $this;
     }
 
-    public function required() : BaseInputType
+    public function required(): BaseInputType
     {
         $this->isRequired = true;
 
         return $this;
     }
 
-    public function readonly() : BaseInputType
+    public function readonly(): BaseInputType
     {
         $this->raw .= 'readonly ';
 
         return $this;
     }
 
-    public function disabled() : BaseInputType
+    public function disabled(): BaseInputType
     {
         $this->raw .= 'disabled ';
 
         return $this;
     }
 
-    public function addClass($classes) : BaseInputType
+    public function addClass($classes): BaseInputType
     {
-        if (is_array($classes))
+        if (is_array($classes)) {
             $this->classes = array_merge($this->classes, $classes);
-        else
+        } else {
             $this->classes[] = trim($classes);
+        }
 
         return $this;
     }
 
-    public function removeClass($classes) : BaseInputType
+    public function removeClass($classes): BaseInputType
     {
         if (is_array($classes)) {
             foreach ($classes as $c) {
                 unset($this->classes[$c]);
             }
-        }
-        else {
+        } else {
             unset($this->classes[trim($classes)]);
         }
 
-        return $this; 
+        return $this;
     }
 
-    public function addStyle($style) : BaseInputType
+    public function addStyle($style): BaseInputType
     {
-        $this->inlineCSS .= $style . '';
+        $this->inlineCSS .= $style.'';
     }
 
-    #region Callbacks
+    //region Callbacks
 
     public function beforeValidation($data)
     {
@@ -201,36 +201,37 @@ class BaseInputType
         return null;
     }
 
-    #endregion
+    //endregion
 
     /* Internal functions */
     public function getValidations($type)
     {
         $validations = [];
-        if ($this->isRequired)
+        if ($this->isRequired) {
             $validations[] = 'required';
-        else
+        } else {
             $validations[] = 'nullable';
+        }
 
         return $validations;
     }
 
-    public final function getType()
+    final public function getType()
     {
         return $this->type;
     }
 
-    public final function getDbField() : string
+    final public function getDbField(): string
     {
         return $this->dbField;
     }
 
-    public final function isRequired() : bool
+    final public function isRequired(): bool
     {
         return $this->isRequired;
     }
 
-    public final function getLabel()
+    final public function getLabel()
     {
         return $this->label;
     }
@@ -263,20 +264,20 @@ class BaseInputType
         return $this->value;
     }
 
-    public final function getTableCell()
+    final public function getTableCell()
     {
         return CellDefinition::Input($this);
     }
 
-    protected function htmlParentDiv($input) : string
+    protected function htmlParentDiv($input): string
     {
-        return '<div class="'. self::classDiv .' @if ($errors->has("'. $this->dbField .'")) '.self::classDivError.' @endif">
-            <label for="'. $this->dbField .'">'. $this->label .'
-            '. ($this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'. $this->help .'"></i>' : '') .'
-            '. ($this->isRequired ? '<span class="text-danger">*</span>' : '') .'
+        return '<div class="'.self::classDiv.' @if ($errors->has("'.$this->dbField.'")) '.self::classDivError.' @endif">
+            <label for="'.$this->dbField.'">'.$this->label.'
+            '.($this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'.$this->help.'"></i>' : '').'
+            '.($this->isRequired ? '<span class="text-danger">*</span>' : '').'
             </label>
-            '. $input .'
-            {!! $errors->first("'. $this->dbField .'", \'<p class="help-block">:message</p>\') !!}
+            '.$input.'
+            {!! $errors->first("'.$this->dbField.'", \'<p class="help-block">:message</p>\') !!}
         </div>';
     }
 }

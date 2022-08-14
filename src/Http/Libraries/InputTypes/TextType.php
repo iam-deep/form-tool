@@ -2,9 +2,8 @@
 
 namespace Biswadeep\FormTool\Http\Libraries\InputTypes;
 
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
 class TextType extends BaseInputType
@@ -18,7 +17,7 @@ class TextType extends BaseInputType
     public bool $isUnique = false;
     private bool $isSlug = false;
 
-    public function encrypt() : TextType
+    public function encrypt(): TextType
     {
         $this->isEncrypted = true;
 
@@ -48,21 +47,22 @@ class TextType extends BaseInputType
             $model = $this->dataModel->form->getModel();
 
             if ($validations == 'store') {
-                $validations[] = sprintf('unique:%s,%s', 
-                    $model::$tableName, 
+                $validations[] = sprintf(
+                    'unique:%s,%s',
+                    $model::$tableName,
                     $this->dbField
                 );
-            }
-            else {
-                $validations[] = sprintf('unique:%s,%s,%s,%s', 
-                    $model::$tableName, 
+            } else {
+                $validations[] = sprintf(
+                    'unique:%s,%s,%s,%s',
+                    $model::$tableName,
                     $this->dbField,
                     $this->dataModel->form->getEditId(),
                     $model::$primaryId
                 );
             }
         }
-        
+
         return $validations;
     }
 
@@ -95,18 +95,18 @@ class TextType extends BaseInputType
 
     public function getHTML()
     {
-        $input = '<input type="'. $this->inputType .'" class="'. implode(' ', $this->classes) .'" id="'. $this->dbField .'" name="'. $this->dbField .'" value="'. old($this->dbField, $this->value) . '" '. ($this->isRequired ? 'required' : '') .' '. $this->raw  .' '. $this->inlineCSS  .' />';
+        $input = '<input type="'.$this->inputType.'" class="'.implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' />';
 
         return $this->htmlParentDiv($input);
     }
 
     public function getHTMLMultiple($key, $index)
     {
-        $value = old($key . '.' . $this->dbField);
+        $value = old($key.'.'.$this->dbField);
 
         $value = $value[$index] ?? $this->value;
 
-        $input = '<input type="'. $this->inputType .'" class="'. implode(' ', $this->classes) .' input-sm" id="'. $this->dbField .'" name="'. $key . '[' . $this->dbField .'][]" value="'. $value . '" '. ($this->isRequired ? 'required' : '') .' '. $this->raw  .' '. $this->inlineCSS  .' />';
+        $input = '<input type="'.$this->inputType.'" class="'.implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' />';
 
         return $input;
     }

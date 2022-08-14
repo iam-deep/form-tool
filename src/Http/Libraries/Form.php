@@ -2,10 +2,9 @@
 
 namespace Biswadeep\FormTool\Http\Libraries;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 use Biswadeep\FormTool\Http\Libraries\InputTypes\InputType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 abstract class FormStatus
 {
@@ -34,19 +33,20 @@ class Form
     private $postData = null;
     private $oldData = null;
 
-    function __construct($resource, $model, DataModel $dataModel = null)
+    public function __construct($resource, $model, DataModel $dataModel = null)
     {
         $this->_resource = $resource;
         $this->_model = $model;
 
-        if ($dataModel)
+        if ($dataModel) {
             $this->_dataModel = $dataModel;
-        else
+        } else {
             $this->_dataModel = DataModel::getInstance();
+        }
 
         $this->_dataModel->form = $this;
 
-        $this->_url = config('form-tool.adminURL') . '/' . $this->_resource->route;
+        $this->_url = config('form-tool.adminURL').'/'.$this->_resource->route;
     }
 
     public function init()
@@ -54,48 +54,47 @@ class Form
         $this->_request = request();
         $method = $this->_request->method();
 
-        if ("POST" == $method) {
+        if ('POST' == $method) {
             $this->formStatus = FormStatus::Store;
+
             return $this->store();
-        }
-        else if ('PUT' == $method) {
+        } elseif ('PUT' == $method) {
             $this->formStatus = FormStatus::Update;
+
             return $this->update();
-        }
-        else if ('DELETE' == $method) {
+        } elseif ('DELETE' == $method) {
             $this->formStatus = FormStatus::Destroy;
+
             return $this->destroy();
-        }
-        else if (strpos($this->_request->getRequestUri(), '/edit')) {
+        } elseif (strpos($this->_request->getRequestUri(), '/edit')) {
             $this->formStatus = FormStatus::Edit;
+
             return $this->edit();
         }
     }
 
-    #region GenerateForm
+    //region GenerateForm
 
     public function getForm()
     {
         $data['inputs'] = '';
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel) {
-                $data['inputs'] .= '<div class="form-group"><label>'. $input->label .'</label>';
+                $data['inputs'] .= '<div class="form-group"><label>'.$input->label.'</label>';
                 $data['inputs'] .= $this->getMultipleFields($input);
                 $data['inputs'] .= '</div>';
-            }
-            else {
+            } else {
                 $data['inputs'] .= $input->getHTML();
             }
         }
 
         $isEdit = $this->formStatus == FormStatus::Edit;
-            
+
         $data['isEdit'] = $isEdit;
         if ($isEdit) {
-            $data['action'] = config('form-tool.adminURL') . '/' . $this->_resource->route . '/' . $this->_editId;
-        }
-        else {
-            $data['action'] = config('form-tool.adminURL') . '/' . $this->_resource->route;
+            $data['action'] = config('form-tool.adminURL').'/'.$this->_resource->route.'/'.$this->_editId;
+        } else {
+            $data['action'] = config('form-tool.adminURL').'/'.$this->_resource->route;
         }
 
         return view('form-tool::crud.components.form', $data);
@@ -110,24 +109,25 @@ class Form
         $template = $this->getTemplate($model, $key, $keyName);
 
         $classes = '';
-        if ($model->isSortable())
+        if ($model->isSortable()) {
             $classes .= ' table-sortable';
+        }
 
-        if ($model->isConfirmBeforeDelete())
+        if ($model->isConfirmBeforeDelete()) {
             $classes .= ' confirm-delete';
+        }
 
-        $data = '<table class="table table-bordered'. $classes .'" id="'. $keyName .'" data-required="'. $model->getRequired() .'"><thead>
+        $data = '<table class="table table-bordered'.$classes.'" id="'.$keyName.'" data-required="'.$model->getRequired().'"><thead>
         <tr class="active">';
 
         $totalCols = 0;
         foreach ($model->getList() as $field) {
-            if (! $field instanceof DataModel) {
+            if (!$field instanceof DataModel) {
                 if ($field->getType() != InputType::Hidden) {
-                    $data .= '<th>' . $field->getLabel() . '</th>';
+                    $data .= '<th>'.$field->getLabel().'</th>';
                     $totalCols++;
                 }
-            }
-            else {
+            } else {
                 $data .= '<th></th>';
                 $totalCols++;
             }
@@ -135,46 +135,45 @@ class Form
 
         $data .= '<th></th></tr></thead><tbody>';
 
-
         //Check if any session data exists
         $field = $model->getList()[0]->getDbField();
-        $val = old($key . '.' . $field);
+        $val = old($key.'.'.$field);
         $totalDataInSession = 0;
-        if ($val && is_array($val))
+        if ($val && is_array($val)) {
             $totalDataInSession = count($val);
-        
-        
+        }
+
         // Let's get data for multiple fields if its Edit
         $result = null;
         $totalRowsInEdit = 0;
 
         // TODO: Need to check if validation failed without $totalDataInSession
-        if (! $totalDataInSession && $this->formStatus == FormStatus::Edit) {
+        if (!$totalDataInSession && $this->formStatus == FormStatus::Edit) {
             $dbModel = $model->getModel();
             if ($dbModel) {
                 if ($dbModel instanceof \stdClass) {
                     $where = [$dbModel->foreignKey => $this->_editId];
-                    
-                    $query = DB::table($dbModel->table)->where($where);                    
-                    if ($dbModel->orderBy)
+
+                    $query = DB::table($dbModel->table)->where($where);
+                    if ($dbModel->orderBy) {
                         $query->orderBy($dbModel->orderBy, 'asc');
-                    else if ($model->getSortableField())
+                    } elseif ($model->getSortableField()) {
                         $query->orderBy($model->getSortableField());
+                    }
 
                     $result = $query->get();
-                }
-                else {
-                    if ($model->getSortableField())
+                } else {
+                    if ($model->getSortableField()) {
                         $dbModel::$orderBy = $model->getSortableField();
-                    
+                    }
+
                     $where = [$dbModel::$foreignKey => $this->_editId];
                     $result = $dbModel::getWhere($where);
                 }
-            }
-            else if (isset($this->resultData->{$key})) {
+            } elseif (isset($this->resultData->{$key})) {
                 $result = \json_decode($this->resultData->{$key});
             }
-            
+
             if ($result) {
                 $totalRowsInEdit = count($result);
 
@@ -194,14 +193,16 @@ class Form
         $appendCount = 0;
         if ($model->getRequired() > 0) {
             // Check if the required items is greater than the items already saved
-            if ($result)
+            if ($result) {
                 $appendCount = $model->getRequired() - $totalRowsInEdit;
-            else if (!$result || $this->formStatus == FormStatus::Create)
+            } elseif (!$result || $this->formStatus == FormStatus::Create) {
                 $appendCount = $model->getRequired();
+            }
         }
 
-        if ($appendCount < $totalDataInSession)
+        if ($appendCount < $totalDataInSession) {
             $appendCount = $totalDataInSession;
+        }
 
         for ($i = 0; $i < $appendCount; $i++) {
             // Sending index will get the field value if there any in the session
@@ -211,14 +212,14 @@ class Form
         $data .= '</tbody>
             <tfoot>
                 <tr>
-                    <td colspan="'. ++$totalCols .'" class="text-right">
+                    <td colspan="'.++$totalCols.'" class="text-right">
                         <a class="btn btn-primary btn-xs d_add"><i class="fa fa-plus"></i></a>
                     </td>
                 </tr>
             </tfoot>
         </table>';
 
-        $data .= '<script>template["'. $keyName .'"]=`'. $template .'`</script>';
+        $data .= '<script>template["'.$keyName.'"]=`'.$template.'`</script>';
 
         return $data;
     }
@@ -229,13 +230,14 @@ class Form
 
         $hidden = '';
         foreach ($model->getList() as $field) {
-            if ($field instanceof DataModel)
-                $template .= '<td>' . $this->getMultipleFields($field) . '</td>';
-            else {
-                if ($field->getType() == InputType::Hidden)
+            if ($field instanceof DataModel) {
+                $template .= '<td>'.$this->getMultipleFields($field).'</td>';
+            } else {
+                if ($field->getType() == InputType::Hidden) {
                     $hidden .= $field->getHTMLMultiple($key, $index);
-                else
-                    $template .= '<td>' . $field->getHTMLMultiple($key, $index) . '</td>';
+                } else {
+                    $template .= '<td>'.$field->getHTMLMultiple($key, $index).'</td>';
+                }
             }
         }
 
@@ -243,7 +245,7 @@ class Form
 
         if ($model->isSortable()) {
             $template .= $hidden
-                . '<a class="btn btn-default handle btn-xs" style="display:none"><i class="fa fa-arrows"></i></a>&nbsp; ';
+                .'<a class="btn btn-default handle btn-xs" style="display:none"><i class="fa fa-arrows"></i></a>&nbsp; ';
         }
 
         $template .= '<a class="btn btn-default btn-xs text-danger d_remove" style="display:none"><i class="fa fa-times"></i></a>';
@@ -252,7 +254,7 @@ class Form
         return $template;
     }
 
-    #endregion
+    //endregion
 
     public function edit($id = false)
     {
@@ -260,11 +262,12 @@ class Form
             $url = $this->_request->getRequestUri();
 
             $matches = [];
-            $t = preg_match('/'. $this->_resource->route .'\/([^\/]*)\/edit/', $url, $matches);
-            if (count($matches) > 1)
+            $t = preg_match('/'.$this->_resource->route.'\/([^\/]*)\/edit/', $url, $matches);
+            if (count($matches) > 1) {
                 $id = $matches[1];
-            else
+            } else {
                 return redirect($this->_url)/*->action([get_class($this->_resource), 'index'])*/->with('error', 'Could not fetch "id"! Call edit manually.');
+            }
         }
 
         $this->_editId = $id;
@@ -272,22 +275,23 @@ class Form
         $this->resultData = $this->_model::getOne($id);
 
         foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel && isset($this->resultData->{$input->getDbField()})) {
+            if (!$input instanceof DataModel && isset($this->resultData->{$input->getDbField()})) {
                 $input->setValue($this->resultData->{$input->getDbField()});
-            } 
+            }
         }
     }
 
-    #region FormAction StoreAndUpdate
+    //region FormAction StoreAndUpdate
 
     private function store()
     {
         $validate = $this->validate();
-        if ($validate !== true)
+        if ($validate !== true) {
             return $validate;
-        
+        }
+
         $this->createPostData();
-        
+
         $insertId = $this->_model::add($this->postData);
 
         if ($insertId) {
@@ -308,21 +312,23 @@ class Form
     {
         if ($id) {
             $this->_editId = $id;
-        }
-        else if (! $this->_editId) {
+        } elseif (!$this->_editId) {
             $parse = $this->parseEditId();
-            if (true !== $parse)
+            if (true !== $parse) {
                 return $parse;
+            }
         }
 
         $validate = $this->validate();
-        if ($validate !== true)
+        if ($validate !== true) {
             return $validate;
+        }
 
-        if (! $this->oldData)
+        if (!$this->oldData) {
             $this->oldData = $this->_model::getOne($this->_editId);
+        }
 
-        // TODO: 
+        // TODO:
         // validations
         //      permission to update
         //      can update this row
@@ -345,18 +351,21 @@ class Form
 
     private function afterSave()
     {
-        if (! $this->_editId)
+        if (!$this->_editId) {
             return;
+        }
 
         $result = $this->_model::getOne($this->_editId);
         foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel)
+            if ($input instanceof DataModel) {
                 continue;
-            
-            if ($this->formStatus == FormStatus::Store)
+            }
+
+            if ($this->formStatus == FormStatus::Store) {
                 $response = $input->afterStore($result);
-            else
+            } else {
                 $response = $input->afterUpdate($this->oldData, $result);
+            }
         }
 
         $this->saveMultipleFields();
@@ -365,18 +374,19 @@ class Form
     private function saveMultipleFields()
     {
         foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel || ! $input->getModel())
+            if (!$input instanceof DataModel || !$input->getModel()) {
                 continue;
-            
+            }
+
             $model = $input->getModel();
 
             $foreignKey = null;
             if ($model instanceof \stdClass) {
                 $foreignKey = $model->foreignKey;
-            }
-            else {
-                if (! isset($model::$foreignKey))
-                    throw new \Exception('$foreignKey property not defined at ' . $model);
+            } else {
+                if (!isset($model::$foreignKey)) {
+                    throw new \Exception('$foreignKey property not defined at '.$model);
+                }
 
                 $foreignKey = $model::$foreignKey;
             }
@@ -390,7 +400,7 @@ class Form
                     }
 
                     $dataRow[$foreignKey] = $this->_editId;
-                    
+
                     $data[] = $dataRow;
                 }
             }
@@ -398,13 +408,14 @@ class Form
             $where = [$foreignKey => $this->_editId];
             if ($model instanceof \stdClass) {
                 DB::table($model->table)->where($where)->delete();
-                if (count($data))
+                if (count($data)) {
                     DB::table($model->table)->insert($data);
-            }
-            else {
+                }
+            } else {
                 $model::deleteWhere($where);
-                if (count($data))
+                if (count($data)) {
                     $model::addMany($data);
+                }
             }
         }
     }
@@ -415,12 +426,14 @@ class Form
 
         $fields = $labels = $merge = [];
         foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel)
+            if ($input instanceof DataModel) {
                 continue;
+            }
 
             $newValue = $input->beforeValidation($this->_request->{$input->getDbField()});
-            if ($newValue !== null)
+            if ($newValue !== null) {
                 $merge[$input->getDbField()] = $newValue;
+            }
 
             $fields[$input->getDbField()] = $input->getValidations($validationType);
 
@@ -432,11 +445,11 @@ class Form
         }
 
         $validator = \Validator::make($this->_request->all(), $fields, [], $labels);
- 
+
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
         }
- 
+
         $this->postData = $validator->validated();
 
         return true;
@@ -450,15 +463,16 @@ class Form
         } else {
             if ($id) {
                 $this->_editId = $id;
-            }
-            else if (! $this->_editId) {
+            } elseif (!$this->_editId) {
                 $parse = $this->parseEditId();
-                if (true !== $parse)
+                if (true !== $parse) {
                     return $parse;
+                }
             }
 
-            if (! $this->oldData)
+            if (!$this->oldData) {
                 $this->oldData = $this->_model::getOne($this->_editId);
+            }
 
             $this->postData['updatedBy'] = Session::has('user') ? Session::get('user')->userId : 0;
             $this->postData['updatedAt'] = date('Y-m-d H:i:s');
@@ -468,24 +482,27 @@ class Form
 
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel) {
-                if (! $input->getModel())
-                    $this->postData[$input->getKey()] = \json_encode($this->_request{$input->getKey()});
-                
+                if (!$input->getModel()) {
+                    $this->postData[$input->getKey()] = \json_encode($this->_request[$input->getKey()]);
+                }
+
                 continue;
             }
 
             $response = null;
-            if ($this->formStatus == FormStatus::Store)
-                $response = $input->beforeStore((object)$this->postData);
-            else
-                $response = $input->beforeUpdate($this->oldData, (object)$this->postData);
+            if ($this->formStatus == FormStatus::Store) {
+                $response = $input->beforeStore((object) $this->postData);
+            } else {
+                $response = $input->beforeUpdate($this->oldData, (object) $this->postData);
+            }
 
             if ($response !== null) {
                 $this->postData[$input->getDbField()] = $response;
             }
 
-            if (! $this->postData[$input->getDbField()] && $input->getDefaultValue() !== null)
+            if (!$this->postData[$input->getDbField()] && $input->getDefaultValue() !== null) {
                 $this->postData[$input->getDbField()] = $input->getDefaultValue();
+            }
         }
     }
 
@@ -495,18 +512,20 @@ class Form
 
         $merge = [];
         foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel)
+            if (!$input instanceof DataModel) {
                 continue;
-            
+            }
+
             $value = $data[$input->getKey()];
             if (is_array($value)) {
                 $keys = array_keys($value);
-                if (! $keys)
+                if (!$keys) {
                     continue;
+                }
 
                 $totalRows = count($value[$keys[0]]);
                 $totalKeys = count($keys);
-                
+
                 $newData = [];
                 for ($i = 0; $i < $totalRows; $i++) {
                     $newRow = [];
@@ -524,7 +543,7 @@ class Form
         $this->_request->merge($merge);
 
         /* Need this for file upload and other callbacks
-        
+
         $arrayToMerge = [];
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel) {
@@ -532,10 +551,10 @@ class Form
 
                 foreach ($input->getList() as $field) {
                     //$response = $input->beforeStore((object)$this->postData);
-                    //$row[$field->dbField()] = 
+                    //$row[$field->dbField()] =
                 }
 
-                $arrayToMerge[$input->getKey()] = 1;                
+                $arrayToMerge[$input->getKey()] = 1;
             }
         }*/
     }
@@ -545,16 +564,17 @@ class Form
         $url = $this->_request->getRequestUri();
 
         $matches = [];
-        $t = preg_match('/'. $this->_resource->route .'\/([^\/]*)\/?/', $url, $matches);
+        $t = preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
         if (count($matches) > 1) {
             $this->_editId = $matches[1];
+
             return true;
         }
-        
+
         return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
     }
 
-    #endregion
+    //endregion
 
     private function destroy($id = false)
     {
@@ -562,14 +582,15 @@ class Form
             $url = $this->_request->getRequestUri();
 
             $matches = [];
-            $t = preg_match('/'. $this->_resource->route .'\/([^\/]*)\/?/', $url, $matches);
-            if (count($matches) > 1)
+            $t = preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
+            if (count($matches) > 1) {
                 $id = $matches[1];
-            else
+            } else {
                 return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
+            }
         }
 
-        // TODO: 
+        // TODO:
         // validations
         //      permission to delete
         //      can delete this row
@@ -578,9 +599,9 @@ class Form
         foreach ($this->_dataModel->getList() as $field) {
             if ($field instanceof DataModel) {
                 // TODO:
-            }
-            else
+            } else {
                 $field->beforeDestroy($result);
+            }
         }
 
         $affected = $this->_model::deleteOne($id);
@@ -589,9 +610,9 @@ class Form
             foreach ($this->_dataModel->getList() as $field) {
                 if ($field instanceof DataModel) {
                     // TODO:
-                }
-                else
+                } else {
                     $field->afterDestroy($result);
+                }
             }
 
             // This will only execute if the method called by default not manually from the destroy
@@ -603,7 +624,7 @@ class Form
         return redirect($this->_url)->with('success', 'Data deleted successfully!');
     }
 
-    #region GetterSetter
+    //region GetterSetter
 
     public function getPostData($id = null)
     {
@@ -632,5 +653,5 @@ class Form
         return $this->resultData;
     }
 
-    #endregion
+    //endregion
 }

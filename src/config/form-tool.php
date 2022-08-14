@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 return [
     // Do not put any slash in the end
@@ -22,5 +22,5 @@ return [
     'allowedTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,pptx,webm,mkv,flv,vob,avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz,zipx',
 
     // Allowed types for image upload
-    'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif'
+    'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif',
 ];

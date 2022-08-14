@@ -9,7 +9,9 @@ class ImageType extends FileType
     public int $type = InputType::Image;
     public string $typeInString = 'image';
 
-    private $maxWidth, $maxHeight, $ratio;
+    private $maxWidth;
+    private $maxHeight;
+    private $ratio;
 
     public function __construct()
     {
@@ -20,11 +22,13 @@ class ImageType extends FileType
 
     public function dimensions($maxWidth = null, $maxHeight = null)
     {
-        if ($maxWidth)
+        if ($maxWidth) {
             $this->maxWidth = $maxWidth;
+        }
 
-        if ($maxHeight)
+        if ($maxHeight) {
             $this->maxHeight = $maxHeight;
+        }
 
         return $this;
     }
@@ -49,23 +53,25 @@ class ImageType extends FileType
                 $rule->maxWidth($this->maxWidth);
                 $flag = true;
             }
-            
+
             if ($this->maxHeight) {
                 $rule->maxHeight($this->maxHeight);
                 $flag = true;
             }
-        
+
             if ($this->ratio) {
                 $rule->ratio($this->ratio);
                 $flag = true;
             }
 
-            if ($flag)
+            if ($flag) {
                 $validations[] = $rule;
+            }
 
             $imageTypes = config('form-tool.imageTypes');
-            if ($imageTypes)
-                $validations['mimes'] = 'mimes:' . $imageTypes;
+            if ($imageTypes) {
+                $validations['mimes'] = 'mimes:'.$imageTypes;
+            }
         }
 
         return $validations;
@@ -74,8 +80,9 @@ class ImageType extends FileType
     public function getTableValue()
     {
         if ($this->value) {
-            if ($this->isImage($this->value))
-                return '<a href="'. asset($this->value) .'" target="_blank"><img class="img-thumbnail" src="'. asset($this->value) .'" style="max-height:150px;max-width:150px;"></a>';
+            if ($this->isImage($this->value)) {
+                return '<a href="'.asset($this->value).'" target="_blank"><img class="img-thumbnail" src="'.asset($this->value).'" style="max-height:150px;max-width:150px;"></a>';
+            }
 
             return parent::getTableValue($this->value);
         }
