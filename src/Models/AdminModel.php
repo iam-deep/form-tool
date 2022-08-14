@@ -32,30 +32,35 @@ class AdminModel extends Model
     public static function add($data)
     {
         $id = DB::table(static::$tableName)->insertGetId($data);
+
         return $id;
     }
 
     public static function addMany($data)
     {
-        if (count($data))
+        if (count($data)) {
             DB::table(static::$tableName)->insert($data);
+        }
     }
 
     public static function updateOne($id, $data)
     {
         $affected = DB::table(static::$tableName)->where(static::$primaryId, $id)->update($data);
+
         return $affected;
     }
 
     public static function deleteOne($id)
     {
         $affected = DB::table(static::$tableName)->where(static::$primaryId, $id)->delete();
+
         return $affected;
     }
 
     public static function deleteWhere($where)
     {
         $affected = DB::table(static::$tableName)->where($where)->delete();
+
         return $affected;
     }
 }

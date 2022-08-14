@@ -18,12 +18,13 @@ class Table
         $this->_resource = $resource;
         $this->_model = $model;
 
-        if ($dataModel)
+        if ($dataModel) {
             $this->_dataModel = $dataModel;
-        else
+        } else {
             $this->_dataModel = DataModel::getInstance();
+        }
 
-        $this->_url = config('form-tool.adminURL') . '/' . $resource->route;
+        $this->_url = config('form-tool.adminURL').'/'.$resource->route;
         //$this->_url = url()->current();
 
         /*if (is_array($result)) {
@@ -37,9 +38,10 @@ class Table
         }*/
     }
 
-    public function setTableField(TableField $tableField) : Table
+    public function setTableField(TableField $tableField): Table
     {
         $this->field = $tableField;
+
         return $this;
     }
 
@@ -49,7 +51,7 @@ class Table
 
         $tableField->slNo();
         foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel) {
+            if (!$input instanceof DataModel) {
                 $tableField->cellList[] = $input->getTableCell();
             }
         }
@@ -61,12 +63,13 @@ class Table
         $this->field = $tableField;
     }
 
-    private function create() : object
+    private function create(): object
     {
         $result = $this->_model::getAll();
 
-        if (!$this->field)
-            $this->setDefaultField();        
+        if (!$this->field) {
+            $this->setDefaultField();
+        }
 
         $data['headings'] = $data['tableData'] = [];
 
@@ -83,9 +86,9 @@ class Table
                 $viewData->styleClass = $cell->styleClass;
                 $viewData->styleCSS = $cell->styleCSS;
 
-                if ($cell->fieldType == '_slno')
+                if ($cell->fieldType == '_slno') {
                     $viewData->data = ++$i;
-                else {
+                } else {
                     // We can't use isset here as isset will be false is value is null, and value can be null
                     if (\property_exists($value, $cell->getDbField())) {
                         $cell->setValue($value->{$cell->getDbField()});
@@ -100,13 +103,12 @@ class Table
                                     $con = \trim($con);
                                     if (\property_exists($value, $con)) {
                                         $values[] = $value->{$con};
-                                    }
-                                    else {
-                                        $values[] = '<b class="text-red">DB FIELD "'. $con .'" NOT FOUND</b>';
+                                    } else {
+                                        $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
                                     }
                                 }
                             }
-                            $viewData->data = \vsprintf('%s' . $concat->pattern, $values);
+                            $viewData->data = \vsprintf('%s'.$concat->pattern, $values);
                         }
 
                         /*switch ($cell->fieldType) {
@@ -126,27 +128,26 @@ class Table
                                 $viewData->data = $val;
                                 break;
                         }*/
-                    }
-                    else if ($cell->fieldType == 'action') {
-                        if (!isset($value->{$this->_model::$primaryId}))
-                        {
+                    } elseif ($cell->fieldType == 'action') {
+                        if (!isset($value->{$this->_model::$primaryId})) {
                             $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
                             continue;
                         }
 
                         foreach ($this->field->actions as $action) {
-                            if ('edit' == $action->action)
-                                $viewData->data .= '<a href="' . $this->_url . '/'. $value->{$this->_model::$primaryId} .'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
-                            else if ('delete' == $action->action)
-                                $viewData->data .= ' <form action="'. $this->_url . '/'. $value->{$this->_model::$primaryId} .'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
-                                    '. csrf_field() .'
-                                    '. method_field('DELETE') .'
+                            if ('edit' == $action->action) {
+                                $viewData->data .= '<a href="'.$this->_url.'/'.$value->{$this->_model::$primaryId}.'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
+                            } elseif ('delete' == $action->action) {
+                                $viewData->data .= ' <form action="'.$this->_url.'/'.$value->{$this->_model::$primaryId}.'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
+                                    '.csrf_field().'
+                                    '.method_field('DELETE').'
                                     <button class="btn btn-danger btn-flat btn-sm"><i class="fa fa-trash"></i></button>
                                 </form>';
+                            }
                         }
-                    }
-                    else
+                    } else {
                         $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
+                    }
                 }
 
                 $viewRow->columns[] = $viewData;
@@ -171,13 +172,14 @@ class Table
 
     public function getPagination()
     {
-        if (isset($this->_table->pagination))
+        if (isset($this->_table->pagination)) {
             return $this->_table->pagination;
+        }
 
         return null;
     }
 
-    public function getDataModel() : DataModel
+    public function getDataModel(): DataModel
     {
         return $this->_dataModel;
     }
