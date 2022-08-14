@@ -87,9 +87,27 @@ class Table
                     $viewData->data = ++$i;
                 else {
                     // We can't use isset here as isset will be false is value is null, and value can be null
-                    if (property_exists($value, $cell->getDbField())) {
+                    if (\property_exists($value, $cell->getDbField())) {
                         $cell->setValue($value->{$cell->getDbField()});
                         $viewData->data = $cell->getValue();
+
+                        $concat = $cell->getConcat();
+                        if ($concat) {
+                            $values = [];
+                            $values[] = $viewData->data;
+                            if ($concat->dbFields) {
+                                foreach ($concat->dbFields as $con) {
+                                    $con = \trim($con);
+                                    if (\property_exists($value, $con)) {
+                                        $values[] = $value->{$con};
+                                    }
+                                    else {
+                                        $values[] = '<b class="text-red">DB FIELD "'. $con .'" NOT FOUND</b>';
+                                    }
+                                }
+                            }
+                            $viewData->data = \vsprintf('%s' . $concat->pattern, $values);
+                        }
 
                         /*switch ($cell->fieldType) {
                             case 'date':

@@ -8,18 +8,20 @@ use Closure;
 
 class CellDefinition
 {
-    public BaseInputType $inputType;
+    private BaseInputType $inputType;
 
     public string $fieldType;
-    public string $dbField;
-    public bool $sortable = true;
+    private string $dbField;
+    private bool $sortable = true;
 
     // Label can be nullable
-    public $label = '';
+    private $label = '';
+
+    private $concat = null;
 
     // Styles
-    public string $width = '';
-    public string $align = '';
+    private string $width = '';
+    private string $align = '';
     public string $styleCSS = '';
     public $styleClass = [];
 
@@ -82,6 +84,15 @@ class CellDefinition
         return $this;
     }
 
+    public function concat($pattern = '', ...$dbFields)
+    {
+        $this->concat = new \stdClass();
+        $this->concat->pattern = $pattern;
+        $this->concat->dbFields = $dbFields;
+
+        return $this;
+    }
+
     public function setup() : void
     {
         $this->styleCSS = '';
@@ -124,6 +135,11 @@ class CellDefinition
     {
         if ($this->fieldType == '_input')
             return $this->inputType->getTableValue();
+    }
+
+    public function getConcat()
+    {
+        return $this->concat;
     }
 }
 

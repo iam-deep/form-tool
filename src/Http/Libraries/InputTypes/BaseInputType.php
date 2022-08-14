@@ -166,34 +166,39 @@ class BaseInputType
 
     #region Callbacks
 
+    public function beforeValidation($data)
+    {
+        return null;
+    }
+
     public function beforeStore(object $newData)
     {
-
+        return null;
     }
 
     public function afterStore(object $newData)
     {
-
+        return null;
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-
+        return null;
     }
 
     public function afterUpdate(object $oldData, object $newData)
     {
-
+        return null;
     }
 
     public function beforeDestroy(object $oldData)
     {
-
+        return null;
     }
 
     public function afterDestroy(object $oldData)
     {
-        
+        return null;
     }
 
     #endregion
@@ -268,6 +273,7 @@ class BaseInputType
         return '<div class="'. self::classDiv .' @if ($errors->has("'. $this->dbField .'")) '.self::classDivError.' @endif">
             <label for="'. $this->dbField .'">'. $this->label .'
             '. ($this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'. $this->help .'"></i>' : '') .'
+            '. ($this->isRequired ? '<span class="text-danger">*</span>' : '') .'
             </label>
             '. $input .'
             {!! $errors->first("'. $this->dbField .'", \'<p class="help-block">:message</p>\') !!}

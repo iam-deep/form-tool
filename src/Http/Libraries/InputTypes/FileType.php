@@ -61,16 +61,16 @@ class FileType extends BaseInputType
 
         if ($request->file($this->dbField)) {
             $validations[] = 'file';
+
+            $allowedTypes = config('form-tool.allowedTypes');
+            if ($allowedTypes)
+                $validations['mimes'] = 'mimes:' . $allowedTypes;
         }
 
         if ($this->maxSizeInKb > 0) {
             $validations[] = 'max:' . $this->maxSizeInKb;
         }
-
-        $allowedTypes = config('form-tool.allowedTypes');
-        if ($allowedTypes)
-            $validations['mimes'] = 'mimes:' . $allowedTypes;
-
+        
         return $validations;
     }
 
@@ -330,7 +330,7 @@ class FileType extends BaseInputType
         if (!$exts) 
             $exts = config('form-tool.imageTypes');
 
-        $ext = pathinfo($file, PATHINFO_EXTENSION);
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
         if ($ext && in_array($ext, explode(',', $exts)))
             return true;

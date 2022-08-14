@@ -57,6 +57,11 @@ class Crud
 
     public static function getForm()
     {
+        return self::$_form;
+    }
+
+    public static function getHTMLForm()
+    {
         return self::$_form->getForm();
     }
 }

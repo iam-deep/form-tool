@@ -5,6 +5,7 @@ namespace Biswadeep\FormTool\Http\Libraries\InputTypes;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Str;
 
 class TextType extends BaseInputType
 {
@@ -15,6 +16,7 @@ class TextType extends BaseInputType
 
     public bool $isEncrypted = false;
     public bool $isUnique = false;
+    private bool $isSlug = false;
 
     public function encrypt() : TextType
     {
@@ -25,6 +27,14 @@ class TextType extends BaseInputType
 
     public function unique()
     {
+        $this->isUnique = true;
+
+        return $this;
+    }
+
+    public function slug()
+    {
+        $this->isSlug = true;
         $this->isUnique = true;
 
         return $this;
@@ -53,6 +63,9 @@ class TextType extends BaseInputType
             }
         }
 
+        /*if ($this->isSlug)
+            $validations[] = new RuleSlug($this->dbField);*/
+
         return $validations;
     }
 
@@ -72,6 +85,15 @@ class TextType extends BaseInputType
     public function getTableValue()
     {
         return $this->value;
+    }
+
+    public function beforeValidation($data)
+    {
+        if ($this->isSlug) {
+            return Str::slug($data);
+        }
+
+        return null;
     }
 
     public function getHTML()

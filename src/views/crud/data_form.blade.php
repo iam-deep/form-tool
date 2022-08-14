@@ -9,7 +9,7 @@
                 <h3 class="box-title">{{ $title }}</h3>
             </div>
 
-            <?php echo getForm(); ?>
+            <?php echo getHTMLForm(); ?>
 
         </div>
     </div>

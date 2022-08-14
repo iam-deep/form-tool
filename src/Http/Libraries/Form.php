@@ -72,6 +72,8 @@ class Form
         }
     }
 
+    #region GenerateForm
+
     public function getForm()
     {
         $data['inputs'] = '';
@@ -104,6 +106,9 @@ class Form
         $key = $model->getFullKey();
         $keyName = str_replace(['[', ']'], '-', $key);
 
+        // Getting the template at the beginning will make sure that it will not contain any values of the field
+        $template = $this->getTemplate($model, $key, $keyName);
+
         $classes = '';
         if ($model->isSortable())
             $classes .= ' table-sortable';
@@ -129,12 +134,22 @@ class Form
         }
 
         $data .= '<th></th></tr></thead><tbody>';
-        
-        $template = $this->getTemplate($model, $key, $keyName);
 
+
+        //Check if any session data exists
+        $field = $model->getList()[0]->getDbField();
+        $val = old($key . '.' . $field);
+        $totalDataInSession = 0;
+        if ($val && is_array($val))
+            $totalDataInSession = count($val);
+        
+        
         // Let's get data for multiple fields if its Edit
         $result = null;
-        if ($this->formStatus == FormStatus::Edit) {
+        $totalRowsInEdit = 0;
+
+        // TODO: Need to check if validation failed without $totalDataInSession
+        if (! $totalDataInSession && $this->formStatus == FormStatus::Edit) {
             $dbModel = $model->getModel();
             if ($dbModel) {
                 if ($dbModel instanceof \stdClass) {
@@ -143,6 +158,8 @@ class Form
                     $query = DB::table($dbModel->table)->where($where);                    
                     if ($dbModel->orderBy)
                         $query->orderBy($dbModel->orderBy, 'asc');
+                    else if ($model->getSortableField())
+                        $query->orderBy($model->getSortableField());
 
                     $result = $query->get();
                 }
@@ -159,6 +176,8 @@ class Form
             }
             
             if ($result) {
+                $totalRowsInEdit = count($result);
+
                 $i = 0;
                 foreach ($result as $row) {
                     foreach ($model->getList() as $field) {
@@ -172,17 +191,21 @@ class Form
             }
         }
 
+        $appendCount = 0;
         if ($model->getRequired() > 0) {
             // Check if the required items is greater than the items already saved
-            $appendCount = 0;
             if ($result)
-                $appendCount = $model->getRequired() - count($result);
+                $appendCount = $model->getRequired() - $totalRowsInEdit;
             else if (!$result || $this->formStatus == FormStatus::Create)
                 $appendCount = $model->getRequired();
-            
-            for ($i = 0; $i < $appendCount; $i++) {
-                $data .= $template;
-            }
+        }
+
+        if ($appendCount < $totalDataInSession)
+            $appendCount = $totalDataInSession;
+
+        for ($i = 0; $i < $appendCount; $i++) {
+            // Sending index will get the field value if there any in the session
+            $data .= $this->getTemplate($model, $key, $keyName, $i + $totalRowsInEdit);
         }
 
         $data .= '</tbody>
@@ -200,7 +223,7 @@ class Form
         return $data;
     }
 
-    private function getTemplate($model, $key, $keyName, $index = 0)
+    private function getTemplate($model, $key, $keyName, $index = -1)
     {
         $template = '<tr class="d_block">';
 
@@ -229,6 +252,8 @@ class Form
         return $template;
     }
 
+    #endregion
+
     public function edit($id = false)
     {
         if (!$id) {
@@ -253,6 +278,8 @@ class Form
         }
     }
 
+    #region FormAction StoreAndUpdate
+
     private function store()
     {
         $validate = $this->validate();
@@ -267,6 +294,11 @@ class Form
             $this->_editId = $insertId;
 
             $this->afterSave();
+
+            // This will only execute if the method called by default not manually from the store
+            if (\method_exists($this->_resource, 'store')) {
+                $this->_resource->store($this->_request);
+            }
         }
 
         return redirect($this->_url)->with('success', 'Data added successfully!');
@@ -301,6 +333,11 @@ class Form
 
         if ($affected > 0) {
             $this->afterSave();
+
+            // This will only execute if the method called by default not manually from the store
+            if (\method_exists($this->_resource, 'update')) {
+                $this->_resource->update($this->_request, $this->_editId);
+            }
         }
 
         return redirect($this->_url)->with('success', 'Data updated successfully!');
@@ -376,14 +413,22 @@ class Form
     {
         $validationType = $this->formStatus == FormStatus::Store ? 'store' : 'update';
 
-        $fields = $labels = [];
+        $fields = $labels = $merge = [];
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel)
                 continue;
 
+            $newValue = $input->beforeValidation($this->_request->{$input->getDbField()});
+            if ($newValue !== null)
+                $merge[$input->getDbField()] = $newValue;
+
             $fields[$input->getDbField()] = $input->getValidations($validationType);
 
             $labels[$input->getDbField()] = $input->getLabel();
+        }
+
+        if ($merge) {
+            $this->_request->merge($merge);
         }
 
         $validator = \Validator::make($this->_request->all(), $fields, [], $labels);
@@ -444,26 +489,16 @@ class Form
         }
     }
 
-    private function parseEditId()
-    {
-        $url = $this->_request->getRequestUri();
-
-        $matches = [];
-        $t = preg_match('/'. $this->_resource->route .'\/([^\/]*)\/?/', $url, $matches);
-        if (count($matches) > 1) {
-            $this->_editId = $matches[1];
-            return true;
-        }
-        
-        return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
-    }
-
     private function formatMultiple()
     {
         $data = $this->_request->all();
 
         $merge = [];
-        foreach ($data as $name => $value) {
+        foreach ($this->_dataModel->getList() as $input) {
+            if (! $input instanceof DataModel)
+                continue;
+            
+            $value = $data[$input->getKey()];
             if (is_array($value)) {
                 $keys = array_keys($value);
                 if (! $keys)
@@ -471,7 +506,7 @@ class Form
 
                 $totalRows = count($value[$keys[0]]);
                 $totalKeys = count($keys);
-
+                
                 $newData = [];
                 for ($i = 0; $i < $totalRows; $i++) {
                     $newRow = [];
@@ -482,7 +517,7 @@ class Form
                     $newData[] = $newRow;
                 }
 
-                $merge[$name] = $newData;
+                $merge[$input->getKey()] = $newData;
             }
         }
 
@@ -504,6 +539,22 @@ class Form
             }
         }*/
     }
+
+    private function parseEditId()
+    {
+        $url = $this->_request->getRequestUri();
+
+        $matches = [];
+        $t = preg_match('/'. $this->_resource->route .'\/([^\/]*)\/?/', $url, $matches);
+        if (count($matches) > 1) {
+            $this->_editId = $matches[1];
+            return true;
+        }
+        
+        return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
+    }
+
+    #endregion
 
     private function destroy($id = false)
     {
@@ -542,10 +593,17 @@ class Form
                 else
                     $field->afterDestroy($result);
             }
+
+            // This will only execute if the method called by default not manually from the destroy
+            if (\method_exists($this->_resource, 'destroy')) {
+                $this->_resource->destroy($id);
+            }
         }
 
         return redirect($this->_url)->with('success', 'Data deleted successfully!');
     }
+
+    #region GetterSetter
 
     public function getPostData($id = null)
     {
@@ -568,4 +626,11 @@ class Form
     {
         return $this->_editId;
     }
+
+    public function getData()
+    {
+        return $this->resultData;
+    }
+
+    #endregion
 }

@@ -2,10 +2,10 @@
 
 use Biswadeep\FormTool\Http\Libraries\Crud;
 
-if (! function_exists('getForm')) {
-    function getForm()
+if (! function_exists('getHTMLForm')) {
+    function getHTMLForm()
     {
-        return Crud::getForm();
+        return Crud::getHTMLForm();
     }
 }
 

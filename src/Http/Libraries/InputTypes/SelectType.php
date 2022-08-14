@@ -9,16 +9,17 @@ class SelectType extends BaseInputType
     public int $type = InputType::Select;
     public string $typeInString = 'select';
 
-    private $options = [];
-    private $result = null;
-    private $firstOption = '';
+    protected $options = [];
+    protected $result = null;
+    protected $firstOption = '';
 
-    private string $dbTable = '';
-    private string $dbTableValue = '';
-    private string $dbTableTitle = '';
+    protected string $dbTable = '';
+    protected string $dbTableValue = '';
+    protected string $dbTableTitle = '';
+    protected $dbPatternFields = [];
 
     // Setter
-    public function options($options)
+    public function options($options, ...$patternDbFields)
     {
         if (is_string($options))
         {
@@ -28,6 +29,7 @@ class SelectType extends BaseInputType
                 $this->dbTable = \trim($db[0]);
                 $this->dbTableValue = \trim($db[1]);
                 $this->dbTableTitle = \trim($db[2]);
+                $this->dbPatternFields = $patternDbFields;
             }
             else {
                 throw new \Exception('Wrong format! It should be table_name.value_column.text_column');
@@ -61,9 +63,26 @@ class SelectType extends BaseInputType
         if (isset($this->options[$this->value]))
             return $this->options[$this->value];
 
-        foreach ($this->result as $row) {
-            if ($row->{$this->dbTableValue} === $this->value)
-                return $row->{$this->dbTableTitle};
+        if ($this->result) {
+            foreach ($this->result as $row) {
+                if ($row->{$this->dbTableValue} === $this->value) {
+                    if ($this->dbPatternFields) {
+                        $values = [];
+                        foreach ($this->dbPatternFields as $field) {
+                            $field = \trim($field);
+                            if (\property_exists($row, $field))
+                                $values[] = $row->{$field};
+                            else {
+                                $values[] = '<b class="text-red">DB field "'. $field .'" not exists!</b>';
+                            }
+                        }
+
+                        return \vsprintf($this->dbTableTitle, $values);
+                    }
+
+                    return $row->{$this->dbTableTitle};
+                }
+            }
         }
 
         return null;
@@ -82,7 +101,25 @@ class SelectType extends BaseInputType
 
         if ($this->result) {
             foreach ($this->result as $row) {
-                $input .= '<option value="'. $row->{$this->dbTableValue} .'" '. ($row->{$this->dbTableValue} == $value ? 'selected' : '') .'>' . $row->{$this->dbTableTitle} .'</option>';
+                $text = '';
+                if ($this->dbPatternFields) {
+                    $values = [];
+                    foreach ($this->dbPatternFields as $field) {
+                        $field = \trim($field);
+                        if (\property_exists($row, $field))
+                            $values[] = $row->{$field};
+                        else {
+                            $values[] = 'DB field "'. $field .'" not exists!';
+                        }
+                    }
+
+                    $text = \vsprintf($this->dbTableTitle, $values);
+                }
+                else {
+                    $text = $row->{$this->dbTableTitle};
+                }
+
+                $input .= '<option value="'. $row->{$this->dbTableValue} .'" '. ($row->{$this->dbTableValue} == $value ? 'selected' : '') .'>' . $text .'</option>';
             }
         }
         else {

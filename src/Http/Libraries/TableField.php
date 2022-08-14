@@ -135,9 +135,9 @@ class TableField
         return $cell;
     }
 
-    public function actions($actions) : CellDefinition
+    public function actions($actions = ['edit', 'delete']) : CellDefinition
     {
-        if (!is_array($actions))
+        if (! is_array($actions))
             throw new \Exception("Actions columns should be in an array! Like: ['edit', 'delete']");
 
         $cell = CellDefinition::Other('action', '', 'Actions')->width('85px');
