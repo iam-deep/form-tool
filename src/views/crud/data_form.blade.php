@@ -15,4 +15,7 @@
     </div>
 </div>
 
+@if (isset($script))
+    {!! $script !!}
+@endif
 @stop
