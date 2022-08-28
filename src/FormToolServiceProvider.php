@@ -12,11 +12,11 @@ class FormToolServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->mergeConfigFrom(__DIR__.'/config/form-tool.php', 'form-tool');
+        $this->publishes([__DIR__.'/config/form-tool.php' => config_path('form-tool.php')], 'config');
         $this->publishes([
-            __DIR__.'/config/form-tool.php' => config_path('form-tool.php'),
             __DIR__.'/views/layouts'        => resource_path('views'.config('form-tool.adminURL').'/layouts'),
             //__DIR__.'/public/assets'        => public_path('assets/vendor/form-tool'),        // public as 3rd parameter
-        ]);
+        ], 'views');
 
         //if (!$this->app->routesAreCached())
         $this->loadRoutesFrom(__DIR__.'/routes/web.php');
