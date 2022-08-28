@@ -25,6 +25,8 @@ let template = [];
         @endif
 
         {!! Blade::render($inputs) !!}
+
+        <div id="afterForm"></div>
     </div>
     <div class="box-footer">
         <button class="btn btn-primary btn-flat">Submit</button>
