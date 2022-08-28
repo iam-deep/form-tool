@@ -2,7 +2,9 @@
 
 A lightweight Laravel form tool to create your admin panel or web app easily!
 
-This package still under primary development.
+*This package still under primary development.*
+
+You can boost start the setup with this skeleton package: <a href="https://github.com/biswadeep-sarkar/form-tool-skeleton">form-tool-skeleton</a>
 
 Thanks
 

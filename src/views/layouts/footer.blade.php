@@ -14,9 +14,9 @@
 <!-- REQUIRED JS SCRIPTS -->
 
 <!-- Bootstrap 3.3.7 -->
-<script src="{{ URL::asset('/assets/vendor/form-tool/plugins/bootstrap/dist/js/bootstrap.min.js') }}"></script>
+<script src="{{ URL::asset('/assets/form-tool/plugins/bootstrap/dist/js/bootstrap.min.js') }}"></script>
 <!-- AdminLTE App -->
-<script src="{{ URL::asset('/assets/vendor/form-tool/dist/js/adminlte.min.js') }}"></script>
+<script src="{{ URL::asset('/assets/form-tool/dist/js/adminlte.min.js') }}"></script>
 
 </body>
 </html>

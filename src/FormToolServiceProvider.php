@@ -7,8 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\ServiceProvider;
 
-//include_once(__DIR__ . '/helpers.php');
-
 class FormToolServiceProvider extends ServiceProvider
 {
     public function boot()
@@ -17,7 +15,7 @@ class FormToolServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__.'/config/form-tool.php' => config_path('form-tool.php'),
             __DIR__.'/views/layouts'        => resource_path('views'.config('form-tool.adminURL').'/layouts'),
-            __DIR__.'/public/assets'        => public_path('assets/vendor/form-tool'),        // public as 3rd parameter
+            //__DIR__.'/public/assets'        => public_path('assets/vendor/form-tool'),        // public as 3rd parameter
         ]);
 
         //if (!$this->app->routesAreCached())
