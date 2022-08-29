@@ -489,6 +489,11 @@ class Form
                 continue;
             }
 
+            $dbField = $input->getDbField();
+
+            // If we don't have a postdata for an field like for an optional file field
+            $this->postData[$dbField] = $this->postData[$dbField] ?? null;
+
             $response = null;
             if ($this->formStatus == FormStatus::Store) {
                 $response = $input->beforeStore((object) $this->postData);
@@ -497,11 +502,11 @@ class Form
             }
 
             if ($response !== null) {
-                $this->postData[$input->getDbField()] = $response;
+                $this->postData[$dbField] = $response;
             }
 
-            if (!$this->postData[$input->getDbField()] && $input->getDefaultValue() !== null) {
-                $this->postData[$input->getDbField()] = $input->getDefaultValue();
+            if (!$this->postData[$dbField] && $input->getDefaultValue() !== null) {
+                $this->postData[$dbField] = $input->getDefaultValue();
             }
         }
     }
