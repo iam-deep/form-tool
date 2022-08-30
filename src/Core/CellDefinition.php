@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Http\Libraries;
+namespace Biswadeep\FormTool\Core;
 
-use Biswadeep\FormTool\Http\Libraries\InputTypes\BaseInputType;
+use Biswadeep\FormTool\Core\InputTypes\BaseInputType;
 use Closure;
 
 class CellDefinition

@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Http\Libraries\InputTypes;
+namespace Biswadeep\FormTool\Core\InputTypes;
 
 class HiddenType extends BaseInputType
 {

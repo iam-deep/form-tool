@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Http\Libraries;
+namespace Biswadeep\FormTool\Core;
 
 use Closure;
 
@@ -88,11 +88,11 @@ class DataModel
         $inputType = new $class();
 
         if (!$inputType instanceof InputTypes\BaseInputType) {
-            throw new \Exception($class.' should extends Biswadeep\FormTool\Http\Libraries\InputTypes\BaseInputType');
+            throw new \Exception($class.' should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType');
         }
 
         if (!$inputType instanceof InputTypes\ICustomType) {
-            throw new \Exception($class.' should implements Biswadeep\FormTool\Http\Libraries\InputTypes\ICustomType');
+            throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
         }
 
         $this->_dataTypeList[] = $inputType;

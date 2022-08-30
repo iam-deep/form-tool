@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Http\Libraries;
+namespace Biswadeep\FormTool\Core;
 
 use Closure;
 

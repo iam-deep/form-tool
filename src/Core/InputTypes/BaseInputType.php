@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Http\Libraries\InputTypes;
+namespace Biswadeep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Http\Libraries\CellDefinition;
+use Biswadeep\FormTool\Core\CellDefinition;
 
 interface ICustomType
 {

@@ -1,6 +1,6 @@
 <?php
 
-use Biswadeep\FormTool\Http\Libraries\Crud;
+use Biswadeep\FormTool\Core\Crud;
 
 if (!function_exists('getHTMLForm')) {
     function getHTMLForm()

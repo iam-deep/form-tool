@@ -1,6 +1,6 @@
 {
     "name": "biswadeep/form-tool",
-    "description": "A lightweight Laravel form tool to create your admin panel easily",
+    "description": "A lightweight Laravel form tool to create your admin panel or web app easily!",
     "type": "library",
     "license": "MIT",
     "version": "1.0.0",
