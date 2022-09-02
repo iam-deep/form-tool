@@ -92,7 +92,7 @@ class DataModel
         return $inputType;
     }
 
-    public function date(string $dbField, string $label = null) : InputTypes\DateType
+    public function date(string $dbField, string $label = null): InputTypes\DateType
     {
         $inputType = new InputTypes\DateType();
         $inputType->init($this, $dbField, $label);
@@ -101,7 +101,7 @@ class DataModel
         return $inputType;
     }
 
-    public function time(string $dbField, string $label = null) : InputTypes\TimeType
+    public function time(string $dbField, string $label = null): InputTypes\TimeType
     {
         $inputType = new InputTypes\TimeType();
         $inputType->init($this, $dbField, $label);
@@ -110,7 +110,7 @@ class DataModel
         return $inputType;
     }
 
-    public function datetime(string $dbField, string $label = null) : InputTypes\DateTimeType
+    public function datetime(string $dbField, string $label = null): InputTypes\DateTimeType
     {
         $inputType = new InputTypes\DateTimeType();
         $inputType->init($this, $dbField, $label);

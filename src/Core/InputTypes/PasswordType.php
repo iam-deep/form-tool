@@ -18,16 +18,18 @@ class PasswordType extends BaseInputType
 
     public function getTableValue()
     {
-        if ($this->value)
+        if ($this->value) {
             return '*****';
+        }
 
         return '';
     }
 
     public function beforeStore(object $newData)
     {
-        if ($newData->{$this->dbField} == '')
+        if ($newData->{$this->dbField} == '') {
             return null;
+        }
 
         return Hash::make($newData->{$this->dbField});
     }
@@ -35,8 +37,9 @@ class PasswordType extends BaseInputType
     public function beforeUpdate(object $oldData, object $newData)
     {
         // If user doesn't provide any password then let's put the previous password
-        if ($newData->{$this->dbField} == '')
+        if ($newData->{$this->dbField} == '') {
             return $oldData->{$this->dbField};
+        }
 
         return Hash::make($newData->{$this->dbField});
     }

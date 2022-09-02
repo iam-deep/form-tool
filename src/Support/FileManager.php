@@ -111,7 +111,7 @@ class FileManager
                     throw new \Exception('Failed to create directory: '.$uploadDir);
                 }
             }
-            
+
             if (!\is_writable($uploadDir)) {
                 throw new \Exception('Upload Directory not writable: '.$uploadDir);
             }
@@ -190,7 +190,7 @@ class FileManager
         if (!$exts) {
             $exts = self::getAllowedTypes();
         }
-        
+
         $ext = \strtolower(\pathinfo($file, PATHINFO_EXTENSION));
 
         if ($ext && \in_array($ext, \explode(',', $exts))) {

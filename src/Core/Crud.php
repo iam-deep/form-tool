@@ -13,8 +13,8 @@ class Crud
     private static $_form;
     private static $_table;
 
-    private static $_cssLink = []; 
-    private static $_jsLink = []; 
+    private static $_cssLink = [];
+    private static $_jsLink = [];
     private static $_css = [];
     private static $_js = [];
 
@@ -72,7 +72,7 @@ class Crud
     public static function addCssLink($link)
     {
         $link = \trim($link);
-        if (! \in_array($link, self::$_cssLink)) {
+        if (!\in_array($link, self::$_cssLink)) {
             self::$_cssLink[] = $link;
         }
     }
@@ -80,7 +80,7 @@ class Crud
     public static function addJsLink($link)
     {
         $link = \trim($link);
-        if (! \in_array($link, self::$_jsLink)) {
+        if (!\in_array($link, self::$_jsLink)) {
             self::$_jsLink[] = $link;
         }
     }
@@ -88,30 +88,34 @@ class Crud
     // Pass a unique key for each script so that we don't add duplicate $css
     public static function addCss($css, $key = '')
     {
-        if ($key)
+        if ($key) {
             self::$_css[$key] = $css;
-        else
+        } else {
             self::$_css[] = $css;
+        }
     }
 
     // Pass a unique key for each script so that we don't add duplicate $scripts
     public static function addJs($script, $key = '')
     {
-        if ($key)
+        if ($key) {
             self::$_js[$key] = $script;
-        else
+        } else {
             self::$_js[] = $script;
+        }
     }
 
     public static function getCssLinks()
     {
         $links = [];
         foreach (self::$_cssLink as $link) {
-            if ($link)
-                if (false !== \strpos($link,'//'))
+            if ($link) {
+                if (false !== \strpos($link, '//')) {
                     $links[] = '<link href="'.$link.'" rel="stylesheet" type="text/css" />';
-                else
-                    $links[] = '<link href="'. URL::asset($link) .'" rel="stylesheet" type="text/css" />';
+                } else {
+                    $links[] = '<link href="'.URL::asset($link).'" rel="stylesheet" type="text/css" />';
+                }
+            }
         }
 
         return \implode("\n", $links);
@@ -121,11 +125,13 @@ class Crud
     {
         $links = [];
         foreach (self::$_jsLink as $link) {
-            if ($link)
-                if (false !== \strpos($link,'//'))
+            if ($link) {
+                if (false !== \strpos($link, '//')) {
                     $links[] = '<script src="'.$link.'"></script>';
-                else
-                    $links[] = '<script src="'. URL::asset($link) .'"></script>';
+                } else {
+                    $links[] = '<script src="'.URL::asset($link).'"></script>';
+                }
+            }
         }
 
         return \implode("\n", $links);
@@ -133,17 +139,19 @@ class Crud
 
     public static function getCss()
     {
-        if (! self::$_css)
+        if (!self::$_css) {
             return '';
+        }
 
         return '<style>'.\implode("\n", self::$_css).'</style>';
     }
 
     public static function getJs()
     {
-        if (! self::$_js)
+        if (!self::$_js) {
             return '';
-        
+        }
+
         return '<script>'.\implode("\n", self::$_js).'</script>';
     }
 }

@@ -82,14 +82,14 @@ if (!function_exists('getJs')) {
 if (!function_exists('getAllCss')) {
     function getAllCss()
     {
-        return Crud::getCssLinks() . Crud::getCss();
+        return Crud::getCssLinks().Crud::getCss();
     }
 }
 
 if (!function_exists('getAllJs')) {
     function getAllJs()
     {
-        return Crud::getJsLinks() . Crud::getJs();
+        return Crud::getJsLinks().Crud::getJs();
     }
 }
 

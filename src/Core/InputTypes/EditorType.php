@@ -4,8 +4,8 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\Crud;
 use Biswadeep\FormTool\Support\FileManager;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 
 class EditorType extends BaseInputType
 {
@@ -46,7 +46,7 @@ class EditorType extends BaseInputType
         $value = \strip_tags($this->decodeHTML($this->value));
         $length = \mb_strlen($value);
 
-        return \mb_substr($value, 0, $this->limitTableViewLength) . ($length > $this->limitTableViewLength ? '...' : '');
+        return \mb_substr($value, 0, $this->limitTableViewLength).($length > $this->limitTableViewLength ? '...' : '');
     }
 
     public function beforeStore(object $newData)
@@ -74,7 +74,7 @@ class EditorType extends BaseInputType
 
         if ($validator->fails()) {
             return \Response::json([
-                'error' => $validator->getMessageBag()->toArray()
+                'error' => $validator->getMessageBag()->toArray(),
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 
@@ -85,8 +85,8 @@ class EditorType extends BaseInputType
 
         return \Response::json([
             'error' => [
-                'message' => 'Something went wrong! Please try again.'
-            ]
+                'message' => 'Something went wrong! Please try again.',
+            ],
         ], 400);
 
         /*
@@ -110,15 +110,15 @@ class EditorType extends BaseInputType
     {
         $this->setDependencies();
 
-        Crud::addJs("
-        // CkEditor config for field: ". $this->dbField ."
-        var uploadPath = '". URL::to(config('form-tool.adminURL').'/form-tool/editor-upload') ."/?path=". $this->uploadPath ."';
-        var selector = document.querySelector('#". $this->dbField ."');
+        Crud::addJs('
+        // CkEditor config for field: '.$this->dbField."
+        var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
+        var selector = document.querySelector('#".$this->dbField."');
         createCkEditor(selector, csrf_token, uploadPath);
         ");
 
-        $input = '<textarea data-path="'. $this->uploadPath .'" class="'.\implode(' ', $this->classes).'" id="'. $this->dbField .'" name="'.$this->dbField.'" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.old($this->dbField, $this->decodeHTML($this->value)).'</textarea>';
-        
+        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.old($this->dbField, $this->decodeHTML($this->value)).'</textarea>';
+
         return $this->htmlParentDiv($input);
     }
 
@@ -127,10 +127,10 @@ class EditorType extends BaseInputType
         $this->setDependencies();
 
         if ($index != -1) {
-            Crud::addJs("
-            // CkEditor config for field: ". $this->dbField .$index ."
-            var uploadPath = '". URL::to(config('form-tool.adminURL').'/form-tool/editor-upload') ."/?path=". $this->uploadPath ."';
-            var selector = document.querySelector('#". $this->dbField.$index ."');
+            Crud::addJs('
+            // CkEditor config for field: '.$this->dbField.$index."
+            var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
+            var selector = document.querySelector('#".$this->dbField.$index."');
             createCkEditor(selector, csrf_token, uploadPath);
             ");
         }
@@ -138,7 +138,7 @@ class EditorType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $this->decodeHTML($value[$index] ?? $this->value);
 
-        $input = '<textarea data-path="'. $this->uploadPath .'" class="'.\implode(' ', $this->classes).'" id="'. $this->dbField .$index.'" name="'.$key.'['.$this->dbField.'][]" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
+        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
 
         return $input;
     }
@@ -152,7 +152,7 @@ class EditorType extends BaseInputType
     {
         Crud::addJsLink('assets/form-tool/plugins/ckeditor5-35.1.0/ckeditor.js');
         Crud::addJs("
-        let csrf_token = '". csrf_token() ."';
+        let csrf_token = '".csrf_token()."';
 
         // CkEditor Script
         function createCkEditor(selector, csrf_token, uploadPath)

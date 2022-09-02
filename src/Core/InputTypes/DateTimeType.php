@@ -11,7 +11,7 @@ class DateTimeType extends BaseInputType
 
     protected $dbFormat = 'Y-m-d H:i:s';
     protected $niceFormat = 'd-m-Y h:i A';
-    
+
     protected $pickerFormatDateTime = 'DD-MM-YYYY hh:mm A';
     protected $pickerFormatDate = 'DD-MM-YYYY';
     protected $pickerFormatTime = 'hh:mm A';
@@ -37,8 +37,9 @@ class DateTimeType extends BaseInputType
 
     public function getTableValue()
     {
-        if ($this->value)
+        if ($this->value) {
             return \date($this->niceFormat, \strtotime($this->value));
+        }
 
         return null;
     }
@@ -46,8 +47,9 @@ class DateTimeType extends BaseInputType
     public function beforeStore(object $newData)
     {
         $val = \trim($newData->{$this->dbField});
-        if (!$val)
+        if (!$val) {
             return null;
+        }
 
         return \date($this->dbFormat, \strtotime($val));
     }
@@ -55,8 +57,9 @@ class DateTimeType extends BaseInputType
     public function beforeUpdate(object $oldData, object $newData)
     {
         $val = \trim($newData->{$this->dbField});
-        if (!$val)
+        if (!$val) {
             return null;
+        }
 
         return \date($this->dbFormat, \strtotime($val));
     }
@@ -84,16 +87,17 @@ class DateTimeType extends BaseInputType
 
     private function modifyFormat($value)
     {
-        if (!$value)
+        if (!$value) {
             return '';
-        
+        }
+
         return \date($this->niceFormat, \strtotime($value));
     }
 
     private function setDependencies()
     {
         Crud::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
-        
+
         Crud::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
         Crud::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js');
 
@@ -101,12 +105,14 @@ class DateTimeType extends BaseInputType
         $this->pickerFormatDate = \trim(config('form-tool.pickerFormatDate', $this->pickerFormatDate));
         $this->pickerFormatTime = \trim(config('form-tool.pickerFormatTime', $this->pickerFormatTime));
 
-        Crud::addJs('
+        Crud::addJs(
+            '
         // Date and DateTimePicker
-        $(".datetime-picker").datetimepicker({format: "'. $this->pickerFormatDateTime .'", useCurrent: false});
-        $(".date-picker").datetimepicker({format: "'. $this->pickerFormatDate .'", useCurrent: false});
-        $(".time-picker").datetimepicker({format: "'. $this->pickerFormatTime .'", useCurrent: false});
+        $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
+        $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", useCurrent: false});
+        $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", useCurrent: false});
         ',
-        'datetime');
+            'datetime'
+        );
     }
 }

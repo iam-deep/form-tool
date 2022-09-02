@@ -83,9 +83,10 @@ class FileType extends BaseInputType
     {
         $oldFile = request()->get($this->dbField);
         $filename = FileManager::uploadFile($this->dbField, $this->path, $oldFile);
-        if ($filename !== null)
+        if ($filename !== null) {
             return $filename;
-        
+        }
+
         // No files have been uploaded let's return the old file if have one
         return $oldFile ?? '';
     }
