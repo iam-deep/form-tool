@@ -36,7 +36,7 @@ abstract class InputType
 
     // Textare & Editor
     const Textarea = 50;
-    const CkEditor = 51;
+    const Editor = 51;
 
     // Custom
     const Custom = 99;
@@ -75,7 +75,7 @@ class BaseInputType
     public function init($dataModel, string $dbField, string $label = null)
     {
         $this->dataModel = $dataModel;
-        $this->dbField = trim($dbField);
+        $this->dbField = \trim($dbField);
         $this->label = $label ?: \ucfirst($this->dbField);
     }
 
@@ -137,10 +137,10 @@ class BaseInputType
 
     public function addClass($classes): BaseInputType
     {
-        if (is_array($classes)) {
+        if (\is_array($classes)) {
             $this->classes = array_merge($this->classes, $classes);
         } else {
-            $this->classes[] = trim($classes);
+            $this->classes[] = \trim($classes);
         }
 
         return $this;
@@ -148,12 +148,12 @@ class BaseInputType
 
     public function removeClass($classes): BaseInputType
     {
-        if (is_array($classes)) {
+        if (\is_array($classes)) {
             foreach ($classes as $c) {
                 unset($this->classes[$c]);
             }
         } else {
-            unset($this->classes[trim($classes)]);
+            unset($this->classes[\trim($classes)]);
         }
 
         return $this;

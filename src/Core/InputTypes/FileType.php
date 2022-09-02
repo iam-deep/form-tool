@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Support\FileManager;
+
 class FileType extends BaseInputType
 {
     public int $type = InputType::File;
@@ -26,7 +28,7 @@ class FileType extends BaseInputType
 
     public function maxSize(float $maxSizeInKb)
     {
-        $this->maxSizeInKb = \trim($maxSizeInKb);
+        $this->maxSizeInKb = $maxSizeInKb;
 
         return $this;
     }
@@ -49,7 +51,7 @@ class FileType extends BaseInputType
                 $validations[] = 'nullable';
             }
         } else {
-            if ($this->isRequired && !$request->{$this->dbField}) {
+            if ($this->isRequired && !$request->get($this->dbField)) {
                 $validations[] = 'required';
             } else {
                 $validations[] = 'nullable';
@@ -59,7 +61,7 @@ class FileType extends BaseInputType
         if ($request->file($this->dbField)) {
             $validations[] = 'file';
 
-            $allowedTypes = config('form-tool.allowedTypes');
+            $allowedTypes = FileManager::getAllowedTypes();
             if ($allowedTypes) {
                 $validations['mimes'] = 'mimes:'.$allowedTypes;
             }
@@ -74,81 +76,17 @@ class FileType extends BaseInputType
 
     public function beforeStore(object $newData)
     {
-        $request = request();
-        $file = $request->file($this->dbField);
-
-        if ($file) {
-            $destinationPath = $this->getUploadPath();
-            $filename = $this->addHypens($file->getClientOriginalName());
-
-            return $this->uploadFile($file, $destinationPath, $filename, true);
-        }
-
-        return null;
-    }
-
-    protected function uploadFile($file, $destinationPath, $filename, $flagCheck)
-    {
-        // If same file name exist then increment the file name
-        if ($flagCheck) {
-            $i = 2;
-            while (\file_exists($destinationPath.$filename)) {
-                $pathinfo = \pathinfo($filename);
-
-                if (isset($pathinfo['filename'])) {
-                    $filename = $pathinfo['filename'].'_'.$i++;
-
-                    if (isset($pathinfo['extension'])) {
-                        $filename .= '.'.$pathinfo['extension'];
-                    }
-                } else {
-                    $filename .= '_'.$i++;
-                }
-            }
-        }
-
-        $file->move($destinationPath, $filename);
-
-        return $destinationPath.$filename;
+        return FileManager::uploadFile($this->dbField, $this->path);
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-        $request = request();
-        $file = $request->file($this->dbField);
-
-        if ($file) {
-            $flagCheck = true;
-
-            $destinationPath = $this->getUploadPath();
-            $filename = $this->addHypens($file->getClientOriginalName());
-
-            // Let's replace the old file if exists
-            if (isset($oldData->{$this->dbField}) && $oldData->{$this->dbField}) {
-                $pathinfo = \pathinfo($oldData->{$this->dbField});
-
-                $ext = $pathinfo['extension'] ?? '';
-
-                // Check the old file extention with new file
-                if ($ext == $file->getClientOriginalExtension()) {
-                    $flagCheck = false;
-
-                    $destinationPath = \ltrim($pathinfo['dirname'], '/').'/';
-                    $filename = $pathinfo['basename'];
-                }
-
-                /* TODO: Delete the cache image
-
-                $cacheImage = $destinationPath . $pathinfo['filename'].'-150x150.'.$pathinfo['extension'];
-                $this->deleteFile($cacheImage);
-                */
-            }
-
-            return $this->uploadFile($file, $destinationPath, $filename, $flagCheck);
-        }
-
-        $oldFile = $request->{$this->dbField};
-
+        $oldFile = request()->get($this->dbField);
+        $filename = FileManager::uploadFile($this->dbField, $this->path, $oldFile);
+        if ($filename !== null)
+            return $filename;
+        
+        // No files have been uploaded let's return the old file if have one
         return $oldFile ?? '';
     }
 
@@ -158,28 +96,19 @@ class FileType extends BaseInputType
         $newFile = $newData->{$this->dbField} ?? null;
 
         if ($oldFile != $newFile) {
-            $this->deleteFile($oldFile);
+            FileManager::deleteFile($oldFile);
         }
     }
 
     public function afterDestroy(object $oldData)
     {
-        $this->deleteFile($oldData->{$this->dbField} ?? null);
-    }
-
-    private function addHypens($value)
-    {
-        do {
-            $value = str_replace(['-', '--'], '-', $value);
-        } while (false !== strpos($value, '--'));
-
-        return $value;
+        FileManager::deleteFile($oldData->{$this->dbField} ?? null);
     }
 
     public function getTableValue()
     {
         if ($this->value) {
-            return '<a href="'.asset($this->value).'" target="_blank"><i class="fa '.$this->getFileIcon($this->value).' fa-2x"></i></a>';
+            return '<a href="'.asset($this->value).'" target="_blank"><i class="fa '.FileManager::getFileIcon($this->value).' fa-2x"></i></a>';
         }
 
         return null;
@@ -196,14 +125,14 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && !$this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && !$this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
             </div>';
 
         if ($this->value) {
-            if ($this->isImage($this->value)) {
+            if (FileManager::isImage($this->value)) {
                 $file = '<img src="'.asset($value).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
-                $file = '<i class="fa '.$this->getFileIcon($this->value).' fa-5x"></i>';
+                $file = '<i class="fa '.FileManager::getFileIcon($this->value).' fa-5x"></i>';
             }
 
             $input .= '<div class="col-sm-6" id="image-group-'.$this->dbField.'"> &nbsp; 
@@ -218,177 +147,37 @@ class FileType extends BaseInputType
         return $this->htmlParentDiv($input);
     }
 
-    protected function deleteFile($file)
+    public function getHTMLMultiple($key, $index)
     {
-        if ($file) {
-            try {
-                if (\file_exists($file)) {
-                    \unlink($file);
-                }
-            } catch (\Exception $e) {
-                // TODO: log
-            }
-        }
-    }
+        $value = old($key.'.'.$this->dbField);
+        $value = $value[$index] ?? $this->value;
 
-    protected function getUploadPath(): string
-    {
-        $uploadDir = \trim(config('form-tool.uploadPath'));
-
-        if (!$uploadDir) {
-            throw new \Exception("'uploadPath' not set at config/form-tool.php");
+        $script = '$(\'#image-group-'.$this->dbField.$index.'\').remove();';
+        if ($this->isRequired) {
+            $script .= '$(\'#'.$this->dbField.$index.'\').prop(\'required\', \'required\')';
         }
 
-        $uploadDir = \str_replace('/', '', $uploadDir);
+        $input = '<div class="row">
+            <div class="col-sm-3">
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired && !$value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
+            </div>';
 
-        if (!file_exists($uploadDir)) {
-            try {
-                mkdir($uploadDir);
-                $this->restrictDirectoryAccess($uploadDir);
-            } catch (\Exception $e) {
-                throw new \Exception('Failed to create directory: '.$uploadDir);
-            }
-        }
-
-        if (!is_writable($uploadDir)) {
-            throw new \Exception('Upload Directory not writable: '.$uploadDir);
-        }
-
-        $path = [];
-        if ($this->path) {
-            $dirs = array_filter(explode('/', $this->path));
-            foreach ($dirs as $dir) {
-                //if ($dir && ! in_array($dir, $exclude))
-                $path[] = $dir;
-            }
-        }
-
-        $subDirDate = \trim(config('form-tool.uploadSubDirFormat', 'm-Y'));
-        if ($subDirDate) {
-            $format = str_replace([' ', '  '], '-', $subDirDate);
-            if ($format) {
-                $path[] = date($format);
-            }
-        }
-
-        $uploadPath = $uploadDir.'/';
-        $subDirs = implode('/', array_filter($path));
-        if ($subDirs) {
-            $uploadPath = $uploadPath.$subDirs.'/';
-        }
-
-        if ($uploadPath && !file_exists($uploadPath)) {
-            try {
-                mkdir($uploadPath, 0777, true);
-                $this->restrictDirectoryAccess($uploadPath);
-            } catch (\Exception $e) {
-                throw new \Exception('Failed to create directory: '.$uploadPath.'. '.$e->getMessage());
-            }
-        }
-
-        return $uploadPath;
-    }
-
-    protected function restrictDirectoryAccess(string $path)
-    {
-        $dirs = array_filter(explode('/', $path));
-
-        $parentPath = '';
-        while (count($dirs)) {
-            $currentDir = array_shift($dirs);
-
-            $indexFile = $parentPath.$currentDir.'/index.html';
-
-            if (!file_exists($indexFile)) {
-                try {
-                    $handle = fopen($indexFile, 'w');
-
-                    $fileData = '<!DOCTYPE html><html><head><title>403 Forbidden</title></head><body><p>Directory access is forbidden.</p></body></html>';
-                    fwrite($handle, $fileData);
-                    fclose($handle);
-                } catch (\Exception $e) {
-                    // TODO: Log
-                }
+        if ($value) {
+            if (FileManager::isImage($value)) {
+                $file = '<img src="'.asset($value).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
+            } else {
+                $file = '<i class="fa '.FileManager::getFileIcon($value).' fa-5x"></i>';
             }
 
-            /* It can be used to create index file for all the sub directories under parent directory
-            foreach (glob($currentDir . '/*') as $dir) {
-                if (is_dir($dir))
-                    $dirs[] = $dir;
-            }*/
-
-            $parentPath .= $currentDir.'/';
-        }
-    }
-
-    protected function isImage($file, $exts = null)
-    {
-        if (!$exts) {
-            $exts = config('form-tool.imageTypes');
+            $input .= '<div class="col-sm-6" id="image-group-'.$this->dbField.$index.'"> &nbsp; 
+                <a href="'.asset($value).'" target="_blank">'.$file.'</a>
+                <input type="hidden" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'">
+                <button class="close pull-right" aria-hidden="true" type="button" onclick="'.$script.'"><i class="fa fa-times"></i></button>
+            </div>';
         }
 
-        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
+        $input .= '</div>';
 
-        if ($ext && in_array($ext, explode(',', $exts))) {
-            return true;
-        }
-
-        return false;
-    }
-
-    protected function getFileIcon($file)
-    {
-        $ext = pathinfo($file, PATHINFO_EXTENSION);
-
-        switch ($ext) {
-            case 'pdf':
-                return 'fa-file-pdf-o';
-
-            case 'zip':
-            case 'rar':
-            case 'tar.gz':
-                return 'fa-file-archive-o';
-
-            case 'php':
-            case 'html':
-            case 'css':
-            case 'js':
-                return 'fa-file-code-o';
-
-            case 'mkv':
-            case 'flv':
-            case 'avi':
-            case '3gp':
-                return 'fa-file-video-o';
-
-            case 'mp3':
-            case 'wv':
-                return 'fa-file-audio-o';
-
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'webp':
-            case 'gif':
-            case 'svg':
-            case 'bmp':
-                return 'fa-file-image-o';
-
-            case 'ppt':
-            case 'pptx':
-                return 'fa-file-powerpoint-o';
-
-            case 'csv':
-            case 'xsl':
-            case 'xslx':
-                return 'fa-file-excel-o';
-
-            case 'doc':
-            case 'docx':
-                return 'fa-file-word-o';
-
-            default:
-                return 'fa-file-text';
-        }
+        return $input;
     }
 }

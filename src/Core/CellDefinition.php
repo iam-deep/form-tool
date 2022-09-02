@@ -114,7 +114,7 @@ class CellDefinition
             $this->styleCSS = 'style="'.$this->styleCSS.'"';
         }
 
-        $this->styleClass = implode(' ', $this->styleClass);
+        $this->styleClass = \implode(' ', $this->styleClass);
         if ($this->styleClass) {
             $this->styleClass = 'class="'.$this->styleClass.'"';
         }

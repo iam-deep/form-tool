@@ -47,6 +47,15 @@ class DataModel
         return $inputType;
     }
 
+    public function password(string $dbField, string $label = null): InputTypes\PasswordType
+    {
+        $inputType = new InputTypes\PasswordType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
     public function hidden(string $dbField, string $label = null): InputTypes\HiddenType
     {
         $inputType = new InputTypes\HiddenType();
@@ -83,6 +92,51 @@ class DataModel
         return $inputType;
     }
 
+    public function date(string $dbField, string $label = null) : InputTypes\DateType
+    {
+        $inputType = new InputTypes\DateType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
+    public function time(string $dbField, string $label = null) : InputTypes\TimeType
+    {
+        $inputType = new InputTypes\TimeType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
+    public function datetime(string $dbField, string $label = null) : InputTypes\DateTimeType
+    {
+        $inputType = new InputTypes\DateTimeType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
+    public function select(string $dbField, string $label = null): InputTypes\SelectType
+    {
+        $inputType = new InputTypes\SelectType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
+    public function editor(string $dbField, string $label = null): InputTypes\EditorType
+    {
+        $inputType = new InputTypes\EditorType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
     public function custom($class, string $dbField, string $label = null)
     {
         $inputType = new $class();
@@ -110,57 +164,6 @@ class DataModel
         }
 
         return null;
-    }
-
-    //region later
-
-    /*public function date(string $dbField, string $label = null) : DataType
-    {
-        $dataType = new DataType('date', $dbField, $label);
-        $this->cellList[] = $dataType;
-
-        return $dataType;
-    }
-
-    public function time(string $dbField, string $label = null) : DataType
-    {
-        $dataType = new DataType('time', $dbField, $label);
-        $this->cellList[] = $dataType;
-
-        return $dataType;
-    }
-
-    public function datetime(string $dbField, string $label = null) : DataType
-    {
-        $dataType = new DataType('datetime', $dbField, $label);
-        $this->cellList[] = $dataType;
-
-        return $dataType;
-    }
-
-    public function status(string $dbField, string $label = null) : DataType
-    {
-        $dataType = new DataType('status', $dbField, $label);
-        $this->cellList[] = $dataType;
-
-        return $dataType;
-    }
-
-    public function image(string $dbField, string $label = null) : ImageType
-    {
-        $dataType = new DataType('image', $dbField, $label);
-        $this->cellList[] = $dataType;
-
-        return $dataType;
-    }*/
-
-    public function select(string $dbField, string $label = null): InputTypes\SelectType
-    {
-        $inputType = new InputTypes\SelectType();
-        $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
-
-        return $inputType;
     }
 
     /*public function actions($actions) : DataType

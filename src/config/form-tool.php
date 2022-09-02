@@ -23,4 +23,14 @@ return [
 
     // Allowed types for image upload
     'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif',
+
+    // Human Date and Time format
+    'formatDateTime' => 'd-m-Y h:i A',
+    'formatDate' => 'd-m-Y',
+    'formatTime' => 'h:i A',
+
+    // Date and Time picker format, these formats should match with the above formats otherwise validation will fail
+    'pickerFormatDateTime' => 'DD-MM-YYYY hh:mm A',
+    'pickerFormatDate' => 'DD-MM-YYYY',
+    'pickerFormatTime' => 'hh:mm A',
 ];

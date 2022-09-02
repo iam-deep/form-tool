@@ -2,6 +2,7 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Support\FileManager;
 use Illuminate\Validation\Rule;
 
 class ImageType extends FileType
@@ -44,7 +45,7 @@ class ImageType extends FileType
     {
         $validations = parent::getValidations($type);
 
-        if (in_array('file', $validations)) {
+        if (\in_array('file', $validations)) {
             $validations[] = 'image';
 
             $flag = false;
@@ -68,7 +69,7 @@ class ImageType extends FileType
                 $validations[] = $rule;
             }
 
-            $imageTypes = config('form-tool.imageTypes');
+            $imageTypes = FileManager::getImageTypes();
             if ($imageTypes) {
                 $validations['mimes'] = 'mimes:'.$imageTypes;
             }
@@ -80,7 +81,7 @@ class ImageType extends FileType
     public function getTableValue()
     {
         if ($this->value) {
-            if ($this->isImage($this->value)) {
+            if (FileManager::isImage($this->value)) {
                 return '<a href="'.asset($this->value).'" target="_blank"><img class="img-thumbnail" src="'.asset($this->value).'" style="max-height:150px;max-width:150px;"></a>';
             }
 

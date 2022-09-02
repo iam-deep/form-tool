@@ -28,7 +28,7 @@ class AdminCheckLoggedIn
                 if ($user && isset($sessionUser->adminLoginToken) && Hash::check($user->password.$user->email.$_SERVER['HTTP_USER_AGENT'], $sessionUser->adminLoginToken)) {
                     $loginRedirect = config('form-tool.loginRedirect');
                     if (!$loginRedirect) {
-                        dd('loginRedirect not set in config/form-tool.php');
+                        $loginRedirect = '/dashboard';
                     }
 
                     $loginRedirect = config('form-tool.adminURL').$loginRedirect;

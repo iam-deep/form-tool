@@ -50,12 +50,7 @@ class AuthController extends Controller
             Session::put('user', $user);
             Cookie::make('i_am_admin', $user->userId, now()->addDays(90)->diffInSeconds());
 
-            $loginRedirect = config('form-tool.loginRedirect');
-            if (!$loginRedirect) {
-                dd('loginRedirect not set in config/form-tool.php');
-            }
-
-            $loginRedirect = config('form-tool.adminURL').$loginRedirect;
+            $loginRedirect = config('form-tool.adminURL').config('form-tool.loginRedirect', '/dashboard');
 
             return redirect($loginRedirect);
         }

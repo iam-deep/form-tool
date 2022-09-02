@@ -26,7 +26,7 @@ class TableField
     {
         $input = $this->_table->getDataModel()->getInputTypeByDbField($dbField);
         if (!$input) {
-            dd($dbField.' not found in the DataModel.');
+            throw new \Exception($dbField.' not found in the DataModel.');
         }
 
         $cell = CellDefinition::Input($input)->label($label);
@@ -49,7 +49,7 @@ class TableField
 
         $inputType->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($inputType); //->label($label);
+        $cell = CellDefinition::Input($inputType);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -60,7 +60,7 @@ class TableField
         $type = new InputTypes\TextType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -71,7 +71,7 @@ class TableField
         $type = new InputTypes\SelectType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -79,10 +79,10 @@ class TableField
 
     public function date(string $dbField, string $label = null): CellDefinition
     {
-        $type = new InputTypes\TextType();
+        $type = new InputTypes\DateType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -90,10 +90,10 @@ class TableField
 
     public function time(string $dbField, string $label = null): CellDefinition
     {
-        $type = new InputTypes\TextType();
+        $type = new InputTypes\TimeType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -101,10 +101,10 @@ class TableField
 
     public function datetime(string $dbField, string $label = null): CellDefinition
     {
-        $type = new InputTypes\TextType();
+        $type = new InputTypes\DateTimeType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -115,7 +115,7 @@ class TableField
         $type = new InputTypes\SelectType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -126,7 +126,7 @@ class TableField
         $type = new InputTypes\ImageType();
         $type->init(null, $dbField, $label);
 
-        $cell = CellDefinition::Input($type); //->label($label);
+        $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
 
         return $cell;

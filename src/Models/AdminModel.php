@@ -38,7 +38,7 @@ class AdminModel extends Model
 
     public static function addMany($data)
     {
-        if (count($data)) {
+        if (\count($data)) {
             DB::table(static::$tableName)->insert($data);
         }
     }

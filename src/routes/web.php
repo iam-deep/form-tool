@@ -22,4 +22,7 @@ Route::group(['prefix' => config('form-tool.adminURL'), 'middleware' => ['web', 
 
     //Route::get('dashboard', [DashboardController::class, 'index']);
     //Route::resource('categories', CategoriesController::class);
+
+    
+    Route::post('form-tool/editor-upload', [Biswadeep\FormTool\Core\InputTypes\EditorType::class, 'uploadImage']);
 });

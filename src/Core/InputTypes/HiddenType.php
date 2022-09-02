@@ -14,7 +14,7 @@ class HiddenType extends BaseInputType
 
     public function getHTML()
     {
-        $input = '<input type="hidden" class="'.implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.' />';
+        $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.' />';
 
         return $input;
     }
@@ -22,10 +22,9 @@ class HiddenType extends BaseInputType
     public function getHTMLMultiple($key, $index)
     {
         $value = old($key.'.'.$this->dbField);
-
         $value = $value[$index] ?? $this->value;
 
-        $input = '<input type="hidden" class="'.implode(' ', $this->classes).'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.$this->raw.' />';
+        $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.$this->raw.' />';
 
         return $input;
     }

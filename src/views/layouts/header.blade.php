@@ -38,7 +38,7 @@
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">Adm</span>
       <!-- logo for regular state and mobile devices -->
-      <span class="logo-lg">{{ config('app.name') }}</span>
+      <span class="logo-lg">{{ config('app.name', 'Admin') }}</span>
     </a>
 
     <!-- Header Navbar -->

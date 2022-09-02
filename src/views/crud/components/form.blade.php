@@ -24,6 +24,8 @@ let template = [];
             <input type="hidden" name="_method" value="PUT">
         @endif
 
+        <div id="beforeForm"></div>
+
         {!! Blade::render($inputs) !!}
 
         <div id="afterForm"></div>
@@ -34,11 +36,35 @@ let template = [];
 </form>
 
 <script>
-$(function(){
+$(function() {
+
+    // Setup the multiple table
+    $('.table').each(function() {
+        let requiredItems = parseInt($(this).attr('data-required')) || 0;
+        let items = $(this).find('.d_block').length || 0;
+
+        if (items <= requiredItems) {
+            $(this).find('.d_remove').hide();
+        }
+        else {
+            $(this).find('.d_remove').show();
+        }
+
+        if (items > 1)
+            $(this).find('.handle').show();
+        else
+            $(this).find('.handle').hide();
+
+        let i = 1;
+        $(this).find('.sort-value').each(function(){
+            $(this).val(i++);
+        });
+    });
+
+    // Add row into the multiple table
 	$('body').on('click', '.d_add', function(e){
         e.preventDefault();
 
-		//var b = $(this).closest('.table').find('.d_block:first');
 		var table = $(this).closest('.table');
 		var c = template[table.attr('id')];
 
@@ -57,6 +83,8 @@ $(function(){
             $(this).val(i++);
         });
 	});
+
+    // Remove row from the multiple table
 	$('body').on('click', '.d_remove', function(e){
         e.preventDefault();
 
@@ -87,29 +115,8 @@ $(function(){
             });
         }
 	});
-
-    $('.table').each(function() {
-        let requiredItems = parseInt($(this).attr('data-required')) || 0;
-        let items = $(this).find('.d_block').length || 0;
-
-        if (items <= requiredItems) {
-            $(this).find('.d_remove').hide();
-        }
-        else {
-            $(this).find('.d_remove').show();
-        }
-
-        if (items > 1)
-            $(this).find('.handle').show();
-        else
-            $(this).find('.handle').hide();
-
-        let i = 1;
-        $(this).find('.sort-value').each(function(){
-            $(this).val(i++);
-        });
-    });
     
+    // Sort table rows
     $( ".table-sortable tbody" ).sortable({
         placeholder : "ui-state-highlight",
         handle: ".handle",

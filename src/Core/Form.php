@@ -103,7 +103,7 @@ class Form
     private function getMultipleFields($model)
     {
         $key = $model->getFullKey();
-        $keyName = str_replace(['[', ']'], '-', $key);
+        $keyName = \str_replace(['[', ']'], '-', $key);
 
         // Getting the template at the beginning will make sure that it will not contain any values of the field
         $template = $this->getTemplate($model, $key, $keyName);
@@ -139,8 +139,8 @@ class Form
         $field = $model->getList()[0]->getDbField();
         $val = old($key.'.'.$field);
         $totalDataInSession = 0;
-        if ($val && is_array($val)) {
-            $totalDataInSession = count($val);
+        if ($val && \is_array($val)) {
+            $totalDataInSession = \count($val);
         }
 
         // Let's get data for multiple fields if its Edit
@@ -175,7 +175,7 @@ class Form
             }
 
             if ($result) {
-                $totalRowsInEdit = count($result);
+                $totalRowsInEdit = \count($result);
 
                 $i = 0;
                 foreach ($result as $row) {
@@ -219,7 +219,7 @@ class Form
             </tfoot>
         </table>';
 
-        $data .= '<script>template["'.$keyName.'"]=`'.$template.'`</script>';
+        Crud::addJs('template["'.$keyName.'"]=`'.$template.'`', $keyName);
 
         return $data;
     }
@@ -262,8 +262,8 @@ class Form
             $url = $this->_request->getRequestUri();
 
             $matches = [];
-            $t = preg_match('/'.$this->_resource->route.'\/([^\/]*)\/edit/', $url, $matches);
-            if (count($matches) > 1) {
+            $t = \preg_match('/'.$this->_resource->route.'\/([^\/]*)\/edit/', $url, $matches);
+            if (\count($matches) > 1) {
                 $id = $matches[1];
             } else {
                 return redirect($this->_url)/*->action([get_class($this->_resource), 'index'])*/->with('error', 'Could not fetch "id"! Call edit manually.');
@@ -392,11 +392,15 @@ class Form
             }
 
             $data = [];
-            if (isset($this->_request->{$input->getKey()}) && is_array($this->_request->{$input->getKey()})) {
-                foreach ($this->_request->{$input->getKey()} as $row) {
+            if ($this->_request->get($input->getKey()) && \is_array($this->_request->get($input->getKey()))) {
+                foreach ($this->_request->get($input->getKey()) as $row) {
                     $dataRow = [];
                     foreach ($input->getList() as $field) {
-                        $dataRow[$field->getDbField()] = $row[$field->getDbField()];
+
+                        // If we don't have a postdata for an field like for an optional file field
+                        //$this->postData[$dbField] = $this->postData[$dbField] ?? null;
+
+                        $dataRow[$field->getDbField()] = $row[$field->getDbField()] ?? null;
                     }
 
                     $dataRow[$foreignKey] = $this->_editId;
@@ -408,12 +412,12 @@ class Form
             $where = [$foreignKey => $this->_editId];
             if ($model instanceof \stdClass) {
                 DB::table($model->table)->where($where)->delete();
-                if (count($data)) {
+                if (\count($data)) {
                     DB::table($model->table)->insert($data);
                 }
             } else {
                 $model::deleteWhere($where);
-                if (count($data)) {
+                if (\count($data)) {
                     $model::addMany($data);
                 }
             }
@@ -424,18 +428,18 @@ class Form
     {
         $validationType = $this->formStatus == FormStatus::Store ? 'store' : 'update';
 
-        $fields = $labels = $merge = [];
+        $rules = $labels = $merge = [];
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel) {
                 continue;
             }
 
-            $newValue = $input->beforeValidation($this->_request->{$input->getDbField()});
+            $newValue = $input->beforeValidation($this->_request->get($input->getDbField()));
             if ($newValue !== null) {
                 $merge[$input->getDbField()] = $newValue;
             }
 
-            $fields[$input->getDbField()] = $input->getValidations($validationType);
+            $rules[$input->getDbField()] = $input->getValidations($validationType);
 
             $labels[$input->getDbField()] = $input->getLabel();
         }
@@ -444,7 +448,7 @@ class Form
             $this->_request->merge($merge);
         }
 
-        $validator = \Validator::make($this->_request->all(), $fields, [], $labels);
+        $validator = \Validator::make($this->_request->all(), $rules, [], $labels);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
@@ -459,7 +463,7 @@ class Form
     {
         if ($this->formStatus == FormStatus::Store) {
             $this->postData['createdBy'] = Session::has('user') ? Session::get('user')->userId : 0;
-            $this->postData['createdAt'] = date('Y-m-d H:i:s');
+            $this->postData['createdAt'] = \date('Y-m-d H:i:s');
         } else {
             if ($id) {
                 $this->_editId = $id;
@@ -475,7 +479,7 @@ class Form
             }
 
             $this->postData['updatedBy'] = Session::has('user') ? Session::get('user')->userId : 0;
-            $this->postData['updatedAt'] = date('Y-m-d H:i:s');
+            $this->postData['updatedAt'] = \date('Y-m-d H:i:s');
         }
 
         $this->formatMultiple();
@@ -521,15 +525,15 @@ class Form
                 continue;
             }
 
-            $value = $data[$input->getKey()];
-            if (is_array($value)) {
+            $value = $data[$input->getKey()] ?? null;
+            if (\is_array($value)) {
                 $keys = array_keys($value);
                 if (!$keys) {
                     continue;
                 }
 
-                $totalRows = count($value[$keys[0]]);
-                $totalKeys = count($keys);
+                $totalRows = \count($value[$keys[0]]);
+                $totalKeys = \count($keys);
 
                 $newData = [];
                 for ($i = 0; $i < $totalRows; $i++) {
@@ -569,8 +573,8 @@ class Form
         $url = $this->_request->getRequestUri();
 
         $matches = [];
-        $t = preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
-        if (count($matches) > 1) {
+        $t = \preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
+        if (\count($matches) > 1) {
             $this->_editId = $matches[1];
 
             return true;
@@ -587,8 +591,8 @@ class Form
             $url = $this->_request->getRequestUri();
 
             $matches = [];
-            $t = preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
-            if (count($matches) > 1) {
+            $t = \preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
+            if (\count($matches) > 1) {
                 $id = $matches[1];
             } else {
                 return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
@@ -648,7 +652,7 @@ class Form
         return $this->_model;
     }
 
-    public function getEditId()
+    public function getId()
     {
         return $this->_editId;
     }

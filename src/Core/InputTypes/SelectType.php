@@ -21,10 +21,10 @@ class SelectType extends BaseInputType
     // Setter
     public function options($options, ...$patternDbFields)
     {
-        if (is_string($options)) {
-            $db = explode('.', $options);
+        if (\is_string($options)) {
+            $db = \explode('.', $options);
 
-            if (count($db) >= 3) {
+            if (\count($db) >= 3) {
                 $this->dbTable = \trim($db[0]);
                 $this->dbTableValue = \trim($db[1]);
                 $this->dbTableTitle = \trim($db[2]);
@@ -34,7 +34,7 @@ class SelectType extends BaseInputType
             }
 
             $this->result = DB::table($this->dbTable)->orderBy($this->dbTableValue)->get();
-        } elseif (is_array($options)) {
+        } elseif (\is_array($options)) {
             $this->options = $options;
         }
 
@@ -94,7 +94,7 @@ class SelectType extends BaseInputType
             if ($this->firstOption) {
                 $input .= '<option value="">'.$this->firstOption.'</option>';
             } else {
-                $input .= '<option value="">(select '.strtolower($this->label).')</option>';
+                $input .= '<option value="">(select '.\strtolower($this->label).')</option>';
             }
         }
 
@@ -134,7 +134,7 @@ class SelectType extends BaseInputType
     {
         $value = old($this->dbField, $this->value);
 
-        $input = '<select class="'.implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.'>';
+        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.'>';
 
         return $this->htmlParentDiv($input.$this->getCommonHTML($value));
     }
@@ -142,10 +142,9 @@ class SelectType extends BaseInputType
     public function getHTMLMultiple($key, $index)
     {
         $value = old($key.'.'.$this->dbField);
-
         $value = $value[$index] ?? $this->value;
 
-        $input = '<select class="'.implode(' ', $this->classes).' input-sm" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.'>';
+        $input = '<select class="'.\implode(' ', $this->classes).' input-sm" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.'>';
 
         return $input.$this->getCommonHTML($value);
     }
