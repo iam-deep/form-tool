@@ -47,7 +47,7 @@ class DateTimeType extends BaseInputType
     public function beforeStore(object $newData)
     {
         $val = \trim($newData->{$this->dbField});
-        if (!$val) {
+        if (! $val) {
             return null;
         }
 
@@ -57,7 +57,7 @@ class DateTimeType extends BaseInputType
     public function beforeUpdate(object $oldData, object $newData)
     {
         $val = \trim($newData->{$this->dbField});
-        if (!$val) {
+        if (! $val) {
             return null;
         }
 
@@ -87,7 +87,7 @@ class DateTimeType extends BaseInputType
 
     private function modifyFormat($value)
     {
-        if (!$value) {
+        if (! $value) {
             return '';
         }
 

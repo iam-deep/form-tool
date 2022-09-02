@@ -122,7 +122,7 @@ class Form
 
         $totalCols = 0;
         foreach ($model->getList() as $field) {
-            if (!$field instanceof DataModel) {
+            if (! $field instanceof DataModel) {
                 if ($field->getType() != InputType::Hidden) {
                     $data .= '<th>'.$field->getLabel().'</th>';
                     $totalCols++;
@@ -148,7 +148,7 @@ class Form
         $totalRowsInEdit = 0;
 
         // TODO: Need to check if validation failed without $totalDataInSession
-        if (!$totalDataInSession && $this->formStatus == FormStatus::Edit) {
+        if (! $totalDataInSession && $this->formStatus == FormStatus::Edit) {
             $dbModel = $model->getModel();
             if ($dbModel) {
                 if ($dbModel instanceof \stdClass) {
@@ -195,7 +195,7 @@ class Form
             // Check if the required items is greater than the items already saved
             if ($result) {
                 $appendCount = $model->getRequired() - $totalRowsInEdit;
-            } elseif (!$result || $this->formStatus == FormStatus::Create) {
+            } elseif (! $result || $this->formStatus == FormStatus::Create) {
                 $appendCount = $model->getRequired();
             }
         }
@@ -258,7 +258,7 @@ class Form
 
     public function edit($id = false)
     {
-        if (!$id) {
+        if (! $id) {
             $url = $this->_request->getRequestUri();
 
             $matches = [];
@@ -275,7 +275,7 @@ class Form
         $this->resultData = $this->_model::getOne($id);
 
         foreach ($this->_dataModel->getList() as $input) {
-            if (!$input instanceof DataModel && isset($this->resultData->{$input->getDbField()})) {
+            if (! $input instanceof DataModel && isset($this->resultData->{$input->getDbField()})) {
                 $input->setValue($this->resultData->{$input->getDbField()});
             }
         }
@@ -312,7 +312,7 @@ class Form
     {
         if ($id) {
             $this->_editId = $id;
-        } elseif (!$this->_editId) {
+        } elseif (! $this->_editId) {
             $parse = $this->parseEditId();
             if (true !== $parse) {
                 return $parse;
@@ -324,7 +324,7 @@ class Form
             return $validate;
         }
 
-        if (!$this->oldData) {
+        if (! $this->oldData) {
             $this->oldData = $this->_model::getOne($this->_editId);
         }
 
@@ -351,7 +351,7 @@ class Form
 
     private function afterSave()
     {
-        if (!$this->_editId) {
+        if (! $this->_editId) {
             return;
         }
 
@@ -374,7 +374,7 @@ class Form
     private function saveMultipleFields()
     {
         foreach ($this->_dataModel->getList() as $input) {
-            if (!$input instanceof DataModel || !$input->getModel()) {
+            if (! $input instanceof DataModel || ! $input->getModel()) {
                 continue;
             }
 
@@ -384,7 +384,7 @@ class Form
             if ($model instanceof \stdClass) {
                 $foreignKey = $model->foreignKey;
             } else {
-                if (!isset($model::$foreignKey)) {
+                if (! isset($model::$foreignKey)) {
                     throw new \Exception('$foreignKey property not defined at '.$model);
                 }
 
@@ -467,14 +467,14 @@ class Form
         } else {
             if ($id) {
                 $this->_editId = $id;
-            } elseif (!$this->_editId) {
+            } elseif (! $this->_editId) {
                 $parse = $this->parseEditId();
                 if (true !== $parse) {
                     return $parse;
                 }
             }
 
-            if (!$this->oldData) {
+            if (! $this->oldData) {
                 $this->oldData = $this->_model::getOne($this->_editId);
             }
 
@@ -486,7 +486,7 @@ class Form
 
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel) {
-                if (!$input->getModel()) {
+                if (! $input->getModel()) {
                     $this->postData[$input->getKey()] = \json_encode($this->_request[$input->getKey()]);
                 }
 
@@ -509,7 +509,7 @@ class Form
                 $this->postData[$dbField] = $response;
             }
 
-            if (!$this->postData[$dbField] && $input->getDefaultValue() !== null) {
+            if (! $this->postData[$dbField] && $input->getDefaultValue() !== null) {
                 $this->postData[$dbField] = $input->getDefaultValue();
             }
         }
@@ -521,14 +521,14 @@ class Form
 
         $merge = [];
         foreach ($this->_dataModel->getList() as $input) {
-            if (!$input instanceof DataModel) {
+            if (! $input instanceof DataModel) {
                 continue;
             }
 
             $value = $data[$input->getKey()] ?? null;
             if (\is_array($value)) {
                 $keys = array_keys($value);
-                if (!$keys) {
+                if (! $keys) {
                     continue;
                 }
 
@@ -587,7 +587,7 @@ class Form
 
     private function destroy($id = false)
     {
-        if (!$id) {
+        if (! $id) {
             $url = $this->_request->getRequestUri();
 
             $matches = [];

@@ -51,7 +51,7 @@ class Table
 
         $tableField->slNo();
         foreach ($this->_dataModel->getList() as $input) {
-            if (!$input instanceof DataModel) {
+            if (! $input instanceof DataModel) {
                 $tableField->cellList[] = $input->getTableCell();
             }
         }
@@ -67,7 +67,7 @@ class Table
     {
         $result = $this->_model::getAll();
 
-        if (!$this->field) {
+        if (! $this->field) {
             $this->setDefaultField();
         }
 
@@ -129,7 +129,7 @@ class Table
                                 break;
                         }*/
                     } elseif ($cell->fieldType == 'action') {
-                        if (!isset($value->{$this->_model::$primaryId})) {
+                        if (! isset($value->{$this->_model::$primaryId})) {
                             $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
                             continue;
                         }

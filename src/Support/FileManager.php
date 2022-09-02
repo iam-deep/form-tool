@@ -103,7 +103,7 @@ class FileManager
         $uploadPath = '';
 
         if ($uploadDir) {
-            if (!\file_exists($uploadDir)) {
+            if (! \file_exists($uploadDir)) {
                 try {
                     \mkdir($uploadDir);
                     self::restrictDirectoryAccess($uploadDir);
@@ -112,7 +112,7 @@ class FileManager
                 }
             }
 
-            if (!\is_writable($uploadDir)) {
+            if (! \is_writable($uploadDir)) {
                 throw new \Exception('Upload Directory not writable: '.$uploadDir);
             }
 
@@ -141,7 +141,7 @@ class FileManager
             $uploadPath = $uploadPath.$subDirs.'/';
         }
 
-        if ($uploadPath && !\file_exists($uploadPath)) {
+        if ($uploadPath && ! \file_exists($uploadPath)) {
             try {
                 \mkdir($uploadPath, 0777, true);
                 self::restrictDirectoryAccess($uploadPath);
@@ -163,7 +163,7 @@ class FileManager
 
             $indexFile = $parentPath.$currentDir.'/index.html';
 
-            if (!\file_exists($indexFile)) {
+            if (! \file_exists($indexFile)) {
                 try {
                     $handle = \fopen($indexFile, 'w');
 
@@ -187,7 +187,7 @@ class FileManager
 
     public static function isImage($file, $exts = null)
     {
-        if (!$exts) {
+        if (! $exts) {
             $exts = self::getAllowedTypes();
         }
 

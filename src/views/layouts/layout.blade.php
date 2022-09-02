@@ -70,12 +70,12 @@
                     <div class="alert alert-danger">
                         {{ session('error') }}
                     </div>
-                    <?php session()->pull('error');  ?>
+                    <?php session()->pull('error'); ?>
                 @elseif (session('success'))
                     <div class="alert alert-success">
                         {{ session('success') }}
                     </div>
-                    <?php session()->pull('success');  ?>
+                    <?php session()->pull('success'); ?>
                 @endif
 
                 @if ($errors->any())
@@ -87,7 +87,7 @@
                         </ul>
                     </div>
 
-                    <?php session()->pull('errors');  ?>
+                    <?php session()->pull('errors'); ?>
                 @endif
             </div>
         </div>

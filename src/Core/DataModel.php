@@ -141,11 +141,11 @@ class DataModel
     {
         $inputType = new $class();
 
-        if (!$inputType instanceof InputTypes\BaseInputType) {
+        if (! $inputType instanceof InputTypes\BaseInputType) {
             throw new \Exception($class.' should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType');
         }
 
-        if (!$inputType instanceof InputTypes\ICustomType) {
+        if (! $inputType instanceof InputTypes\ICustomType) {
             throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
         }
 
@@ -158,7 +158,7 @@ class DataModel
     public function getInputTypeByDbField(string $dbField)
     {
         foreach ($this->_dataTypeList as $input) {
-            if (!$input instanceof DataModel && $input->getDbField() == $dbField) {
+            if (! $input instanceof DataModel && $input->getDbField() == $dbField) {
                 return $input;
             }
         }
@@ -241,7 +241,7 @@ class DataModel
 
             $this->multipleModel = $model;
 
-            if ($model && !isset($model::$foreignKey)) {
+            if ($model && ! isset($model::$foreignKey)) {
                 throw new \Exception('$foreignKey property not defined at '.$model);
             }
         }
@@ -251,11 +251,11 @@ class DataModel
 
     public function keepId()
     {
-        if (!$this->multipleModel && !$this->multipleTable) {
+        if (! $this->multipleModel && ! $this->multipleTable) {
             throw new \Exception('keepId only works with db table, Please assign the table first. And keepId must called at last.');
         }
 
-        if ($this->isMultipleSortable && !$this->multipleSortableField) {
+        if ($this->isMultipleSortable && ! $this->multipleSortableField) {
             throw new \Exception('You must pass a dbField in sortable to make work with keepId. And keepId must called at last.');
         }
 
@@ -310,7 +310,7 @@ class DataModel
             $key .= $this->parentDataModel->getKey($key);
 
             // Preventing array brackets for the first $key
-            if (!$this->parentDataModel->isMultiple) {
+            if (! $this->parentDataModel->isMultiple) {
                 $key .= $this->key;
 
                 return $key;

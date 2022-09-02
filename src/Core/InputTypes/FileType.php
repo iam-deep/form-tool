@@ -51,7 +51,7 @@ class FileType extends BaseInputType
                 $validations[] = 'nullable';
             }
         } else {
-            if ($this->isRequired && !$request->get($this->dbField)) {
+            if ($this->isRequired && ! $request->get($this->dbField)) {
                 $validations[] = 'required';
             } else {
                 $validations[] = 'nullable';
@@ -126,7 +126,7 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && !$this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && ! $this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
             </div>';
 
         if ($this->value) {
@@ -160,7 +160,7 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired && !$value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired && ! $value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
             </div>';
 
         if ($value) {

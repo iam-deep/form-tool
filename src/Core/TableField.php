@@ -25,7 +25,7 @@ class TableField
     public function default(string $dbField, string $label = null)
     {
         $input = $this->_table->getDataModel()->getInputTypeByDbField($dbField);
-        if (!$input) {
+        if (! $input) {
             throw new \Exception($dbField.' not found in the DataModel.');
         }
 
@@ -39,11 +39,11 @@ class TableField
     {
         $inputType = new $class();
 
-        if (!$inputType instanceof InputTypes\BaseInputType) {
+        if (! $inputType instanceof InputTypes\BaseInputType) {
             throw new \Exception($class.' should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType');
         }
 
-        if (!$inputType instanceof InputTypes\ICustomType) {
+        if (! $inputType instanceof InputTypes\ICustomType) {
             throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
         }
 
@@ -134,7 +134,7 @@ class TableField
 
     public function actions($actions = ['edit', 'delete']): CellDefinition
     {
-        if (!is_array($actions)) {
+        if (! is_array($actions)) {
             throw new \Exception("Actions columns should be in an array! Like: ['edit', 'delete']");
         }
 

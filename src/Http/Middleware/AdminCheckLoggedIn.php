@@ -13,9 +13,8 @@ class AdminCheckLoggedIn
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
+     * @param  \Illuminate\Http\Request  $request
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
-     *
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
     public function handle(Request $request, Closure $next)
@@ -27,7 +26,7 @@ class AdminCheckLoggedIn
                 $user = DB::table('users')->where('email', $sessionUser->email)->where('status', 1)->first();
                 if ($user && isset($sessionUser->adminLoginToken) && Hash::check($user->password.$user->email.$_SERVER['HTTP_USER_AGENT'], $sessionUser->adminLoginToken)) {
                     $loginRedirect = config('form-tool.loginRedirect');
-                    if (!$loginRedirect) {
+                    if (! $loginRedirect) {
                         $loginRedirect = '/dashboard';
                     }
 

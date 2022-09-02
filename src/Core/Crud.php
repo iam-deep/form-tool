@@ -72,7 +72,7 @@ class Crud
     public static function addCssLink($link)
     {
         $link = \trim($link);
-        if (!\in_array($link, self::$_cssLink)) {
+        if (! \in_array($link, self::$_cssLink)) {
             self::$_cssLink[] = $link;
         }
     }
@@ -80,7 +80,7 @@ class Crud
     public static function addJsLink($link)
     {
         $link = \trim($link);
-        if (!\in_array($link, self::$_jsLink)) {
+        if (! \in_array($link, self::$_jsLink)) {
             self::$_jsLink[] = $link;
         }
     }
@@ -139,7 +139,7 @@ class Crud
 
     public static function getCss()
     {
-        if (!self::$_css) {
+        if (! self::$_css) {
             return '';
         }
 
@@ -148,7 +148,7 @@ class Crud
 
     public static function getJs()
     {
-        if (!self::$_js) {
+        if (! self::$_js) {
             return '';
         }
 
