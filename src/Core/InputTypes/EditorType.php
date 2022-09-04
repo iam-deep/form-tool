@@ -62,23 +62,24 @@ class EditorType extends BaseInputType
     public function uploadImage(Request $request)
     {
         // TODO: Change this to our Crud method after ajax implementation
-        // TODO: Errors are not tested and not in exact format
         // TODO: Multiple Images for different screens
 
-        $json = [];
+        $fieldName = 'upload';
 
-        $rules['upload'] = (new ImageType())->getValidations('store');
-        $labels['upload'] = 'Image';
+        $rules[$fieldName] = (new ImageType())->getValidations('store');
+        $labels[$fieldName] = 'Image';
 
         $validator = \Validator::make($request->all(), $rules, [], $labels);
 
         if ($validator->fails()) {
             return \Response::json([
-                'error' => $validator->getMessageBag()->toArray(),
+                'error' => [
+                    'message' => $validator->getMessageBag()->first($fieldName)
+                ]
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 
-        $path = FileManager::uploadFile('upload', $request->query('path'));
+        $path = FileManager::uploadFile($fieldName, $request->query('path'));
         if ($path != null) {
             return \Response::json(['url' => URL::asset($path)], 200);
         }
@@ -89,19 +90,12 @@ class EditorType extends BaseInputType
             ],
         ], 400);
 
-        /*
-        {
+        /*{
             "urls": {
                 "default": "https://example.com/images/foo.jpg",
                 "800": "https://example.com/images/foo-800.jpg",
                 "1024": "https://example.com/images/foo-1024.jpg",
                 "1920": "https://example.com/images/foo-1920.jpg"
-            }
-        }
-
-        {
-            "error": {
-                "message": "The image upload failed because the image was too big (max 1.5MB)."
             }
         }*/
     }
@@ -150,7 +144,7 @@ class EditorType extends BaseInputType
 
     private function setDependencies()
     {
-        Crud::addJsLink('assets/form-tool/plugins/ckeditor5-35.1.0/ckeditor.js');
+        Crud::addJsLink('assets/form-tool/plugins/ckeditor5-35.1.0/build/ckeditor.js');
         Crud::addJs("
         let csrf_token = '".csrf_token()."';
 
@@ -271,7 +265,8 @@ class EditorType extends BaseInputType
                     headers: {
                         'X-CSRF-TOKEN': csrf_token
                     }
-                }
+                },
+                allowedContent: true
             })
             .then( editor => {
                 window.editor = editor;

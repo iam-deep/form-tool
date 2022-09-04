@@ -137,6 +137,15 @@ class DataModel
         return $inputType;
     }
 
+    public function checkbox(string $dbField, string $label = null): InputTypes\CheckboxType
+    {
+        $inputType = new InputTypes\CheckboxType();
+        $inputType->init($this, $dbField, $label);
+        $this->_dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
     public function custom($class, string $dbField, string $label = null)
     {
         $inputType = new $class();
