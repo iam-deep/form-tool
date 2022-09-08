@@ -32,11 +32,9 @@ trait Options
             }
 
             $this->optionData[] = ['db' => $tableInfo];
-        }
-        elseif (\is_array($options)) {
+        } elseif (\is_array($options)) {
             $this->optionData[] = ['array' => $options];
-        }
-        else {
+        } else {
             throw new \Exception('You need to pass an array or string with table info');
         }
 
@@ -58,8 +56,7 @@ trait Options
             if (! isset($this->validationMessages['min'])) {
                 $this->validationMessages['min'] = sprintf('The %s must be at least %s items.', $this->label, $min);
             }
-        }
-        else {
+        } else {
             throw new \Exception('min value must be greater than 0 for field: '.$this->dbField);
         }
 
@@ -74,8 +71,7 @@ trait Options
             if (! isset($this->validationMessages['max'])) {
                 $this->validationMessages['max'] = sprintf('The %s must not be greater than %s items.', $this->label, $max);
             }
-        }
-        else {
+        } else {
             throw new \Exception('max value must be greater than 0 for field: '.$this->dbField);
         }
 
@@ -107,7 +103,7 @@ trait Options
                                         $values[] = 'DB field "'.$field.'" not exists!';
                                     }
                                 }
-            
+
                                 $text = \vsprintf($options->dbTableTitle, $values);
                             } else {
                                 $text = $row->{$options->dbTableTitle};
@@ -116,8 +112,7 @@ trait Options
                             $val = $row->{$options->dbTableValue};
                             $this->options->{$val} = $text;
                         }
-                    }
-                    else {
+                    } else {
                         foreach ($options as $val => $text) {
                             $this->options->{$val} = $text;
                         }
@@ -127,16 +122,15 @@ trait Options
         }
 
         if ($this->optionType == InputType::Checkbox) {
-            $totalOptions = \count((array)$this->options);
+            $totalOptions = \count((array) $this->options);
             if ($totalOptions <= 1) {
                 if ($totalOptions == 0) {
                     $this->singleOptions[$this->valueYes] = $this->captionYes;
                     $this->options->{$this->valueYes} = $this->captionYes;
-                }
-                elseif (\property_exists($this->options, "0")) {
+                } elseif (\property_exists($this->options, '0')) {
                     // We cannot accept Yes/On value as 0 for single option, so let's change it
-                    $this->options->{$this->valueYes} = $this->captionYes = $this->options->{"0"};
-                    unset($this->options->{"0"});
+                    $this->options->{$this->valueYes} = $this->captionYes = $this->options->{'0'};
+                    unset($this->options->{'0'});
                 }
             }
         }
@@ -146,12 +140,12 @@ trait Options
     protected function countOptions()
     {
         if ($this->options) {
-            return \count((array)$this->options);
+            return \count((array) $this->options);
         }
 
         $this->createOptions();
 
-        return \count((array)$this->options);
+        return \count((array) $this->options);
     }
 
     public function getTableValue()
@@ -161,10 +155,10 @@ trait Options
         }
 
         $this->createOptions();
-        
+
         if ($this->isMultiple) {
             $values = [];
-            $rawValues = (array)\json_decode($this->value, true);
+            $rawValues = (array) \json_decode($this->value, true);
             $i = 0;
             foreach ($rawValues as $val) {
                 $values[] = $this->options->{$val} ?? null;
@@ -175,8 +169,7 @@ trait Options
             }
 
             return implode(', ', $values).(\count($rawValues) > 3 ? '...' : '');
-        }
-        else {
+        } else {
             if ($this->optionType == InputType::Checkbox && $this->singleOptions) {
                 return $this->value == $this->valueYes ? $this->captionYes : $this->captionNo;
             }

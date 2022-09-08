@@ -140,8 +140,7 @@ class BaseInputType
                 if (false !== strpos($rules, 'required')) {
                     $this->isRequired();
                 }
-            }
-            elseif (\is_array($rules)) {
+            } elseif (\is_array($rules)) {
                 if (in_array('required', $rules)) {
                     $this->isRequired();
                 }

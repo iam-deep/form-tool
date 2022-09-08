@@ -74,8 +74,8 @@ class EditorType extends BaseInputType
         if ($validator->fails()) {
             return \Response::json([
                 'error' => [
-                    'message' => $validator->getMessageBag()->first($fieldName)
-                ]
+                    'message' => $validator->getMessageBag()->first($fieldName),
+                ],
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 

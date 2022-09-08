@@ -23,7 +23,7 @@ class CheckboxType extends BaseInputType
         $this->classes = [];
         $this->optionType = InputType::Checkbox;
     }
-    
+
     //region Setter
     public function required(): CheckboxType
     {
@@ -72,10 +72,9 @@ class CheckboxType extends BaseInputType
                 return null;
             }
 
-            // If we have multiple options then let's keep it in json            
+            // If we have multiple options then let's keep it in json
             return \json_encode($val);
-        }
-        else {
+        } else {
             // If we have no options or single option then let's use single values
             return $val[0] ?? $this->valueNo;
         }
@@ -89,16 +88,15 @@ class CheckboxType extends BaseInputType
         if (! $value) {
             $value = $this->value;
             if ($this->isMultiple) {
-                $value = (array)\json_decode($this->value, true);
-            }
-            else {
+                $value = (array) \json_decode($this->value, true);
+            } else {
                 $value = [$value];
             }
         }
 
         $input = '';
         foreach ($this->options as $val => $text) {
-            $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string)$val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+            $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string) $val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
         }
 
         return $this->htmlParentDiv($input);

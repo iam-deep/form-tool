@@ -1,10 +1,10 @@
 <?php
 
 // Middlewares
-use Biswadeep\FormTool\Http\Middleware\AdminAuth;
-use Biswadeep\FormTool\Http\Middleware\AdminCheckLoggedIn;
-// Controllers
 use Biswadeep\FormTool\Http\Controllers\AuthController;
+use Biswadeep\FormTool\Http\Middleware\AdminAuth;
+// Controllers
+use Biswadeep\FormTool\Http\Middleware\AdminCheckLoggedIn;
 
 /** Auth Routes **/
 Route::group(['prefix' => config('form-tool.adminURL'), 'middleware' => ['web', AdminCheckLoggedIn::class/*, 'throttle:login'*/]], function () {
