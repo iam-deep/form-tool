@@ -12,8 +12,8 @@ return [
     'uploadPath' => 'uploads',
 
     // Upload files in date directories. Like month-year directory
-    // It will create one more sub directory under the route directory or uploadPath
-    // Then our full upload path will be uploads/07-2022/
+    // It will create one more sub directory under the root directory, uploadPath or sub directory
+    // Then our full upload path will be uploads/07-2022/ or uploads/sub-path/07-2022
     // Leave blank if you don't want to use
     // Possible values: date time format or blank
     'uploadSubDirFormat' => 'm-Y',

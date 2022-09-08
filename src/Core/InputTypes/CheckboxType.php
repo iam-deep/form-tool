@@ -11,75 +11,94 @@ class CheckboxType extends BaseInputType
     public int $type = InputType::Checkbox;
     public string $typeInString = 'checkbox';
 
+    protected string $captionYes = 'Yes';
+    protected string $captionNo = 'No';
+    protected string $valueYes = '1';
+    protected string $valueNo = '0';
+
+    protected $singleOptions = [];
+
     public function __construct()
     {
         $this->classes = [];
-        $this->isMultiple = true;
+        $this->optionType = InputType::Checkbox;
     }
     
-    // Setter
-    
-    public function getValidations($type)
+    //region Setter
+    public function required(): CheckboxType
     {
-        $validations = parent::getValidations($type);
+        $this->isRequired = true;
+        $this->validations['required'] = 'required';
 
-        return $validations;
+        return $this;
     }
 
-    public function beforeValidation($data)
+    public function captions($captionYes, $captionNo = 'No')
     {
-        return null;
+        $this->captionYes = $captionYes;
+        $this->captionNo = $captionNo;
+
+        return $this;
+    }
+
+    public function values($valueYes, $valueNo = 0)
+    {
+        if (! $valueYes) {
+            throw new \Exception('Yes/On value cannot be: "'.$valueYes.'"');
+        }
+
+        $this->valueYes = $valueYes;
+        $this->valueNo = $valueNo;
+
+        return $this;
+    }
+    //endregion
+
+    public function beforeStore($newData)
+    {
+        return $this->getFormValue($newData);
     }
 
     public function beforeUpdate($oldData, $newData)
     {
+        return $this->getFormValue($newData);
+    }
+
+    private function getFormValue($newData)
+    {
         $val = $newData->{$this->dbField};
-        if ($this->isMultiple && $this->countOption > 1) {
+        if ($this->isMultiple) {
+            if ($val === null) {
+                return null;
+            }
+
+            // If we have multiple options then let's keep it in json            
             return \json_encode($val);
         }
         else {
-            return $val;
+            // If we have no options or single option then let's use single values
+            return $val[0] ?? $this->valueNo;
         }
     }
 
     public function getHTML()
     {
-        $value = old($this->dbField, $this->value);
+        $this->createOptions();
 
-        if ($this->isMultiple)
-            $value = (array)\json_decode($this->value, true);
-
-        $input = '';
-        if ($this->options && \count($this->options)) {
-            foreach ($this->options as $val => $text) {
-                $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array($val, $value) ? 'checked' : '').' '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+        $value = old($this->dbField);
+        if (! $value) {
+            $value = $this->value;
+            if ($this->isMultiple) {
+                $value = (array)\json_decode($this->value, true);
             }
-
-            if ($this->result) {
-                foreach ($this->result as $row) {
-                    $text = '';
-                    if ($this->dbPatternFields) {
-                        $values = [];
-                        foreach ($this->dbPatternFields as $field) {
-                            $field = \trim($field);
-                            if (\property_exists($row, $field)) {
-                                $values[] = $row->{$field};
-                            } else {
-                                $values[] = 'DB field "'.$field.'" not exists!';
-                            }
-                        }
-    
-                        $text = \vsprintf($this->dbTableTitle, $values);
-                    } else {
-                        $text = $row->{$this->dbTableTitle};
-                    }
-    
-                    $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'[]" value="'.$row->{$this->dbTableValue}.'" '.(\is_array($value) && \in_array($row->{$this->dbTableValue}, $value) ? 'checked' : '').' '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
-                }
+            else {
+                $value = [$value];
             }
         }
-        else {
-            $input = '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="1" '.(\is_string($value) && 1 == $value ? 'checked' : '').' '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' /></label>';
+
+        $input = '';
+        foreach ($this->options as $val => $text) {
+            $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string)$val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
         }
 
         return $this->htmlParentDiv($input);
@@ -87,10 +106,12 @@ class CheckboxType extends BaseInputType
 
     public function getHTMLMultiple($key, $index)
     {
+        // TODO: Everything here
+
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 
-        $input = '<input type="checkbox" class="'.\implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' />';
+        $input = '<input type="checkbox" class="'.\implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
 
         return $input;
     }

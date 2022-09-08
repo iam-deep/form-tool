@@ -19,6 +19,14 @@ class FileType extends BaseInputType
     }
 
     // Setter
+    public function required(): FileType
+    {
+        $this->isRequired = true;
+        $this->validations['required'] = 'required';
+
+        return $this;
+    }
+
     public function path(string $path)
     {
         $this->path = \trim($path);
@@ -87,8 +95,8 @@ class FileType extends BaseInputType
             return $filename;
         }
 
-        // No files have been uploaded let's return the old file if have one
-        return $oldFile ?? '';
+        // No files have been uploaded let's return the old file if we have
+        return $oldFile ?? null;
     }
 
     public function afterUpdate(object $oldData, object $newData)
@@ -126,7 +134,7 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && ! $this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && ! $this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
             </div>';
 
         if ($this->value) {
@@ -160,7 +168,7 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired && ! $value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.' '.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired && ! $value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
             </div>';
 
         if ($value) {

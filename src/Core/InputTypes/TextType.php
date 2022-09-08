@@ -95,7 +95,7 @@ class TextType extends BaseInputType
 
     public function getHTML()
     {
-        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' />';
+        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.$this->inlineCSS.' />';
 
         return $this->htmlParentDiv($input);
     }
@@ -105,7 +105,7 @@ class TextType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 
-        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.($this->isRequired ? 'required' : '').' '.$this->raw.' '.$this->inlineCSS.' />';
+        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
 
         return $input;
     }

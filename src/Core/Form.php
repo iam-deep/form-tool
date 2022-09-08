@@ -428,7 +428,7 @@ class Form
     {
         $validationType = $this->formStatus == FormStatus::Store ? 'store' : 'update';
 
-        $rules = $labels = $merge = [];
+        $rules = $messages = $labels = $merge = [];
         foreach ($this->_dataModel->getList() as $input) {
             if ($input instanceof DataModel) {
                 continue;
@@ -441,6 +441,8 @@ class Form
 
             $rules[$input->getDbField()] = $input->getValidations($validationType);
 
+            $messages = array_merge($messages, $input->getValidationMessages());
+
             $labels[$input->getDbField()] = $input->getLabel();
         }
 
@@ -448,7 +450,7 @@ class Form
             $this->_request->merge($merge);
         }
 
-        $validator = \Validator::make($this->_request->all(), $rules, [], $labels);
+        $validator = \Validator::make($this->_request->all(), $rules, $messages, $labels);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();

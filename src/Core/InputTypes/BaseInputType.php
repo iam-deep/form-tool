@@ -58,6 +58,8 @@ class BaseInputType
     protected $raw = '';
 
     // Validations
+    protected $validations = [];
+    protected $validationMessages = [];
     protected bool $isRequired = false;
     protected bool $isError = false;
     protected string $error = '';
@@ -79,6 +81,7 @@ class BaseInputType
         $this->label = $label ?: \ucfirst($this->dbField);
     }
 
+    //region Setter
     public function label($label): BaseInputType
     {
         $this->label = $label;
@@ -117,20 +120,47 @@ class BaseInputType
     public function required(): BaseInputType
     {
         $this->isRequired = true;
+        $this->validations['required'] = 'required';
+        $this->raw('required');
+
+        return $this;
+    }
+
+    public function validations($rules, array $messages = [], bool $replace = false)
+    {
+        if ($rules) {
+            $this->validations[] = $rules;
+        }
+
+        $this->validationMessages = $messages;
+
+        if ($replace) {
+            $this->validations = $rules;
+            if (\is_string($rules)) {
+                if (false !== strpos($rules, 'required')) {
+                    $this->isRequired();
+                }
+            }
+            elseif (\is_array($rules)) {
+                if (in_array('required', $rules)) {
+                    $this->isRequired();
+                }
+            }
+        }
 
         return $this;
     }
 
     public function readonly(): BaseInputType
     {
-        $this->raw .= 'readonly ';
+        $this->raw('readonly');
 
         return $this;
     }
 
     public function disabled(): BaseInputType
     {
-        $this->raw .= 'disabled ';
+        $this->raw('disabled');
 
         return $this;
     }
@@ -163,6 +193,7 @@ class BaseInputType
     {
         $this->inlineCSS .= $style.'';
     }
+    //endregion
 
     //region Callbacks
 
@@ -206,14 +237,23 @@ class BaseInputType
     /* Internal functions */
     public function getValidations($type)
     {
-        $validations = [];
-        if ($this->isRequired) {
-            $validations[] = 'required';
-        } else {
-            $validations[] = 'nullable';
+        // TODO: Check required when validation passed as string
+
+        if (! \in_array('required', $this->validations)) {
+            $this->validations[] = 'nullable';
         }
 
-        return $validations;
+        return $this->validations;
+    }
+
+    public function getValidationMessages()
+    {
+        $messages = [];
+        foreach ($this->validationMessages as $rule => $message) {
+            $messages[$this->dbField.'.'.$rule] = $message;
+        }
+
+        return $messages;
     }
 
     final public function getType()
@@ -244,14 +284,6 @@ class BaseInputType
     public function getValue()
     {
         return $this->value;
-
-        /*Crypt::encryptString($request->token);
-
-        try {
-            $decrypted = Crypt::decryptString($encryptedValue);
-        } catch (DecryptException $e) {
-            //
-        }*/
     }
 
     public function getDefaultValue()
