@@ -2,126 +2,125 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Core\InputTypes\Common\Options;
+use Biswadeep\FormTool\Core\Crud;
 use Illuminate\Support\Facades\DB;
 
 class SelectType extends BaseInputType
 {
+    use Options;
+
     public int $type = InputType::Select;
     public string $typeInString = 'select';
 
-    protected $options = [];
-    protected $result = null;
-    protected $firstOption = '';
+    //protected $options = [];
+    //protected $result = null;
+    protected bool $isFirstOption = true;
+    protected string $firstOption = '';
 
-    protected string $dbTable = '';
-    protected string $dbTableValue = '';
-    protected string $dbTableTitle = '';
-    protected $dbPatternFields = [];
+    protected $plugins = ['default', 'chosen'];
+    protected string $currentPlugin = '';
 
-    // Setter
-    public function options($options, ...$patternDbFields)
-    {
-        if (\is_string($options)) {
-            $db = \explode('.', $options);
-
-            if (\count($db) >= 3) {
-                $this->dbTable = \trim($db[0]);
-                $this->dbTableValue = \trim($db[1]);
-                $this->dbTableTitle = \trim($db[2]);
-                $this->dbPatternFields = $patternDbFields;
-            } else {
-                throw new \Exception('Wrong format! It should be table_name.value_column.text_column');
-            }
-
-            $this->result = DB::table($this->dbTable)->orderBy($this->dbTableValue)->get();
-        } elseif (\is_array($options)) {
-            $this->options = $options;
-        }
-
-        return $this;
-    }
-
+    //region Setter
     public function noFirst()
     {
-        $this->firstOption = null;
+        $this->isFirstOption = false;
 
         return $this;
     }
 
     public function first($firstOption)
     {
+        $this->isFirstOption = true;
         $this->firstOption = \trim($firstOption);
 
         return $this;
     }
 
-    public function getTableValue()
+    // This only works for chosen
+    public function placeholder(string $placeholder): SelectType
     {
-        if (isset($this->options[$this->value])) {
-            return $this->options[$this->value];
+        $this->raw('data-placeholder="'.$placeholder.'"');
+
+        return $this;
+    }
+
+    public function multiple()
+    {
+        $this->isMultiple = true;
+        $this->raw('multiple');
+        $this->currentPlugin = 'chosen';
+
+        return $this;
+    }
+
+    public function plugin($plugin = 'default')
+    {
+        if (! \in_array($plugin, $this->plugins)) {
+            throw new \Exception('Plugin not found: '.$plugin);
         }
 
-        if ($this->result) {
-            foreach ($this->result as $row) {
-                if ($row->{$this->dbTableValue} === $this->value) {
-                    if ($this->dbPatternFields) {
-                        $values = [];
-                        foreach ($this->dbPatternFields as $field) {
-                            $field = \trim($field);
-                            if (\property_exists($row, $field)) {
-                                $values[] = $row->{$field};
-                            } else {
-                                $values[] = '<b class="text-red">DB field "'.$field.'" not exists!</b>';
-                            }
-                        }
+        $this->currentPlugin = $plugin;
 
-                        return \vsprintf($this->dbTableTitle, $values);
-                    }
+        return $this;
+    }
+    //endregion
 
-                    return $row->{$this->dbTableTitle};
-                }
-            }
+    public function setPlugin($isMultiple = false)
+    {
+        if ($this->currentPlugin != 'chosen') {
+            return;
         }
 
-        return null;
+        Crud::addCssLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.min.css');
+        Crud::addJsLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.jquery.min.js');
+        $this->addClass('chosen');
+
+        $config = [
+            'width' => '100%',
+            'disable_search_threshold' => 10
+        ];
+
+        if (! $this->isRequired) {
+            $config['allow_single_deselect'] = true;
+        }
+
+        if ($this->limitMax) {
+            $config['max_selected_options'] = $this->limitMax;
+        }
+
+        $this->isFirstOption = true;
+        $this->firstOption = '';
+
+        Crud::addJs('$(".chosen").chosen('. \json_encode($config) .');', 'chosen');
+
+        /* TODO:
+        if ($isMultiple) {
+            Crud::addJs('$(".chosen").trigger("chosen:updated");', 'chosen-update');
+        }*/
     }
 
     private function getCommonHTML($value)
     {
+        $this->createOptions();
+
         $input = '';
 
-        if ($this->firstOption !== null) {
-            if ($this->firstOption) {
-                $input .= '<option value="">'.$this->firstOption.'</option>';
-            } else {
+        if ($this->isFirstOption) {
+            if (! $this->firstOption) {
                 $input .= '<option value="">(select '.\strtolower($this->label).')</option>';
+            } else {
+                $input .= '<option value="">'.$this->firstOption.'</option>';
             }
         }
 
-        if ($this->result) {
-            foreach ($this->result as $row) {
-                $text = '';
-                if ($this->dbPatternFields) {
-                    $values = [];
-                    foreach ($this->dbPatternFields as $field) {
-                        $field = \trim($field);
-                        if (\property_exists($row, $field)) {
-                            $values[] = $row->{$field};
-                        } else {
-                            $values[] = 'DB field "'.$field.'" not exists!';
-                        }
-                    }
-
-                    $text = \vsprintf($this->dbTableTitle, $values);
-                } else {
-                    $text = $row->{$this->dbTableTitle};
-                }
-
-                $input .= '<option value="'.$row->{$this->dbTableValue}.'" '.($row->{$this->dbTableValue} == $value ? 'selected' : '').'>'.$text.'</option>';
+        if ($this->isMultiple) {
+            foreach ($this->options as $val => $text) {
+                $input .= '<option value="'.$val.'" '.(\is_array($value) && \in_array($val, $value) ? 'selected' : '').'>'.$text.'</option>';
             }
         } else {
             foreach ($this->options as $val => $text) {
-                $input .= '<option value="'.$val.'" '.($val === $value ? 'selected' : '').'>'.$text.'</option>';
+                $input .= '<option value="'.$val.'" '.($val == $value ? 'selected' : '').'>'.$text.'</option>';
             }
         }
 
@@ -132,15 +131,25 @@ class SelectType extends BaseInputType
 
     public function getHTML()
     {
-        $value = old($this->dbField, $this->value);
+        $this->setPlugin();
 
-        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.$this->raw.$this->inlineCSS.'>';
+        $value = old($this->dbField);
+        if (! $value) {
+            $value = $this->value;
+            if ($this->isMultiple) {
+                $value = (array)\json_decode($this->value, true);
+            }
+        }
+
+        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
 
         return $this->htmlParentDiv($input.$this->getCommonHTML($value));
     }
 
     public function getHTMLMultiple($key, $index)
     {
+        $this->setPlugin(true);
+
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 

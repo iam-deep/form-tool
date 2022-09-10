@@ -82,7 +82,7 @@ class BaseInputType
     }
 
     //region Setter
-    public function label($label): BaseInputType
+    public function label(string $label): BaseInputType
     {
         $this->label = $label;
 
@@ -96,21 +96,21 @@ class BaseInputType
         return $this;
     }
 
-    public function placeholder($text): BaseInputType
+    public function placeholder(string $text): BaseInputType
     {
         $this->placeholder = $text;
 
         return $this;
     }
 
-    public function help($helpText): BaseInputType
+    public function help(string $helpText): BaseInputType
     {
         $this->help = $helpText;
 
         return $this;
     }
 
-    public function raw($rawAttributes): BaseInputType
+    public function raw(string $rawAttributes): BaseInputType
     {
         $this->raw .= $rawAttributes.' ';
 

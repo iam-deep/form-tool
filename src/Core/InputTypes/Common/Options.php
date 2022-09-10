@@ -15,6 +15,9 @@ trait Options
     protected int $optionType = -1;
     protected $options = null;
 
+    protected int $limitMin = 0;
+    protected int $limitMax = 0;
+
     //region Setter
     public function options($options, ...$patternDbFields)
     {
@@ -52,6 +55,7 @@ trait Options
     {
         if ($min > 0) {
             $this->validations[] = 'min:'.$min;
+            $this->limitMin = $min;
 
             if (! isset($this->validationMessages['min'])) {
                 $this->validationMessages['min'] = sprintf('The %s must be at least %s items.', $this->label, $min);
@@ -67,6 +71,7 @@ trait Options
     {
         if ($max > 0) {
             $this->validations[] = 'max:'.$max;
+            $this->limitMax = $max;
 
             if (! isset($this->validationMessages['max'])) {
                 $this->validationMessages['max'] = sprintf('The %s must not be greater than %s items.', $this->label, $max);
