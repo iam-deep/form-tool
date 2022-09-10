@@ -2,8 +2,8 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\Options;
 use Biswadeep\FormTool\Core\Crud;
+use Biswadeep\FormTool\Core\InputTypes\Common\Options;
 use Illuminate\Support\Facades\DB;
 
 class SelectType extends BaseInputType
@@ -78,7 +78,7 @@ class SelectType extends BaseInputType
 
         $config = [
             'width' => '100%',
-            'disable_search_threshold' => 10
+            'disable_search_threshold' => 10,
         ];
 
         if (! $this->isRequired) {
@@ -92,7 +92,7 @@ class SelectType extends BaseInputType
         $this->isFirstOption = true;
         $this->firstOption = '';
 
-        Crud::addJs('$(".chosen").chosen('. \json_encode($config) .');', 'chosen');
+        Crud::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen');
 
         /* TODO:
         if ($isMultiple) {
@@ -137,7 +137,7 @@ class SelectType extends BaseInputType
         if (! $value) {
             $value = $this->value;
             if ($this->isMultiple) {
-                $value = (array)\json_decode($this->value, true);
+                $value = (array) \json_decode($this->value, true);
             }
         }
 
