@@ -4,7 +4,7 @@ namespace Biswadeep\FormTool\Core;
 
 class Table
 {
-    private $_dataModel;
+    private $_bluePrint;
     private $_resource;
     private $_model;
 
@@ -13,16 +13,17 @@ class Table
 
     private $_url;
 
-    public function __construct($resource, $model, DataModel $dataModel = null)
+    public function __construct($resource, BluePrint $bluePrint = null, $model = null)
     {
         $this->_resource = $resource;
-        $this->_model = $model;
 
-        if ($dataModel) {
-            $this->_dataModel = $dataModel;
+        if ($bluePrint) {
+            $this->_bluePrint = $bluePrint;
         } else {
-            $this->_dataModel = DataModel::getInstance();
+            $this->_bluePrint = BluePrint::getInstance();
         }
+
+        $this->_model = $model;
 
         $this->_url = config('form-tool.adminURL').'/'.$resource->route;
         //$this->_url = url()->current();
@@ -50,8 +51,8 @@ class Table
         $tableField = new TableField($this);
 
         $tableField->slNo();
-        foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if (! $input instanceof BluePrint) {
                 $tableField->cellList[] = $input->getTableCell();
             }
         }
@@ -65,7 +66,8 @@ class Table
 
     private function create(): object
     {
-        $result = $this->_model::getAll();
+        $result = $this->_model->getAll();
+        $primaryId = $this->_model->getPrimaryId();
 
         if (! $this->field) {
             $this->setDefaultField();
@@ -110,35 +112,17 @@ class Table
                             }
                             $viewData->data = \vsprintf('%s'.$concat->pattern, $values);
                         }
-
-                        /*switch ($cell->fieldType) {
-                            case 'date':
-                                $viewData->data = $val ? date('d M, Y', strtotime($val)) : '';
-                                break;
-                            case 'time':
-                                $viewData->data = $val ? date('h:i s', strtotime($val)) : '';
-                                break;
-                            case 'datetime':
-                                $viewData->data = $val ? date('d M, Y h:i A', strtotime($val)) : '';
-                                break;
-                            case 'status':
-                                $viewData->data = 1 ? 'Active' : 'Inactive';
-                                break;
-                            default:
-                                $viewData->data = $val;
-                                break;
-                        }*/
                     } elseif ($cell->fieldType == 'action') {
-                        if (! isset($value->{$this->_model::$primaryId})) {
+                        if (! isset($value->{$primaryId})) {
                             $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
                             continue;
                         }
 
                         foreach ($this->field->actions as $action) {
                             if ('edit' == $action->action) {
-                                $viewData->data .= '<a href="'.$this->_url.'/'.$value->{$this->_model::$primaryId}.'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
+                                $viewData->data .= '<a href="'.$this->_url.'/'.$value->{$primaryId}.'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
                             } elseif ('delete' == $action->action) {
-                                $viewData->data .= ' <form action="'.$this->_url.'/'.$value->{$this->_model::$primaryId}.'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
+                                $viewData->data .= ' <form action="'.$this->_url.'/'.$value->{$primaryId}.'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
                                     '.csrf_field().'
                                     '.method_field('DELETE').'
                                     <button class="btn btn-danger btn-flat btn-sm"><i class="fa fa-trash"></i></button>
@@ -179,9 +163,9 @@ class Table
         return null;
     }
 
-    public function getDataModel(): DataModel
+    public function getBluePrint(): BluePrint
     {
-        return $this->_dataModel;
+        return $this->_bluePrint;
     }
 }
 

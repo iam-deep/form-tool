@@ -2,7 +2,7 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\Crud;
+use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\InputTypes\Common\Options;
 use Illuminate\Support\Facades\DB;
 
@@ -16,7 +16,7 @@ class SelectType extends BaseInputType
     //protected $options = [];
     //protected $result = null;
     protected bool $isFirstOption = true;
-    protected string $firstOption = '';
+    protected $firstOption = null;
 
     protected $plugins = ['default', 'chosen'];
     protected string $currentPlugin = '';
@@ -29,7 +29,7 @@ class SelectType extends BaseInputType
         return $this;
     }
 
-    public function first($firstOption)
+    public function first(string $firstOption)
     {
         $this->isFirstOption = true;
         $this->firstOption = \trim($firstOption);
@@ -49,7 +49,7 @@ class SelectType extends BaseInputType
     {
         $this->isMultiple = true;
         $this->raw('multiple');
-        $this->currentPlugin = 'chosen';
+        $this->plugin('chosen');
 
         return $this;
     }
@@ -61,10 +61,37 @@ class SelectType extends BaseInputType
         }
 
         $this->currentPlugin = $plugin;
+        $this->isFirstOption = true;
+        $this->firstOption = '';
 
         return $this;
     }
     //endregion
+
+    public function beforeStore($newData)
+    {
+        return $this->getFormValue($newData);
+    }
+
+    public function beforeUpdate($oldData, $newData)
+    {
+        return $this->getFormValue($newData);
+    }
+
+    private function getFormValue($newData)
+    {
+        $val = $newData->{$this->dbField};
+        if ($this->isMultiple) {
+            if ($val === null) {
+                return null;
+            }
+
+            // If we have multiple options then let's keep it in json
+            return \json_encode($val);
+        }
+            
+        return $val;
+    }
 
     public function setPlugin($isMultiple = false)
     {
@@ -72,8 +99,8 @@ class SelectType extends BaseInputType
             return;
         }
 
-        Crud::addCssLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.min.css');
-        Crud::addJsLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.jquery.min.js');
+        Doc::addCssLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.min.css');
+        Doc::addJsLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.jquery.min.js');
         $this->addClass('chosen');
 
         $config = [
@@ -89,14 +116,11 @@ class SelectType extends BaseInputType
             $config['max_selected_options'] = $this->limitMax;
         }
 
-        $this->isFirstOption = true;
-        $this->firstOption = '';
-
-        Crud::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen');
+        Doc::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen');
 
         /* TODO:
         if ($isMultiple) {
-            Crud::addJs('$(".chosen").trigger("chosen:updated");', 'chosen-update');
+            Doc::addJs('$(".chosen").trigger("chosen:updated");', 'chosen-update');
         }*/
     }
 
@@ -107,7 +131,7 @@ class SelectType extends BaseInputType
         $input = '';
 
         if ($this->isFirstOption) {
-            if (! $this->firstOption) {
+            if ($this->firstOption === null) {
                 $input .= '<option value="">(select '.\strtolower($this->label).')</option>';
             } else {
                 $input .= '<option value="">'.$this->firstOption.'</option>';
@@ -134,7 +158,7 @@ class SelectType extends BaseInputType
         $this->setPlugin();
 
         $value = old($this->dbField);
-        if (! $value) {
+        if ($value === null) {
             $value = $this->value;
             if ($this->isMultiple) {
                 $value = (array) \json_decode($this->value, true);

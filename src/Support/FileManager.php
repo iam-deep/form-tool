@@ -188,7 +188,7 @@ class FileManager
     public static function isImage($file, $exts = null)
     {
         if (! $exts) {
-            $exts = self::getAllowedTypes();
+            $exts = self::getImageTypes();
         }
 
         $ext = \strtolower(\pathinfo($file, PATHINFO_EXTENSION));

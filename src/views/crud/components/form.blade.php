@@ -31,7 +31,7 @@ let template = [];
         <div id="afterForm"></div>
     </div>
     <div class="box-footer">
-        <button class="btn btn-primary btn-flat">Submit</button>
+        <button class="btn btn-primary btn-flat submit">Submit</button>
     </div>
 </form>
 
@@ -115,6 +115,10 @@ $(function() {
             });
         }
 	});
+
+    $('form').on('submit', function(){
+        $('.submit').html('<i class="fa fa-spinner fa-pulse"></i> ' + $('.submit').text()).prop('disabled', true);
+    });
     
     // Sort table rows
     $( ".table-sortable tbody" ).sortable({

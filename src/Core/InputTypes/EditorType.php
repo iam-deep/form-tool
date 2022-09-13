@@ -2,7 +2,7 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\Crud;
+use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
@@ -104,7 +104,7 @@ class EditorType extends BaseInputType
     {
         $this->setDependencies();
 
-        Crud::addJs('
+        Doc::addJs('
         // CkEditor config for field: '.$this->dbField."
         var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
         var selector = document.querySelector('#".$this->dbField."');
@@ -121,7 +121,7 @@ class EditorType extends BaseInputType
         $this->setDependencies();
 
         if ($index != -1) {
-            Crud::addJs('
+            Doc::addJs('
             // CkEditor config for field: '.$this->dbField.$index."
             var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
             var selector = document.querySelector('#".$this->dbField.$index."');
@@ -144,8 +144,8 @@ class EditorType extends BaseInputType
 
     private function setDependencies()
     {
-        Crud::addJsLink('assets/form-tool/plugins/ckeditor5-35.1.0/build/ckeditor.js');
-        Crud::addJs("
+        Doc::addJsLink('assets/form-tool/plugins/ckeditor5-35.1.0/build/ckeditor.js');
+        Doc::addJs("
         let csrf_token = '".csrf_token()."';
 
         // CkEditor Script
@@ -284,7 +284,7 @@ class EditorType extends BaseInputType
         }
         ", 'ckeditor');
 
-        Crud::addCss('
+        Doc::addCss('
         .ck-editor__editable[role="textbox"] {
             /* editing area */
             min-height: 100px;

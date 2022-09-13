@@ -44,21 +44,21 @@ class TextType extends BaseInputType
         $validations = parent::getValidations($type);
 
         if ($this->isUnique) {
-            $model = $this->dataModel->form->getModel();
+            $model = $this->bluePrint->form->getModel();
 
             if ($validations == 'store') {
                 $validations[] = \sprintf(
                     'unique:%s,%s',
-                    $model::$tableName,
+                    $model->getTableName(),
                     $this->dbField
                 );
             } else {
                 $validations[] = \sprintf(
                     'unique:%s,%s,%s,%s',
-                    $model::$tableName,
+                    $model->getTableName(),
                     $this->dbField,
-                    $this->dataModel->form->getId(),
-                    $model::$primaryId
+                    $this->bluePrint->form->getId(),
+                    $model->getPrimaryId()
                 );
             }
         }

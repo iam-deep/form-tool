@@ -5,7 +5,7 @@
 <?php
 // Called on top to set all the dependencies
 // If called below getAllCss() then we will not get the css
-$form = getHTMLForm();
+$form = getHTMLForm($crudName ?? null);
 ?>
 
 <?php echo getCssLinks(); ?>
@@ -15,7 +15,7 @@ $form = getHTMLForm();
     <div class="col-md-8 col-sm-offset-2">
         <div class="box box-primary">
             <div class="box-header with-border">
-                <h3 class="box-title">{{ $title }}</h3>
+                <h3 class="box-title">{{ $title ?? '' }}</h3>
             </div>
 
             <?php echo $form; ?>

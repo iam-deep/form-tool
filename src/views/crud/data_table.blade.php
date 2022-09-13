@@ -10,10 +10,10 @@
                 <a href="{{ url()->current() }}/create" class="btn btn-primary btn-sm btn-flat pull-right"><i class="fa fa-plus"></i> &nbsp;Add</a>
             </div>
             <div class="box-body">
-                {{ getTableContent() }}
+                {{ getTableContent($crudName ?? null) }}
             </div>
             <div class="box-footer">
-                {{ getTablePagination() }}
+                {{ getTablePagination($crudName ?? null) }}
             </div>
         </div>
     </div>

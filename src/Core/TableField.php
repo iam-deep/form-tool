@@ -24,9 +24,9 @@ class TableField
 
     public function default(string $dbField, string $label = null)
     {
-        $input = $this->_table->getDataModel()->getInputTypeByDbField($dbField);
+        $input = $this->_table->getBluePrint()->getInputTypeByDbField($dbField);
         if (! $input) {
-            throw new \Exception($dbField.' not found in the DataModel.');
+            throw new \Exception($dbField.' not found in the BluePrint.');
         }
 
         $cell = CellDefinition::Input($input)->label($label);

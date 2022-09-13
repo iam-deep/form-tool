@@ -7,151 +7,126 @@ use Illuminate\Support\Facades\URL;
 
 class Crud
 {
-    private static $_resource;
-    private static $_model;
-    private static $_dataModel;
-    private static $_form;
-    private static $_table;
+    public string $name;
 
-    private static $_cssLink = [];
-    private static $_jsLink = [];
-    private static $_css = [];
-    private static $_js = [];
+    private $resource;
+    private $model;
+    private $bluePrint;
+    private $form;
+    private $table;
 
-    public static function createModel(object $resource, string $model, Closure $callback)
+    public function create(object $resource, $model, Closure $callback, $name = 'default')
     {
-        self::$_resource = $resource;
-        self::$_model = $model;
+        $this->resource = $resource;
+        $this->name = $name;
 
-        self::$_dataModel = new DataModel();
-        $callback(self::$_dataModel);
+        if ($model instanceof DataModel) {
+            $this->model = $model;
+        } else {
+            $this->model = new DataModel($model);
+        }
 
-        self::$_form = new Form(self::$_resource, self::$_model, self::$_dataModel);
-        $response = self::$_form->init();
+        $this->bluePrint = new BluePrint();
+        $callback($this->bluePrint);
+
+        $this->form = new Form($this->resource, $this->bluePrint, $this->model);
+        $this->form->setCrud($this);
+
+        $this->table = new Table($this->resource, $this->bluePrint, $this->model);
+
+        return $this;
+    }
+
+    public function run()
+    {
+        $response = $this->form->init();
 
         if ($response instanceof \Illuminate\Http\RedirectResponse) {
             return $response->send();
         }
 
-        self::$_table = new Table(self::$_resource, self::$_model, self::$_dataModel);
+        return $this;
     }
 
-    public static function edit($id)
+    public function db($tableName, $primaryId = '', $orderBy = '', $foreignKey = '')
     {
-        self::$_form->edit($id);
+        $this->model->db($tableName, $primaryId, $orderBy, $foreignKey);
+
+        return $this;
     }
 
-    public static function createTable(Closure $callback)
+    //region FormMethods
+
+    /*public function getHTMLForm()
     {
-        $tableField = new TableField(self::$_table);
+        return $this->form->getHTMLForm();
+    }
+
+    public function store()
+    {
+        return $this->form->store();
+    }
+
+    public function edit($id = null)
+    {
+        return $this->form->edit($id);
+    }
+
+    public function update($id = null)
+    {
+        return $this->form->update($id);
+    }
+
+    public function destroy($id = null)
+    {
+        return $this->form->destroy($id);
+    }
+
+    public function doNoSave($fields)
+    {
+        $this->form->doNotSave();
+    }*/
+
+    public function __call($method, $parameters)
+    {
+        //$class_methods = get_class_methods($this->form);
+
+        return $this->form->{$method}(...$parameters);
+
+        //return call_user_func_array(array($this->form, $name), $parameters);
+    }
+
+    //endregion
+
+    //region TableMethod
+
+    public function createTable(Closure $callback)
+    {
+        $tableField = new TableField($this->table);
         $callback($tableField);
 
-        return self::$_table->setTableField($tableField);
+        return $this->table->setTableField($tableField);
     }
 
-    public static function getTableContent()
+    public function getTableContent()
     {
-        return self::$_table->getContent();
+        return $this->table->getContent();
     }
 
-    public static function getTablePagination()
+    public function getTablePagination()
     {
-        return self::$_table->getPagination();
+        return $this->table->getPagination();
     }
 
-    public static function getForm()
+    //endregion
+
+    public function getForm()
     {
-        return self::$_form;
+        return $this->form;
     }
 
-    public static function getHTMLForm()
+    public function getTable()
     {
-        return self::$_form->getForm();
-    }
-
-    public static function addCssLink($link)
-    {
-        $link = \trim($link);
-        if (! \in_array($link, self::$_cssLink)) {
-            self::$_cssLink[] = $link;
-        }
-    }
-
-    public static function addJsLink($link)
-    {
-        $link = \trim($link);
-        if (! \in_array($link, self::$_jsLink)) {
-            self::$_jsLink[] = $link;
-        }
-    }
-
-    // Pass a unique key for each script so that we don't add duplicate $css
-    public static function addCss($css, $key = '')
-    {
-        if ($key) {
-            self::$_css[$key] = $css;
-        } else {
-            self::$_css[] = $css;
-        }
-    }
-
-    // Pass a unique key for each script so that we don't add duplicate $scripts
-    public static function addJs($script, $key = '')
-    {
-        if ($key) {
-            self::$_js[$key] = $script;
-        } else {
-            self::$_js[] = $script;
-        }
-    }
-
-    public static function getCssLinks()
-    {
-        $links = [];
-        foreach (self::$_cssLink as $link) {
-            if ($link) {
-                if (false !== \strpos($link, '//')) {
-                    $links[] = '<link href="'.$link.'" rel="stylesheet" type="text/css" />';
-                } else {
-                    $links[] = '<link href="'.URL::asset($link).'" rel="stylesheet" type="text/css" />';
-                }
-            }
-        }
-
-        return \implode("\n", $links);
-    }
-
-    public static function getJsLinks()
-    {
-        $links = [];
-        foreach (self::$_jsLink as $link) {
-            if ($link) {
-                if (false !== \strpos($link, '//')) {
-                    $links[] = '<script src="'.$link.'"></script>';
-                } else {
-                    $links[] = '<script src="'.URL::asset($link).'"></script>';
-                }
-            }
-        }
-
-        return \implode("\n", $links);
-    }
-
-    public static function getCss()
-    {
-        if (! self::$_css) {
-            return '';
-        }
-
-        return '<style>'.\implode("\n", self::$_css).'</style>';
-    }
-
-    public static function getJs()
-    {
-        if (! self::$_js) {
-            return '';
-        }
-
-        return '<script>'.\implode("\n", self::$_js).'</script>';
+        return $this->table;
     }
 }

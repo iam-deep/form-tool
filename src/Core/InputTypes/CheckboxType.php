@@ -74,10 +74,10 @@ class CheckboxType extends BaseInputType
 
             // If we have multiple options then let's keep it in json
             return \json_encode($val);
-        } else {
-            // If we have no options or single option then let's use single values
-            return $val[0] ?? $this->valueNo;
         }
+
+        // If we have no options or single option then let's use single values
+        return $val[0] ?? $this->valueNo;        
     }
 
     public function getHTML()
@@ -85,12 +85,12 @@ class CheckboxType extends BaseInputType
         $this->createOptions();
 
         $value = old($this->dbField);
-        if (! $value) {
+        if ($value === null) {
             $value = $this->value;
             if ($this->isMultiple) {
                 $value = (array) \json_decode($this->value, true);
             } else {
-                $value = [$value];
+                $value = [(string) $value];
             }
         }
 

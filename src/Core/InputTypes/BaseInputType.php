@@ -44,7 +44,7 @@ abstract class InputType
 
 class BaseInputType
 {
-    protected $dataModel = null;
+    protected $bluePrint = null;
 
     protected int $type = InputType::Text;
 
@@ -74,9 +74,9 @@ class BaseInputType
     protected const classLabel = '';
     protected const classDisplayError = 'help-block';
 
-    public function init($dataModel, string $dbField, string $label = null)
+    public function init($bluePrint, string $dbField, string $label = null)
     {
-        $this->dataModel = $dataModel;
+        $this->bluePrint = $bluePrint;
         $this->dbField = \trim($dbField);
         $this->label = $label ?: \ucfirst($this->dbField);
     }
@@ -129,7 +129,7 @@ class BaseInputType
     public function validations($rules, array $messages = [], bool $replace = false)
     {
         if ($rules) {
-            $this->validations[] = $rules;
+            $this->validations = array_merge($this->validations, $rules);
         }
 
         $this->validationMessages = $messages;
@@ -179,10 +179,14 @@ class BaseInputType
     {
         if (\is_array($classes)) {
             foreach ($classes as $c) {
-                unset($this->classes[$c]);
+                if (($key = array_search($c, $this->classes)) !== false) {
+                    unset($this->classes[$key]);
+                }
             }
         } else {
-            unset($this->classes[\trim($classes)]);
+            if (($key = array_search($classes, $this->classes)) !== false) {
+                unset($this->classes[$key]);
+            }
         }
 
         return $this;

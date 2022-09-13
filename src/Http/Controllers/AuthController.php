@@ -45,8 +45,6 @@ class AuthController extends Controller
 
             $user->adminLoginToken = Hash::make($user->password.$user->email.$_SERVER['HTTP_USER_AGENT']);
 
-            unset($user->password);
-
             Session::put('user', $user);
             Cookie::make('i_am_admin', $user->userId, now()->addDays(90)->diffInSeconds());
 

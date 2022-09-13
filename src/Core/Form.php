@@ -17,7 +17,7 @@ abstract class FormStatus
 
 class Form
 {
-    private $_dataModel;
+    private $_bluePrint;
     private $_resource;
     private $_model;
 
@@ -33,53 +33,78 @@ class Form
     private $postData = null;
     private $oldData = null;
 
-    public function __construct($resource, $model, DataModel $dataModel = null)
+    private $crud = null;
+    private $options = null;
+
+    public function __construct($resource, BluePrint $bluePrint = null, $model = null)
     {
+        $this->options = new \stdClass();
+
         $this->_resource = $resource;
         $this->_model = $model;
 
-        if ($dataModel) {
-            $this->_dataModel = $dataModel;
+        if ($bluePrint) {
+            $this->_bluePrint = $bluePrint;
         } else {
-            $this->_dataModel = DataModel::getInstance();
+            $this->_bluePrint = BluePrint::getInstance();
         }
 
-        $this->_dataModel->form = $this;
+        $this->_bluePrint->form = $this;
 
         $this->_url = config('form-tool.adminURL').'/'.$this->_resource->route;
+        $this->_request = request();
     }
 
     public function init()
     {
-        $this->_request = request();
         $method = $this->_request->method();
 
         if ('POST' == $method) {
-            $this->formStatus = FormStatus::Store;
-
             return $this->store();
         } elseif ('PUT' == $method) {
-            $this->formStatus = FormStatus::Update;
-
             return $this->update();
         } elseif ('DELETE' == $method) {
-            $this->formStatus = FormStatus::Destroy;
-
             return $this->destroy();
         } elseif (strpos($this->_request->getRequestUri(), '/edit')) {
-            $this->formStatus = FormStatus::Edit;
-
             return $this->edit();
         }
     }
 
+    //region Options
+
+    public function doNotSave($fields)
+    {
+        $this->options->doNotSave = [];
+        if (\is_string($fields)) {
+            $this->options->doNotSave[] = $fields;
+        } elseif (is_array($fields)) {
+            $this->options->doNotSave = $fields;
+        }
+
+        return $this->crud;
+    }
+
+    public function saveOnly($fields)
+    {
+        $this->options->saveOnly = [];
+        if (\is_string($fields)) {
+            $this->options->saveOnly[] = $fields;
+        } elseif (is_array($fields)) {
+            $this->options->saveOnly = $fields;
+        }
+
+        return $this->crud;
+    }
+
+    //endregion
+
     //region GenerateForm
 
-    public function getForm()
+    public function getHTMLForm()
     {
         $data['inputs'] = '';
-        foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if ($input instanceof BluePrint) {
                 $data['inputs'] .= '<div class="form-group"><label>'.$input->label.'</label>';
                 $data['inputs'] .= $this->getMultipleFields($input);
                 $data['inputs'] .= '</div>';
@@ -122,7 +147,7 @@ class Form
 
         $totalCols = 0;
         foreach ($model->getList() as $field) {
-            if (! $field instanceof DataModel) {
+            if (! $field instanceof BluePrint) {
                 if ($field->getType() != InputType::Hidden) {
                     $data .= '<th>'.$field->getLabel().'</th>';
                     $totalCols++;
@@ -219,7 +244,7 @@ class Form
             </tfoot>
         </table>';
 
-        Crud::addJs('template["'.$keyName.'"]=`'.$template.'`', $keyName);
+        Doc::addJs('template["'.$keyName.'"]=`'.$template.'`', $keyName);
 
         return $data;
     }
@@ -230,7 +255,7 @@ class Form
 
         $hidden = '';
         foreach ($model->getList() as $field) {
-            if ($field instanceof DataModel) {
+            if ($field instanceof BluePrint) {
                 $template .= '<td>'.$this->getMultipleFields($field).'</td>';
             } else {
                 if ($field->getType() == InputType::Hidden) {
@@ -258,6 +283,8 @@ class Form
 
     public function edit($id = false)
     {
+        $this->formStatus = FormStatus::Edit;
+
         if (! $id) {
             $url = $this->_request->getRequestUri();
 
@@ -272,10 +299,13 @@ class Form
 
         $this->_editId = $id;
 
-        $this->resultData = $this->_model::getOne($id);
+        $this->resultData = $this->_model->getOne($id);
+        if (! $this->resultData) {
+            abort(404);
+        }
 
-        foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel && isset($this->resultData->{$input->getDbField()})) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if (! $input instanceof BluePrint && isset($this->resultData->{$input->getDbField()})) {
                 $input->setValue($this->resultData->{$input->getDbField()});
             }
         }
@@ -283,16 +313,23 @@ class Form
 
     //region FormAction StoreAndUpdate
 
-    private function store()
+    public function store()
     {
+        $this->formStatus = FormStatus::Store;
+
         $validate = $this->validate();
         if ($validate !== true) {
             return $validate;
         }
 
-        $this->createPostData();
+        $result = $this->createPostData();
+        if ($result !== true) {
+            return $result;
+        }
 
-        $insertId = $this->_model::add($this->postData);
+        //dd($this->postData);
+
+        $insertId = $this->_model->add($this->postData);
 
         if ($insertId) {
             $this->_editId = $insertId;
@@ -300,16 +337,18 @@ class Form
             $this->afterSave();
 
             // This will only execute if the method called by default not manually from the store
-            if (\method_exists($this->_resource, 'store')) {
+            /*if (\method_exists($this->_resource, 'store')) {
                 $this->_resource->store($this->_request);
-            }
+            }*/
         }
 
         return redirect($this->_url)->with('success', 'Data added successfully!');
     }
 
-    private function update($id = null)
+    public function update($id = null)
     {
+        $this->formStatus = FormStatus::Update;
+
         if ($id) {
             $this->_editId = $id;
         } elseif (! $this->_editId) {
@@ -325,7 +364,11 @@ class Form
         }
 
         if (! $this->oldData) {
-            $this->oldData = $this->_model::getOne($this->_editId);
+            $this->oldData = $this->_model->getOne($this->_editId);
+        }
+
+        if (! $this->oldData) {
+            throw new \Exception('Old data not found for ID: '.$this->_editId);
         }
 
         // TODO:
@@ -333,17 +376,20 @@ class Form
         //      permission to update
         //      can update this row
 
-        $this->createPostData();
+        $result = $this->createPostData();
+        if ($result !== true) {
+            return $result;
+        }
 
-        $affected = $this->_model::updateOne($this->_editId, $this->postData);
+        $affected = $this->_model->updateOne($this->_editId, $this->postData);
 
         if ($affected > 0) {
             $this->afterSave();
 
             // This will only execute if the method called by default not manually from the store
-            if (\method_exists($this->_resource, 'update')) {
+            /*if (\method_exists($this->_resource, 'update')) {
                 $this->_resource->update($this->_request, $this->_editId);
-            }
+            }*/
         }
 
         return redirect($this->_url)->with('success', 'Data updated successfully!');
@@ -355,9 +401,9 @@ class Form
             return;
         }
 
-        $result = $this->_model::getOne($this->_editId);
-        foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel) {
+        $result = $this->_model->getOne($this->_editId);
+        foreach ($this->_bluePrint->getList() as $input) {
+            if ($input instanceof BluePrint) {
                 continue;
             }
 
@@ -373,8 +419,8 @@ class Form
 
     private function saveMultipleFields()
     {
-        foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel || ! $input->getModel()) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if (! $input instanceof BluePrint || ! $input->getModel()) {
                 continue;
             }
 
@@ -429,8 +475,8 @@ class Form
         $validationType = $this->formStatus == FormStatus::Store ? 'store' : 'update';
 
         $rules = $messages = $labels = $merge = [];
-        foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if ($input instanceof BluePrint) {
                 continue;
             }
 
@@ -463,6 +509,9 @@ class Form
 
     private function createPostData($id = null)
     {
+        $postData = $this->postData;
+        $this->postData = [];
+
         if ($this->formStatus == FormStatus::Store) {
             $this->postData['createdBy'] = Session::has('user') ? Session::get('user')->userId : 0;
             $this->postData['createdAt'] = \date('Y-m-d H:i:s');
@@ -477,7 +526,7 @@ class Form
             }
 
             if (! $this->oldData) {
-                $this->oldData = $this->_model::getOne($this->_editId);
+                $this->oldData = $this->_model->getOne($this->_editId);
             }
 
             $this->postData['updatedBy'] = Session::has('user') ? Session::get('user')->userId : 0;
@@ -486,8 +535,39 @@ class Form
 
         $this->formatMultiple();
 
-        foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel) {
+        // I think we should not remove the meta data like dates and updatedby
+        // Remove if there is any extra fields that are not needed
+        /*foreach ($this->postData as $key => $val) {
+            if (isset($this->options->doNotSave) && $this->options->doNotSave) {
+                if (\in_array($key, $this->options->doNotSave)) {
+                    unset($this->postData[$key]);
+                    continue;
+                }
+            }
+            if (isset($this->options->saveOnly) && $this->options->saveOnly) {
+                if (! \in_array($key, $this->options->saveOnly)) {
+                    unset($this->postData[$key]);
+                    continue;
+                }
+            }
+        }*/
+
+        foreach ($this->_bluePrint->getList() as $input) {
+            $dbField = $input->getDbField();
+
+            // Check if we don't want to save or only save to prevent further process of the field
+            if (isset($this->options->doNotSave) && $this->options->doNotSave) {
+                if (\in_array($dbField, $this->options->doNotSave)) {
+                    continue;
+                }
+            }
+            if (isset($this->options->saveOnly) && $this->options->saveOnly) {
+                if (! \in_array($dbField, $this->options->saveOnly)) {
+                    continue;
+                }
+            }
+
+            if ($input instanceof BluePrint) {
                 if (! $input->getModel()) {
                     $this->postData[$input->getKey()] = \json_encode($this->_request[$input->getKey()]);
                 }
@@ -495,10 +575,8 @@ class Form
                 continue;
             }
 
-            $dbField = $input->getDbField();
-
             // If we don't have a postdata for an field like for an optional file field
-            $this->postData[$dbField] = $this->postData[$dbField] ?? null;
+            $this->postData[$dbField] = $postData[$dbField] ?? null;
 
             $response = null;
             if ($this->formStatus == FormStatus::Store) {
@@ -515,6 +593,8 @@ class Form
                 $this->postData[$dbField] = $input->getDefaultValue();
             }
         }
+
+        return true;
     }
 
     private function formatMultiple()
@@ -522,8 +602,8 @@ class Form
         $data = $this->_request->all();
 
         $merge = [];
-        foreach ($this->_dataModel->getList() as $input) {
-            if (! $input instanceof DataModel) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if (! $input instanceof BluePrint) {
                 continue;
             }
 
@@ -556,8 +636,8 @@ class Form
         /* Need this for file upload and other callbacks
 
         $arrayToMerge = [];
-        foreach ($this->_dataModel->getList() as $input) {
-            if ($input instanceof DataModel) {
+        foreach ($this->_bluePrint->getList() as $input) {
+            if ($input instanceof BluePrint) {
                 $row = [];
 
                 foreach ($input->getList() as $field) {
@@ -587,8 +667,10 @@ class Form
 
     //endregion
 
-    private function destroy($id = false)
+    public function destroy($id = false)
     {
+        $this->formStatus = FormStatus::Destroy;
+
         if (! $id) {
             $url = $this->_request->getRequestUri();
 
@@ -606,20 +688,25 @@ class Form
         //      permission to delete
         //      can delete this row
 
-        $result = $this->_model::getOne($id);
-        foreach ($this->_dataModel->getList() as $field) {
-            if ($field instanceof DataModel) {
-                // TODO:
-            } else {
-                $field->beforeDestroy($result);
+        $result = $this->_model->getOne($id);
+
+        if ($result) {
+            foreach ($this->_bluePrint->getList() as $field) {
+                if ($field instanceof BluePrint) {
+                    // TODO:
+                } else {
+                    $field->beforeDestroy($result);
+                }
             }
+        } else {
+            // TODO: Log result not found on delete id
         }
 
-        $affected = $this->_model::deleteOne($id);
+        $affected = $this->_model->deleteOne($id);
 
-        if ($affected > 0) {
-            foreach ($this->_dataModel->getList() as $field) {
-                if ($field instanceof DataModel) {
+        if ($affected > 0 && $result) {
+            foreach ($this->_bluePrint->getList() as $field) {
+                if ($field instanceof BluePrint) {
                     // TODO:
                 } else {
                     $field->afterDestroy($result);
@@ -627,9 +714,9 @@ class Form
             }
 
             // This will only execute if the method called by default not manually from the destroy
-            if (\method_exists($this->_resource, 'destroy')) {
+            /*if (\method_exists($this->_resource, 'destroy')) {
                 $this->_resource->destroy($id);
-            }
+            }*/
         }
 
         return redirect($this->_url)->with('success', 'Data deleted successfully!');
@@ -639,7 +726,10 @@ class Form
 
     public function getPostData($id = null)
     {
-        $this->createPostData($id);
+        $result = $this->createPostData($id);
+        if ($result !== true) {
+            return $result;
+        }
 
         return $this->postData;
     }
@@ -662,6 +752,11 @@ class Form
     public function getData()
     {
         return $this->resultData;
+    }
+
+    public function setCrud(Crud $crud)
+    {
+        $this->crud = $crud;
     }
 
     //endregion

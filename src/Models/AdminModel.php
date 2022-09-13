@@ -13,6 +13,16 @@ class AdminModel extends Model
     public static $tableName = '';
     public static $primaryId = 'id';
     public static $orderBy = 'id';
+    public static $foreignKey = '';
+
+    public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
+    {
+        //dd('setup: ' . $tableName);
+        static::$tableName = $tableName ?: static::$tableName;
+        static::$primaryId = $primaryId ?: static::$primaryId;
+        static::$orderBy = $orderBy ?: static::$orderBy;
+        static::$foreignKey = $foreignKey ?: static::$foreignKey;
+    }
 
     public static function getAll()
     {

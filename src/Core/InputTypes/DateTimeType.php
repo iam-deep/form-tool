@@ -2,7 +2,7 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\Crud;
+use Biswadeep\FormTool\Core\Doc;
 
 class DateTimeType extends BaseInputType
 {
@@ -96,16 +96,16 @@ class DateTimeType extends BaseInputType
 
     private function setDependencies()
     {
-        Crud::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
+        Doc::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
 
-        Crud::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
-        Crud::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js');
+        Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
+        Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js');
 
         $this->pickerFormatDateTime = \trim(config('form-tool.pickerFormatDateTime', $this->pickerFormatDateTime));
         $this->pickerFormatDate = \trim(config('form-tool.pickerFormatDate', $this->pickerFormatDate));
         $this->pickerFormatTime = \trim(config('form-tool.pickerFormatTime', $this->pickerFormatTime));
 
-        Crud::addJs(
+        Doc::addJs(
             '
         // Date and DateTimePicker
         $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
