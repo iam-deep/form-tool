@@ -39,7 +39,7 @@ class AdminModel extends Model
         $searchTerm = array_filter(\explode(' ', $searchTerm));
 
         foreach ($searchTerm as $term) {
-            $query->where(function($query) use ($term, $fields) {
+            $query->where(function ($query) use ($term, $fields) {
                 foreach ($fields as $field) {
                     $query->orWhere($field, 'LIKE', "%{$term}%");
                 }

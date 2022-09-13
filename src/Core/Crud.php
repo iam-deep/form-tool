@@ -128,6 +128,7 @@ class Crud
     public function search()
     {
         $searchTerm = \request()->query->get('search');
+
         return $this->table->search($searchTerm);
     }
 

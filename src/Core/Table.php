@@ -15,7 +15,7 @@ class Table
     private $field;
     private $searchFields = [];
 
-    private $dataResult; 
+    private $dataResult;
 
     private $url;
 
@@ -47,7 +47,7 @@ class Table
         $fieldsToSearch = $this->searchFields;
         if (! $fieldsToSearch) {
             foreach ($this->bluePrint->getList() as $input) {
-                if (! $input instanceof BluePrint && 
+                if (! $input instanceof BluePrint &&
                     ($input->getType() == InputType::Text
                     || $input->getType() == InputType::Textarea
                     || $input->getType() == InputType::Hidden
@@ -67,7 +67,7 @@ class Table
         }
 
         $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch);
-        
+
         $table = $this->create();
         $table->content = $table->content->render();
         $table->pagination = $table->pagination->render();
@@ -103,7 +103,7 @@ class Table
     }
 
     private function create(): object
-    {        
+    {
         $primaryId = $this->model->getPrimaryId();
 
         if (! $this->field) {
