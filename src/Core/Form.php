@@ -4,7 +4,6 @@ namespace Biswadeep\FormTool\Core;
 
 use Biswadeep\FormTool\Core\InputTypes\InputType;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Session;
 
 abstract class FormStatus
 {
@@ -513,7 +512,7 @@ class Form
         $this->postData = [];
 
         if ($this->formStatus == FormStatus::Store) {
-            $this->postData['createdBy'] = Session::has('user') ? Session::get('user')->userId : 0;
+            $this->postData['createdBy'] = Auth::user() ? Auth::user()->userId : 0;
             $this->postData['createdAt'] = \date('Y-m-d H:i:s');
         } else {
             if ($id) {
@@ -529,7 +528,7 @@ class Form
                 $this->oldData = $this->_model->getOne($this->_editId);
             }
 
-            $this->postData['updatedBy'] = Session::has('user') ? Session::get('user')->userId : 0;
+            $this->postData['updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
             $this->postData['updatedAt'] = \date('Y-m-d H:i:s');
         }
 
