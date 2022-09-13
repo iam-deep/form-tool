@@ -21,7 +21,7 @@ class DataModel
             $this->model = AdminModel::class;
         }
     }
-    
+
     public function db($tableName, $primaryId = 'id', $orderBy = '', $foreignKey = '')
     {
         $this->tableName = $tableName;

@@ -2,12 +2,12 @@
 
 namespace Biswadeep\FormTool\Http\Middleware;
 
+use Biswadeep\FormTool\Core\Auth;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Biswadeep\FormTool\Core\Auth;
 
 class AdminAuth
 {
@@ -29,6 +29,7 @@ class AdminAuth
                 $user = DB::table('users')->where('email', $sessionUser->email)->where('status', 1)->first();
                 if ($user && isset($sessionUser->adminLoginToken) && Hash::check($user->password.$user->email.$_SERVER['HTTP_USER_AGENT'], $sessionUser->adminLoginToken)) {
                     Auth::setUser($user);
+
                     return $next($request);
                 }
             }

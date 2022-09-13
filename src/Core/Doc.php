@@ -26,12 +26,12 @@ class Doc
         }
 
         $name = $name ?: self::$defaultCrudName;
-        
+
         $crud = new Crud();
         self::$crudList->{$name} = $crud;
 
         $crud->create($resource, $model, $callback, $name);
-        
+
         return $crud;
     }
 

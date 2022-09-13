@@ -89,7 +89,7 @@ class SelectType extends BaseInputType
             // If we have multiple options then let's keep it in json
             return \json_encode($val);
         }
-            
+
         return $val;
     }
 

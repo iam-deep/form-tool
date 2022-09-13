@@ -77,7 +77,7 @@ class CheckboxType extends BaseInputType
         }
 
         // If we have no options or single option then let's use single values
-        return $val[0] ?? $this->valueNo;        
+        return $val[0] ?? $this->valueNo;
     }
 
     public function getHTML()
