@@ -1,9 +1,7 @@
 <?php
 
-// Middlewares
 use Biswadeep\FormTool\Http\Controllers\AuthController;
 use Biswadeep\FormTool\Http\Middleware\AdminAuth;
-// Controllers
 use Biswadeep\FormTool\Http\Middleware\AdminCheckLoggedIn;
 
 /** Auth Routes **/
@@ -20,8 +18,7 @@ Route::group(['prefix' => config('form-tool.adminURL'), 'middleware' => ['web', 
 /* Authenticated Routes */
 Route::group(['prefix' => config('form-tool.adminURL'), 'middleware' => ['web', AdminAuth::class]], function () {
 
-    //Route::get('dashboard', [DashboardController::class, 'index']);
-    //Route::resource('categories', CategoriesController::class);
+    //Route::resource('demo-page', DemoController::class);
 
     Route::post('form-tool/editor-upload', [Biswadeep\FormTool\Core\InputTypes\EditorType::class, 'uploadImage']);
 });
