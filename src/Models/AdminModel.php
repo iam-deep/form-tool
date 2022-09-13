@@ -17,7 +17,6 @@ class AdminModel extends Model
 
     public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
     {
-        //dd('setup: ' . $tableName);
         static::$tableName = $tableName ?: static::$tableName;
         static::$primaryId = $primaryId ?: static::$primaryId;
         static::$orderBy = $orderBy ?: static::$orderBy;
@@ -32,6 +31,22 @@ class AdminModel extends Model
     public static function getOne($id)
     {
         return DB::table(static::$tableName)->where(static::$primaryId, $id)->first();
+    }
+
+    public static function search($searchTerm, $fields)
+    {
+        $query = DB::table(static::$tableName);
+        $searchTerm = array_filter(\explode(' ', $searchTerm));
+
+        foreach ($searchTerm as $term) {
+            $query->where(function($query) use ($term, $fields) {
+                foreach ($fields as $field) {
+                    $query->orWhere($field, 'LIKE', "%{$term}%");
+                }
+            });
+        }
+
+        return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }
 
     public static function getWhere($where)

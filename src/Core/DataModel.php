@@ -60,6 +60,11 @@ class DataModel
         return $this->setup()::getOne($id);
     }
 
+    public function search($searchTerm, $fields)
+    {
+        return $this->setup()::search($searchTerm, $fields);
+    }
+
     public function getWhere($id)
     {
         return $this->setup()::getWhere($id);

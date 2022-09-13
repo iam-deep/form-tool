@@ -21,8 +21,9 @@ class CellDefinition
     // Styles
     private string $width = '';
     private string $align = '';
-    public string $styleCSS = '';
-    public $styleClass = [];
+    private string $styleCSS = '';
+    private $styleClass = [];
+    public $raw = '';
 
     // Private is important
     private function __construct()
@@ -99,6 +100,13 @@ class CellDefinition
         return $this;
     }
 
+    public function raw(string $rawAttributes): CellDefinition
+    {
+        $this->raw .= $rawAttributes.' ';
+
+        return $this;
+    }
+
     public function setup(): void
     {
         $this->styleCSS = '';
@@ -118,6 +126,9 @@ class CellDefinition
         if ($this->styleClass) {
             $this->styleClass = 'class="'.$this->styleClass.'"';
         }
+
+        $this->raw($this->styleCSS);
+        $this->raw($this->styleClass);
     }
 
     // Getter

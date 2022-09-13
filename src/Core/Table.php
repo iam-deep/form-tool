@@ -2,41 +2,30 @@
 
 namespace Biswadeep\FormTool\Core;
 
+use Biswadeep\FormTool\Core\InputTypes\InputType;
+use Illuminate\Support\Arr;
+
 class Table
 {
-    private $_bluePrint;
-    private $_resource;
-    private $_model;
+    private $bluePrint;
+    private $resource;
+    private $model;
 
-    public $_table;
-    public $field;
+    private $table;
+    private $field;
+    private $searchFields = [];
 
-    private $_url;
+    private $dataResult; 
 
-    public function __construct($resource, BluePrint $bluePrint = null, $model = null)
+    private $url;
+
+    public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
-        $this->_resource = $resource;
+        $this->resource = $resource;
+        $this->bluePrint = $bluePrint;
+        $this->model = $model;
 
-        if ($bluePrint) {
-            $this->_bluePrint = $bluePrint;
-        } else {
-            $this->_bluePrint = BluePrint::getInstance();
-        }
-
-        $this->_model = $model;
-
-        $this->_url = config('form-tool.adminURL').'/'.$resource->route;
-        //$this->_url = url()->current();
-
-        /*if (is_array($result)) {
-            $result = $result;
-        }
-        else if (is_string($result)) {
-            $this->model = $result;
-            $result = $result::getAll();
-
-            $this->pagination = $result->onEachSide(2)->links();
-        }*/
+        $this->url = config('form-tool.adminURL').'/'.$resource->route;
     }
 
     public function setTableField(TableField $tableField): Table
@@ -46,12 +35,61 @@ class Table
         return $this;
     }
 
+    public function searchIn($fields)
+    {
+        $this->searchFields = Arr::wrap($fields);
+
+        return $this;
+    }
+
+    public function search($searchTerm)
+    {
+        $fieldsToSearch = $this->searchFields;
+        if (! $fieldsToSearch) {
+            foreach ($this->bluePrint->getList() as $input) {
+                if (! $input instanceof BluePrint && 
+                    ($input->getType() == InputType::Text
+                    || $input->getType() == InputType::Textarea
+                    || $input->getType() == InputType::Hidden
+                    || $input->getType() == InputType::Editor)
+                    ) {
+                    $fieldsToSearch[] = $input->getDbField();
+                }
+            }
+        }
+
+        if (! $fieldsToSearch) {
+            $json = new \stdClass();
+            $json->isSuccess = false;
+            $json->error = 'Fields not found to search!';
+
+            return $json;
+        }
+
+        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch);
+        
+        $table = $this->create();
+        $table->content = $table->content->render();
+        $table->pagination = $table->pagination->render();
+        $table->total = \count($this->dataResult);
+        $table->isSuccess = true;
+
+        return $table;
+    }
+
+    public function listAll()
+    {
+        $this->dataResult = $this->model->getAll();
+
+        return $this->create();
+    }
+
     private function setDefaultField()
     {
         $tableField = new TableField($this);
 
         $tableField->slNo();
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint) {
                 $tableField->cellList[] = $input->getTableCell();
             }
@@ -65,9 +103,8 @@ class Table
     }
 
     private function create(): object
-    {
-        $result = $this->_model->getAll();
-        $primaryId = $this->_model->getPrimaryId();
+    {        
+        $primaryId = $this->model->getPrimaryId();
 
         if (! $this->field) {
             $this->setDefaultField();
@@ -81,57 +118,58 @@ class Table
         }
 
         $i = 0;
-        foreach ($result as $value) {
+        foreach ($this->dataResult as $value) {
             $viewRow = new TableViewRow();
             foreach ($this->field->cellList as $cell) {
                 $viewData = new TableViewCol();
-                $viewData->styleClass = $cell->styleClass;
-                $viewData->styleCSS = $cell->styleCSS;
+                $viewData->raw = $cell->raw;
 
                 if ($cell->fieldType == '_slno') {
                     $viewData->data = ++$i;
-                } else {
-                    // We can't use isset here as isset will be false is value is null, and value can be null
-                    if (\property_exists($value, $cell->getDbField())) {
-                        $cell->setValue($value->{$cell->getDbField()});
-                        $viewData->data = $cell->getValue();
+                    $viewRow->columns[] = $viewData;
+                    continue;
+                }
 
-                        $concat = $cell->getConcat();
-                        if ($concat) {
-                            $values = [];
-                            $values[] = $viewData->data;
-                            if ($concat->dbFields) {
-                                foreach ($concat->dbFields as $con) {
-                                    $con = \trim($con);
-                                    if (\property_exists($value, $con)) {
-                                        $values[] = $value->{$con};
-                                    } else {
-                                        $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
-                                    }
+                // We can't use isset here as isset will be false is value is null, and value can be null
+                if (\property_exists($value, $cell->getDbField())) {
+                    $cell->setValue($value->{$cell->getDbField()});
+                    $viewData->data = $cell->getValue();
+
+                    $concat = $cell->getConcat();
+                    if ($concat) {
+                        $values = [];
+                        $values[] = $viewData->data;
+                        if ($concat->dbFields) {
+                            foreach ($concat->dbFields as $con) {
+                                $con = \trim($con);
+                                if (\property_exists($value, $con)) {
+                                    $values[] = $value->{$con};
+                                } else {
+                                    $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
                                 }
                             }
-                            $viewData->data = \vsprintf('%s'.$concat->pattern, $values);
                         }
-                    } elseif ($cell->fieldType == 'action') {
-                        if (! isset($value->{$primaryId})) {
-                            $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
-                            continue;
-                        }
-
-                        foreach ($this->field->actions as $action) {
-                            if ('edit' == $action->action) {
-                                $viewData->data .= '<a href="'.$this->_url.'/'.$value->{$primaryId}.'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
-                            } elseif ('delete' == $action->action) {
-                                $viewData->data .= ' <form action="'.$this->_url.'/'.$value->{$primaryId}.'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
-                                    '.csrf_field().'
-                                    '.method_field('DELETE').'
-                                    <button class="btn btn-danger btn-flat btn-sm"><i class="fa fa-trash"></i></button>
-                                </form>';
-                            }
-                        }
-                    } else {
-                        $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
+                        $viewData->data = \vsprintf('%s'.$concat->pattern, $values);
                     }
+                } elseif ($cell->fieldType == 'action') {
+                    if (! isset($value->{$primaryId})) {
+                        $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
+                        continue;
+                    }
+
+                    foreach ($this->field->actions as $action) {
+                        if ('edit' == $action->action) {
+                            $viewData->data .= '<a href="'.$this->url.'/'.$value->{$primaryId}.'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
+                        } elseif ('delete' == $action->action) {
+                            $viewData->data .= ' <form action="'.$this->url.'/'.$value->{$primaryId}.'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
+                                '.csrf_field().'
+                                '.method_field('DELETE').'
+                                <button class="btn btn-danger btn-flat btn-sm"><i class="fa fa-trash"></i></button>
+                            </form>';
+                        }
+                    }
+                } else {
+                    $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
                 }
 
                 $viewRow->columns[] = $viewData;
@@ -140,24 +178,35 @@ class Table
             $data['tableData'][] = $viewRow;
         }
 
-        $this->_table = new \stdClass();
-        $this->_table->content = view('form-tool::crud.components.table_list', $data);
-        $this->_table->pagination = $result->onEachSide(2)->links();
+        if (! \count($this->dataResult)) {
+            $viewData = new TableViewCol();
+            $viewData->data = 'Nothing found!';
+            $viewData->raw = 'style="text-align:center;font-style: italic;" colspan="'.\count($data['headings']).'"';
 
-        return $this->_table;
+            $viewRow = new TableViewRow();
+            $viewRow->columns[] = $viewData;
+
+            $data['tableData'][] = $viewRow;
+        }
+
+        $this->table = new \stdClass();
+        $this->table->content = view('form-tool::crud.components.table_list', $data);
+        $this->table->pagination = $this->dataResult->onEachSide(2)->links();
+
+        return $this->table;
     }
 
     public function getContent()
     {
-        $this->create();
+        $this->listAll();
 
-        return $this->_table->content;
+        return $this->table->content;
     }
 
     public function getPagination()
     {
-        if (isset($this->_table->pagination)) {
-            return $this->_table->pagination;
+        if (isset($this->table->pagination)) {
+            return $this->table->pagination;
         }
 
         return null;
@@ -165,20 +214,18 @@ class Table
 
     public function getBluePrint(): BluePrint
     {
-        return $this->_bluePrint;
+        return $this->bluePrint;
     }
 }
 
 class TableViewRow
 {
     public $columns = [];
-    public string $styleClass = '';
-    public string $styleCSS = '';
+    public string $raw = '';
 }
 
 class TableViewCol
 {
     public $data = null;
-    public string $styleClass = '';
-    public string $styleCSS = '';
+    public string $raw = '';
 }

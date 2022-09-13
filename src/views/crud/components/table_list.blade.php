@@ -3,7 +3,7 @@
         <thead>
             <tr>
                 @foreach ($headings as $header)
-                    <th {!! $header->styleClass . ' ' . $header->styleCSS !!} >
+                    <th {!! $header->raw !!}>
                         {{ $header->getLabel() }}
                     </th>
                 @endforeach
@@ -11,9 +11,9 @@
         </thead>
         <tbody>
             @foreach ($tableData as $rows)
-                <tr {!! $rows->styleClass . ' ' . $rows->styleCSS !!} >
+                <tr {!! $rows->raw !!}>
                     @foreach ($rows->columns as $cols)
-                        <td {!! $cols->styleClass . ' ' . $cols->styleCSS !!}>{!! $cols->data !!}</td>
+                        <td {!! $cols->raw !!}>{!! $cols->data !!}</td>
                     @endforeach
                 </tr>
             @endforeach

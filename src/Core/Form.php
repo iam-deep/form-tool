@@ -35,20 +35,14 @@ class Form
     private $crud = null;
     private $options = null;
 
-    public function __construct($resource, BluePrint $bluePrint = null, $model = null)
+    public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
-        $this->options = new \stdClass();
-
         $this->_resource = $resource;
+        $this->_bluePrint = $bluePrint;
         $this->_model = $model;
 
-        if ($bluePrint) {
-            $this->_bluePrint = $bluePrint;
-        } else {
-            $this->_bluePrint = BluePrint::getInstance();
-        }
-
         $this->_bluePrint->form = $this;
+        $this->options = new \stdClass();
 
         $this->_url = config('form-tool.adminURL').'/'.$this->_resource->route;
         $this->_request = request();

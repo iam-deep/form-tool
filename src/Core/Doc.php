@@ -32,6 +32,13 @@ class Doc
 
         $crud->create($resource, $model, $callback, $name);
 
+        if (! isset($resource->title)) {
+            throw new \Exception('$title not set in the controller!');
+        }
+        if (! isset($resource->route)) {
+            throw new \Exception('$route not set in the controller!');
+        }
+
         return $crud;
     }
 
