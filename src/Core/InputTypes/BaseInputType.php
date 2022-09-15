@@ -117,33 +117,55 @@ class BaseInputType
         return $this;
     }
 
-    public function required(): BaseInputType
+    public function removeRaw(string $rawAttributes): BaseInputType
     {
-        $this->isRequired = true;
-        $this->validations['required'] = 'required';
-        $this->raw('required');
+        $this->raw = \str_replace($rawAttributes.' ', '', $this->raw);
+        
+        return $this;
+    }
+
+    public function required(bool $isRequired = true): BaseInputType
+    {
+        $this->isRequired = $isRequired;
+
+        if ($isRequired) {
+            $this->validations['required'] = 'required';
+            $this->raw('required');
+        } else {
+            if (isset($this->validations['required'])) {
+                unset($this->validations['required']);
+            }
+
+            $this->removeRaw('required');
+        }
 
         return $this;
     }
 
-    public function validations($rules, array $messages = [], bool $replace = false)
+    public function validations($rules, $messages = [], bool $replace = false)
     {
         if ($rules) {
+            if (\is_string($rules)) {
+                $rules = \explode('|', $rules);
+            }
+
             $this->validations = array_merge($this->validations, $rules);
+
+            if ($replace) {
+                $this->validations = $rules;
+                if (in_array('required', $rules)) {
+                    $this->required();
+                } else {
+                    $this->required(false);
+                }
+            }
         }
 
-        $this->validationMessages = $messages;
+        if ($messages) {
+            $this->validationMessages = array_merge($this->validationMessages, $messages);
 
-        if ($replace) {
-            $this->validations = $rules;
-            if (\is_string($rules)) {
-                if (false !== strpos($rules, 'required')) {
-                    $this->isRequired();
-                }
-            } elseif (\is_array($rules)) {
-                if (in_array('required', $rules)) {
-                    $this->isRequired();
-                }
+            if ($replace) {
+                $this->validationMessages = $messages;
             }
         }
 
@@ -299,6 +321,31 @@ class BaseInputType
         return $this->value;
     }
 
+    public function getPlaceholder()
+    {
+        return $this->placeholder;
+    }
+
+    public function getHelp()
+    {
+        return $this->help;
+    }
+
+    public function getRaw()
+    {
+        return $this->raw;
+    }
+
+    public function getClasses()
+    {
+        return $this->classes;
+    }
+
+    public function getInlineCss()
+    {
+        return $this->inlineCSS;
+    }
+
     final public function getTableCell()
     {
         return CellDefinition::Input($this);
@@ -314,5 +361,24 @@ class BaseInputType
             '.$input.'
             {!! $errors->first("'.$this->dbField.'", \'<p class="help-block">:message</p>\') !!}
         </div>';
+    }
+
+    public function toObj($type)
+    {
+        $field = new \stdClass();
+        $field->type = $this->type;
+        $field->dbField = $this->dbField;
+        $field->label = $this->label;
+        $field->defaultValue = $this->defaultValue;
+        $field->placeholder = $this->placeholder;
+        $field->help = $this->help;
+        $field->raw = $this->raw;
+        $field->validations = $this->getValidations($type);
+        $field->validationMessages = $this->getValidationMessages();
+        $field->isRequired = $this->isRequired;
+        $field->classes = $this->classes;
+        $field->inlineCSS = $this->inlineCSS;
+
+        return $field;
     }
 }

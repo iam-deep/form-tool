@@ -37,6 +37,13 @@ class Crud
         return $this;
     }
 
+    public function modify(Closure $callback)
+    {
+        $callback($this->bluePrint);
+
+        return $this;
+    }
+
     public function run()
     {
         $response = $this->form->init();

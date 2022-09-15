@@ -55,10 +55,6 @@
       <h1>
         @if (isset($title)) {{ $title }} @else <i>Set a title</i> @endif
       </h1>
-      <ol class="breadcrumb">
-        <li><a href="/dashboard"><i class="fa fa-dashboard"></i> Dashboard</a></li>
-        <li class="active"> @if (isset($title)) {{ $title }} @endif</li>
-      </ol>
     </section>
 
     <!-- Main content -->

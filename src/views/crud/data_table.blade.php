@@ -8,11 +8,10 @@
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $title }}</h3>
 
-                <div class="col-sm-3 pull-right">
-                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="" placeholder="Search" autocomplete="off">
+                <div class="box-tools pull-right">
+                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;margin-right:15px;" value="" placeholder="Search" autocomplete="off">
                     <a href="{{ url()->current() }}/create" class="btn btn-primary btn-sm btn-flat pull-right"><i class="fa fa-plus"></i> &nbsp;Add</a>
                 </div>
-
             </div>
             <div class="box-body">
                 {{ getTableContent($crudName ?? null) }}

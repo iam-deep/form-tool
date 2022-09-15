@@ -25,10 +25,17 @@ class CheckboxType extends BaseInputType
     }
 
     //region Setter
-    public function required(): CheckboxType
+    public function required($isRequired = true): CheckboxType
     {
-        $this->isRequired = true;
-        $this->validations['required'] = 'required';
+        $this->isRequired = $isRequired;
+
+        if ($isRequired) {
+            $this->validations['required'] = 'required';
+        } else {
+            if (isset($this->validations['required'])) {
+                unset($this->validations['required']);
+            }
+        }
 
         return $this;
     }

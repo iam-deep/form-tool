@@ -154,6 +154,7 @@ class Table
                 } elseif ($cell->fieldType == 'action') {
                     if (! isset($value->{$primaryId})) {
                         $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
+                        $viewRow->columns[] = $viewData;
                         continue;
                     }
 

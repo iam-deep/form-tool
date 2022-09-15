@@ -19,10 +19,17 @@ class FileType extends BaseInputType
     }
 
     // Setter
-    public function required(): FileType
+    public function required($isRequired = true): FileType
     {
-        $this->isRequired = true;
-        $this->validations['required'] = 'required';
+        $this->isRequired = $isRequired;
+
+        if ($isRequired) {
+            $this->validations['required'] = 'required';
+        } else {
+            if (isset($this->validations['required'])) {
+                unset($this->validations['required']);
+            }
+        }
 
         return $this;
     }

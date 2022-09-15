@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core;
 
 use Closure;
+use Illuminate\Support\Arr;
 
 class BluePrint
 {
@@ -161,6 +162,30 @@ class BluePrint
         $inputType->init($this, $dbField, $label);
 
         return $inputType;
+    }
+
+    public function modify(string $dbField)
+    {
+        $field = $this->getInputTypeByDbField($dbField);
+        if (! $field) {
+            throw new \Exception('Modify field not found. Field should be in the "create" method: '.$dbField);
+        }
+
+        return $field;
+    }
+
+    public function remove($dbFields)
+    {
+        $fields = Arr::wrap($dbFields);
+
+        foreach ($fields as $field) {
+            foreach ($this->_dataTypeList as $key => $type) {
+                if ($type->getDbField() == $field) {
+                    unset($this->_dataTypeList[$key]);
+                    break;
+                }
+            }
+        }
     }
 
     public function getInputTypeByDbField(string $dbField)
@@ -332,5 +357,15 @@ class BluePrint
         }
 
         return $key.']';
+    }
+
+    public function toObj($type)
+    {
+        $data['fields'] = [];
+        foreach ($this->_dataTypeList as $fieldType) {            
+            $data['fields'][] = $fieldType->toObj($type);
+        }
+
+        return $data['fields'];
     }
 }

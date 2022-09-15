@@ -46,7 +46,7 @@ class TextType extends BaseInputType
         if ($this->isUnique) {
             $model = $this->bluePrint->form->getModel();
 
-            if ($validations == 'store') {
+            if ($type == 'store') {
                 $validations[] = \sprintf(
                     'unique:%s,%s',
                     $model->getTableName(),

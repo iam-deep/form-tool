@@ -739,6 +739,13 @@ class Form
 
     public function getId()
     {
+        if (! $this->_editId) {
+            $parse = $this->parseEditId();
+            if (true !== $parse) {
+                throw new \Exception('id not found!');
+            }
+        }
+
         return $this->_editId;
     }
 

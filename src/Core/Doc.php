@@ -42,6 +42,19 @@ class Doc
         return $crud;
     }
 
+    public static function modify(Closure $callback, string $name = null)
+    {
+        $name = $name ?: self::$defaultCrudName;
+        if (! isset(self::$crudList->{$name})) {
+            throw new \Exception('Crud not found! You need to create it before modify.');
+        }
+
+        $crud = self::$crudList->{$name};
+        $crud->modify($callback);
+
+        return $crud;
+    }
+
     public static function getCrud()
     {
         return self::$crudList->{self::$defaultCrudName} ?? null;

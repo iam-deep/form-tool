@@ -76,7 +76,7 @@
               </li>
               <li class="user-footer">
                 <div class="pull-left">
-                  <a href="{{ URL::to(config('form-tool.adminURL') . '/profile') }}" class="btn btn-default btn-flat">Settings</a>
+                  <a href="{{ URL::to(config('form-tool.adminURL') . '/change-password') }}" class="btn btn-default btn-flat">Password</a>
                 </div>
                 <div class="pull-right">
                   <a href="{{ URL::to(config('form-tool.adminURL') . '/logout') }}" class="btn btn-default btn-flat">Sign out</a>
