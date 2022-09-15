@@ -362,7 +362,7 @@ class BluePrint
     public function toObj($type)
     {
         $data['fields'] = [];
-        foreach ($this->_dataTypeList as $fieldType) {            
+        foreach ($this->_dataTypeList as $fieldType) {
             $data['fields'][] = $fieldType->toObj($type);
         }
 

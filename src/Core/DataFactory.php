@@ -20,12 +20,12 @@ class DataFactory
             $action = $segments[1];
         }
 
-        if ( ! $filename || ! $action) {
+        if (! $filename || ! $action) {
             throw new \Exception('route name not found!');
         }
 
         $segment = new \stdClass();
-        $segment->path = self::$rootDir . '/' . $filename . '.txt';
+        $segment->path = self::$rootDir.'/'.$filename.'.txt';
         $segment->action = $action;
 
         return $segment;

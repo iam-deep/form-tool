@@ -120,7 +120,7 @@ class BaseInputType
     public function removeRaw(string $rawAttributes): BaseInputType
     {
         $this->raw = \str_replace($rawAttributes.' ', '', $this->raw);
-        
+
         return $this;
     }
 
