@@ -17,7 +17,7 @@ class CreateUserGroupsTable extends Migration
             $table->id('groupId');
             $table->string('groupName');
             $table->text('permission')->nullable();
-            
+
             $table->integer('updatedBy')->nullable();
             $table->datetime('updatedAt')->nullable();
             $table->integer('createdBy')->nullable();

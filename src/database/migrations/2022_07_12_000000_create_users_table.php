@@ -21,7 +21,7 @@ class CreateUsersTable extends Migration
             $table->timestamp('emailVerifiedAt')->nullable();
             $table->string('password');
             $table->boolean('status');
-            
+
             $table->integer('updatedBy')->nullable();
             $table->datetime('updatedAt')->nullable();
             $table->integer('createdBy')->nullable();

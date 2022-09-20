@@ -2,10 +2,10 @@
 
 namespace Biswadeep\FormTool\Support;
 
-use Request;
+use Biswadeep\FormTool\Core\Guard;
 use Closure;
 use Illuminate\Support\Facades\URL;
-use Biswadeep\FormTool\Core\Guard;
+use Request;
 
 class Menu
 {
@@ -27,9 +27,9 @@ class Menu
     }
 
     /**
-     * Create new menu
+     * Create new menu.
      *
-     * @param string $menuName optional name of the menu in menu bag, required when creating multiple menus
+     * @param  string  $menuName  optional name of the menu in menu bag, required when creating multiple menus
      * @return Menu
      **/
     public static function create(string $menuName = 'default')
@@ -47,11 +47,11 @@ class Menu
     }
 
     /**
-     * Add single sidebar menu link
+     * Add single sidebar menu link.
      *
-     * @param string $route Provide link/route of the anchor tag
-     * @param string $label Provide label/text of the anchor tag
-     * @param string $icon Provide icon class
+     * @param  string  $route  Provide link/route of the anchor tag
+     * @param  string  $label  Provide label/text of the anchor tag
+     * @param  string  $icon  Provide icon class
      * @param $guardAction optionally you can specify action to guard (Values: null, view, create, edit, delete)
      * @return null
      **/
@@ -64,17 +64,17 @@ class Menu
                 'label' => $label,
                 'icon' => $icon,
                 'active' => false,
-                'isParent' => false
+                'isParent' => false,
             ];
         }
     }
 
     /**
-     * Add nested sidebar menu links
+     * Add nested sidebar menu links.
      *
-     * @param string $parentLabel Parent menu label
-     * @param string $parentIcon Parent menu icon
-     * @param Closure $childLinks Child links Closure
+     * @param  string  $parentLabel  Parent menu label
+     * @param  string  $parentIcon  Parent menu icon
+     * @param  Closure  $childLinks  Child links Closure
      * @return null
      **/
     public function addNested(string $parentLabel, string $parentIcon, Closure $childLinks)
@@ -85,7 +85,7 @@ class Menu
         $menu->parentIcon = $parentIcon;
 
         $childLinks($menu);
-        
+
         $this->list[] = $menu;
     }
 
@@ -122,8 +122,8 @@ class Menu
                 $menu = $newMenu;
                 continue;
             }
-            
-            if($this->activeLink == $menu->route) {
+
+            if ($this->activeLink == $menu->route) {
                 $menu->active = true;
                 $this->isChildActive = true;
             }
@@ -146,6 +146,6 @@ class Menu
             return \view($view, $data);
         }
 
-        throw new \Exception('Menu name not found in menu bag: '.$menuName);        
+        throw new \Exception('Menu name not found in menu bag: '.$menuName);
     }
 }

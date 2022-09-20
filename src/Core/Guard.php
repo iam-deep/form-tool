@@ -2,9 +2,9 @@
 
 namespace Biswadeep\FormTool\Core;
 
-use Illuminate\Support\Facades\DB;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Session;
 
@@ -25,11 +25,12 @@ class Guard
 
     /**
      * This function must called first from middleware to initialize the guard class
-     * This function must called only once
+     * This function must called only once.
      **/
     public static function init(Request $request, Closure $next)
     {
         self::$instance = new Guard();
+
         return self::$instance->doCheck($request, $next);
     }
 
@@ -45,7 +46,6 @@ class Guard
             return true;
         }
 
-        
         if ($route) {
             return isset(self::$instance->permissions->{$route}->view) ? true : false;
         }
@@ -133,7 +133,7 @@ class Guard
                 $this->hasCreate = isset($this->permissions->{$this->route}->create) ? true : false;
                 $this->hasEdit = isset($this->permissions->{$this->route}->update) ? true : false;
                 $this->hasDelete = isset($this->permissions->{$this->route}->delete) ? true : false;
-                
+
                 // Check permissions as per request action
                 switch ($this->action) {
                     case 'create':
@@ -144,7 +144,7 @@ class Guard
                         }
 
                         break;
-                    
+
                     case 'edit':
                     case 'update':
                         if (! $this->hasEdit) {

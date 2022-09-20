@@ -360,8 +360,8 @@ class BaseInputType
         $help = $this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'.$this->help.'"></i>' : '';
 
         $required = ($this->isRequired ? ' <span class="text-danger">*</span>' : '');
-        
-        return '<div class="'.self::classDiv.' '. ($error ? self::classDivError : null) .'">
+
+        return '<div class="'.self::classDiv.' '.($error ? self::classDivError : null).'">
             <label for="'.$this->dbField.'">'.$this->label.$help.$required.'</label>
             '.$input.$error.'
         </div>';

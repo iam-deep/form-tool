@@ -2,10 +2,9 @@
 
 namespace Biswadeep\FormTool\Http\Middleware;
 
+use Biswadeep\FormTool\Core\Guard;
 use Closure;
 use Illuminate\Http\Request;
-
-use Biswadeep\FormTool\Core\Guard;
 
 class GuardRequest
 {

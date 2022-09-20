@@ -143,7 +143,7 @@ class TableField
                 if (Guard::hasEdit()) {
                     $this->actions[] = new TableAction($action);
                 }
-            } else if ($action == 'delete') {
+            } elseif ($action == 'delete') {
                 if (Guard::hasDelete()) {
                     $this->actions[] = new TableAction($action);
                 }
