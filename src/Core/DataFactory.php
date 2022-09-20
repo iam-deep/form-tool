@@ -15,7 +15,7 @@ class DataFactory
 
         $filename = $action = '';
         $segments = \explode('.', $route);
-        if (\count($segments) >= 1) {
+        if (\count($segments) > 1) {
             $filename = $segments[0];
             $action = $segments[1];
         }

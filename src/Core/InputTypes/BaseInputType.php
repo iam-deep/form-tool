@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\CellDefinition;
+use Illuminate\Support\Facades\Session;
 
 interface ICustomType
 {
@@ -353,13 +354,16 @@ class BaseInputType
 
     protected function htmlParentDiv($input): string
     {
-        return '<div class="'.self::classDiv.' @if ($errors->has("'.$this->dbField.'")) '.self::classDivError.' @endif">
-            <label for="'.$this->dbField.'">'.$this->label.'
-            '.($this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'.$this->help.'"></i>' : '').'
-            '.($this->isRequired ? '<span class="text-danger">*</span>' : '').'
-            </label>
-            '.$input.'
-            {!! $errors->first("'.$this->dbField.'", \'<p class="help-block">:message</p>\') !!}
+        $errors = Session::get('errors');
+        $error = $errors ? $errors->first($this->dbField, '<p class="help-block">:message</p>') : null;
+
+        $help = $this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'.$this->help.'"></i>' : '';
+
+        $required = ($this->isRequired ? ' <span class="text-danger">*</span>' : '');
+        
+        return '<div class="'.self::classDiv.' '. ($error ? self::classDivError : null) .'">
+            <label for="'.$this->dbField.'">'.$this->label.$help.$required.'</label>
+            '.$input.$error.'
         </div>';
     }
 

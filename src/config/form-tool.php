@@ -33,4 +33,7 @@ return [
     'pickerFormatDateTime' => 'DD-MM-YYYY hh:mm A',
     'pickerFormatDate'     => 'DD-MM-YYYY',
     'pickerFormatTime'     => 'hh:mm A',
+
+    // Enable User Permission for View, Create, Edit and Delete
+    'isGuarded' => true,
 ];

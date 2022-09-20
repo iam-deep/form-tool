@@ -95,27 +95,39 @@ class Form
 
     public function getHTMLForm()
     {
-        $data['inputs'] = '';
+        $data['form'] = $this->getForm();
+
+        return view('form-tool::crud.components.form', $data);
+    }
+
+    public function getForm()
+    {
+        $data = new \stdClass();
+
+        $data->fields = new \stdClass();
         foreach ($this->_bluePrint->getList() as $input) {
+            $html = '';
             if ($input instanceof BluePrint) {
-                $data['inputs'] .= '<div class="form-group"><label>'.$input->label.'</label>';
-                $data['inputs'] .= $this->getMultipleFields($input);
-                $data['inputs'] .= '</div>';
+                $html .= '<div class="form-group"><label>'.$input->label.'</label>';
+                $html .= $this->getMultipleFields($input);
+                $html .= '</div>';
             } else {
-                $data['inputs'] .= $input->getHTML();
+                $html = $input->getHTML();
             }
+
+            $data->fields->{$input->getDbField()} = $html;
         }
 
         $isEdit = $this->formStatus == FormStatus::Edit;
 
-        $data['isEdit'] = $isEdit;
+        $data->isEdit = $isEdit;
         if ($isEdit) {
-            $data['action'] = config('form-tool.adminURL').'/'.$this->_resource->route.'/'.$this->_editId;
+            $data->action = config('form-tool.adminURL').'/'.$this->_resource->route.'/'.$this->_editId;
         } else {
-            $data['action'] = config('form-tool.adminURL').'/'.$this->_resource->route;
+            $data->action = config('form-tool.adminURL').'/'.$this->_resource->route;
         }
 
-        return view('form-tool::crud.components.form', $data);
+        return $data;
     }
 
     private function getMultipleFields($model)
@@ -319,8 +331,6 @@ class Form
         if ($result !== true) {
             return $result;
         }
-
-        //dd($this->postData);
 
         $insertId = $this->_model->add($this->postData);
 
@@ -749,7 +759,7 @@ class Form
         return $this->_editId;
     }
 
-    public function getData()
+    public function getEditData()
     {
         return $this->resultData;
     }

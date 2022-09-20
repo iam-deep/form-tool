@@ -1,6 +1,5 @@
 <style>
-.ui-state-highlight
-{
+.ui-state-highlight {
     background-color:#ffffcc;
     border:1px dotted #ccc;
     cursor:move;
@@ -13,20 +12,23 @@
 }
 </style>
 <script>
+// Declaring empty template is important as multiple table depends on this variable
 let template = [];
 </script>
 
-<form action="{{ $action }}" method="POST" enctype="multipart/form-data">
+<form action="{{ $form->action }}" method="POST" enctype="multipart/form-data">
     <div class="box-body">
         @csrf
 
-        @if ($isEdit)
+        @if ($form->isEdit)
             <input type="hidden" name="_method" value="PUT">
         @endif
 
         <div id="beforeForm"></div>
 
-        {!! Blade::render($inputs) !!}
+        @foreach ($form->fields as $field)
+            {!! $field !!}
+        @endforeach
 
         <div id="afterForm"></div>
     </div>

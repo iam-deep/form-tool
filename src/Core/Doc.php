@@ -121,13 +121,13 @@ class Doc
         }
     }
 
-    public static function getForm(string $name = null)
+    /*public static function getForm(string $name = null)
     {
         $crud = self::getCurdByName($name);
         if ($crud) {
             return $crud->getForm();
         }
-    }
+    }*/
 
     public static function getHTMLForm(string $name = null)
     {

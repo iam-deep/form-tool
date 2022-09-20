@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool\Core;
 
+use Illuminate\Support\Arr;
+
 class TableField
 {
     public $cellList = [];
@@ -134,15 +136,25 @@ class TableField
 
     public function actions($actions = ['edit', 'delete']): CellDefinition
     {
-        if (! is_array($actions)) {
-            throw new \Exception("Actions columns should be in an array! Like: ['edit', 'delete']");
+        $actions = Arr::wrap($actions);
+
+        foreach ($actions as $action) {
+            if ($action == 'edit') {
+                if (Guard::hasEdit()) {
+                    $this->actions[] = new TableAction($action);
+                }
+            } else if ($action == 'delete') {
+                if (Guard::hasDelete()) {
+                    $this->actions[] = new TableAction($action);
+                }
+            } else {
+                $this->actions[] = new TableAction($action);
+            }
         }
 
         $cell = CellDefinition::Other('action', '', 'Actions')->width('85px');
-        $this->cellList[] = $cell;
-
-        foreach ($actions as $action) {
-            $this->actions[] = new TableAction($action);
+        if (\count($this->actions)) {
+            $this->cellList[] = $cell;
         }
 
         return $cell;

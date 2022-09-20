@@ -143,7 +143,7 @@ class Crud
 
     public function getForm()
     {
-        return $this->form;
+        return $this->form->getForm();
     }
 
     public function getTable()

@@ -80,15 +80,15 @@ if (! function_exists('getJs')) {
     }
 }
 
-if (! function_exists('getAllCss')) {
-    function getAllCss()
+if (! function_exists('getFormCss')) {
+    function getFormCss()
     {
         return Doc::getCssLinks().Doc::getCss();
     }
 }
 
-if (! function_exists('getAllJs')) {
-    function getAllJs()
+if (! function_exists('getFormJs')) {
+    function getFormJs()
     {
         return Doc::getJsLinks().Doc::getJs();
     }
@@ -118,5 +118,12 @@ if (! function_exists('isSuccess')) {
         }
 
         return false;
+    }
+}
+
+if (! function_exists('getSidemenu')) {
+    function getSidemenu()
+    {
+        return \Biswadeep\FormTool\Support\Menu::generate();
     }
 }

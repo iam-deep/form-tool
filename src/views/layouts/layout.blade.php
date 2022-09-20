@@ -8,26 +8,7 @@
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">MAIN NAVIGATION</li>
-        @if (isset($sideMenu))
-            @foreach ($sideMenu as $menuTitle => $menu)
-                @if (is_array($menu[1]))
-                    <li class="treeview">
-                        <a href="#"><i class="{{ $menu[0] }}"></i> <span>{{ $menuTitle }}</span>
-                            <span class="pull-right-container">
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </span>
-                        </a>
-                        <ul class="treeview-menu">
-                            @foreach ($menu[1] as $subTitle => $subMenu)
-                                <li @if (isset($subMenu[2]) && $subMenu[2] == 'active') class="active" @endif><a href="{{ URL::to(config('form-tool.adminURL') . '/' . $subMenu[0]) }}"> <span>{{ $subTitle }}</span></a></li>
-                            @endforeach
-                        </ul>
-                    </li>
-                @else
-                    <li @if (isset($menu[2]) && $menu[2] == 'active') class="active" @endif><a href="{{ URL::to(config('form-tool.adminURL') . '/' . $menu[0]) }}"><i class="{{ $menu[1] }}"></i> <span>{{ $menuTitle }}</span></a></li>
-                @endif
-            @endforeach
-        @endif
+        {{ getSidemenu() }}
 
         {{-- sample multi level menu
 
