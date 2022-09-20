@@ -124,7 +124,7 @@ class Menu
                 } else {
                     unset($this->list[$key]);
                 }
-                
+
                 continue;
             }
 
