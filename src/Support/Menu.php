@@ -119,7 +119,12 @@ class Menu
                 $newMenu->childs = $menu->make();
                 $newMenu->active = $menu->isChildActive;
 
-                $menu = $newMenu;
+                if (\count($newMenu->childs)) {
+                    $menu = $newMenu;
+                } else {
+                    unset($this->list[$key]);
+                }
+                
                 continue;
             }
 

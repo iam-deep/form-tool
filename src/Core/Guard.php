@@ -131,7 +131,7 @@ class Guard
                 }
 
                 $this->hasCreate = isset($this->permissions->{$this->route}->create) ? true : false;
-                $this->hasEdit = isset($this->permissions->{$this->route}->update) ? true : false;
+                $this->hasEdit = isset($this->permissions->{$this->route}->edit) ? true : false;
                 $this->hasDelete = isset($this->permissions->{$this->route}->delete) ? true : false;
 
                 // Check permissions as per request action

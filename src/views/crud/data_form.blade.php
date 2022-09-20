@@ -2,14 +2,13 @@
 
 @section('content')
 
-<?php
+@php
 // Called on top to set all the dependencies
 // If called below getAllCss() then we will not get the css
 $form = getHTMLForm($crudName ?? null);
-?>
+@endphp
 
-<?php echo getCssLinks(); ?>
-<?php echo getCss(); ?>
+{!! getFormCss(); !!}
 
 <div class="row">
     <div class="col-md-8 col-sm-offset-2">
@@ -18,17 +17,12 @@ $form = getHTMLForm($crudName ?? null);
                 <h3 class="box-title">{{ $title ?? '' }}</h3>
             </div>
 
-            <?php echo $form; ?>
+            {!! $form !!}
 
         </div>
     </div>
 </div>
 
-@if (isset($script))
-    {!! $script !!}
-@endif
-
-<?php echo getJsLinks(); ?>
-<?php echo getJs(); ?>
+{!! getFormJs(); !!}
 
 @stop
