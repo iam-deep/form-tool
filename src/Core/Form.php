@@ -29,7 +29,8 @@ class Form
     private $_url = '';
 
     private $resultData = null;
-    private $postData = null;
+    private $postData = [];
+    private $updatePostData = [];
     private $oldData = null;
 
     private $crud = null;
@@ -570,6 +571,13 @@ class Form
                 }
             }
 
+            // If we have custom data to update, then we will update and prevent our further process
+            if (isset($this->updatePostData[$dbField])) {
+                $this->postData[$dbField] = $this->updatePostData[$dbField];
+
+                continue;
+            }
+
             if ($input instanceof BluePrint) {
                 if (! $input->getModel()) {
                     $this->postData[$input->getKey()] = \json_encode($this->_request[$input->getKey()]);
@@ -737,9 +745,9 @@ class Form
         return $this->postData;
     }
 
-    public function setPostData($data)
+    public function updatePostData($data)
     {
-        $this->postData = $data;
+        $this->updatePostData = $data;
     }
 
     public function getModel()
