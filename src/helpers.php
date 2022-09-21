@@ -2,6 +2,7 @@
 
 use Biswadeep\FormTool\Core\Auth;
 use Biswadeep\FormTool\Core\Doc;
+use Biswadeep\FormTool\Core\Guard;
 
 if (! function_exists('getHTMLForm')) {
     function getHTMLForm(string $name = null)
@@ -125,5 +126,12 @@ if (! function_exists('getSidemenu')) {
     function getSidemenu()
     {
         return \Biswadeep\FormTool\Support\Menu::generate();
+    }
+}
+
+if (! function_exists('guard')) {
+    function guard()
+    {
+        return Guard::class;
     }
 }

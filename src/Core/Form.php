@@ -737,12 +737,16 @@ class Form
 
     public function getPostData($id = null)
     {
-        $result = $this->createPostData($id);
+        /*$result = $this->createPostData($id);
         if ($result !== true) {
             return $result;
+        }*/
+
+        if ($this->postData) {
+            return $this->postData;
         }
 
-        return $this->postData;
+        return $this->_request->post();
     }
 
     public function updatePostData($data)
