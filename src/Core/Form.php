@@ -16,17 +16,17 @@ abstract class FormStatus
 
 class Form
 {
-    private $_bluePrint;
-    private $_resource;
-    private $_model;
+    private $bluePrint;
+    private $resource;
+    private $model;
 
     private int $formStatus = 0;
 
-    private $_request;
+    private $request;
 
-    private $_editId;
+    private $editId;
 
-    private $_url = '';
+    private $url = '';
 
     private $resultData = null;
     private $postData = [];
@@ -38,20 +38,20 @@ class Form
 
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
-        $this->_resource = $resource;
-        $this->_bluePrint = $bluePrint;
-        $this->_model = $model;
+        $this->resource = $resource;
+        $this->bluePrint = $bluePrint;
+        $this->model = $model;
 
-        $this->_bluePrint->form = $this;
+        $this->bluePrint->form = $this;
         $this->options = new \stdClass();
 
-        $this->_url = config('form-tool.adminURL').'/'.$this->_resource->route;
-        $this->_request = request();
+        $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
+        $this->request = request();
     }
 
     public function init()
     {
-        $method = $this->_request->method();
+        $method = $this->request->method();
 
         if ('POST' == $method) {
             return $this->store();
@@ -59,7 +59,7 @@ class Form
             return $this->update();
         } elseif ('DELETE' == $method) {
             return $this->destroy();
-        } elseif (strpos($this->_request->getRequestUri(), '/edit')) {
+        } elseif (strpos($this->request->getRequestUri(), '/edit')) {
             return $this->edit();
         }
     }
@@ -106,7 +106,7 @@ class Form
         $data = new \stdClass();
 
         $data->fields = new \stdClass();
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             $html = '';
             if ($input instanceof BluePrint) {
                 $html .= '<div class="form-group"><label>'.$input->label.'</label>';
@@ -123,9 +123,9 @@ class Form
 
         $data->isEdit = $isEdit;
         if ($isEdit) {
-            $data->action = config('form-tool.adminURL').'/'.$this->_resource->route.'/'.$this->_editId;
+            $data->action = config('form-tool.adminURL').'/'.$this->resource->route.'/'.$this->editId;
         } else {
-            $data->action = config('form-tool.adminURL').'/'.$this->_resource->route;
+            $data->action = config('form-tool.adminURL').'/'.$this->resource->route;
         }
 
         return $data;
@@ -183,7 +183,7 @@ class Form
             $dbModel = $model->getModel();
             if ($dbModel) {
                 if ($dbModel instanceof \stdClass) {
-                    $where = [$dbModel->foreignKey => $this->_editId];
+                    $where = [$dbModel->foreignKey => $this->editId];
 
                     $query = DB::table($dbModel->table)->where($where);
                     if ($dbModel->orderBy) {
@@ -198,7 +198,7 @@ class Form
                         $dbModel::$orderBy = $model->getSortableField();
                     }
 
-                    $where = [$dbModel::$foreignKey => $this->_editId];
+                    $where = [$dbModel::$foreignKey => $this->editId];
                     $result = $dbModel::getWhere($where);
                 }
             } elseif (isset($this->resultData->{$key})) {
@@ -292,25 +292,25 @@ class Form
         $this->formStatus = FormStatus::Edit;
 
         if (! $id) {
-            $url = $this->_request->getRequestUri();
+            $url = $this->request->getRequestUri();
 
             $matches = [];
-            $t = \preg_match('/'.$this->_resource->route.'\/([^\/]*)\/edit/', $url, $matches);
+            $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/edit/', $url, $matches);
             if (\count($matches) > 1) {
                 $id = $matches[1];
             } else {
-                return redirect($this->_url)/*->action([get_class($this->_resource), 'index'])*/->with('error', 'Could not fetch "id"! Call edit manually.');
+                return redirect($this->url)/*->action([get_class($this->resource), 'index'])*/->with('error', 'Could not fetch "id"! Call edit manually.');
             }
         }
 
-        $this->_editId = $id;
+        $this->editId = $id;
 
-        $this->resultData = $this->_model->getOne($id);
+        $this->resultData = $this->model->getOne($id);
         if (! $this->resultData) {
             abort(404);
         }
 
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint && isset($this->resultData->{$input->getDbField()})) {
                 $input->setValue($this->resultData->{$input->getDbField()});
             }
@@ -333,20 +333,20 @@ class Form
             return $result;
         }
 
-        $insertId = $this->_model->add($this->postData);
+        $insertId = $this->model->add($this->postData);
 
         if ($insertId) {
-            $this->_editId = $insertId;
+            $this->editId = $insertId;
 
             $this->afterSave();
 
             // This will only execute if the method called by default not manually from the store
-            /*if (\method_exists($this->_resource, 'store')) {
-                $this->_resource->store($this->_request);
+            /*if (\method_exists($this->resource, 'store')) {
+                $this->resource->store($this->request);
             }*/
         }
 
-        return redirect($this->_url)->with('success', 'Data added successfully!');
+        return redirect($this->url)->with('success', 'Data added successfully!');
     }
 
     public function update($id = null)
@@ -354,8 +354,8 @@ class Form
         $this->formStatus = FormStatus::Update;
 
         if ($id) {
-            $this->_editId = $id;
-        } elseif (! $this->_editId) {
+            $this->editId = $id;
+        } elseif (! $this->editId) {
             $parse = $this->parseEditId();
             if (true !== $parse) {
                 return $parse;
@@ -368,11 +368,11 @@ class Form
         }
 
         if (! $this->oldData) {
-            $this->oldData = $this->_model->getOne($this->_editId);
+            $this->oldData = $this->model->getOne($this->editId);
         }
 
         if (! $this->oldData) {
-            throw new \Exception('Old data not found for ID: '.$this->_editId);
+            throw new \Exception('Old data not found for ID: '.$this->editId);
         }
 
         // TODO:
@@ -385,28 +385,28 @@ class Form
             return $result;
         }
 
-        $affected = $this->_model->updateOne($this->_editId, $this->postData);
+        $affected = $this->model->updateOne($this->editId, $this->postData);
 
         if ($affected > 0) {
             $this->afterSave();
 
             // This will only execute if the method called by default not manually from the store
-            /*if (\method_exists($this->_resource, 'update')) {
-                $this->_resource->update($this->_request, $this->_editId);
+            /*if (\method_exists($this->resource, 'update')) {
+                $this->resource->update($this->request, $this->editId);
             }*/
         }
 
-        return redirect($this->_url)->with('success', 'Data updated successfully!');
+        return redirect($this->url)->with('success', 'Data updated successfully!');
     }
 
     private function afterSave()
     {
-        if (! $this->_editId) {
+        if (! $this->editId) {
             return;
         }
 
-        $result = $this->_model->getOne($this->_editId);
-        foreach ($this->_bluePrint->getList() as $input) {
+        $result = $this->model->getOne($this->editId);
+        foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
             }
@@ -423,7 +423,7 @@ class Form
 
     private function saveMultipleFields()
     {
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint || ! $input->getModel()) {
                 continue;
             }
@@ -442,8 +442,8 @@ class Form
             }
 
             $data = [];
-            if ($this->_request->get($input->getKey()) && \is_array($this->_request->get($input->getKey()))) {
-                foreach ($this->_request->get($input->getKey()) as $row) {
+            if ($this->request->get($input->getKey()) && \is_array($this->request->get($input->getKey()))) {
+                foreach ($this->request->get($input->getKey()) as $row) {
                     $dataRow = [];
                     foreach ($input->getList() as $field) {
 
@@ -453,13 +453,13 @@ class Form
                         $dataRow[$field->getDbField()] = $row[$field->getDbField()] ?? null;
                     }
 
-                    $dataRow[$foreignKey] = $this->_editId;
+                    $dataRow[$foreignKey] = $this->editId;
 
                     $data[] = $dataRow;
                 }
             }
 
-            $where = [$foreignKey => $this->_editId];
+            $where = [$foreignKey => $this->editId];
             if ($model instanceof \stdClass) {
                 DB::table($model->table)->where($where)->delete();
                 if (\count($data)) {
@@ -479,12 +479,12 @@ class Form
         $validationType = $this->formStatus == FormStatus::Store ? 'store' : 'update';
 
         $rules = $messages = $labels = $merge = [];
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
             }
 
-            $newValue = $input->beforeValidation($this->_request->get($input->getDbField()));
+            $newValue = $input->beforeValidation($this->request->get($input->getDbField()));
             if ($newValue !== null) {
                 $merge[$input->getDbField()] = $newValue;
             }
@@ -497,10 +497,10 @@ class Form
         }
 
         if ($merge) {
-            $this->_request->merge($merge);
+            $this->request->merge($merge);
         }
 
-        $validator = \Validator::make($this->_request->all(), $rules, $messages, $labels);
+        $validator = \Validator::make($this->request->all(), $rules, $messages, $labels);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
@@ -521,8 +521,8 @@ class Form
             $this->postData['createdAt'] = \date('Y-m-d H:i:s');
         } else {
             if ($id) {
-                $this->_editId = $id;
-            } elseif (! $this->_editId) {
+                $this->editId = $id;
+            } elseif (! $this->editId) {
                 $parse = $this->parseEditId();
                 if (true !== $parse) {
                     return $parse;
@@ -530,7 +530,7 @@ class Form
             }
 
             if (! $this->oldData) {
-                $this->oldData = $this->_model->getOne($this->_editId);
+                $this->oldData = $this->model->getOne($this->editId);
             }
 
             $this->postData['updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
@@ -556,7 +556,7 @@ class Form
             }
         }*/
 
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             $dbField = $input->getDbField();
 
             // Check if we don't want to save or only save to prevent further process of the field
@@ -580,7 +580,7 @@ class Form
 
             if ($input instanceof BluePrint) {
                 if (! $input->getModel()) {
-                    $this->postData[$input->getKey()] = \json_encode($this->_request[$input->getKey()]);
+                    $this->postData[$input->getKey()] = \json_encode($this->request[$input->getKey()]);
                 }
 
                 continue;
@@ -610,10 +610,10 @@ class Form
 
     private function formatMultiple()
     {
-        $data = $this->_request->all();
+        $data = $this->request->all();
 
         $merge = [];
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint) {
                 continue;
             }
@@ -642,12 +642,12 @@ class Form
             }
         }
 
-        $this->_request->merge($merge);
+        $this->request->merge($merge);
 
         /* Need this for file upload and other callbacks
 
         $arrayToMerge = [];
-        foreach ($this->_bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
                 $row = [];
 
@@ -663,17 +663,17 @@ class Form
 
     private function parseEditId()
     {
-        $url = $this->_request->getRequestUri();
+        $url = $this->request->getRequestUri();
 
         $matches = [];
-        $t = \preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
+        $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/?/', $url, $matches);
         if (\count($matches) > 1) {
-            $this->_editId = $matches[1];
+            $this->editId = $matches[1];
 
             return true;
         }
 
-        return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
+        return redirect($this->url)->with('error', 'Could not fetch "id"! Call update manually.');
     }
 
     //endregion
@@ -683,14 +683,14 @@ class Form
         $this->formStatus = FormStatus::Destroy;
 
         if (! $id) {
-            $url = $this->_request->getRequestUri();
+            $url = $this->request->getRequestUri();
 
             $matches = [];
-            $t = \preg_match('/'.$this->_resource->route.'\/([^\/]*)\/?/', $url, $matches);
+            $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/?/', $url, $matches);
             if (\count($matches) > 1) {
                 $id = $matches[1];
             } else {
-                return redirect($this->_url)->with('error', 'Could not fetch "id"! Call update manually.');
+                return redirect($this->url)->with('error', 'Could not fetch "id"! Call update manually.');
             }
         }
 
@@ -699,10 +699,10 @@ class Form
         //      permission to delete
         //      can delete this row
 
-        $result = $this->_model->getOne($id);
+        $result = $this->model->getOne($id);
 
         if ($result) {
-            foreach ($this->_bluePrint->getList() as $field) {
+            foreach ($this->bluePrint->getList() as $field) {
                 if ($field instanceof BluePrint) {
                     // TODO:
                 } else {
@@ -713,10 +713,10 @@ class Form
             // TODO: Log result not found on delete id
         }
 
-        $affected = $this->_model->deleteOne($id);
+        $affected = $this->model->deleteOne($id);
 
         if ($affected > 0 && $result) {
-            foreach ($this->_bluePrint->getList() as $field) {
+            foreach ($this->bluePrint->getList() as $field) {
                 if ($field instanceof BluePrint) {
                     // TODO:
                 } else {
@@ -725,12 +725,12 @@ class Form
             }
 
             // This will only execute if the method called by default not manually from the destroy
-            /*if (\method_exists($this->_resource, 'destroy')) {
-                $this->_resource->destroy($id);
+            /*if (\method_exists($this->resource, 'destroy')) {
+                $this->resource->destroy($id);
             }*/
         }
 
-        return redirect($this->_url)->with('success', 'Data deleted successfully!');
+        return redirect($this->url)->with('success', 'Data deleted successfully!');
     }
 
     //region GetterSetter
@@ -746,7 +746,7 @@ class Form
             return $this->postData;
         }
 
-        return $this->_request->post();
+        return $this->request->post();
     }
 
     public function updatePostData($data)
@@ -756,19 +756,19 @@ class Form
 
     public function getModel()
     {
-        return $this->_model;
+        return $this->model;
     }
 
     public function getId()
     {
-        if (! $this->_editId) {
+        if (! $this->editId) {
             $parse = $this->parseEditId();
             if (true !== $parse) {
                 throw new \Exception('id not found!');
             }
         }
 
-        return $this->_editId;
+        return $this->editId;
     }
 
     public function getEditData()
