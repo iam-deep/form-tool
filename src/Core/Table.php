@@ -120,7 +120,7 @@ class Table
 
         if (! $this->field) {
             $this->setDefaultField();
-        } else if ($this->isFromTrash) {
+        } elseif ($this->isFromTrash) {
             // Remove actions if we are listing trash data
             $this->field->removeActions();
 
@@ -222,15 +222,15 @@ class Table
                 'label' => 'All',
                 'count' => 0,
                 'active' => false,
-                'separator' => true
+                'separator' => true,
             ],
             'trash' => [
                 'href' => $this->url.'?quick_status=trash',
                 'label' => 'Trash',
                 'count' => 0,
                 'active' => false,
-                'separator' => true
-            ]
+                'separator' => true,
+            ],
         ];
 
         $isAllActive = true;
@@ -238,11 +238,11 @@ class Table
         $i = 0;
         foreach ($quickFilters as $key => &$row) {
             if ($key == 'all') {
-                $row['count'] = $this->model->countWhere(function($query, $class) {
+                $row['count'] = $this->model->countWhere(function ($query, $class) {
                     $query->whereNull($class::$columnDeletedAt);
                 });
             } elseif ($key == 'trash') {
-                $row['count'] = $this->model->countWhere(function($query, $class) {
+                $row['count'] = $this->model->countWhere(function ($query, $class) {
                     $query->whereNotNull($class::$columnDeletedAt);
                 });
             }
