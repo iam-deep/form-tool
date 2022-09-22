@@ -134,7 +134,10 @@ class Table
             $data['headings'][] = $row;
         }
 
-        $i = 0;
+        $perPage = $this->dataResult->perPage();
+        $page = $this->request->query('page');
+
+        $i = $page ? (($page - 1) * $perPage) : 0;
         foreach ($this->dataResult as $value) {
             $viewRow = new TableViewRow();
             foreach ($this->field->cellList as $cell) {
