@@ -9,11 +9,11 @@ class TableField
     public $cellList = [];
     public $actions = [];
 
-    private Table $_table;
+    private Table $table;
 
     public function __construct(Table $table)
     {
-        $this->_table = $table;
+        $this->table = $table;
     }
 
     public function slNo(string $label = null): CellDefinition
@@ -26,7 +26,7 @@ class TableField
 
     public function default(string $dbField, string $label = null)
     {
-        $input = $this->_table->getBluePrint()->getInputTypeByDbField($dbField);
+        $input = $this->table->getBluePrint()->getInputTypeByDbField($dbField);
         if (! $input) {
             throw new \Exception($dbField.' not found in the BluePrint.');
         }
