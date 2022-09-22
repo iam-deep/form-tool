@@ -5,6 +5,7 @@ namespace Biswadeep\FormTool\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
+use Closure;
 
 class AdminModel extends Model
 {
@@ -15,6 +16,9 @@ class AdminModel extends Model
     public static $orderBy = 'id';
     public static $foreignKey = '';
 
+    public static $isSoftDelete = true;
+    public static $columnDeletedAt = 'deletedAt';
+
     public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
     {
         static::$tableName = $tableName ?: static::$tableName;
@@ -23,17 +27,31 @@ class AdminModel extends Model
         static::$foreignKey = $foreignKey ?: static::$foreignKey;
     }
 
-    public static function getAll()
+    public static function getAll($isFromTrash = false)
     {
-        return DB::table(static::$tableName)->orderBy(static::$primaryId, 'desc')->paginate(20);
+        $query = DB::table(static::$tableName);
+        if (static::$isSoftDelete) {
+            if ($isFromTrash) {
+                $query->whereNotNull(static::$columnDeletedAt);
+            } else {
+                $query->whereNull(static::$columnDeletedAt);
+            }
+        }
+
+        return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }
 
     public static function getOne($id)
     {
-        return DB::table(static::$tableName)->where(static::$primaryId, $id)->first();
+        $query = DB::table(static::$tableName);
+        if (static::$isSoftDelete) {
+            $query->whereNull(static::$columnDeletedAt);
+        }
+
+        return $query->where(static::$primaryId, $id)->first();
     }
 
-    public static function search($searchTerm, $fields)
+    public static function search($searchTerm, $fields, $isFromTrash = false)
     {
         $query = DB::table(static::$tableName);
         $searchTerm = array_filter(\explode(' ', $searchTerm));
@@ -46,12 +64,35 @@ class AdminModel extends Model
             });
         }
 
+        if (static::$isSoftDelete) {
+            if ($isFromTrash) {
+                $query->whereNotNull(static::$columnDeletedAt);
+            } else {
+                $query->whereNull(static::$columnDeletedAt);
+            }
+        }
+
         return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }
 
     public static function getWhere($where)
     {
-        return DB::table(static::$tableName)->orderBy(static::$orderBy, 'asc')->where($where)->get();
+        $query = DB::table(static::$tableName);
+        if (static::$isSoftDelete) {
+            $query->whereNull(static::$columnDeletedAt);
+        }
+
+        return $query->orderBy(static::$orderBy, 'asc')->where($where)->get();
+    }
+
+    public static function countWhere(Closure $where = null)
+    {
+        $query = DB::table(static::$tableName);
+        if ($where) {
+            $where($query, AdminModel::class);
+        }
+
+        return $query->count();
     }
 
     public static function add($data)
@@ -70,19 +111,32 @@ class AdminModel extends Model
 
     public static function updateOne($id, $data)
     {
-        $affected = DB::table(static::$tableName)->where(static::$primaryId, $id)->update($data);
+        // Let's prevent update of deleted data
+        $query = DB::table(static::$tableName);
+        if (static::$isSoftDelete) {
+            $query->whereNull(static::$columnDeletedAt);
+        }
+
+        $affected = $query->where(static::$primaryId, $id)->update($data);
 
         return $affected;
     }
 
     public static function deleteOne($id)
     {
-        $affected = DB::table(static::$tableName)->where(static::$primaryId, $id)->delete();
+        // Let's prevent delete of non-deleted data
+        // Data those are not in the trash should not be deleted
+        $query = DB::table(static::$tableName);
+        if (static::$isSoftDelete) {
+            $query->whereNotNull(static::$columnDeletedAt);
+        }
+
+        $affected = $query->where(static::$primaryId, $id)->delete();
 
         return $affected;
     }
 
-    public static function deleteWhere($where)
+    public static function destroyWhere($where)
     {
         $affected = DB::table(static::$tableName)->where($where)->delete();
 

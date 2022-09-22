@@ -11,6 +11,13 @@ if (! function_exists('getHTMLForm')) {
     }
 }
 
+if (! function_exists('getTableFilter')) {
+    function getTableFilter(string $name = null)
+    {
+        return Doc::getTableFilter($name);
+    }
+}
+
 if (! function_exists('getTableContent')) {
     function getTableContent(string $name = null)
     {

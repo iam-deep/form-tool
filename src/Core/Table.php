@@ -17,7 +17,10 @@ class Table
 
     private $dataResult;
 
+    private $request;
     private $url;
+
+    private $isFromTrash = false;
 
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
@@ -25,6 +28,7 @@ class Table
         $this->bluePrint = $bluePrint;
         $this->model = $model;
 
+        $this->request = request();
         $this->url = config('form-tool.adminURL').'/'.$resource->route;
     }
 
@@ -44,6 +48,8 @@ class Table
 
     public function search($searchTerm)
     {
+        $this->makeFilter();
+
         $fieldsToSearch = $this->searchFields;
         if (! $fieldsToSearch) {
             foreach ($this->bluePrint->getList() as $input) {
@@ -66,9 +72,9 @@ class Table
             return $json;
         }
 
-        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch);
+        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $this->isFromTrash);
 
-        $table = $this->create();
+        $table = $this->createList();
         $table->content = $table->content->render();
         $table->pagination = $table->pagination->render();
         $table->total = \count($this->dataResult);
@@ -79,12 +85,14 @@ class Table
 
     public function listAll()
     {
-        $this->dataResult = $this->model->getAll();
+        $this->makeFilter();
 
-        return $this->create();
+        $this->dataResult = $this->model->getAll($this->isFromTrash);
+
+        return $this->createList();
     }
 
-    private function setDefaultField()
+    protected function setDefaultField()
     {
         $tableField = new TableField($this);
 
@@ -97,17 +105,26 @@ class Table
 
         $tableField->datetime('createdAt', 'Created At');
 
-        $tableField->actions(['edit', 'delete']);
+        if ($this->isFromTrash) {
+            $tableField->datetime('deletedAt', 'Deleted At');
+        } else {
+            $tableField->actions(['edit', 'delete']);
+        }
 
         $this->field = $tableField;
     }
 
-    private function create(): object
+    protected function createList(): object
     {
         $primaryId = $this->model->getPrimaryId();
 
         if (! $this->field) {
             $this->setDefaultField();
+        } else if ($this->isFromTrash) {
+            // Remove actions if we are listing trash data
+            $this->field->removeActions();
+
+            $this->field->datetime('deletedAt', 'Deleted At');
         }
 
         $data['headings'] = $data['tableData'] = [];
@@ -195,6 +212,70 @@ class Table
         $this->table->pagination = $this->dataResult->onEachSide(2)->links();
 
         return $this->table;
+    }
+
+    protected function createFilter()
+    {
+        $quickFilters = [
+            'all' => [
+                'href' => $this->url,
+                'label' => 'All',
+                'count' => 0,
+                'active' => false,
+                'separator' => true
+            ],
+            'trash' => [
+                'href' => $this->url.'?quick_status=trash',
+                'label' => 'Trash',
+                'count' => 0,
+                'active' => false,
+                'separator' => true
+            ]
+        ];
+
+        $isAllActive = true;
+        $countQuickFilters = \count($quickFilters);
+        $i = 0;
+        foreach ($quickFilters as $key => &$row) {
+            if ($key == 'all') {
+                $row['count'] = $this->model->countWhere(function($query, $class) {
+                    $query->whereNull($class::$columnDeletedAt);
+                });
+            } elseif ($key == 'trash') {
+                $row['count'] = $this->model->countWhere(function($query, $class) {
+                    $query->whereNotNull($class::$columnDeletedAt);
+                });
+            }
+
+            if ($this->request->query('quick_status') == $key) {
+                $row['active'] = true;
+                $isAllActive = false;
+            }
+
+            if (++$i == $countQuickFilters) {
+                $row['separator'] = false;
+            }
+        }
+
+        if ($isAllActive) {
+            $quickFilters['all']['active'] = true;
+        }
+
+        $data['quickFilters'] = $quickFilters;
+
+        return \view('form-tool::crud.components.table_filter', $data);
+    }
+
+    protected function makeFilter()
+    {
+        if ($this->request->query('quick_status') == 'trash') {
+            $this->isFromTrash = true;
+        }
+    }
+
+    public function getFilter()
+    {
+        return $this->createFilter();
     }
 
     public function getContent()

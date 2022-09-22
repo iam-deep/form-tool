@@ -11,7 +11,8 @@ abstract class FormStatus
     public const Store = 2;
     public const Edit = 3;
     public const Update = 4;
-    public const Destroy = 4;
+    public const Delete = 5;
+    public const Destroy = 6;
 }
 
 class Form
@@ -58,7 +59,7 @@ class Form
         } elseif ('PUT' == $method) {
             return $this->update();
         } elseif ('DELETE' == $method) {
-            return $this->destroy();
+            return $this->delete();
         } elseif (strpos($this->request->getRequestUri(), '/edit')) {
             return $this->edit();
         }
@@ -678,6 +679,31 @@ class Form
 
     //endregion
 
+    public function delete($id = false)
+    {
+        $this->formStatus = FormStatus::Delete;
+
+        if (! $id) {
+            $url = $this->request->getRequestUri();
+
+            $matches = [];
+            $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/?/', $url, $matches);
+            if (\count($matches) > 1) {
+                $id = $matches[1];
+            } else {
+                return redirect($this->url)->with('error', 'Could not fetch "id"! Call update manually.');
+            }
+        }
+
+        $data = [];
+        $data['deletedBy'] = Auth::user() ? Auth::user()->userId : 0;
+        $data['deletedAt'] = \date('Y-m-d H:i:s');
+
+        $affected = $this->model->updateOne($id, $data);
+
+        return redirect($this->url)->with('success', 'Data deleted successfully!');
+    }
+
     public function destroy($id = false)
     {
         $this->formStatus = FormStatus::Destroy;
@@ -702,6 +728,16 @@ class Form
         $result = $this->model->getOne($id);
 
         if ($result) {
+            if ($this->crud->isSoftDelete) {
+                if (! \property_exists($result, 'deletedAt')) {
+                    throw new \Exception('Column "deletedAt" not found!');
+                }
+
+                if ($result->deletedAt === null) {
+                    return redirect($this->url)->with('error', 'Soft delete is enabled for this CRUD. You need to mark as delete first then only you can delete it permanently!');
+                }
+            }
+
             foreach ($this->bluePrint->getList() as $field) {
                 if ($field instanceof BluePrint) {
                     // TODO:
@@ -730,7 +766,7 @@ class Form
             }*/
         }
 
-        return redirect($this->url)->with('success', 'Data deleted successfully!');
+        return redirect($this->url)->with('success', 'Data permanently deleted successfully!');
     }
 
     //region GetterSetter

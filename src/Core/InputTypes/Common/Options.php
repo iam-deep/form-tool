@@ -18,6 +18,8 @@ trait Options
     protected int $limitMin = 0;
     protected int $limitMax = 0;
 
+    protected bool $isRemoveTrash = true;
+
     //region Setter
     public function options($options, ...$patternDbFields)
     {
@@ -40,6 +42,13 @@ trait Options
         } else {
             throw new \Exception('You need to pass an array or string with table info');
         }
+
+        return $this;
+    }
+
+    public function withoutTrash(bool $flag = true)
+    {
+        $this->isRemoveTrash = $flag;
 
         return $this;
     }
@@ -95,7 +104,12 @@ trait Options
             foreach ($this->optionData as $optionData) {
                 foreach ($optionData as $type => $options) {
                     if ('db' == $type) {
-                        $result = DB::table($options->dbTable)->orderBy($options->dbTableValue)->get();
+                        $query = DB::table($options->dbTable);
+                        if ($this->isRemoveTrash) {
+                            $query->whereNull('deletedAt');
+                        }
+                        $result = $query->orderBy($options->dbTableValue)->get();
+
                         foreach ($result as $row) {
                             $text = '';
                             if ($options->dbPatternFields) {
@@ -159,6 +173,7 @@ trait Options
             return null;
         }
 
+        $this->withoutTrash(false);
         $this->createOptions();
 
         if ($this->isMultiple) {

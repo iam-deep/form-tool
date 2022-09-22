@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core;
 
 use Biswadeep\FormTool\Models\AdminModel;
+use Closure;
 
 class DataModel
 {
@@ -10,6 +11,8 @@ class DataModel
     protected string $primaryId = '';
     protected string $orderBy = '';
     protected string $foreignKey = '';
+
+    protected bool $isSoftDelete = true;
 
     protected string $model = '';
 
@@ -28,6 +31,15 @@ class DataModel
         $this->primaryId = $primaryId;
         $this->orderBy = $orderBy;
         $this->foreignKey = $foreignKey;
+
+        return $this;
+    }
+
+    public function softDelete(bool $enable = true)
+    {
+        $this->isSoftDelete = $enable;
+
+        return $this;
     }
 
     public function getTableName()
@@ -50,9 +62,9 @@ class DataModel
         return $this->foreignKey ?: $this->model::$foreignKey;
     }
 
-    public function getAll()
+    public function getAll($isFromTrash = false)
     {
-        return $this->setup()::getAll();
+        return $this->setup()::getAll($isFromTrash);
     }
 
     public function getOne($id)
@@ -60,9 +72,9 @@ class DataModel
         return $this->setup()::getOne($id);
     }
 
-    public function search($searchTerm, $fields)
+    public function search($searchTerm, $fields, $isFromTrash = false)
     {
-        return $this->setup()::search($searchTerm, $fields);
+        return $this->setup()::search($searchTerm, $fields, $isFromTrash);
     }
 
     public function getWhere($id)
@@ -93,6 +105,11 @@ class DataModel
     public function deleteWhere($where)
     {
         return $this->setup()::deleteWhere($where);
+    }
+
+    public function countWhere(Closure $where = null)
+    {
+        return $this->setup()::countWhere($where);
     }
 
     private function setup()

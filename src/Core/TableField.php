@@ -154,10 +154,19 @@ class TableField
 
         $cell = CellDefinition::Other('action', '', 'Actions')->width('85px');
         if (\count($this->actions)) {
-            $this->cellList[] = $cell;
+            $this->cellList['actions'] = $cell;
         }
 
         return $cell;
+    }
+
+    public function removeActions()
+    {
+        if (isset($this->cellList['actions'])) {
+            unset($this->cellList['actions']);
+        }
+
+        return null;
     }
 
     public function create(): array

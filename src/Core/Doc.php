@@ -105,6 +105,14 @@ class Doc
         }
     }
 
+    public static function getTableFilter(string $name = null)
+    {
+        $crud = self::getCurdByName($name);
+        if ($crud) {
+            return $crud->getTable()->getFilter();
+        }
+    }
+
     public static function getTableContent(string $name = null)
     {
         $crud = self::getCurdByName($name);

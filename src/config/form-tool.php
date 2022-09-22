@@ -36,4 +36,15 @@ return [
 
     // Enable User Permission for View, Create, Edit and Delete
     'isGuarded' => true,
+
+    // Prevent direct deletion of data from database
+    // This will mark the data/row as deleted and then you can delete it permanently
+    'isSoftDelete' => true,
+
+    // This will prevent deletion of any data that have been used as foreign key in other tables
+    // You need first delete all the data linked with the foreign key id
+    'isPreventForeignKeyDelete' => true,
+
+    // This will log actions for create, edit, delete
+    'isLogActions' => true,
 ];

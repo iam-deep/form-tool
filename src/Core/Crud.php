@@ -15,6 +15,8 @@ class Crud
     private $form;
     private $table;
 
+    public $isSoftDelete = true;
+
     public function create(object $resource, $model, Closure $callback, $name = 'default')
     {
         $this->resource = $resource;
@@ -58,6 +60,14 @@ class Crud
     public function db($tableName, $primaryId = '', $orderBy = '', $foreignKey = '')
     {
         $this->model->db($tableName, $primaryId, $orderBy, $foreignKey);
+
+        return $this;
+    }
+
+    public function softDelete(bool $enable = true)
+    {
+        $this->isSoftDelete = $enable;
+        $this->model->softDelete($enable);
 
         return $this;
     }

@@ -4,15 +4,20 @@
 
 <div class="row">
     <div class="col-md-12">
+
+        {{ getTableFilter($crudName ?? null) }}
+        
+        <div class="clearfix"></div>
+
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">{{ $title }}</h3>
 
                 <div class="box-tools pull-right">
-                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;margin-right:15px;" value="" placeholder="Search" autocomplete="off">
+                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="" placeholder="Search" autocomplete="off">
 
                     @if (guard()::hasCreate())
-                        <a href="{{ url()->current() }}/create" class="btn btn-primary btn-sm btn-flat pull-right"><i class="fa fa-plus"></i> &nbsp;Add</a>
+                        <a href="{{ url()->current() }}/create" class="btn btn-primary btn-sm btn-flat pull-right" style="margin-left:15px;"><i class="fa fa-plus"></i> &nbsp;Add</a>
                     @endif
                 </div>
             </div>
@@ -45,7 +50,8 @@ const search = ($input) => {
     }
 
     $.ajax({
-        url: "{{ URL::to(url()->current().'/search') }}",
+        // TODO: (optional) need to remove "search" key from the query string
+        url: "{{ URL::to(url()->current().'/search?' . \http_build_query(request()->query())) }}",
         type: "get",
         dataType: "json",
         data: { search: input },
