@@ -99,7 +99,7 @@ class Form
     {
         $data['form'] = $this->getForm();
 
-        return view('form-tool::crud.components.form', $data);
+        return view('form-tool::form.form', $data);
     }
 
     public function getForm()

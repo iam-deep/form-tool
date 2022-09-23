@@ -211,7 +211,7 @@ class Table
         }
 
         $this->table = new \stdClass();
-        $this->table->content = view('form-tool::crud.components.table_list', $data);
+        $this->table->content = view('form-tool::list.table', $data);
         $this->table->pagination = $this->dataResult->onEachSide(2)->links();
 
         return $this->table;
@@ -266,7 +266,7 @@ class Table
 
         $data['quickFilters'] = $quickFilters;
 
-        return \view('form-tool::crud.components.table_filter', $data);
+        return \view('form-tool::list.filter', $data);
     }
 
     protected function makeFilter()
