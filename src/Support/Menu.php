@@ -144,9 +144,9 @@ class Menu
         if (isset(self::$menuBag->{$menuName}) && $menu = self::$menuBag->{$menuName}) {
             $menu->make();
 
-            $data['sideMenu'] = $menu->list;
+            $data['sidebar'] = $menu->list;
 
-            $view = $view ?? 'form-tool::components.menu';
+            $view = $view ?? 'form-tool::layouts.menu';
 
             return \view($view, $data);
         }

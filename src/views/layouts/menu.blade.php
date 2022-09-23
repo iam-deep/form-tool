@@ -1,4 +1,4 @@
-@foreach ($sideMenu as $menu)
+@foreach ($sidebar as $menu)
     @if ($menu->isParent)
         <li class="treeview @if ($menu->active) active @endif">
             <a href="#"><i class="{{ $menu->icon }}"></i> <span>{{ $menu->label }}</span>

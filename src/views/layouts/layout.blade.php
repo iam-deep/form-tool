@@ -8,7 +8,8 @@
       <!-- Sidebar Menu -->
       <ul class="sidebar-menu" data-widget="tree">
         <li class="header">MAIN NAVIGATION</li>
-        {{ getSidemenu() }}
+
+        @include('form-tool::layouts.menu')
 
         {{-- sample multi level menu
 
