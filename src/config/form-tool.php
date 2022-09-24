@@ -47,4 +47,14 @@ return [
 
     // This will log actions for create, edit, delete
     'isLogActions' => true,
+
+    // Table meta columns
+    'table_meta_columns' => [
+        'updatedBy' => 'updatedBy', // Default NULL
+        'updatedAt' => 'updatedAt', // Default NULL
+        'createdBy' => 'createdBy', // Default NULL
+        'createdAt' => 'createdAt',
+        'deletedBy' => 'deletedBy', // Default NULL
+        'deletedAt' => 'deletedAt', // Default NULL
+    ],
 ];

@@ -23,6 +23,15 @@ class Table
 
     private $isFromTrash = false;
 
+    private $tableMetaColumns = [
+        'updatedBy' => 'updatedBy',
+        'updatedAt' => 'updatedAt',
+        'createdBy' => 'createdBy',
+        'createdAt' => 'createdAt',
+        'deletedBy' => 'deletedBy',
+        'deletedAt' => 'deletedAt',
+    ];
+
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
         $this->resource = $resource;
@@ -120,7 +129,8 @@ class Table
         $tableField->datetime('createdAt', 'Created At');
 
         if ($this->isFromTrash) {
-            $tableField->datetime('deletedAt', 'Deleted At');
+            $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+            $tableField->datetime($metaColumns['deletedAt'] ?? 'deletedAt', 'Deleted At');
         } else {
             $tableField->actions(['edit', 'delete']);
         }
@@ -138,7 +148,8 @@ class Table
             // Remove actions if we are listing trash data
             $this->field->removeActions();
 
-            $this->field->datetime('deletedAt', 'Deleted At');
+            $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+            $this->field->datetime($metaColumns['deletedAt'] ?? 'deletedAt', 'Deleted At');
         }
 
         $data['headings'] = $data['tableData'] = [];
@@ -237,6 +248,8 @@ class Table
 
     protected function createFilter()
     {
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+
         $quickFilters = [
             'all' => [
                 'href' => $this->url,
@@ -260,11 +273,11 @@ class Table
         foreach ($quickFilters as $key => &$row) {
             if ($key == 'all') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) {
-                    $query->whereNull($class::$columnDeletedAt);
+                    $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
                 });
             } elseif ($key == 'trash') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) {
-                    $query->whereNotNull($class::$columnDeletedAt);
+                    $query->whereNotNull($metaColumns['deletedAt'] ?? 'deletedAt');
                 });
             }
 

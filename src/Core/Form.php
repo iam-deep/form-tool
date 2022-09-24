@@ -37,6 +37,15 @@ class Form
     private $crud = null;
     private $options = null;
 
+    private $tableMetaColumns = [
+        'updatedBy' => 'updatedBy',
+        'updatedAt' => 'updatedAt',
+        'createdBy' => 'createdBy',
+        'createdAt' => 'createdAt',
+        'deletedBy' => 'deletedBy',
+        'deletedAt' => 'deletedAt',
+    ];
+
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
         $this->resource = $resource;
@@ -517,9 +526,11 @@ class Form
         $postData = $this->postData;
         $this->postData = [];
 
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+
         if ($this->formStatus == FormStatus::Store) {
-            $this->postData['createdBy'] = Auth::user() ? Auth::user()->userId : 0;
-            $this->postData['createdAt'] = \date('Y-m-d H:i:s');
+            $this->postData[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::user() ? Auth::user()->userId : 0;
+            $this->postData[$metaColumns['createdAt'] ?? 'createdAt'] = \date('Y-m-d H:i:s');
         } else {
             if ($id) {
                 $this->editId = $id;
@@ -534,8 +545,8 @@ class Form
                 $this->oldData = $this->model->getOne($this->editId);
             }
 
-            $this->postData['updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
-            $this->postData['updatedAt'] = \date('Y-m-d H:i:s');
+            $this->postData[$metaColumns['updatedBy'] ?? 'updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
+            $this->postData[$metaColumns['updatedAt'] ?? 'updatedAt'] = \date('Y-m-d H:i:s');
         }
 
         $this->formatMultiple();
@@ -695,9 +706,11 @@ class Form
             }
         }
 
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+
         $data = [];
-        $data['deletedBy'] = Auth::user() ? Auth::user()->userId : 0;
-        $data['deletedAt'] = \date('Y-m-d H:i:s');
+        $data[$metaColumns['deletedBy'] ?? 'deletedBy'] = Auth::user() ? Auth::user()->userId : 0;
+        $data[$metaColumns['deletedAt'] ?? 'deletedAt'] = \date('Y-m-d H:i:s');
 
         $affected = $this->model->updateOne($id, $data);
 
@@ -720,20 +733,21 @@ class Form
             }
         }
 
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+        $deletedAt = $metaColumns['deletedBy'] ?? 'deletedBy';
+
         // TODO:
         // validations
         //      permission to delete
         //      can delete this row
 
-        $result = $this->model->getOne($id);
-
         if ($result) {
             if ($this->crud->isSoftDelete) {
-                if (! \property_exists($result, 'deletedAt')) {
-                    throw new \Exception('Column "deletedAt" not found!');
+                if (! \property_exists($result, $deletedAt)) {
+                    throw new \Exception('Column "$deletedAt" not found!');
                 }
 
-                if ($result->deletedAt === null) {
+                if ($result->{$deletedAt} === null) {
                     return redirect($this->url)->with('error', 'Soft delete is enabled for this CRUD. You need to mark as delete first then only you can delete it permanently!');
                 }
             }

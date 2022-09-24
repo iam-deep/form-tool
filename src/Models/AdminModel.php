@@ -17,7 +17,6 @@ class AdminModel extends Model
     public static $foreignKey = '';
 
     public static $isSoftDelete = true;
-    public static $columnDeletedAt = 'deletedAt';
 
     public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
     {
@@ -29,12 +28,15 @@ class AdminModel extends Model
 
     public static function getAll($isFromTrash = false)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
+
         $query = DB::table(static::$tableName);
         if (static::$isSoftDelete) {
             if ($isFromTrash) {
-                $query->whereNotNull(static::$columnDeletedAt);
+                $query->whereNotNull($deletedAt);
             } else {
-                $query->whereNull(static::$columnDeletedAt);
+                $query->whereNull($deletedAt);
             }
         }
 
@@ -43,9 +45,12 @@ class AdminModel extends Model
 
     public static function getOne($id)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
         $query = DB::table(static::$tableName);
         if (static::$isSoftDelete) {
-            $query->whereNull(static::$columnDeletedAt);
+            $query->whereNull($deletedAt);
         }
 
         return $query->where(static::$primaryId, $id)->first();
@@ -53,6 +58,9 @@ class AdminModel extends Model
 
     public static function search($searchTerm, $fields, $isFromTrash = false)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
         $query = DB::table(static::$tableName);
         $searchTerm = array_filter(\explode(' ', $searchTerm));
 
@@ -66,9 +74,9 @@ class AdminModel extends Model
 
         if (static::$isSoftDelete) {
             if ($isFromTrash) {
-                $query->whereNotNull(static::$columnDeletedAt);
+                $query->whereNotNull($deletedAt);
             } else {
-                $query->whereNull(static::$columnDeletedAt);
+                $query->whereNull($deletedAt);
             }
         }
 
@@ -77,9 +85,12 @@ class AdminModel extends Model
 
     public static function getWhere($where)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
         $query = DB::table(static::$tableName);
         if (static::$isSoftDelete) {
-            $query->whereNull(static::$columnDeletedAt);
+            $query->whereNull($deletedAt);
         }
 
         return $query->orderBy(static::$orderBy, 'asc')->where($where)->get();
@@ -111,10 +122,13 @@ class AdminModel extends Model
 
     public static function updateOne($id, $data)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
         // Let's prevent update of deleted data
         $query = DB::table(static::$tableName);
         if (static::$isSoftDelete) {
-            $query->whereNull(static::$columnDeletedAt);
+            $query->whereNull($deletedAt);
         }
 
         $affected = $query->where(static::$primaryId, $id)->update($data);
@@ -124,11 +138,14 @@ class AdminModel extends Model
 
     public static function deleteOne($id)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
         // Let's prevent delete of non-deleted data
         // Data those are not in the trash should not be deleted
         $query = DB::table(static::$tableName);
         if (static::$isSoftDelete) {
-            $query->whereNotNull(static::$columnDeletedAt);
+            $query->whereNotNull($deletedAt);
         }
 
         $affected = $query->where(static::$primaryId, $id)->delete();

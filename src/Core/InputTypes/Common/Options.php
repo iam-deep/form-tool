@@ -99,6 +99,8 @@ trait Options
             return;
         }
 
+        $metaColumns = \config('form-tool.table_meta_columns');
+
         $this->options = new \stdClass();
         if ($this->optionData) {
             foreach ($this->optionData as $optionData) {
@@ -106,7 +108,7 @@ trait Options
                     if ('db' == $type) {
                         $query = DB::table($options->dbTable);
                         if ($this->isRemoveTrash) {
-                            $query->whereNull('deletedAt');
+                            $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
                         }
                         $result = $query->orderBy($options->dbTableValue)->get();
 
