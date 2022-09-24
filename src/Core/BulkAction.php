@@ -26,6 +26,5 @@ class BulkAction
 
     public function delete()
     {
-
     }
 }

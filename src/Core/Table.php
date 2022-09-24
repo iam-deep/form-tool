@@ -35,7 +35,7 @@ class Table
 
     public function create(Closure $callback)
     {
-        $tableField = new TableField($this);        
+        $tableField = new TableField($this);
         $tableField->bulkActionCheckbox();
 
         $callback($tableField);
@@ -162,7 +162,7 @@ class Table
                     $viewData->data = ++$i;
                     $viewRow->columns[] = $viewData;
                     continue;
-                } else if ($cell->fieldType == '_bulk') {
+                } elseif ($cell->fieldType == '_bulk') {
                     $viewData->data = '<input type="checkbox" class="bulk" name="bulk[]" value="'.($value->{$primaryId} ?? '').'">';
                     $viewRow->columns[] = $viewData;
                     continue;
