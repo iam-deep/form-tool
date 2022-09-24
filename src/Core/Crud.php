@@ -57,9 +57,9 @@ class Crud
         return $this;
     }
 
-    public function db($tableName, $primaryId = '', $orderBy = '', $foreignKey = '')
+    public function db($tableName, $primaryId = '', $token = '', $orderBy = '', $foreignKey = '')
     {
-        $this->model->db($tableName, $primaryId, $orderBy, $foreignKey);
+        $this->model->db($tableName, $primaryId, $token, $orderBy, $foreignKey);
 
         return $this;
     }
@@ -72,7 +72,7 @@ class Crud
         return $this;
     }
 
-    //region FormMethods
+    //region FormGetter
 
     /*public function getHTMLForm()
     {
@@ -97,23 +97,24 @@ class Crud
     public function destroy($id = null)
     {
         return $this->form->destroy($id);
-    }
-
-    public function doNoSave($fields)
-    {
-        $this->form->doNotSave();
     }*/
+
+    //endregion
 
     public function __call($method, $parameters)
     {
-        //$class_methods = get_class_methods($this->form);
+        /*if (\method_exists($this->form, $method)) {
+            $this->form->{$method}(...$parameters);
+        } else if (\method_exists($this->model, $method)) {
+            $this->model->{$method}(...$parameters);
+        } else if (\method_exists($this->table, $method)) {
+            $this->table->{$method}(...$parameters);
+        } else {
+            throw new \BadMethodCallException("$method not found in class Crud.");
+        }*/
 
         return $this->form->{$method}(...$parameters);
-
-        //return call_user_func_array(array($this->form, $name), $parameters);
     }
-
-    //endregion
 
     //region TableMethod
 
@@ -149,5 +150,10 @@ class Crud
     public function getTable()
     {
         return $this->table;
+    }
+
+    public function getModel()
+    {
+        return $this->model;
     }
 }

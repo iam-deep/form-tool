@@ -67,7 +67,7 @@ class Table
         return $this;
     }
 
-    public function search($searchTerm)
+    public function search()
     {
         $this->makeFilter();
 
@@ -140,7 +140,7 @@ class Table
 
     protected function createList(): object
     {
-        $primaryId = $this->model->getPrimaryId();
+        $primaryId = $this->model->isToken() ? $this->model->getToken() : $this->model->getPrimaryId();
 
         if (! $this->field) {
             $this->setDefaultField();

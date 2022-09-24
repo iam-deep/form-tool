@@ -13,18 +13,19 @@ class AdminModel extends Model
 
     public static $tableName = '';
     public static $primaryId = 'id';
+    public static $token = 'token';
     public static $orderBy = 'id';
     public static $foreignKey = '';
 
     public static $isSoftDelete = true;
 
-    public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
+    /*public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
     {
         static::$tableName = $tableName ?: static::$tableName;
         static::$primaryId = $primaryId ?: static::$primaryId;
         static::$orderBy = $orderBy ?: static::$orderBy;
         static::$foreignKey = $foreignKey ?: static::$foreignKey;
-    }
+    }*/
 
     public static function getAll($isFromTrash = false)
     {
@@ -43,7 +44,7 @@ class AdminModel extends Model
         return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }
 
-    public static function getOne($id)
+    public static function getOne($id, $isToken = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
@@ -53,7 +54,13 @@ class AdminModel extends Model
             $query->whereNull($deletedAt);
         }
 
-        return $query->where(static::$primaryId, $id)->first();
+        if ($isToken) {
+            $query->where(static::$token, $id);
+        } else {
+            $query->where(static::$primaryId, $id);
+        }
+
+        return $query->first();
     }
 
     public static function search($searchTerm, $fields, $isFromTrash = false)
@@ -83,25 +90,18 @@ class AdminModel extends Model
         return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }
 
-    public static function getWhere($where)
+    public static function getWhere($where = null)
     {
-        $metaColumns = \config('form-tool.table_meta_columns');
-        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
-
         $query = DB::table(static::$tableName);
-        if (static::$isSoftDelete) {
-            $query->whereNull($deletedAt);
-        }
+        self::applyWhere($query, $where);
 
-        return $query->orderBy(static::$orderBy, 'asc')->where($where)->get();
+        return $query->orderByRaw(1, 'asc')->get();
     }
 
-    public static function countWhere(Closure $where = null)
+    public static function countWhere($where = null)
     {
         $query = DB::table(static::$tableName);
-        if ($where) {
-            $where($query, AdminModel::class);
-        }
+        self::applyWhere($query, $where);
 
         return $query->count();
     }
@@ -120,7 +120,7 @@ class AdminModel extends Model
         }
     }
 
-    public static function updateOne($id, $data)
+    public static function updateOne($id, $data, $isToken = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
@@ -131,12 +131,18 @@ class AdminModel extends Model
             $query->whereNull($deletedAt);
         }
 
-        $affected = $query->where(static::$primaryId, $id)->update($data);
+        if ($isToken) {
+            $query->where(static::$token, $id);
+        } else {
+            $query->where(static::$primaryId, $id);
+        }
+
+        $affected = $query->update($data);
 
         return $affected;
     }
 
-    public static function deleteOne($id)
+    public static function deleteOne($id, $isToken = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
@@ -148,15 +154,33 @@ class AdminModel extends Model
             $query->whereNotNull($deletedAt);
         }
 
-        $affected = $query->where(static::$primaryId, $id)->delete();
+        if ($isToken) {
+            $query->where(static::$token, $id);
+        } else {
+            $query->where(static::$primaryId, $id);
+        }
+
+        $affected = $query->delete();
 
         return $affected;
     }
 
-    public static function destroyWhere($where)
+    public static function destroyWhere($where = null)
     {
-        $affected = DB::table(static::$tableName)->where($where)->delete();
+        $query = DB::table(static::$tableName);
+        self::applyWhere($query, $where);
+
+        $affected = $query->delete();
 
         return $affected;
+    }
+
+    protected static function applyWhere($query, $where)
+    {
+        if ($where instanceof Closure) {
+            $where($query, static::class);
+        } else if ($where) {
+            $query->where($where);
+        }
     }
 }

@@ -58,7 +58,7 @@ class TextType extends BaseInputType
                     $model->getTableName(),
                     $this->dbField,
                     $this->bluePrint->form->getId(),
-                    $model->getPrimaryId()
+                    ($model->isToken() ? $model->getToken() : $model->getPrimaryId())
                 );
             }
         }

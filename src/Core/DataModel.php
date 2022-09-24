@@ -3,15 +3,18 @@
 namespace Biswadeep\FormTool\Core;
 
 use Biswadeep\FormTool\Models\AdminModel;
+use Biswadeep\FormTool\Support\Random;
 use Closure;
 
 class DataModel
 {
     protected string $tableName = '';
     protected string $primaryId = '';
+    protected string $token = '';
     protected string $orderBy = '';
     protected string $foreignKey = '';
 
+    protected bool $isToken = false;
     protected bool $isSoftDelete = true;
 
     protected string $model = '';
@@ -25,22 +28,62 @@ class DataModel
         }
     }
 
-    public function db($tableName, $primaryId = 'id', $orderBy = '', $foreignKey = '')
+    //region Options
+
+    public function db($tableName, $primaryId = 'id', $token = '', $orderBy = '', $foreignKey = '')
     {
-        $this->tableName = $tableName;
-        $this->primaryId = $primaryId;
-        $this->orderBy = $orderBy;
-        $this->foreignKey = $foreignKey;
+        $this->tableName = \trim($tableName);
+        $this->primaryId = \trim($primaryId);
+        $this->token = \trim($token);
+        $this->orderBy = \trim($orderBy);
+        $this->foreignKey = \trim($foreignKey);
+
+        if ($this->token) {
+            $this->isToken = true;
+        }
 
         return $this;
     }
 
-    public function softDelete(bool $enable = true)
+    public function table(string $tableName)
     {
-        $this->isSoftDelete = $enable;
+        $this->tableName = \trim($tableName);
 
         return $this;
     }
+
+    public function id(string $primaryId)
+    {
+        $this->primaryId = \trim($primaryId);
+
+        return $this;
+    }
+
+    public function token(string $tokenColumn = 'token')
+    {
+        $this->isToken = true;
+        $this->token = \trim($tokenColumn);
+
+        return $this;
+    }
+
+    public function orderBy(string $orderByColumn)
+    {
+        $this->orderBy = \trim($orderByColumn);
+
+        return $this;
+    }
+
+    public function foreignKey(string $foreignKeyColumn)
+    {
+        $this->foreignKey = \trim($foreignKeyColumn);
+
+        return $this;
+    }
+
+    //endregion
+
+    //region GettersAndSetters
 
     public function getTableName()
     {
@@ -50,6 +93,16 @@ class DataModel
     public function getPrimaryId()
     {
         return $this->primaryId ?: $this->model::$primaryId;
+    }
+
+    public function isToken()
+    {
+        return $this->isToken;
+    }
+
+    public function getToken()
+    {
+        return $this->token ?: $this->model::$token;
     }
 
     public function getOrderBy()
@@ -62,14 +115,21 @@ class DataModel
         return $this->foreignKey ?: $this->model::$foreignKey;
     }
 
+    public function softDelete(bool $enable = true)
+    {
+        $this->isSoftDelete = $enable;
+    }
+
+    //endregion
+
     public function getAll($isFromTrash = false)
     {
         return $this->setup()::getAll($isFromTrash);
     }
 
-    public function getOne($id)
+    public function getOne($id, $isToken = null)
     {
-        return $this->setup()::getOne($id);
+        return $this->setup()::getOne($id, $isToken ?? $this->isToken);
     }
 
     public function search($searchTerm, $fields, $isFromTrash = false)
@@ -77,13 +137,17 @@ class DataModel
         return $this->setup()::search($searchTerm, $fields, $isFromTrash);
     }
 
-    public function getWhere($id)
+    public function getWhere($where = null)
     {
-        return $this->setup()::getWhere($id);
+        return $this->setup()::getWhere($where);
     }
 
     public function add($data)
     {
+        if ($this->isToken) {
+            $data[$this->token] = Random::unique($this);
+        }
+
         return $this->setup()::add($data);
     }
 
@@ -92,29 +156,35 @@ class DataModel
         $this->setup()::addMany($data);
     }
 
-    public function updateOne($id, $data)
+    public function updateOne($id, $data, $isToken = null)
     {
-        return $this->setup()::updateOne($id, $data);
+        return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
     }
 
-    public function deleteOne($id)
+    public function deleteOne($id, $isToken = null)
     {
-        return $this->setup()::deleteOne($id);
+        return $this->setup()::deleteOne($id, $isToken ?? $this->isToken);
     }
 
-    public function deleteWhere($where)
+    public function deleteWhere($where = null)
     {
         return $this->setup()::deleteWhere($where);
     }
 
-    public function countWhere(Closure $where = null)
+    public function countWhere($where = null)
     {
         return $this->setup()::countWhere($where);
     }
 
     private function setup()
     {
-        $this->model::setup($this->tableName, $this->primaryId, $this->orderBy, $this->foreignKey);
+        $this->model::$tableName = $this->tableName ?: $this->model::$tableName;
+        $this->model::$primaryId = $this->primaryId ?: $this->model::$primaryId;
+        $this->model::$token = $this->token ?: $this->model::$token;
+        $this->model::$orderBy = $this->orderBy ?: $this->model::$orderBy;
+        $this->model::$foreignKey = $this->foreignKey ?: $this->model::$foreignKey;
+
+        $this->model::$isSoftDelete = $this->isSoftDelete;
 
         return $this->model;
     }
