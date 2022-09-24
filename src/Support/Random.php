@@ -8,14 +8,14 @@ class Random
 {
     public static function create(int $length = 32)
     {
-        if (\function_exists("random_bytes")) {
+        if (\function_exists('random_bytes')) {
             $bytes = \random_bytes(ceil($length / 2));
-            return \substr(\bin2hex($bytes), 0, $length);
 
-        } else if (\function_exists("openssl_random_pseudo_bytes")) {
+            return \substr(\bin2hex($bytes), 0, $length);
+        } elseif (\function_exists('openssl_random_pseudo_bytes')) {
             $bytes = \openssl_random_pseudo_bytes(ceil($length / 2));
-            return \substr(\bin2hex($bytes), 0, $length);
 
+            return \substr(\bin2hex($bytes), 0, $length);
         } else {
             // No cryptographically secure random function available, Let's generate custom
 
@@ -25,7 +25,7 @@ class Random
 
     public static function custom(int $length = 32, string $characters = null)
     {
-        $defaultCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        $defaultCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $characters = $characters ?: $defaultCharacters;
 
         $random = '';
@@ -51,12 +51,12 @@ class Random
     }
 
     /**
-     * Create token for all rows of table
+     * Create token for all rows of table.
      *
      * This method will check full DB table and create unique token for each row if token is empty or null
      *
-     * @param DataModel $model Provide DataModel which you want to modify
-     * @param int $length Length of token default is 32
+     * @param  DataModel  $model  Provide DataModel which you want to modify
+     * @param  int  $length  Length of token default is 32
      * @return null
      **/
     public static function createTokenForTable(DataModel $model, int $length = 32)
@@ -69,7 +69,7 @@ class Random
             if ($row->{$token}) {
                 continue;
             }
-            
+
             $random = self::unique($model, $length);
 
             $model->updateOne($row->{$primaryId}, [$token => $random]);

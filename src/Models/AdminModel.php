@@ -179,7 +179,7 @@ class AdminModel extends Model
     {
         if ($where instanceof Closure) {
             $where($query, static::class);
-        } else if ($where) {
+        } elseif ($where) {
             $query->where($where);
         }
     }
