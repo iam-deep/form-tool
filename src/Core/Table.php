@@ -126,10 +126,11 @@ class Table
             }
         }
 
-        $tableField->datetime('createdAt', 'Created At');
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+
+        $tableField->datetime($metaColumns['createdAt'] ?? 'createdAt', 'Created At');
 
         if ($this->isFromTrash) {
-            $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
             $tableField->datetime($metaColumns['deletedAt'] ?? 'deletedAt', 'Deleted At');
         } else {
             $tableField->actions(['edit', 'delete']);
