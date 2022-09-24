@@ -272,11 +272,11 @@ class Table
         $i = 0;
         foreach ($quickFilters as $key => &$row) {
             if ($key == 'all') {
-                $row['count'] = $this->model->countWhere(function ($query, $class) {
+                $row['count'] = $this->model->countWhere(function ($query, $class) use ($metaColumns) {
                     $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
                 });
             } elseif ($key == 'trash') {
-                $row['count'] = $this->model->countWhere(function ($query, $class) {
+                $row['count'] = $this->model->countWhere(function ($query, $class) use ($metaColumns) {
                     $query->whereNotNull($metaColumns['deletedAt'] ?? 'deletedAt');
                 });
             }
