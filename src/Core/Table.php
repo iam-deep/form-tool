@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core;
 
 use Biswadeep\FormTool\Core\InputTypes\InputType;
+use Closure;
 use Illuminate\Support\Arr;
 
 class Table
@@ -30,6 +31,17 @@ class Table
 
         $this->request = request();
         $this->url = config('form-tool.adminURL').'/'.$resource->route;
+    }
+
+    public function create(Closure $callback)
+    {
+        $tableField = new TableField($this);        
+        $tableField->bulkActionCheckbox();
+
+        $callback($tableField);
+        $this->setTableField($tableField);
+
+        return $this;
     }
 
     public function setTableField(TableField $tableField): Table
@@ -72,6 +84,7 @@ class Table
             return $json;
         }
 
+        $searchTerm = $this->request->query->get('search');
         $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $this->isFromTrash);
 
         $table = $this->createList();
@@ -96,6 +109,7 @@ class Table
     {
         $tableField = new TableField($this);
 
+        $tableField->bulkActionCheckbox();
         $tableField->slNo();
         foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint) {
@@ -146,6 +160,10 @@ class Table
 
                 if ($cell->fieldType == '_slno') {
                     $viewData->data = ++$i;
+                    $viewRow->columns[] = $viewData;
+                    continue;
+                } else if ($cell->fieldType == '_bulk') {
+                    $viewData->data = '<input type="checkbox" class="bulk" name="bulk[]" value="'.($value->{$primaryId} ?? '').'">';
                     $viewRow->columns[] = $viewData;
                     continue;
                 }
@@ -265,6 +283,10 @@ class Table
         }
 
         $data['quickFilters'] = $quickFilters;
+
+        $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
+        $bulkAction = new BulkAction();
+        $data['bulkActions'] = $bulkAction->getActions($bulkGroup);
 
         return \view('form-tool::list.filter', $data);
     }

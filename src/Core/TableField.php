@@ -16,14 +16,6 @@ class TableField
         $this->table = $table;
     }
 
-    public function slNo(string $label = null): CellDefinition
-    {
-        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px');
-        $this->cellList[] = $cell;
-
-        return $cell;
-    }
-
     public function default(string $dbField, string $label = null)
     {
         $input = $this->table->getBluePrint()->getInputTypeByDbField($dbField);
@@ -167,6 +159,22 @@ class TableField
         }
 
         return null;
+    }
+
+    public function bulkActionCheckbox()
+    {
+        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" id="selectAll">')->width('50px');
+        $this->cellList[] = $cell;
+
+        return $cell;
+    }
+
+    public function slNo(string $label = null): CellDefinition
+    {
+        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px');
+        $this->cellList[] = $cell;
+
+        return $cell;
     }
 
     public function create(): array

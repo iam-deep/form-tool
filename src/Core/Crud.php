@@ -117,14 +117,6 @@ class Crud
 
     //region TableMethod
 
-    public function createTable(Closure $callback)
-    {
-        $tableField = new TableField($this->table);
-        $callback($tableField);
-
-        return $this->table->setTableField($tableField);
-    }
-
     public function getTableContent()
     {
         return $this->table->getContent();
@@ -144,9 +136,7 @@ class Crud
 
     public function search()
     {
-        $searchTerm = \request()->query->get('search');
-
-        return $this->table->search($searchTerm);
+        return $this->table->search();
     }
 
     //endregion

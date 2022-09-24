@@ -101,7 +101,7 @@ class Doc
     {
         $crud = self::getCurdByName($name);
         if ($crud) {
-            return $crud->createTable($callback);
+            return $crud->getTable()->create($callback);
         }
     }
 
