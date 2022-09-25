@@ -13,7 +13,7 @@ class AuthController extends Controller
 {
     public function index()
     {
-        return redirect()->route('login');
+        return redirect(config('form-tool.adminURL').'/login');
     }
 
     public function login(Request $request)
@@ -53,7 +53,7 @@ class AuthController extends Controller
             return redirect($loginRedirect);
         }
 
-        return redirect()->route('login')->with('error', 'Your email or password is incorrect!')->withInput($request->except('password'));
+        return redirect(config('form-tool.adminURL').'/login')->with('error', 'Your email or password is incorrect!')->withInput($request->except('password'));
     }
 
     public function logout()
@@ -63,6 +63,6 @@ class AuthController extends Controller
         //TODO: Remove testing
         Session::flush();
 
-        return redirect()->route('login')->with('success', 'You have been successfully logged out!');
+        return redirect(config('form-tool.adminURL').'/login')->with('success', 'You have been successfully logged out!');
     }
 }

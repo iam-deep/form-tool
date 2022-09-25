@@ -8,12 +8,12 @@ return [
     'loginRedirect' => '/dashboard',
 
     // Set root upload directory inside public folder
-    // Let's assume we named it 'uploads'
-    'uploadPath' => 'uploads',
+    // Let's assume we named it 'storage'
+    'uploadPath' => 'storage',
 
     // Upload files in date directories. Like month-year directory
     // It will create one more sub directory under the root directory, uploadPath or sub directory
-    // Then our full upload path will be uploads/07-2022/ or uploads/sub-path/07-2022
+    // Then our full upload path will be storage/07-2022/ or storage/sub-path/07-2022
     // Leave blank if you don't want to use
     // Possible values: date time format or blank
     'uploadSubDirFormat' => 'm-Y',

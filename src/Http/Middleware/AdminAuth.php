@@ -39,6 +39,6 @@ class AdminAuth
 
         Session::pull('user');
 
-        return redirect()->route('login')->with('error', $msg);
+        return redirect(config('form-tool.adminURL').'/login')->with('error', $msg);
     }
 }

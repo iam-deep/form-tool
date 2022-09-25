@@ -169,7 +169,7 @@ class Guard
         // If we have any issues then just logout the user
         Session::pull('user');
 
-        return redirect()->route('login')->with('error', 'Something went wrong! Please loin again.');
+        return redirect(config('form-tool.adminURL').'/login')->with('error', 'Something went wrong! Please loin again.');
     }
 
     public static function abort()
