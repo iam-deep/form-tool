@@ -35,14 +35,14 @@ class BluePrint
 
     public function getList(): array
     {
-        return $this->_dataTypeList;
+        return $this->dataTypeList;
     }
 
     public function text(string $dbField, string $label = null): InputTypes\TextType
     {
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -51,7 +51,7 @@ class BluePrint
     {
         $inputType = new InputTypes\PasswordType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -60,7 +60,7 @@ class BluePrint
     {
         $inputType = new InputTypes\HiddenType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -69,7 +69,7 @@ class BluePrint
     {
         $inputType = new InputTypes\FileType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -78,7 +78,7 @@ class BluePrint
     {
         $inputType = new InputTypes\ImageType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -87,7 +87,7 @@ class BluePrint
     {
         $inputType = new InputTypes\TextareaType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -96,7 +96,7 @@ class BluePrint
     {
         $inputType = new InputTypes\DateType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -105,7 +105,7 @@ class BluePrint
     {
         $inputType = new InputTypes\TimeType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -114,7 +114,7 @@ class BluePrint
     {
         $inputType = new InputTypes\DateTimeType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -123,7 +123,7 @@ class BluePrint
     {
         $inputType = new InputTypes\SelectType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -132,7 +132,7 @@ class BluePrint
     {
         $inputType = new InputTypes\EditorType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -141,7 +141,7 @@ class BluePrint
     {
         $inputType = new InputTypes\CheckboxType();
         $inputType->init($this, $dbField, $label);
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
 
         return $inputType;
     }
@@ -158,7 +158,7 @@ class BluePrint
             throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
         }
 
-        $this->_dataTypeList[] = $inputType;
+        $this->dataTypeList[] = $inputType;
         $inputType->init($this, $dbField, $label);
 
         return $inputType;
@@ -179,9 +179,9 @@ class BluePrint
         $fields = Arr::wrap($dbFields);
 
         foreach ($fields as $field) {
-            foreach ($this->_dataTypeList as $key => $type) {
+            foreach ($this->dataTypeList as $key => $type) {
                 if ($type->getDbField() == $field) {
-                    unset($this->_dataTypeList[$key]);
+                    unset($this->dataTypeList[$key]);
                     break;
                 }
             }
@@ -190,7 +190,7 @@ class BluePrint
 
     public function getInputTypeByDbField(string $dbField)
     {
-        foreach ($this->_dataTypeList as $input) {
+        foreach ($this->dataTypeList as $input) {
             if (! $input instanceof BluePrint && $input->getDbField() == $dbField) {
                 return $input;
             }
@@ -226,7 +226,7 @@ class BluePrint
 
         $field($subBluePrint[$dbField]);
 
-        $this->_dataTypeList[] = $subBluePrint[$dbField];
+        $this->dataTypeList[] = $subBluePrint[$dbField];
 
         return $subBluePrint[$dbField];
     }
@@ -362,7 +362,7 @@ class BluePrint
     public function toObj($type)
     {
         $data['fields'] = [];
-        foreach ($this->_dataTypeList as $fieldType) {
+        foreach ($this->dataTypeList as $fieldType) {
             $data['fields'][] = $fieldType->toObj($type);
         }
 

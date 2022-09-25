@@ -86,4 +86,4 @@ $(document).on("input", "#tableSearch", function() {
 });
 </script>
 
-@stop
+@endsection

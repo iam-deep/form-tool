@@ -25,4 +25,4 @@ $form = getHTMLForm($crudName ?? null);
 
 {!! getFormJs(); !!}
 
-@stop
+@endsection
