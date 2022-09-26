@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+
 class TimeType extends DateTimeType
 {
     public int $type = InputType::Time;

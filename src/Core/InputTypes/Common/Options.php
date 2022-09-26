@@ -2,7 +2,7 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes\Common;
 
-use Biswadeep\FormTool\Core\InputTypes\InputType;
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;
 

@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+
 class HiddenType extends BaseInputType
 {
     public int $type = InputType::Hidden;

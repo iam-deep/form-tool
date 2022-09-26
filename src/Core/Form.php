@@ -2,7 +2,7 @@
 
 namespace Biswadeep\FormTool\Core;
 
-use Biswadeep\FormTool\Core\InputTypes\InputType;
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
 
 abstract class FormStatus
@@ -116,24 +116,30 @@ class Form
         $data = new \stdClass();
 
         $data->fields = new \stdClass();
+
         foreach ($this->bluePrint->getList() as $input) {
             $html = '';
             if ($input instanceof BluePrint) {
                 $html .= '<div class="form-group"><label>'.$input->label.'</label>';
                 $html .= $this->getMultipleFields($input);
                 $html .= '</div>';
+
+                $data->fields->{$input->getKey()} = $html;
             } else {
                 $html = $input->getHTML();
-            }
 
-            $data->fields->{$input->getDbField()} = $html;
+                $data->fields->{$input->getDbField()} = $html;
+            }
         }
 
         $isEdit = $this->formStatus == FormStatus::Edit;
 
         $data->isEdit = $isEdit;
+
+        $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : $this->resultData->{$this->model->primaryId()};
+
         if ($isEdit) {
-            $data->action = config('form-tool.adminURL').'/'.$this->resource->route.'/'.$this->editId;
+            $data->action = config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId;
         } else {
             $data->action = config('form-tool.adminURL').'/'.$this->resource->route;
         }
@@ -177,11 +183,13 @@ class Form
         $data .= '<th></th></tr></thead><tbody>';
 
         //Check if any session data exists
-        $field = $model->getList()[0]->getDbField();
-        $val = old($key.'.'.$field);
         $totalDataInSession = 0;
-        if ($val && \is_array($val)) {
-            $totalDataInSession = \count($val);
+        if (count($model->getList()) > 0) {
+            $field = $model->getList()[0]->getDbField();
+            $val = old($key.'.'.$field);
+            if ($val && \is_array($val)) {
+                $totalDataInSession = \count($val);
+            }
         }
 
         // Let's get data for multiple fields if its Edit
@@ -313,12 +321,13 @@ class Form
             }
         }
 
-        $this->editId = $id;
-
         $this->resultData = $this->model->getOne($id);
         if (! $this->resultData) {
             abort(404);
         }
+
+        // Get the primary id as $id can be token
+        $this->editId = $this->resultData->{$this->model->getPrimaryId()};
 
         foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint && isset($this->resultData->{$input->getDbField()})) {
@@ -385,6 +394,8 @@ class Form
             throw new \Exception('Old data not found for ID: '.$this->editId);
         }
 
+        $this->editId = $this->oldData->{$this->model->getPrimaryId()};
+
         // TODO:
         // validations
         //      permission to update
@@ -395,7 +406,7 @@ class Form
             return $result;
         }
 
-        $affected = $this->model->updateOne($this->editId, $this->postData);
+        $affected = $this->model->updateOne($this->editId, $this->postData, false);
 
         if ($affected > 0) {
             $this->afterSave();
@@ -415,7 +426,7 @@ class Form
             return;
         }
 
-        $result = $this->model->getOne($this->editId);
+        $result = $this->model->getOne($this->editId, false);
         foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
@@ -450,17 +461,33 @@ class Form
 
                 $foreignKey = $model::$foreignKey;
             }
+            
 
             $data = [];
-            if ($this->request->get($input->getKey()) && \is_array($this->request->get($input->getKey()))) {
-                foreach ($this->request->get($input->getKey()) as $row) {
+            if ($this->request->post($input->getKey()) && \is_array($this->request->post($input->getKey()))) {
+                foreach ($this->request->post($input->getKey()) as $row) {
                     $dataRow = [];
                     foreach ($input->getList() as $field) {
+                        $dbField = $field->getDbField();
 
                         // If we don't have a postdata for an field like for an optional file field
-                        //$this->postData[$dbField] = $this->postData[$dbField] ?? null;
+                        $dataRow[$dbField] = $row[$dbField] ?? null;
 
-                        $dataRow[$field->getDbField()] = $row[$field->getDbField()] ?? null;
+                        $response = null;
+                        if ($this->formStatus == FormStatus::Store) {
+                            $response = $field->beforeStore((object) $row);
+                        } else {
+                            //dd($this->request->post($input->getKey()));
+                            $response = $field->beforeUpdate((object) $row, (object) $row);
+                        }
+            
+                        if ($response !== null) {
+                            $dataRow[$dbField] = $response;
+                        }
+            
+                        if (! $dataRow[$dbField] && $field->getDefaultValue() !== null) {
+                            $dataRow[$dbField] = $field->getDefaultValue();
+                        }
                     }
 
                     $dataRow[$foreignKey] = $this->editId;
@@ -494,7 +521,7 @@ class Form
                 continue;
             }
 
-            $newValue = $input->beforeValidation($this->request->get($input->getDbField()));
+            $newValue = $input->beforeValidation($this->request->post($input->getDbField()));
             if ($newValue !== null) {
                 $merge[$input->getDbField()] = $newValue;
             }
@@ -569,7 +596,7 @@ class Form
         }*/
 
         foreach ($this->bluePrint->getList() as $input) {
-            $dbField = $input->getDbField();
+            $dbField = $input instanceof BluePrint ? $input->getKey() : $input->getDbField();
 
             // Check if we don't want to save or only save to prevent further process of the field
             if (isset($this->options->doNotSave) && $this->options->doNotSave) {

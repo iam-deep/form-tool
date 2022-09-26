@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Support\FileManager;
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Validation\Rule;
 
 class ImageType extends FileType

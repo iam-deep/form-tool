@@ -19,14 +19,6 @@ class AdminModel extends Model
 
     public static $isSoftDelete = true;
 
-    /*public static function setup($tableName, $primaryId, $orderBy = null, $foreignKey = null)
-    {
-        static::$tableName = $tableName ?: static::$tableName;
-        static::$primaryId = $primaryId ?: static::$primaryId;
-        static::$orderBy = $orderBy ?: static::$orderBy;
-        static::$foreignKey = $foreignKey ?: static::$foreignKey;
-    }*/
-
     public static function getAll($isFromTrash = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');

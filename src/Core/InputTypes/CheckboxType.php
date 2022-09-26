@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\Options;
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 
 class CheckboxType extends BaseInputType
 {
