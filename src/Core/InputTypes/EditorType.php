@@ -2,9 +2,8 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-
 use Biswadeep\FormTool\Core\Doc;
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;

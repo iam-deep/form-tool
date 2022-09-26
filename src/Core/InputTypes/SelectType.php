@@ -3,8 +3,8 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\Doc;
-use Biswadeep\FormTool\Core\InputTypes\Common\Options;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Biswadeep\FormTool\Core\InputTypes\Common\Options;
 use Illuminate\Support\Facades\DB;
 
 class SelectType extends BaseInputType

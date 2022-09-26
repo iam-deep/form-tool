@@ -461,7 +461,6 @@ class Form
 
                 $foreignKey = $model::$foreignKey;
             }
-            
 
             $data = [];
             if ($this->request->post($input->getKey()) && \is_array($this->request->post($input->getKey()))) {
@@ -480,11 +479,11 @@ class Form
                             //dd($this->request->post($input->getKey()));
                             $response = $field->beforeUpdate((object) $row, (object) $row);
                         }
-            
+
                         if ($response !== null) {
                             $dataRow[$dbField] = $response;
                         }
-            
+
                         if (! $dataRow[$dbField] && $field->getDefaultValue() !== null) {
                             $dataRow[$dbField] = $field->getDefaultValue();
                         }
