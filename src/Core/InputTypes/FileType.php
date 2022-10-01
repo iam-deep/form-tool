@@ -92,15 +92,43 @@ class FileType extends BaseInputType
 
     public function beforeStore(object $newData)
     {
-        return FileManager::uploadFile($this->dbField, $this->path);
+        $request = request();
+
+        if ($this->isArray) {
+            $file = $request->file($this->parentField);
+            $file = $file[$this->index][$this->dbField] ?? null;
+
+            return FileManager::uploadFile($file, $this->path);
+        } else {
+            $file = $request->file($this->dbField);
+
+            return FileManager::uploadFile($file, $this->path);
+        }
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-        $oldFile = request()->get($this->dbField);
-        $filename = FileManager::uploadFile($this->dbField, $this->path, $oldFile);
-        if ($filename !== null) {
-            return $filename;
+        $request = request();
+
+        if ($this->isArray) {
+            $oldFile = $request->get($this->parentField);
+            $oldFile = $oldFile[$this->index][$this->dbField] ?? null;
+
+            $file = $request->file($this->parentField);
+            $file = $file[$this->index][$this->dbField] ?? null;
+
+            $filename = FileManager::uploadFile($file, $this->path, $oldFile);
+            if ($filename !== null) {
+                return $filename;
+            }
+        } else {
+            $oldFile = $request->post($this->dbField);
+            $file = $request->file($this->dbField);
+
+            $filename = FileManager::uploadFile($file, $this->path, $oldFile);
+            if ($filename !== null) {
+                return $filename;
+            }
         }
 
         // No files have been uploaded let's return the old file if we have
@@ -135,24 +163,30 @@ class FileType extends BaseInputType
     {
         $value = old($this->dbField, $this->value);
 
-        $script = '$(\'#image-group-'.$this->dbField.'\').remove();';
-        if ($this->isRequired) {
-            $script .= '$(\'#'.$this->dbField.'\').prop(\'required\', \'required\')';
+        $groupId = 'group-'.$this->dbField;
+
+        if ($this->isRequired && ! $value) {
+            $this->raw('required');
         }
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.($this->isRequired && ! $this->value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
             </div>';
 
         if ($this->value) {
+            $script = '$(\'#'.$groupId.'\').remove();';
+            if ($this->isRequired) {
+                $script .= '$(\'#'.$this->dbField.'\').prop(\'required\', \'required\')';
+            }
+
             if (FileManager::isImage($this->value)) {
                 $file = '<img src="'.asset($value).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
                 $file = '<i class="fa '.FileManager::getFileIcon($this->value).' fa-5x"></i>';
             }
 
-            $input .= '<div class="col-sm-6" id="image-group-'.$this->dbField.'"> &nbsp; 
+            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp; 
                 <a href="'.asset($value).'" target="_blank">'.$file.'</a>
                 <input type="hidden" name="'.$this->dbField.'" value="'.$this->value.'">
                 <button class="close pull-left" aria-hidden="true" type="button" onclick="'.$script.'"><i class="fa fa-times"></i></button>
@@ -169,26 +203,34 @@ class FileType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 
-        $script = '$(\'#image-group-'.$this->dbField.$index.'\').remove();';
-        if ($this->isRequired) {
-            $script .= '$(\'#'.$this->dbField.$index.'\').prop(\'required\', \'required\')';
+        $groupId = $key.'-group-'.$this->dbField.'-'.$index;
+        $inputId = $key.'-'.$this->dbField.'-'.$index;
+        $name = $key.'['.$index.']['.$this->dbField.']';
+
+        if ($this->isRequired && ! $value) {
+            $this->raw('required');
         }
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" '.($this->isRequired && ! $value ? 'required' : '').' accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$inputId.'" name="'.$name.'" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
             </div>';
 
         if ($value) {
+            $script = '$(\'#'.$groupId.'\').remove();';
+            if ($this->isRequired) {
+                $script .= '$(\'#'.$inputId.'\').prop(\'required\', \'required\')';
+            }
+
             if (FileManager::isImage($value)) {
                 $file = '<img src="'.asset($value).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
                 $file = '<i class="fa '.FileManager::getFileIcon($value).' fa-5x"></i>';
             }
 
-            $input .= '<div class="col-sm-6" id="image-group-'.$this->dbField.$index.'"> &nbsp; 
+            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp; 
                 <a href="'.asset($value).'" target="_blank">'.$file.'</a>
-                <input type="hidden" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'">
+                <input type="hidden" name="'.$name.'" value="'.$value.'">
                 <button class="close pull-right" aria-hidden="true" type="button" onclick="'.$script.'"><i class="fa fa-times"></i></button>
             </div>';
         }

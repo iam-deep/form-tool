@@ -117,7 +117,7 @@ class CheckboxType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 
-        $input = '<input type="checkbox" class="'.\implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
+        $input = '<input type="checkbox" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
 
         return $input;
     }

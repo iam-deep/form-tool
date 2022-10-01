@@ -5,6 +5,7 @@ namespace Biswadeep\FormTool\Core;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Closure;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\URL;
 
 class Table
 {
@@ -39,7 +40,7 @@ class Table
         $this->model = $model;
 
         $this->request = request();
-        $this->url = config('form-tool.adminURL').'/'.$resource->route;
+        $this->url = URL::to(config('form-tool.adminURL').'/'.$resource->route);
     }
 
     public function create(Closure $callback)

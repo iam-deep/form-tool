@@ -133,7 +133,7 @@ class EditorType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $this->decodeHTML($value[$index] ?? $this->value);
 
-        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.$index.'" name="'.$key.'['.$this->dbField.'][]" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
+        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
 
         return $input;
     }

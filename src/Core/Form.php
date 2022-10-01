@@ -4,6 +4,7 @@ namespace Biswadeep\FormTool\Core;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 abstract class FormStatus
 {
@@ -136,12 +137,12 @@ class Form
 
         $data->isEdit = $isEdit;
 
-        $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : $this->resultData->{$this->model->primaryId()};
-
         if ($isEdit) {
-            $data->action = config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId;
+            $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : $this->resultData->{$this->model->getPrimaryId()};
+
+            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId);
         } else {
-            $data->action = config('form-tool.adminURL').'/'.$this->resource->route;
+            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
         }
 
         return $data;
@@ -164,7 +165,7 @@ class Form
             $classes .= ' confirm-delete';
         }
 
-        $data = '<table class="table table-bordered'.$classes.'" id="'.$keyName.'" data-required="'.$model->getRequired().'"><thead>
+        $data = '<table class="table table-multiple table-bordered'.$classes.'" id="'.$keyName.'" data-required="'.$model->getRequired().'"><thead>
         <tr class="active">';
 
         $totalCols = 0;
@@ -208,6 +209,8 @@ class Form
                         $query->orderBy($dbModel->orderBy, 'asc');
                     } elseif ($model->getSortableField()) {
                         $query->orderBy($model->getSortableField());
+                    } else {
+                        $query->orderBy($dbModel->id, 'asc');
                     }
 
                     $result = $query->get();
@@ -229,9 +232,7 @@ class Form
                 $i = 0;
                 foreach ($result as $row) {
                     foreach ($model->getList() as $field) {
-                        if (isset($row->{$field->getDbField()})) {
-                            $field->setValue($row->{$field->getDbField()});
-                        }
+                        $field->setValue($row->{$field->getDbField()} ?? null);
                     }
 
                     $data .= $this->getTemplate($model, $key, $keyName, $i++);
@@ -275,7 +276,12 @@ class Form
 
     private function getTemplate($model, $key, $keyName, $index = -1)
     {
-        $template = '<tr class="d_block">';
+        // If $index is -1 means we just need the template
+        if ($index == -1) {
+            $index = '{__index}';
+        }
+
+        $template = '<tr class="d_block" id="'.$key.'-row-'.$index.'">';
 
         $hidden = '';
         foreach ($model->getList() as $field) {
@@ -464,9 +470,12 @@ class Form
 
             $data = [];
             if ($this->request->post($input->getKey()) && \is_array($this->request->post($input->getKey()))) {
+                $i = 0;
                 foreach ($this->request->post($input->getKey()) as $row) {
                     $dataRow = [];
                     foreach ($input->getList() as $field) {
+                        $field->setIndex($input->getKey(), $i);
+
                         $dbField = $field->getDbField();
 
                         // If we don't have a postdata for an field like for an optional file field
@@ -476,7 +485,6 @@ class Form
                         if ($this->formStatus == FormStatus::Store) {
                             $response = $field->beforeStore((object) $row);
                         } else {
-                            //dd($this->request->post($input->getKey()));
                             $response = $field->beforeUpdate((object) $row, (object) $row);
                         }
 
@@ -487,11 +495,19 @@ class Form
                         if (! $dataRow[$dbField] && $field->getDefaultValue() !== null) {
                             $dataRow[$dbField] = $field->getDefaultValue();
                         }
+
+                        if ($this->formStatus == FormStatus::Store) {
+                            $field->afterStore((object) $dataRow);
+                        } else {
+                            $field->afterUpdate((object) $row, (object) $dataRow);
+                        }                        
                     }
 
                     $dataRow[$foreignKey] = $this->editId;
 
                     $data[] = $dataRow;
+
+                    $i++;
                 }
             }
 
@@ -575,8 +591,6 @@ class Form
             $this->postData[$metaColumns['updatedAt'] ?? 'updatedAt'] = \date('Y-m-d H:i:s');
         }
 
-        $this->formatMultiple();
-
         // I think we should not remove the meta data like dates and updatedby
         // Remove if there is any extra fields that are not needed
         /*foreach ($this->postData as $key => $val) {
@@ -644,59 +658,6 @@ class Form
         }
 
         return true;
-    }
-
-    private function formatMultiple()
-    {
-        $data = $this->request->all();
-
-        $merge = [];
-        foreach ($this->bluePrint->getList() as $input) {
-            if (! $input instanceof BluePrint) {
-                continue;
-            }
-
-            $value = $data[$input->getKey()] ?? null;
-            if (\is_array($value)) {
-                $keys = array_keys($value);
-                if (! $keys) {
-                    continue;
-                }
-
-                $totalRows = \count($value[$keys[0]]);
-                $totalKeys = \count($keys);
-
-                $newData = [];
-                for ($i = 0; $i < $totalRows; $i++) {
-                    $newRow = [];
-                    for ($j = 0; $j < $totalKeys; $j++) {
-                        $newRow[$keys[$j]] = $value[$keys[$j]][$i];
-                    }
-
-                    $newData[] = $newRow;
-                }
-
-                $merge[$input->getKey()] = $newData;
-            }
-        }
-
-        $this->request->merge($merge);
-
-        /* Need this for file upload and other callbacks
-
-        $arrayToMerge = [];
-        foreach ($this->bluePrint->getList() as $input) {
-            if ($input instanceof BluePrint) {
-                $row = [];
-
-                foreach ($input->getList() as $field) {
-                    //$response = $input->beforeStore((object)$this->postData);
-                    //$row[$field->dbField()] =
-                }
-
-                $arrayToMerge[$input->getKey()] = 1;
-            }
-        }*/
     }
 
     private function parseEditId()

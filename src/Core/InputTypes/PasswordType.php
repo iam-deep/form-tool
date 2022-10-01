@@ -48,7 +48,7 @@ class PasswordType extends BaseInputType
     public function getHTML()
     {
         // We will only display password on validation errors
-        $input = '<input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField).'" placeholder="'.$this->placeholder.'" '.$this->raw.$this->inlineCSS.' />';
+        $input = '<input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />';
 
         return $this->htmlParentDiv($input);
     }
@@ -58,7 +58,7 @@ class PasswordType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? '';
 
-        $input = '<input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$this->dbField.'" name="'.$key.'['.$this->dbField.'][]" value="" placeholder="'.$this->placeholder.'" '.$this->raw.$this->inlineCSS.' />';
+        $input = '<input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="" '.$this->raw.$this->inlineCSS.' />';
 
         return $input;
     }

@@ -178,7 +178,7 @@ class SelectType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 
-        $input = '<select class="'.\implode(' ', $this->classes).' input-sm" name="'.$key.'['.$this->dbField.'][]" '.$this->raw.$this->inlineCSS.'>';
+        $input = '<select class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
 
         return $input.$this->getCommonHTML($value);
     }

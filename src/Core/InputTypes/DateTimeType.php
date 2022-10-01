@@ -69,7 +69,7 @@ class DateTimeType extends BaseInputType
     {
         $this->setDependencies();
 
-        $input = '<input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->modifyFormat($this->value)).'" placeholder="'.$this->placeholder.'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />';
+        $input = '<input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->modifyFormat($this->value)).'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />';
 
         return $this->htmlParentDiv($input);
     }
@@ -81,7 +81,7 @@ class DateTimeType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->modifyFormat($this->value);
 
-        $input = '<input type="text" class="'.\implode(' ', $this->classes).' input-sm" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" placeholder="'.$this->placeholder.'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />';
+        $input = '<input type="text" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />';
 
         return $input;
     }

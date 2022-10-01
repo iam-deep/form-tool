@@ -154,8 +154,8 @@ class BluePrint
             throw new \Exception($class.' should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType');
         }
 
-        if (! $inputType instanceof InputTypes\ICustomType) {
-            throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
+        if (! $inputType instanceof InputTypes\Common\ICustomType) {
+            throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\Common\ICustomType');
         }
 
         $this->dataTypeList[] = $inputType;

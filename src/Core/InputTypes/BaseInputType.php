@@ -22,6 +22,11 @@ class BaseInputType
     protected string $help = '';
     protected $raw = '';
 
+    // For multiple array field type
+    protected bool $isArray = false;
+    protected string $parentField = '';
+    protected int $index = -1;
+
     // Validations
     protected $validations = [];
     protected $validationMessages = [];
@@ -63,7 +68,7 @@ class BaseInputType
 
     public function placeholder(string $text): BaseInputType
     {
-        $this->placeholder = $text;
+        $this->raw('placeholder="'.$text.'"');
 
         return $this;
     }
@@ -264,6 +269,13 @@ class BaseInputType
     final public function getLabel()
     {
         return $this->label;
+    }
+
+    final public function setIndex($parentField, $index)
+    {
+        $this->isArray = true;
+        $this->parentField = $parentField;
+        $this->index = $index;
     }
 
     public function setValue($value)

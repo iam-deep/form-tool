@@ -41,25 +41,28 @@ let template = [];
 $(function() {
 
     // Setup the multiple table
-    $('.table').each(function() {
-        let requiredItems = parseInt($(this).attr('data-required')) || 0;
-        let items = $(this).find('.d_block').length || 0;
+    $('.table-multiple').each(function() {
+        let table = $(this);
+        let requiredItems = parseInt(table.attr('data-required')) || 0;
+        let items = table.find('.d_block').length || 0;
+
+        table.attr('data-index', items);
 
         if (items <= requiredItems) {
-            $(this).find('.d_remove').hide();
+            table.find('.d_remove').hide();
         }
         else {
-            $(this).find('.d_remove').show();
+            table.find('.d_remove').show();
         }
 
         if (items > 1)
-            $(this).find('.handle').show();
+            table.find('.handle').show();
         else
-            $(this).find('.handle').hide();
+            table.find('.handle').hide();
 
         let i = 1;
-        $(this).find('.sort-value').each(function(){
-            $(this).val(i++);
+        table.find('.sort-value').each(function(){
+            table.val(i++);
         });
     });
 
@@ -67,9 +70,12 @@ $(function() {
 	$('body').on('click', '.d_add', function(e){
         e.preventDefault();
 
-		var table = $(this).closest('.table');
-		var c = template[table.attr('id')];
+		let table = $(this).closest('.table');
+        let nextIndex = parseInt(table.attr('data-index'));
+        table.attr('data-index', nextIndex + 1);
 
+		let c = template[table.attr('id')];
+        c = c.replace(/{__index}/gm, nextIndex);
 		table.find('tbody').append(c);
 
         let totalItems = table.find('.d_block').length || 0;

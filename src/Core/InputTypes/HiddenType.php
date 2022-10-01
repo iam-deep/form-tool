@@ -26,7 +26,7 @@ class HiddenType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
 
-        $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" name="'.$key.'['.$this->dbField.'][]" value="'.$value.'" '.$this->raw.' />';
+        $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.' />';
 
         return $input;
     }

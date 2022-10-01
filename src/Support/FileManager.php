@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool\Support;
 
+use Illuminate\Http\UploadedFile;
+
 class FileManager
 {
     protected static string $uploadPath = 'uploads';
@@ -19,11 +21,8 @@ class FileManager
         return \trim(config('form-tool.imageTypes', self::$imageTypes));
     }
 
-    public static function uploadFile($fieldName, $subPath, $oldFilePath = '')
+    public static function uploadFile(?UploadedFile $file, string $subPath, string $oldFilePath = null)
     {
-        $request = request();
-        $file = $request->file($fieldName);
-
         if ($file) {
             $flagCheck = true;
 
@@ -59,10 +58,13 @@ class FileManager
 
     private function doUpload($file, $destinationPath, $filename, $flagCheck = true)
     {
+        $mainFilename = $filename;
+
         // If same file name exist then increment the file name
         if ($flagCheck) {
             $i = 2;
             while (\file_exists($destinationPath.$filename)) {
+                $filename = $mainFilename;
                 $pathinfo = \pathinfo($filename);
 
                 if (isset($pathinfo['filename'])) {
