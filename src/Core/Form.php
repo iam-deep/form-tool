@@ -500,7 +500,7 @@ class Form
                             $field->afterStore((object) $dataRow);
                         } else {
                             $field->afterUpdate((object) $row, (object) $dataRow);
-                        }                        
+                        }
                     }
 
                     $dataRow[$foreignKey] = $this->editId;
