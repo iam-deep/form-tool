@@ -74,7 +74,7 @@ class CheckboxType extends BaseInputType
 
     private function getFormValue($newData)
     {
-        $val = $newData->{$this->dbField};
+        $val = $newData->{$this->dbField} ?? null;
         if ($this->isMultiple) {
             if ($val === null) {
                 return null;

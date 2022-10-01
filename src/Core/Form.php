@@ -468,10 +468,24 @@ class Form
                 $foreignKey = $model::$foreignKey;
             }
 
+            $postData = $this->request->post($input->getKey());
+
+            // Some field don't send data into the post like file
+            // And it's a buggy if we only have only file field in multiple
+            // So let's create an array of null if have any data in our file field
+            if ($postData == null) {
+                foreach ($input->getList() as $field) {
+                    if ($this->request->file($input->getKey())) {
+                        $postData = array_fill(0, \count($this->request->file($input->getKey())), null);
+                        break;
+                    }
+                }
+            }
+
             $data = [];
-            if ($this->request->post($input->getKey()) && \is_array($this->request->post($input->getKey()))) {
+            if ($postData && \is_array($postData)) {
                 $i = 0;
-                foreach ($this->request->post($input->getKey()) as $row) {
+                foreach ($postData as $row) {
                     $dataRow = [];
                     foreach ($input->getList() as $field) {
                         $field->setIndex($input->getKey(), $i);
