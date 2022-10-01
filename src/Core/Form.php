@@ -484,11 +484,10 @@ class Form
 
             $data = [];
             if ($postData && \is_array($postData)) {
-                $i = 0;
-                foreach ($postData as $row) {
+                foreach ($postData as $index => $row) {
                     $dataRow = [];
                     foreach ($input->getList() as $field) {
-                        $field->setIndex($input->getKey(), $i);
+                        $field->setIndex($input->getKey(), $index);
 
                         $dbField = $field->getDbField();
 
@@ -520,8 +519,6 @@ class Form
                     $dataRow[$foreignKey] = $this->editId;
 
                     $data[] = $dataRow;
-
-                    $i++;
                 }
             }
 

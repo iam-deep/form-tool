@@ -58,33 +58,35 @@ class FileType extends BaseInputType
     {
         $request = request();
 
-        $validations = [];
+        $validations = parent::getValidations($type);
 
-        if ('store' == $type) {
-            if ($this->isRequired) {
-                $validations[] = 'required';
-            } else {
-                $validations[] = 'nullable';
-            }
-        } else {
-            if ($this->isRequired && ! $request->get($this->dbField)) {
-                $validations[] = 'required';
-            } else {
-                $validations[] = 'nullable';
-            }
+        if ($this->maxSizeInKb > 0 && ! isset($validations['max'])) {
+            $validations['max'] = 'max:'.$this->maxSizeInKb;
         }
 
         if ($request->file($this->dbField)) {
             $validations[] = 'file';
 
             $allowedTypes = FileManager::getAllowedTypes();
-            if ($allowedTypes) {
+            if ($allowedTypes && ! isset($validations['mimes'])) {
                 $validations['mimes'] = 'mimes:'.$allowedTypes;
             }
+        } else {
+            $validations = [];
         }
 
-        if ($this->maxSizeInKb > 0) {
-            $validations[] = 'max:'.$this->maxSizeInKb;
+        if ('store' == $type) {
+            if ($this->isRequired) {
+                $validations['required'] = 'required';
+            } else {
+                $validations['required'] = 'nullable';
+            }
+        } else {
+            if ($this->isRequired && ! $request->get($this->dbField)) {
+                $validations['required'] = 'required';
+            } else {
+                $validations['required'] = 'nullable';
+            }
         }
 
         return $validations;

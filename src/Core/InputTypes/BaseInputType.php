@@ -235,7 +235,7 @@ class BaseInputType
         // TODO: Check required when validation passed as string
 
         if (! \in_array('required', $this->validations)) {
-            $this->validations[] = 'nullable';
+            $this->validations['required'] = 'nullable';
         }
 
         return $this->validations;
