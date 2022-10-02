@@ -19,6 +19,7 @@ class Guard
     protected bool $hasCreate = false;
     protected bool $hasEdit = false;
     protected bool $hasDelete = false;
+    protected bool $hasDestroy = false;
 
     public static $instance = null;
     private static bool $isEnable = false;
@@ -68,6 +69,11 @@ class Guard
         return ! self::$isEnable || self::$instance->hasDelete;
     }
 
+    public static function hasDestroy()
+    {
+        return ! self::$isEnable || self::$instance->hasDestroy;
+    }
+
     public static function hasViewOrAbort()
     {
         if (! self::$isEnable || self::$instance->hasView) {
@@ -104,6 +110,15 @@ class Guard
         self::abort();
     }
 
+    public static function hasDestroyOrAbort()
+    {
+        if (! self::$isEnable || self::$instance->hasDestroy) {
+            return;
+        }
+
+        self::abort();
+    }
+
     public function doCheck(Request $request, Closure $next)
     {
         if (! self::$isEnable) {
@@ -133,6 +148,7 @@ class Guard
                 $this->hasCreate = isset($this->permissions->{$this->route}->create) ? true : false;
                 $this->hasEdit = isset($this->permissions->{$this->route}->edit) ? true : false;
                 $this->hasDelete = isset($this->permissions->{$this->route}->delete) ? true : false;
+                $this->hasDestroy = isset($this->permissions->{$this->route}->destroy) ? true : false;
 
                 // Check permissions as per request action
                 switch ($this->action) {

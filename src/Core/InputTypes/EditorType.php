@@ -121,11 +121,11 @@ class EditorType extends BaseInputType
     {
         $this->setDependencies();
 
-        if ($index != -1) {
+        if ($index != '{__index}') {
             Doc::addJs('
-            // CkEditor config for field: '.$this->dbField.$index."
+            // CkEditor config for field: '.$key.'-'.$this->dbField.'-'.$index."
             var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
-            var selector = document.querySelector('#".$this->dbField.$index."');
+            var selector = document.querySelector('#".$key.'-'.$this->dbField.'-'.$index."');
             createCkEditor(selector, csrf_token, uploadPath);
             ");
         }

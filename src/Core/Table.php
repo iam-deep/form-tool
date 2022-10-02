@@ -269,6 +269,10 @@ class Table
             ],
         ];
 
+        if (! Guard::hasDestroy()) {
+            unset($quickFilters['trash']);
+        }
+
         $isAllActive = true;
         $countQuickFilters = \count($quickFilters);
         $i = 0;
@@ -308,7 +312,7 @@ class Table
 
     protected function makeFilter()
     {
-        if ($this->request->query('quick_status') == 'trash') {
+        if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
             $this->isFromTrash = true;
         }
     }
