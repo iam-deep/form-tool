@@ -779,7 +779,7 @@ class Form
 
                             $foreignKey = $model::$foreignKey;
                         }
-              
+
                         $where = [$foreignKey => $result->{$this->model->getPrimaryId()}];
                         $childResult = DB::table($model->table)->where($where)->orderBy($model->id, 'asc')->get();
 
@@ -791,7 +791,7 @@ class Form
                     } else {
                         $childResult = \json_decode($result->{$input->getKey()});
                     }
-                    
+
                     foreach ($childResult as $row) {
                         foreach ($input->getList() as $childInput) {
                             $childInput->afterDestroy($row);

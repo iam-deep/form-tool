@@ -50,7 +50,7 @@ class BulkAction
         if (! $ids) {
             return \back()->withErrors('Please select some rows to delete!');
         }
-        
+
         $callback = $this->callback;
         $filtered = [];
         foreach ($ids as $id) {
@@ -60,8 +60,7 @@ class BulkAction
         }
 
         $response = null;
-        switch ($bulkAction)
-        {
+        switch ($bulkAction) {
             case 'duplicate':
                 $response = $this->duplicate($filtered);
                 break;
@@ -125,9 +124,9 @@ class BulkAction
                 if (! $input instanceof BluePrint || ! $input->getModel()) {
                     continue;
                 }
-    
+
                 $model = $input->getModel();
-    
+
                 $foreignKey = null;
                 if ($model instanceof \stdClass) {
                     $foreignKey = $model->foreignKey;
@@ -135,12 +134,12 @@ class BulkAction
                     if (! isset($model::$foreignKey)) {
                         throw new \Exception('$foreignKey property not defined at '.$model);
                     }
-    
+
                     $foreignKey = $model::$foreignKey;
                 }
-             
+
                 $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
-                
+
                 $insert = [];
                 foreach ($childResult as $row) {
                     $row = (array) $row;
@@ -191,14 +190,14 @@ class BulkAction
         if (! $ids) {
             return \back()->withErrors('Nothing restored!');
         }
-        
+
         $metaColumns = \config('form-tool.table_meta_columns', $this->table->getTableMetaColumns());
 
         $data = [];
         $data[$metaColumns['deletedBy'] ?? 'deletedBy'] = null;
         $data[$metaColumns['deletedAt'] ?? 'deletedAt'] = null;
 
-        foreach ($ids as $id) {    
+        foreach ($ids as $id) {
             $affected = $this->table->getModel()->updateOne($id, $data);
         }
 

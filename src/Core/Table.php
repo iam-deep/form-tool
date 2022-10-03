@@ -334,7 +334,7 @@ class Table
     protected function createBulkAction()
     {
         $this->makeFilter();
-        
+
         $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
         $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
 
