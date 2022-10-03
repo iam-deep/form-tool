@@ -137,6 +137,11 @@ class DataModel
         return $this->setup()::search($searchTerm, $fields, $isFromTrash);
     }
 
+    public function getWhereOne($where = null)
+    {
+        return $this->setup()::getWhereOne($where);
+    }
+
     public function getWhere($where = null)
     {
         return $this->setup()::getWhere($where);

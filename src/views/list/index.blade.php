@@ -2,6 +2,18 @@
 
 @section('content')
 
+<style>
+.table {
+    margin-bottom:0;
+}
+ul.pagination {
+    margin:0;
+}
+.box-header {
+    padding-bottom:0px;
+}
+</style>
+
 <div class="row">
     <div class="col-md-12">
 
@@ -10,8 +22,8 @@
         <div class="clearfix"></div>
 
         <div class="box box-primary">
-            <div class="box-header with-border">
-                <h3 class="box-title">{{ $title }}</h3>
+            <div class="box-header">
+                {{ getTableBulkAction($crudName ?? null) }}
 
                 <div class="box-tools pull-right">
                     <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="" placeholder="Search" autocomplete="off">

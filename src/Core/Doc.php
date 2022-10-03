@@ -113,6 +113,14 @@ class Doc
         }
     }
 
+    public static function getTableBulkAction(string $name = null)
+    {
+        $crud = self::getCurdByName($name);
+        if ($crud) {
+            return $crud->getTable()->getBulkAction();
+        }
+    }
+
     public static function getTableContent(string $name = null)
     {
         $crud = self::getCurdByName($name);

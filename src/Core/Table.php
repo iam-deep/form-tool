@@ -33,14 +33,25 @@ class Table
         'deletedAt' => 'deletedAt',
     ];
 
+    public $crud = null;
+    public $bulkAction = null;
+
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
         $this->resource = $resource;
         $this->bluePrint = $bluePrint;
         $this->model = $model;
 
+        $this->bulkAction = new BulkAction();
+        $this->bulkAction->setTable($this);
+
         $this->request = request();
         $this->url = URL::to(config('form-tool.adminURL').'/'.$resource->route);
+    }
+
+    public function setCrud($crud)
+    {
+        $this->crud = $crud;
     }
 
     public function create(Closure $callback)
@@ -243,7 +254,7 @@ class Table
 
         $this->table = new \stdClass();
         $this->table->content = view('form-tool::list.table', $data);
-        $this->table->pagination = $this->dataResult->onEachSide(2)->links();
+        $this->table->pagination = $this->dataResult->onEachSide(2)->withQueryString()->links();
 
         return $this->table;
     }
@@ -303,10 +314,6 @@ class Table
 
         $data['quickFilters'] = $quickFilters;
 
-        $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
-        $bulkAction = new BulkAction();
-        $data['bulkActions'] = $bulkAction->getActions($bulkGroup);
-
         return \view('form-tool::list.filter', $data);
     }
 
@@ -321,6 +328,25 @@ class Table
     {
         return $this->createFilter();
     }
+
+    //region BulkAction
+
+    protected function createBulkAction()
+    {
+        $this->makeFilter();
+        
+        $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
+        $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
+
+        return \view('form-tool::list.bulk_action', $data);
+    }
+
+    public function getBulkAction()
+    {
+        return $this->createBulkAction();
+    }
+
+    //endregion
 
     public function getContent()
     {
@@ -341,6 +367,16 @@ class Table
     public function getBluePrint(): BluePrint
     {
         return $this->bluePrint;
+    }
+
+    public function getModel()
+    {
+        return $this->model;
+    }
+
+    public function getTableMetaColumns()
+    {
+        return $this->tableMetaColumns;
     }
 }
 

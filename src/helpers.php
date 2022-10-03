@@ -18,6 +18,13 @@ if (! function_exists('getTableFilter')) {
     }
 }
 
+if (! function_exists('getTableBulkAction')) {
+    function getTableBulkAction(string $name = null)
+    {
+        return Doc::getTableBulkAction($name);
+    }
+}
+
 if (! function_exists('getTableContent')) {
     function getTableContent(string $name = null)
     {

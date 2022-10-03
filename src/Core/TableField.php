@@ -163,7 +163,7 @@ class TableField
 
     public function bulkActionCheckbox()
     {
-        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" id="selectAll">')->width('50px');
+        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('50px');
         $this->cellList[] = $cell;
 
         return $cell;

@@ -82,6 +82,14 @@ class AdminModel extends Model
         return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }
 
+    public static function getWhereOne($where = null)
+    {
+        $query = DB::table(static::$tableName);
+        self::applyWhere($query, $where);
+
+        return $query->first();
+    }
+
     public static function getWhere($where = null)
     {
         $query = DB::table(static::$tableName);
@@ -119,9 +127,6 @@ class AdminModel extends Model
 
         // Let's prevent update of deleted data
         $query = DB::table(static::$tableName);
-        if (static::$isSoftDelete) {
-            $query->whereNull($deletedAt);
-        }
 
         if ($isToken) {
             $query->where(static::$token, $id);

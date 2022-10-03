@@ -10,10 +10,10 @@ class Crud
     public string $name;
 
     private $resource;
-    private $model;
-    private $bluePrint;
-    private $form;
-    private $table;
+    private DataModel $model;
+    private BluePrint $bluePrint;
+    private Form $form;
+    private Table $table;
 
     public $isSoftDelete = true;
 
@@ -35,6 +35,7 @@ class Crud
         $this->form->setCrud($this);
 
         $this->table = new Table($this->resource, $this->bluePrint, $this->model);
+        $this->table->setCrud($this);
 
         return $this;
     }
@@ -140,11 +141,21 @@ class Crud
         return $this->table->search();
     }
 
+    public function bulkAction(Closure $callback = null)
+    {
+        return $this->table->bulkAction->perform($callback);
+    }
+
     //endregion
+
+    public function createForm()
+    {
+        return $this->form->create();
+    }
 
     public function getForm()
     {
-        return $this->form->getForm();
+        return $this->form;
     }
 
     public function getTable()

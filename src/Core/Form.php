@@ -107,12 +107,12 @@ class Form
 
     public function getHTMLForm()
     {
-        $data['form'] = $this->getForm();
+        $data['form'] = $this->create();
 
         return view('form-tool::form.form', $data);
     }
 
-    public function getForm()
+    public function create()
     {
         $data = new \stdClass();
 
@@ -183,11 +183,12 @@ class Form
 
         $data .= '<th></th></tr></thead><tbody>';
 
-        //Check if any session data exists
+        // TODO: Need to work for only one file field
+        // Check if any session data exists
         $totalDataInSession = 0;
         if (count($model->getList()) > 0) {
             $field = $model->getList()[0]->getDbField();
-            $val = old($key.'.'.$field);
+            $val = old($key);
             if ($val && \is_array($val)) {
                 $totalDataInSession = \count($val);
             }
@@ -364,11 +365,6 @@ class Form
             $this->editId = $insertId;
 
             $this->afterSave();
-
-            // This will only execute if the method called by default not manually from the store
-            /*if (\method_exists($this->resource, 'store')) {
-                $this->resource->store($this->request);
-            }*/
         }
 
         return redirect($this->url)->with('success', 'Data added successfully!');
@@ -397,7 +393,11 @@ class Form
         }
 
         if (! $this->oldData) {
-            throw new \Exception('Old data not found for ID: '.$this->editId);
+            if (\App::environment(['local'])) {
+                throw new \Exception('Old data not found for ID: '.$this->editId);
+            } else {
+                \abort(403);
+            }
         }
 
         $this->editId = $this->oldData->{$this->model->getPrimaryId()};
@@ -416,11 +416,6 @@ class Form
 
         if ($affected > 0) {
             $this->afterSave();
-
-            // This will only execute if the method called by default not manually from the store
-            /*if (\method_exists($this->resource, 'update')) {
-                $this->resource->update($this->request, $this->editId);
-            }*/
         }
 
         return redirect($this->url)->with('success', 'Data updated successfully!');
@@ -739,10 +734,13 @@ class Form
         //      permission to delete
         //      can delete this row
 
+        $idCol = $this->model->isToken() ? $this->model->getToken() : $this->model->getPrimaryId();
+
+        $result = $this->model->getWhereOne([$idCol => $id]);
         if ($result) {
             if ($this->crud->isSoftDelete) {
                 if (! \property_exists($result, $deletedAt)) {
-                    throw new \Exception('Column "$deletedAt" not found!');
+                    throw new \Exception('Column "deletedAt" not found!');
                 }
 
                 if ($result->{$deletedAt} === null) {
@@ -752,7 +750,7 @@ class Form
 
             foreach ($this->bluePrint->getList() as $field) {
                 if ($field instanceof BluePrint) {
-                    // TODO:
+                    // TODO: Still now not needed
                 } else {
                     $field->beforeDestroy($result);
                 }
@@ -764,18 +762,45 @@ class Form
         $affected = $this->model->deleteOne($id);
 
         if ($affected > 0 && $result) {
-            foreach ($this->bluePrint->getList() as $field) {
-                if ($field instanceof BluePrint) {
-                    // TODO:
+            foreach ($this->bluePrint->getList() as $input) {
+                if ($input instanceof BluePrint) {
+                    // Let's delete the file and image of sub tables, and data
+                    $childResult = [];
+                    if ($input->getModel()) {
+                        $model = $input->getModel();
+
+                        $foreignKey = null;
+                        if ($model instanceof \stdClass) {
+                            $foreignKey = $model->foreignKey;
+                        } else {
+                            if (! isset($model::$foreignKey)) {
+                                throw new \Exception('$foreignKey property not defined at '.$model);
+                            }
+
+                            $foreignKey = $model::$foreignKey;
+                        }
+              
+                        $where = [$foreignKey => $result->{$this->model->getPrimaryId()}];
+                        $childResult = DB::table($model->table)->where($where)->orderBy($model->id, 'asc')->get();
+
+                        if ($model instanceof \stdClass) {
+                            DB::table($model->table)->where($where)->delete();
+                        } else {
+                            $model::deleteWhere($where);
+                        }
+                    } else {
+                        $childResult = \json_decode($result->{$input->getKey()});
+                    }
+                    
+                    foreach ($childResult as $row) {
+                        foreach ($input->getList() as $childInput) {
+                            $childInput->afterDestroy($row);
+                        }
+                    }
                 } else {
-                    $field->afterDestroy($result);
+                    $input->afterDestroy($result);
                 }
             }
-
-            // This will only execute if the method called by default not manually from the destroy
-            /*if (\method_exists($this->resource, 'destroy')) {
-                $this->resource->destroy($id);
-            }*/
         }
 
         return redirect($this->url)->with('success', 'Data permanently deleted successfully!');
