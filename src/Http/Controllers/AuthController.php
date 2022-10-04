@@ -30,7 +30,14 @@ class AuthController extends Controller
             'password' => 'required|string',
         ]);
 
-        $user = DB::table('users')->where('email', $postData['email'])->where('status', 1)->first();
+        $query = DB::table('users');
+
+        $metaColumns = \config('form-tool.table_meta_columns');
+        if (isset($metaColumns['deletedAt']) && \trim($metaColumns['deletedAt'])) {
+            $query->whereNull($metaColumns['deletedAt']);
+        }
+
+        $user = $query->where('email', $postData['email'])->where('status', 1)->first();
         if ($user && Hash::check($postData['password'], $user->password)) {
             /*if (isset($_POST['rememberMe'])) {
                 $key = hash('sha512', $this->getRandStr(64).$data['salt']);
