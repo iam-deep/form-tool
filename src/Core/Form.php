@@ -127,7 +127,10 @@ class Form
                 $data->fields->{$input->getKey()} = $html;
             } else {
                 // Let's modify value before if needed like for decryption
-                $input->setValue($input->getValue());
+                // We wil not modify anything on create as default values must be set as it is
+                if ($this->formStatus == FormStatus::Edit) {
+                    $input->setValue($input->getValue());
+                }
 
                 $data->fields->{$input->getDbField()} = $input->getHTML();
             }

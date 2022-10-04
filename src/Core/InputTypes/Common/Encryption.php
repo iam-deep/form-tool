@@ -20,53 +20,51 @@ trait Encryption
     {
         $value = parent::beforeStore($newData) ?: $this->value;
 
-        if (! $this->isEncrypted) {
-            return $value;
-        }
-
-        return Crypt::encryptString($value);
+        return $this->doEncrypt($value);
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
         $value = parent::beforeUpdate($oldData, $newData) ?: $this->value;
 
-        if (! $this->isEncrypted) {
-            return $value;
-        }
-
-        return Crypt::encryptString($value);
+        return $this->doEncrypt($value);
     }
 
     public function getValue()
     {
-        $value = $this->value;
+        $this->doDecrypt();
 
-        if ($this->isEncrypted) {
-            try {
-                $value = Crypt::decryptString($value);
-            } catch (DecryptException $e) {
-                $value = $e->getMessage();
-            }
-        }
-
-        return $value;
+        return parent::getValue();
     }
 
     public function getTableValue()
     {
-        $value = $this->value;
+        $this->doDecrypt();
 
-        if ($this->isEncrypted) {
-            try {
-                $value = Crypt::decryptString($value);
-            } catch (DecryptException $e) {
-                $value = $e->getMessage();
-            }
+        return parent::getTableValue();
+    }
+
+    protected function doEncrypt($value)
+    {
+        if (! $this->isEncrypted || ! $value) {
+            return $value;
         }
 
         $this->value = $value;
 
-        return parent::getTableValue();
+        return Crypt::encryptString($value);
+    }
+
+    protected function doDecrypt()
+    {
+        if ($this->isEncrypted && $this->value) {
+            try {
+                $this->value = Crypt::decryptString($this->value);
+            } catch (DecryptException $e) {
+                $this->value = $e->getMessage();
+            }
+        }
+
+        return $this->value;
     }
 }
