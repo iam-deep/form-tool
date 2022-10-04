@@ -29,7 +29,7 @@ class AdminCheckLoggedIn
                 if (isset($metaColumns['deletedAt']) && \trim($metaColumns['deletedAt'])) {
                     $query->whereNull($metaColumns['deletedAt']);
                 }
-                
+
                 $user = $query->where('email', $sessionUser->email)->where('status', 1)->first();
                 if ($user && isset($sessionUser->adminLoginToken) && Hash::check($user->password.$user->email.$_SERVER['HTTP_USER_AGENT'], $sessionUser->adminLoginToken)) {
                     $loginRedirect = config('form-tool.loginRedirect');
