@@ -47,6 +47,37 @@ class BluePrint
         return $inputType;
     }
 
+    public function number(string $dbField, string $label = null): InputTypes\TextType
+    {
+        $inputType = new InputTypes\TextType();
+        $inputType->init($this, $dbField, $label);
+
+        $inputType->type = InputTypes\Common\InputType::Number;
+        $inputType->typeInString = 'number';
+
+        $inputType->validations(['numeric' => 'numeric']);
+
+        $this->dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
+    public function email(string $dbField, string $label = null): InputTypes\TextType
+    {
+        $inputType = new InputTypes\TextType();
+        $inputType->init($this, $dbField, $label);
+
+        $inputType->type = InputTypes\Common\InputType::Email;
+        $inputType->typeInString = 'email';
+        $inputType->inputType = 'email';
+
+        $inputType->validations(['email' => 'email']);
+
+        $this->dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
     public function password(string $dbField, string $label = null): InputTypes\PasswordType
     {
         $inputType = new InputTypes\PasswordType();
