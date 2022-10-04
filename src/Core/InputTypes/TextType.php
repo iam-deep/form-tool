@@ -2,28 +2,21 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Str;
 
 class TextType extends BaseInputType
 {
+    use Encryption;
+
     public int $type = InputType::Text;
     public string $typeInString = 'text';
 
     public string $inputType = 'text';
 
-    public bool $isEncrypted = false;
     public bool $isUnique = false;
     private bool $isSlug = false;
-
-    public function encrypt(): TextType
-    {
-        $this->isEncrypted = true;
-
-        return $this;
-    }
 
     public function unique()
     {
@@ -65,24 +58,6 @@ class TextType extends BaseInputType
         }
 
         return $validations;
-    }
-
-    public function getValue()
-    {
-        return $this->value;
-
-        /*Crypt::encryptString($request->token);
-
-        try {
-            $decrypted = Crypt::decryptString($encryptedValue);
-        } catch (DecryptException $e) {
-            //
-        }*/
-    }
-
-    public function getTableValue()
-    {
-        return $this->value;
     }
 
     public function beforeValidation($data)

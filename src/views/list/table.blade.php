@@ -70,6 +70,7 @@ $.fn.shiftSelectable = function() {
 };
 
 $(function(){
+    updateIds();
     $('.bulk').shiftSelectable();
 });
 

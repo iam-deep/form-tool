@@ -2,10 +2,13 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 
 class HiddenType extends BaseInputType
 {
+    use Encryption;
+    
     public int $type = InputType::Hidden;
     public string $typeInString = 'hidden';
 

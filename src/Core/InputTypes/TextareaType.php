@@ -2,10 +2,13 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes;
 
+use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 
 class TextareaType extends BaseInputType
 {
+    use Encryption;
+
     public int $type = InputType::Textarea;
     public string $typeInString = 'textarea';
 

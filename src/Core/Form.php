@@ -119,17 +119,17 @@ class Form
         $data->fields = new \stdClass();
 
         foreach ($this->bluePrint->getList() as $input) {
-            $html = '';
             if ($input instanceof BluePrint) {
-                $html .= '<div class="form-group"><label>'.$input->label.'</label>';
+                $html = '<div class="form-group"><label>'.$input->label.'</label>';
                 $html .= $this->getMultipleFields($input);
                 $html .= '</div>';
 
                 $data->fields->{$input->getKey()} = $html;
             } else {
-                $html = $input->getHTML();
+                // Let's modify value before if needed like for decryption
+                $input->setValue($input->getValue());
 
-                $data->fields->{$input->getDbField()} = $html;
+                $data->fields->{$input->getDbField()} = $input->getHTML();
             }
         }
 
@@ -289,6 +289,9 @@ class Form
             if ($field instanceof BluePrint) {
                 $template .= '<td>'.$this->getMultipleFields($field).'</td>';
             } else {
+                // Let's modify value before if needed like for decryption
+                $field->setValue($field->getValue());
+
                 if ($field->getType() == InputType::Hidden) {
                     $hidden .= $field->getHTMLMultiple($key, $index);
                 } else {
@@ -489,6 +492,8 @@ class Form
                         // If we don't have a postdata for an field like for an optional file field
                         $dataRow[$dbField] = $row[$dbField] ?? null;
 
+                        $field->setValue($dataRow[$dbField]);
+
                         $response = null;
                         if ($this->formStatus == FormStatus::Store) {
                             $response = $field->beforeStore((object) $row);
@@ -646,6 +651,8 @@ class Form
 
             // If we don't have a postdata for an field like for an optional file field
             $this->postData[$dbField] = $postData[$dbField] ?? null;
+
+            $input->setValue($this->postData[$dbField]);
 
             $response = null;
             if ($this->formStatus == FormStatus::Store) {
