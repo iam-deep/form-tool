@@ -695,6 +695,10 @@ class Form
 
     public function delete($id = false)
     {
+        if (! $this->crud->isSoftDelete) {
+            return $this->destroy($id);
+        }
+
         $this->formStatus = FormStatus::Delete;
 
         if (! $id) {

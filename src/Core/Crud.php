@@ -37,6 +37,9 @@ class Crud
         $this->table = new Table($this->resource, $this->bluePrint, $this->model);
         $this->table->setCrud($this);
 
+        $this->isSoftDelete = \config('form-tool.isSoftDelete', true);
+        $this->model->softDelete($this->isSoftDelete);
+
         return $this;
     }
 
