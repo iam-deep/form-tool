@@ -280,7 +280,7 @@ class Table
             ],
         ];
 
-        if (! Guard::hasDestroy() || ! $this->crud->isSoftDelete) {
+        if (! Guard::hasDestroy() || ! $this->crud->getSoftDelete()) {
             unset($quickFilters['trash']);
         }
 
@@ -290,7 +290,7 @@ class Table
         foreach ($quickFilters as $key => &$row) {
             if ($key == 'all') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($metaColumns) {
-                    if ($this->crud->isSoftDelete) {
+                    if ($this->crud->getSoftDelete()) {
                         $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
                     }
                 });

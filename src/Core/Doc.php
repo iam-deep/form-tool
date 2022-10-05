@@ -21,6 +21,13 @@ class Doc
 
     public static function create(object $resource, $model, Closure $callback, string $name = null)
     {
+        if (! isset($resource->title)) {
+            throw new \Exception('$title not set or not declared as public at ['. \get_class($resource) .']');
+        }
+        if (! isset($resource->route)) {
+            throw new \Exception('$route not set or not declared as public at ['. \get_class($resource) .']!');
+        }
+
         if (! self::$crudList) {
             self::$crudList = new \stdClass();
         }
@@ -31,13 +38,6 @@ class Doc
         self::$crudList->{$name} = $crud;
 
         $crud->create($resource, $model, $callback, $name);
-
-        if (! isset($resource->title)) {
-            throw new \Exception('$title not set in the controller!');
-        }
-        if (! isset($resource->route)) {
-            throw new \Exception('$route not set in the controller!');
-        }
 
         return $crud;
     }

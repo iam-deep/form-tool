@@ -117,6 +117,8 @@ class SelectType extends BaseInputType
             $config['max_selected_options'] = $this->limitMax;
         }
 
+        $this->removeRaw('required');
+
         Doc::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen');
 
         /* TODO:

@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool;
 
+use Biswadeep\FormTool\Support\Settings;
+use Biswadeep\FormTool\Support\DTConverter;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
@@ -9,6 +11,11 @@ use Illuminate\Support\ServiceProvider;
 
 class FormToolServiceProvider extends ServiceProvider
 {
+    public function register()
+    {
+        //
+    }
+
     public function boot()
     {
         $this->mergeConfigFrom(__DIR__.'/config/form-tool.php', 'form-tool');
@@ -24,10 +31,9 @@ class FormToolServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
         $this->configureRateLimiting();
-    }
 
-    public function register()
-    {
+        Settings::init();
+        DTConverter::init();
     }
 
     protected function configureRateLimiting()

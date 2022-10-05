@@ -15,9 +15,10 @@ class Crud
     private Form $form;
     private Table $table;
 
-    public $isSoftDelete = true;
+    protected string $format = 'default';
+    protected bool $isSoftDelete = true;
 
-    public function create(object $resource, $model, Closure $callback, $name = 'default')
+    public function create(object $resource, $model, Closure $callback, string $name = 'default'): Crud
     {
         $this->resource = $resource;
         $this->name = $name;
@@ -37,15 +38,31 @@ class Crud
         $this->table = new Table($this->resource, $this->bluePrint, $this->model);
         $this->table->setCrud($this);
 
-        $this->isSoftDelete = \config('form-tool.isSoftDelete', true);
-        $this->model->softDelete($this->isSoftDelete);
+        $this->softDelete(\config('form-tool.isSoftDelete', true));
 
         return $this;
     }
 
-    public function modify(Closure $callback)
+    public function modify(Closure $callback): Crud
     {
         $callback($this->bluePrint);
+
+        return $this;
+    }
+
+    /**
+     * Format of the CRUD. It can de default or store data as key value pair
+     *
+     * @param string $var Desired values: (default, keyValue)
+     * @return \Biswadeep\FormTool\Core\Crud
+     **/
+    public function format(string $format = 'default'): Crud
+    {
+        $this->format = $format;
+
+        if ($format != 'default') {
+            $this->softDelete(false);
+        }
 
         return $this;
     }
@@ -61,14 +78,14 @@ class Crud
         return $this;
     }
 
-    public function db($tableName, $primaryId = '', $token = '', $orderBy = '', $foreignKey = '')
+    public function db(string $tableName, ?string $primaryId = '', ?string $token = '', ?string $orderBy = '', ?string $foreignKey = ''): Crud
     {
         $this->model->db($tableName, $primaryId, $token, $orderBy, $foreignKey);
 
         return $this;
     }
 
-    public function softDelete(bool $enable = true)
+    public function softDelete(bool $enable = true): Crud
     {
         $this->isSoftDelete = $enable;
         $this->model->softDelete($enable);
@@ -169,5 +186,15 @@ class Crud
     public function getModel()
     {
         return $this->model;
+    }
+
+    public function getSoftDelete(): bool
+    {
+        return $this->isSoftDelete;
+    }
+
+    public function isDefaultFormat(): bool
+    {
+        return $this->format == 'default';
     }
 }

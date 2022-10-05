@@ -4,27 +4,38 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Biswadeep\FormTool\Support\DTConverter;
 
 class DateTimeType extends BaseInputType
 {
     public int $type = InputType::DateTime;
     public string $typeInString = 'datetime';
 
-    protected $dbFormat = 'Y-m-d H:i:s';
-    protected $niceFormat = 'd-m-Y h:i A';
+    protected $dbFormat = '';
+    protected $niceFormat = '';
 
     protected $pickerFormatDateTime = 'DD-MM-YYYY hh:mm A';
     protected $pickerFormatDate = 'DD-MM-YYYY';
     protected $pickerFormatTime = 'hh:mm A';
 
+    protected $isConvertToLocal = true;
+
     public function __construct()
     {
-        $this->niceFormat = \trim(config('form-tool.formatDateTime', $this->niceFormat));
+        $this->dbFormat = DTConverter::$dbFormatDateTime;
+        $this->niceFormat = DTConverter::$niceFormatDateTime;
 
         $this->classes[] = 'datetime-picker';
 
         // This style is specific to this date picker plugin for the multiple table dates to work properly
         $this->inlineCSS = 'style="position:relative"';
+    }
+
+    public function convert(bool $isConvertToLocal = true)
+    {
+        $this->isConvertToLocal = $isConvertToLocal;
+
+        return $this;
     }
 
     public function getValidations($type)
@@ -38,31 +49,21 @@ class DateTimeType extends BaseInputType
 
     public function getTableValue()
     {
-        if ($this->value) {
-            return \date($this->niceFormat, \strtotime($this->value));
-        }
-
-        return null;
+        return $this->modifyFormat($this->value);
     }
 
     public function beforeStore(object $newData)
     {
         $val = \trim($newData->{$this->dbField});
-        if (! $val) {
-            return null;
-        }
 
-        return \date($this->dbFormat, \strtotime($val));
+        return DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
         $val = \trim($newData->{$this->dbField});
-        if (! $val) {
-            return null;
-        }
 
-        return \date($this->dbFormat, \strtotime($val));
+        return DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
     }
 
     public function getHTML()
@@ -88,11 +89,7 @@ class DateTimeType extends BaseInputType
 
     private function modifyFormat($value)
     {
-        if (! $value) {
-            return '';
-        }
-
-        return \date($this->niceFormat, \strtotime($value));
+        return DTConverter::toNice($value, $this->niceFormat, $this->isConvertToLocal);
     }
 
     private function setDependencies()
@@ -106,8 +103,7 @@ class DateTimeType extends BaseInputType
         $this->pickerFormatDate = \trim(config('form-tool.pickerFormatDate', $this->pickerFormatDate));
         $this->pickerFormatTime = \trim(config('form-tool.pickerFormatTime', $this->pickerFormatTime));
 
-        Doc::addJs(
-            '
+        Doc::addJs('
         // Date and DateTimePicker
         $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
         $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", useCurrent: false});

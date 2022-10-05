@@ -24,7 +24,7 @@ return [
     // Allowed types for image upload
     'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif',
 
-    // Human Date and Time format
+    // Human Date and Time format, will be overridden by db settings
     'formatDateTime' => 'd-m-Y h:i A',
     'formatDate'     => 'd-m-Y',
     'formatTime'     => 'h:i A',

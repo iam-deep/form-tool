@@ -141,7 +141,7 @@ class Form
         $data->isEdit = $isEdit;
 
         if ($isEdit) {
-            $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : $this->resultData->{$this->model->getPrimaryId()};
+            $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
             $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId);
         } else {
@@ -322,29 +322,41 @@ class Form
     {
         $this->formStatus = FormStatus::Edit;
 
-        if (! $id) {
-            $url = $this->request->getRequestUri();
+        $this->resultData = null;
+        if ($this->crud->isDefaultFormat()) {
+            if (! $id) {
+                $url = $this->request->getRequestUri();
 
-            $matches = [];
-            $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/edit/', $url, $matches);
-            if (\count($matches) > 1) {
-                $id = $matches[1];
-            } else {
-                return redirect($this->url)/*->action([get_class($this->resource), 'index'])*/->with('error', 'Could not fetch "id"! Call edit manually.');
+                $matches = [];
+                $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/edit/', $url, $matches);
+                if (\count($matches) > 1) {
+                    $id = $matches[1];
+                } else {
+                    throw new \Exception('Could not fetch "id"! Pass $id manually as parameter.');
+                }
+            }
+            
+            $this->resultData = $this->model->getOne($id);
+            if (! $this->resultData) {
+                abort(404);
+            }
+    
+            // Get the primary id as $id can be token
+            $this->editId = $this->resultData->{$this->model->getPrimaryId()};
+
+        } else {
+            // We are into key value pair format, let's format data
+            $result = $this->model->getAll();
+
+            $this->resultData = new \stdClass();
+            foreach ($result as $row) {
+                $this->resultData->{$row->key} = $row->value;
             }
         }
 
-        $this->resultData = $this->model->getOne($id);
-        if (! $this->resultData) {
-            abort(404);
-        }
-
-        // Get the primary id as $id can be token
-        $this->editId = $this->resultData->{$this->model->getPrimaryId()};
-
         foreach ($this->bluePrint->getList() as $input) {
-            if (! $input instanceof BluePrint && isset($this->resultData->{$input->getDbField()})) {
-                $input->setValue($this->resultData->{$input->getDbField()});
+            if (! $input instanceof BluePrint) {
+                $input->setValue($this->resultData->{$input->getDbField()} ?? null);
             }
         }
     }
@@ -380,13 +392,8 @@ class Form
     {
         $this->formStatus = FormStatus::Update;
 
-        if ($id) {
-            $this->editId = $id;
-        } elseif (! $this->editId) {
-            $parse = $this->parseEditId();
-            if (true !== $parse) {
-                return $parse;
-            }
+        if ($this->crud->isDefaultFormat()) {
+            $this->parseEditId($id);
         }
 
         $validate = $this->validate();
@@ -394,33 +401,59 @@ class Form
             return $validate;
         }
 
-        if (! $this->oldData) {
-            $this->oldData = $this->model->getOne($this->editId);
-        }
+        if ($this->crud->isDefaultFormat()) {
+            if (! $this->oldData) {
+                $this->oldData = $this->model->getOne($this->editId);
+            }
 
-        if (! $this->oldData) {
-            if (\App::environment(['local'])) {
-                throw new \Exception('Old data not found for ID: '.$this->editId);
-            } else {
-                \abort(403);
+            if (! $this->oldData) {
+                if (\App::environment(['local'])) {
+                    throw new \Exception('Data not found for ID: '.$this->editId);
+                } else {
+                    \abort(403);
+                }
+            }
+
+            $this->editId = $this->oldData->{$this->model->getPrimaryId()};
+
+        } else  {
+            $result = $this->model->getAll();
+            $this->editId = -1;
+
+            $this->oldData = new \stdClass();
+            foreach ($result as $row) {
+                $this->oldData->{$row->key} = $row->value;
             }
         }
-
-        $this->editId = $this->oldData->{$this->model->getPrimaryId()};
 
         // TODO:
         // validations
         //      permission to update
         //      can update this row
 
-        $result = $this->createPostData();
+        $result = $this->createPostData($this->editId);
         if ($result !== true) {
             return $result;
         }
 
-        $affected = $this->model->updateOne($this->editId, $this->postData, false);
+        if ($this->crud->isDefaultFormat()) {
+            $affected = $this->model->updateOne($this->editId, $this->postData, false);
 
-        if ($affected > 0) {
+            if ($affected > 0) {
+                $this->afterSave();
+            }
+
+        } else {
+            // This is hard-coded here, as to prevent mistakes or hacks to truncate tables
+            DB::table($this->model->getTableName())->truncate();
+
+            $insert = [];
+            foreach ($this->postData as $key => $value) {
+                $insert[] = ['key' => $key, 'value' => $value];
+            }
+
+            $affected = $this->model->addMany($insert);
+
             $this->afterSave();
         }
 
@@ -433,7 +466,18 @@ class Form
             return;
         }
 
-        $result = $this->model->getOne($this->editId, false);
+        $result = null;
+        if ($this->crud->isDefaultFormat()) {
+            $result = $this->model->getOne($this->editId, false);
+        } else {
+            $data = $this->model->getAll();
+
+            $result = new \stdClass();
+            foreach ($data as $row) {
+                $result->{$row->key} = $row->value;
+            }
+        }
+
         foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
@@ -588,21 +632,16 @@ class Form
             $this->postData[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::user() ? Auth::user()->userId : 0;
             $this->postData[$metaColumns['createdAt'] ?? 'createdAt'] = \date('Y-m-d H:i:s');
         } else {
-            if ($id) {
-                $this->editId = $id;
-            } elseif (! $this->editId) {
-                $parse = $this->parseEditId();
-                if (true !== $parse) {
-                    return $parse;
-                }
-            }
+            $this->parseEditId($id);
 
             if (! $this->oldData) {
                 $this->oldData = $this->model->getOne($this->editId);
             }
 
-            $this->postData[$metaColumns['updatedBy'] ?? 'updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
-            $this->postData[$metaColumns['updatedAt'] ?? 'updatedAt'] = \date('Y-m-d H:i:s');
+            if ($this->crud->isDefaultFormat()) {
+                $this->postData[$metaColumns['updatedBy'] ?? 'updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
+                $this->postData[$metaColumns['updatedAt'] ?? 'updatedAt'] = \date('Y-m-d H:i:s');
+            }
         }
 
         // I think we should not remove the meta data like dates and updatedby
@@ -676,8 +715,14 @@ class Form
         return true;
     }
 
-    private function parseEditId()
+    private function parseEditId($id)
     {
+        if ($id) {
+            $this->editId = $id;
+
+            return true;
+        }
+
         $url = $this->request->getRequestUri();
 
         $matches = [];
@@ -688,30 +733,22 @@ class Form
             return true;
         }
 
-        return redirect($this->url)->with('error', 'Could not fetch "id"! Call update manually.');
+        throw new \Exception('Could not fetch "id"! Pass $id manually as parameter.');
     }
 
     //endregion
 
+    //region FormAction DeleteAndDestroy
+
     public function delete($id = false)
     {
-        if (! $this->crud->isSoftDelete) {
+        if (! $this->crud->getSoftDelete()) {
             return $this->destroy($id);
         }
 
         $this->formStatus = FormStatus::Delete;
 
-        if (! $id) {
-            $url = $this->request->getRequestUri();
-
-            $matches = [];
-            $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/?/', $url, $matches);
-            if (\count($matches) > 1) {
-                $id = $matches[1];
-            } else {
-                return redirect($this->url)->with('error', 'Could not fetch "id"! Call update manually.');
-            }
-        }
+        $this->parseEditId($id);
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
 
@@ -728,17 +765,7 @@ class Form
     {
         $this->formStatus = FormStatus::Destroy;
 
-        if (! $id) {
-            $url = $this->request->getRequestUri();
-
-            $matches = [];
-            $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/?/', $url, $matches);
-            if (\count($matches) > 1) {
-                $id = $matches[1];
-            } else {
-                return redirect($this->url)->with('error', 'Could not fetch "id"! Call update manually.');
-            }
-        }
+        $this->parseEditId($id);
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
         $deletedAt = $metaColumns['deletedBy'] ?? 'deletedBy';
@@ -752,7 +779,7 @@ class Form
 
         $result = $this->model->getWhereOne([$idCol => $id]);
         if ($result) {
-            if ($this->crud->isSoftDelete) {
+            if ($this->crud->getSoftDelete()) {
                 if (! \property_exists($result, $deletedAt)) {
                     throw new \Exception('Column "deletedAt" not found!');
                 }
@@ -820,6 +847,8 @@ class Form
         return redirect($this->url)->with('success', 'Data permanently deleted successfully!');
     }
 
+    //endregion
+
     //region GetterSetter
 
     public function getPostData($id = null)
@@ -849,10 +878,7 @@ class Form
     public function getId()
     {
         if (! $this->editId) {
-            $parse = $this->parseEditId();
-            if (true !== $parse) {
-                throw new \Exception('id not found!');
-            }
+            $this->parseEditId();
         }
 
         return $this->editId;
