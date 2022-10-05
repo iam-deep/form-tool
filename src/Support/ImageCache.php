@@ -55,7 +55,10 @@ class ImageCache
             $img = Image::make($imagePath);
 
             // resize image instance
-            $img->resize(self::$width, self::$height);
+            $img->resize(self::$width, self::$height, function($constraint)
+            {
+                $constraint->aspectRatio();
+            });
 
             // insert a watermark
             // $img->insert('public/watermark.png');
