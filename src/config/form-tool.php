@@ -24,6 +24,18 @@ return [
     // Allowed types for image upload
     'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif',
 
+    // Memory Limit is used for resizing or generating cache images (needed for of high resolution or larger size images)
+    // If you see any white screen or half text screen after image upload then try to increase the memoryLimit
+    // Default keep it 512M (M = MB), no worries will only use at the time of image caching
+    'memoryLimit' => '512M',
+
+    // Set image cache directory under public folder
+    'imageCachePath' => 'cache',
+
+    // Set cache image size in px
+    'imageCacheWidth' => 150,
+    'imageCacheHeight' => 150,
+
     // Human Date and Time format, will be overridden by db settings
     'formatDateTime' => 'd-m-Y h:i A',
     'formatDate'     => 'd-m-Y',

@@ -54,6 +54,8 @@ class CellDefinition
     public function typeOptions(Closure $options)
     {
         $options($this->inputType);
+
+        return $this;
     }
 
     public function right(): CellDefinition
@@ -164,6 +166,13 @@ class CellDefinition
     public function getConcat()
     {
         return $this->concat;
+    }
+
+    public function __call($method, $parameters)
+    {
+        $this->inputType->{$method}(...$parameters);
+
+        return $this;
     }
 }
 

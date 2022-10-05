@@ -4,6 +4,7 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Support\FileManager;
+use Biswadeep\FormTool\Support\ImageCache;
 
 class FileType extends BaseInputType
 {
@@ -183,7 +184,8 @@ class FileType extends BaseInputType
             }
 
             if (FileManager::isImage($this->value)) {
-                $file = '<img src="'.asset($value).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
+                $image = ImageCache::resize($this->value);
+                $file = '<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
                 $file = '<i class="fa '.FileManager::getFileIcon($this->value).' fa-5x"></i>';
             }
@@ -225,7 +227,8 @@ class FileType extends BaseInputType
             }
 
             if (FileManager::isImage($value)) {
-                $file = '<img src="'.asset($value).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
+                $image = ImageCache::resize($value);
+                $file = '<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
                 $file = '<i class="fa '.FileManager::getFileIcon($value).' fa-5x"></i>';
             }

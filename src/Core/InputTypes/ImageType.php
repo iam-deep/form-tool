@@ -4,6 +4,7 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Support\FileManager;
+use Biswadeep\FormTool\Support\ImageCache;
 use Illuminate\Validation\Rule;
 
 class ImageType extends FileType
@@ -83,7 +84,9 @@ class ImageType extends FileType
     {
         if ($this->value) {
             if (FileManager::isImage($this->value)) {
-                return '<a href="'.asset($this->value).'" target="_blank"><img class="img-thumbnail" src="'.asset($this->value).'" style="max-height:150px;max-width:150px;"></a>';
+                $image = ImageCache::resize($this->value);
+
+                return '<a href="'.asset($this->value).'" target="_blank"><img class="img-thumbnail" src="'.asset($image).'" style="max-height:150px;max-width:150px;"></a>';
             }
 
             return parent::getTableValue($this->value);
