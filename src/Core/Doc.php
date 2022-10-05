@@ -22,10 +22,10 @@ class Doc
     public static function create(object $resource, $model, Closure $callback, string $name = null)
     {
         if (! isset($resource->title)) {
-            throw new \Exception('$title not set or not declared as public at ['. \get_class($resource) .']');
+            throw new \Exception('$title not set or not declared as public at ['.\get_class($resource).']');
         }
         if (! isset($resource->route)) {
-            throw new \Exception('$route not set or not declared as public at ['. \get_class($resource) .']!');
+            throw new \Exception('$route not set or not declared as public at ['.\get_class($resource).']!');
         }
 
         if (! self::$crudList) {

@@ -335,15 +335,14 @@ class Form
                     throw new \Exception('Could not fetch "id"! Pass $id manually as parameter.');
                 }
             }
-            
+
             $this->resultData = $this->model->getOne($id);
             if (! $this->resultData) {
                 abort(404);
             }
-    
+
             // Get the primary id as $id can be token
             $this->editId = $this->resultData->{$this->model->getPrimaryId()};
-
         } else {
             // We are into key value pair format, let's format data
             $result = $this->model->getAll();
@@ -415,8 +414,7 @@ class Form
             }
 
             $this->editId = $this->oldData->{$this->model->getPrimaryId()};
-
-        } else  {
+        } else {
             $result = $this->model->getAll();
             $this->editId = -1;
 
@@ -442,7 +440,6 @@ class Form
             if ($affected > 0) {
                 $this->afterSave();
             }
-
         } else {
             // This is hard-coded here, as to prevent mistakes or hacks to truncate tables
             DB::table($this->model->getTableName())->truncate();

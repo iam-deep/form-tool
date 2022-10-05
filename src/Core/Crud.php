@@ -51,9 +51,9 @@ class Crud
     }
 
     /**
-     * Format of the CRUD. It can de default or store data as key value pair
+     * Format of the CRUD. It can de default or store data as key value pair.
      *
-     * @param string $var Desired values: (default, keyValue)
+     * @param  string  $var  Desired values: (default, keyValue)
      * @return \Biswadeep\FormTool\Core\Crud
      **/
     public function format(string $format = 'default'): Crud
