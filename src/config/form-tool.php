@@ -34,8 +34,8 @@ return [
     'imageCachePath' => 'cache',
 
     // Set cache image size in px
-    'imageCacheWidth' => 150,
-    'imageCacheHeight' => 150,
+    'imageCacheWidth' => 100,
+    'imageCacheHeight' => 100,
 
     // Human Date and Time format, will be overridden by db settings
     'formatDateTime' => 'd-m-Y h:i A',

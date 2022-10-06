@@ -390,6 +390,35 @@ class BluePrint
         return $key.']';
     }
 
+    public function getSelectDbOptions()
+    {
+        $selects = [];
+        foreach ($this->dataTypeList as $input) {
+            if (! $input instanceof BluePrint && $input->type == InputTypes\Common\InputType::Select) {
+                foreach ($input->getOptionData() as $options) {
+                    foreach ($options as $type => $optionData) {
+                        if ($type == 'db') {
+                            $model = $this->form->getModel();
+                            $temp = new \stdClass();
+                            $temp->foreignKey = $optionData;
+                            $temp->current = (object) [
+                                'title' => $this->form->getResource()->title,
+                                'table' => $model->getTableName(),
+                                'field' => $input->getDbField(),
+                                'label' => $input->getLabel(),
+                                'id' => $model->isToken() ? $model->getToken() : $model->getPrimaryId()
+                            ];
+
+                            $selects[] = $temp;
+                        }
+                    }
+                }
+            }
+        }
+
+        return $selects;
+    }
+
     public function toObj($type)
     {
         $data['fields'] = [];

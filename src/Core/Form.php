@@ -739,6 +739,11 @@ class Form
 
     public function delete($id = false)
     {
+        $response = $this->checkForeignKeyRestriction($id);
+        if ($response !== true) {
+            return $response;
+        }
+
         if (! $this->crud->getSoftDelete()) {
             return $this->destroy($id);
         }
@@ -844,6 +849,97 @@ class Form
         return redirect($this->url)->with('success', 'Data permanently deleted successfully!');
     }
 
+    private function checkForeignKeyRestriction($id)
+    {
+        if (! \config('form-tool.isPreventForeignKeyDelete')) {
+            return true;
+        }
+
+        $dataCount = [];
+        $totalCount = 0;
+
+        $result = DB::table('cruds')->get();
+        if (\count($result) > 0) {
+            foreach ($result as $row) {
+                $data = \json_decode($row->data);
+                foreach ($data as $option) {
+                    if (! isset($option->foreignKey->dbTable)) {
+                        continue;
+                    }
+
+                    if ($option->foreignKey->dbTable == $this->model->getTableName()) {
+                        $resultData = DB::table($option->current->table)->where($option->current->field, $id)->get();
+
+                        $count = \count($resultData);
+                        if ($count > 0) {
+                            $dataCount[] = [
+                                'count' => $count,
+                                'title' => $option->current->title,
+                                'route' => $row->route,
+                                'label' => $option->current->label,
+                                'id' => $option->current->id,
+                                'result' => $resultData
+                            ];
+                            $totalCount += $count;
+                        }
+                    }
+                }
+            }
+        }
+
+        $totalReferencesToDisplay = 10;
+
+        if ($dataCount) {
+            $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to delete the linked data first to delete this item. ';
+
+            if ($totalCount > 10) {
+                $msg .= 'Below are some of the data which are linked to this item:';
+            } else {
+                $msg .= 'Below data are linked to this item:';
+            }
+
+            $msg .= '<br /><ul>';
+            $i = 0;
+            foreach ($dataCount as $result) {
+                $msg .= \sprintf('<li>%s data of <b>%s</b> in field "%s"</li>', $result['count'], $result['title'], $result['label']);
+
+                $url = URL::to(\config('form-tool.adminURL').'/'.$result['route']);
+                $hasPermission = Guard::hasEdit($result['route']);
+
+                $msg .= '<ul>';
+                foreach ($result['result'] as $row) {
+                    $id = $row->{$result['id']} ?? null;
+
+                    if ($id) {
+                        if ($hasPermission) {
+                            $msg .= '<li>ID: <a href="'. $url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                        } else {
+                            $msg .= '<li>ID: '.$id.'</li>';
+                        }
+                    } else {
+                        $msg .= "<li>ID: <i>{$result['id']} column not found</i></li>";
+                    }
+
+                    $i++;
+                    if ($i >= $totalReferencesToDisplay) {
+                        break;
+                    }
+                }
+                $msg .= '</ul>';
+
+                if ($i >= $totalReferencesToDisplay) {
+                    $msg .= "<li><i>+".($totalCount - $totalReferencesToDisplay)." more item(s)...</i></li>";
+                    break;
+                }
+            }
+            $msg .= '</ul>';
+
+            return redirect($this->url)->with('error', $msg);
+        }
+
+        return true;
+    }
+
     //endregion
 
     //region GetterSetter
@@ -870,6 +966,11 @@ class Form
     public function getModel()
     {
         return $this->model;
+    }
+
+    public function getResource()
+    {
+        return $this->resource;
     }
 
     public function getId()

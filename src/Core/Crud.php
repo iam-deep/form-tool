@@ -4,6 +4,7 @@ namespace Biswadeep\FormTool\Core;
 
 use Closure;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\DB;
 
 class Crud
 {
@@ -122,18 +123,33 @@ class Crud
 
     //endregion
 
+    public function save()
+    {        
+        if (! \config('form-tool.isPreventForeignKeyDelete')) {
+            return;
+        }
+
+        $selects = $this->bluePrint->getSelectDbOptions();
+
+        if (! $selects) {
+            return;
+        }
+
+        $count = DB::table('cruds')->where('route', $this->resource->route)->count();
+
+        $crudData = [
+            'route' => $this->resource->route,
+            'data' => \json_encode($selects)
+        ];
+        if ($count > 0) {
+            DB::table('cruds')->where('route', $this->resource->route)->update($crudData);
+        } else {
+            DB::table('cruds')->insert($crudData);
+        }
+    }
+
     public function __call($method, $parameters)
     {
-        /*if (\method_exists($this->form, $method)) {
-            $this->form->{$method}(...$parameters);
-        } else if (\method_exists($this->model, $method)) {
-            $this->model->{$method}(...$parameters);
-        } else if (\method_exists($this->table, $method)) {
-            $this->table->{$method}(...$parameters);
-        } else {
-            throw new \BadMethodCallException("$method not found in class Crud.");
-        }*/
-
         return $this->form->{$method}(...$parameters);
     }
 
@@ -186,6 +202,11 @@ class Crud
     public function getModel()
     {
         return $this->model;
+    }
+
+    public function getResource()
+    {
+        return $this->resource;
     }
 
     public function getSoftDelete(): bool

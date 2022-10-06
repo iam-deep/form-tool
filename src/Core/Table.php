@@ -95,6 +95,10 @@ class Table
                     $fieldsToSearch[] = $input->getDbField();
                 }
             }
+
+            if ($this->model->isToken()) {
+                $fieldsToSearch[] = $this->model->getToken();
+            }
         }
 
         if (! $fieldsToSearch) {

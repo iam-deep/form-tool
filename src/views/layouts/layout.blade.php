@@ -46,12 +46,12 @@
             <div class="col-sm-12">
                 @if (session('error'))
                     <div class="alert alert-danger">
-                        {{ session('error') }}
+                        {!! session('error') !!}
                     </div>
                     <?php session()->pull('error'); ?>
                 @elseif (session('success'))
                     <div class="alert alert-success">
-                        {{ session('success') }}
+                        {!! session('success') !!}
                     </div>
                     <?php session()->pull('success'); ?>
                 @endif

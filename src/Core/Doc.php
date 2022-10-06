@@ -125,6 +125,8 @@ class Doc
     {
         $crud = self::getCurdByName($name);
         if ($crud) {
+            $crud->save();
+
             return $crud->getTable()->getContent();
         }
     }

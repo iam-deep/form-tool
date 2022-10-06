@@ -199,4 +199,9 @@ trait Options
             return $this->options->{$this->value} ?? null;
         }
     }
+
+    public function getOptionData()
+    {
+        return $this->optionData;
+    }
 }
