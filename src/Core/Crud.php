@@ -3,8 +3,8 @@
 namespace Biswadeep\FormTool\Core;
 
 use Closure;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class Crud
 {
@@ -124,7 +124,7 @@ class Crud
     //endregion
 
     public function save()
-    {        
+    {
         if (! \config('form-tool.isPreventForeignKeyDelete')) {
             return;
         }
@@ -139,7 +139,7 @@ class Crud
 
         $crudData = [
             'route' => $this->resource->route,
-            'data' => \json_encode($selects)
+            'data' => \json_encode($selects),
         ];
         if ($count > 0) {
             DB::table('cruds')->where('route', $this->resource->route)->update($crudData);

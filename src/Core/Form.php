@@ -878,7 +878,7 @@ class Form
                                 'route' => $row->route,
                                 'label' => $option->current->label,
                                 'id' => $option->current->id,
-                                'result' => $resultData
+                                'result' => $resultData,
                             ];
                             $totalCount += $count;
                         }
@@ -912,7 +912,7 @@ class Form
 
                     if ($id) {
                         if ($hasPermission) {
-                            $msg .= '<li>ID: <a href="'. $url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                            $msg .= '<li>ID: <a href="'.$url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
                         } else {
                             $msg .= '<li>ID: '.$id.'</li>';
                         }
@@ -928,7 +928,7 @@ class Form
                 $msg .= '</ul>';
 
                 if ($i >= $totalReferencesToDisplay) {
-                    $msg .= "<li><i>+".($totalCount - $totalReferencesToDisplay)." more item(s)...</i></li>";
+                    $msg .= '<li><i>+'.($totalCount - $totalReferencesToDisplay).' more item(s)...</i></li>';
                     break;
                 }
             }

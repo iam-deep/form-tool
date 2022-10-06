@@ -406,7 +406,7 @@ class BluePrint
                                 'table' => $model->getTableName(),
                                 'field' => $input->getDbField(),
                                 'label' => $input->getLabel(),
-                                'id' => $model->isToken() ? $model->getToken() : $model->getPrimaryId()
+                                'id' => $model->isToken() ? $model->getToken() : $model->getPrimaryId(),
                             ];
 
                             $selects[] = $temp;
