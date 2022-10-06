@@ -122,7 +122,7 @@ class BulkAction
 
         // Creation is not successful let's return
         if (! $insertId) {
-           return;
+            return;
         }
 
         foreach ($this->table->getBluePrint()->getList() as $input) {
