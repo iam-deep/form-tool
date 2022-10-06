@@ -890,7 +890,7 @@ class Form
         }
 
         if ($dataCount) {
-            $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to delete the linked data first to delete this item. ';
+            $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to delete all the linked data first to delete this item. ';
 
             if ($totalCount > 10) {
                 $msg .= 'Below are some of the data which are linked to this item:';

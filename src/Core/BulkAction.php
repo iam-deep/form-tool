@@ -51,30 +51,22 @@ class BulkAction
             return \back()->withErrors('Please select some rows to delete!');
         }
 
-        $callback = $this->callback;
-        $filtered = [];
-        foreach ($ids as $id) {
-            if (! $callback || false !== $callback($id, $bulkAction)) {
-                $filtered[] = $id;
-            }
-        }
-
         $response = null;
         switch ($bulkAction) {
             case 'duplicate':
-                $response = $this->duplicate($filtered);
+                $response = $this->duplicate($ids);
                 break;
 
             case 'delete':
-                $response = $this->delete($filtered);
+                $response = $this->delete($ids);
                 break;
 
             case 'restore':
-                $response = $this->restore($filtered);
+                $response = $this->restore($ids);
                 break;
 
             case 'destroy':
-                $response = $this->destroy($filtered);
+                $response = $this->destroy($ids);
                 break;
 
             default:
@@ -90,10 +82,6 @@ class BulkAction
             return \back()->withErrors("You don't have enough permission to create!");
         }
 
-        if (! $ids) {
-            return \back()->withErrors('Nothing copied!');
-        }
-
         $metaColumns = \config('form-tool.table_meta_columns', $this->table->getTableMetaColumns());
 
         $data = [];
@@ -102,70 +90,84 @@ class BulkAction
         $data[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::user()->userId;
         $data[$metaColumns['createdAt'] ?? 'createdAt'] = \date('Y-m-d H:i:s');
 
+        $callback = $this->callback;
+        $filtered = [];
         foreach ($ids as $id) {
-            $result = $this->table->getModel()->getOne($id);
-
-            $primaryIdColumn = $this->table->getModel()->getPrimaryId();
-
-            // Let's get the actual id if this is a token
-            $id = $this->table->getModel()->isToken() ? $result->{$primaryIdColumn} : $id;
-
-            $result->{$primaryIdColumn} = 0;
-            $result = array_merge((array) $result, $data);
-
-            $insertId = $this->table->getModel()->add($result);
-
-            // Creation is not successful let's move on
-            if (! $insertId) {
-                continue;
-            }
-
-            foreach ($this->table->getBluePrint()->getList() as $input) {
-                if (! $input instanceof BluePrint || ! $input->getModel()) {
-                    continue;
-                }
-
-                $model = $input->getModel();
-
-                $foreignKey = null;
-                if ($model instanceof \stdClass) {
-                    $foreignKey = $model->foreignKey;
-                } else {
-                    if (! isset($model::$foreignKey)) {
-                        throw new \Exception('$foreignKey property not defined at '.$model);
-                    }
-
-                    $foreignKey = $model::$foreignKey;
-                }
-
-                $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
-
-                $insert = [];
-                foreach ($childResult as $row) {
-                    $row = (array) $row;
-                    $row[$model->id] = 0;
-                    $row[$foreignKey] = $insertId;
-
-                    $insert[] = $row;
-                }
-
-                // TODO: Need to do this in the data model, it's not BulkAction or Form's job
-                $where = [$foreignKey => $insertId];
-                if ($model instanceof \stdClass) {
-                    DB::table($model->table)->where($where)->delete();
-                    if (\count($insert)) {
-                        DB::table($model->table)->insert($insert);
-                    }
-                } else {
-                    $model::deleteWhere($where);
-                    if (\count($insert)) {
-                        $model::addMany($insert);
-                    }
-                }
+            if (! $callback || false !== $callback($id, 'duplicate')) {
+                $filtered[] = $id;
+                $this->doDuplicate($id, $data);
             }
         }
 
+        if (! $filtered) {
+            return \back()->withErrors('Nothing copied!');
+        }
+
         return \back()->with('success', 'Selected rows copied successfully!');
+    }
+
+    protected function doDuplicate($id, $data)
+    {
+        $result = $this->table->getModel()->getOne($id);
+
+        $primaryIdColumn = $this->table->getModel()->getPrimaryId();
+
+        // Let's get the actual id if this is a token
+        $id = $this->table->getModel()->isToken() ? $result->{$primaryIdColumn} : $id;
+
+        $result->{$primaryIdColumn} = 0;
+        $result = array_merge((array) $result, $data);
+
+        $insertId = $this->table->getModel()->add($result);
+
+        // Creation is not successful let's return
+        if (! $insertId) {
+           return;
+        }
+
+        foreach ($this->table->getBluePrint()->getList() as $input) {
+            if (! $input instanceof BluePrint || ! $input->getModel()) {
+                continue;
+            }
+
+            $model = $input->getModel();
+
+            $foreignKey = null;
+            if ($model instanceof \stdClass) {
+                $foreignKey = $model->foreignKey;
+            } else {
+                if (! isset($model::$foreignKey)) {
+                    throw new \Exception('$foreignKey property not defined at '.$model);
+                }
+
+                $foreignKey = $model::$foreignKey;
+            }
+
+            $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
+
+            $insert = [];
+            foreach ($childResult as $row) {
+                $row = (array) $row;
+                $row[$model->id] = 0;
+                $row[$foreignKey] = $insertId;
+
+                $insert[] = $row;
+            }
+
+            // TODO: Need to do this in the data model, it's not BulkAction or Form's job
+            $where = [$foreignKey => $insertId];
+            if ($model instanceof \stdClass) {
+                DB::table($model->table)->where($where)->delete();
+                if (\count($insert)) {
+                    DB::table($model->table)->insert($insert);
+                }
+            } else {
+                $model::deleteWhere($where);
+                if (\count($insert)) {
+                    $model::addMany($insert);
+                }
+            }
+        }
     }
 
     protected function delete($ids)
@@ -174,12 +176,17 @@ class BulkAction
             return \back()->withErrors("You don't have enough permission to delete!");
         }
 
-        if (! $ids) {
-            return \back()->withErrors('Nothing deleted!');
+        $callback = $this->callback;
+        $filtered = [];
+        foreach ($ids as $id) {
+            if (! $callback || false !== $callback($id, 'delete')) {
+                $filtered[] = $id;
+                $this->table->crud->getForm()->delete($id);
+            }
         }
 
-        foreach ($ids as $id) {
-            $this->table->crud->getForm()->delete($id);
+        if (! $filtered) {
+            return \back()->withErrors('Nothing deleted!');
         }
 
         return \back()->with('success', 'Selected rows deleted successfully!');
@@ -187,18 +194,23 @@ class BulkAction
 
     protected function restore($ids)
     {
-        if (! $ids) {
-            return \back()->withErrors('Nothing restored!');
-        }
-
         $metaColumns = \config('form-tool.table_meta_columns', $this->table->getTableMetaColumns());
 
         $data = [];
         $data[$metaColumns['deletedBy'] ?? 'deletedBy'] = null;
         $data[$metaColumns['deletedAt'] ?? 'deletedAt'] = null;
 
+        $callback = $this->callback;
+        $filtered = [];
         foreach ($ids as $id) {
-            $affected = $this->table->getModel()->updateOne($id, $data);
+            if (! $callback || false !== $callback($id, 'restore')) {
+                $filtered[] = $id;
+                $affected = $this->table->getModel()->updateOne($id, $data);
+            }
+        }
+
+        if (! $filtered) {
+            return \back()->withErrors('Nothing restored!');
         }
 
         return \back()->with('success', 'Selected rows restored successfully!');
@@ -210,12 +222,17 @@ class BulkAction
             return \back()->withErrors("You don't have enough permission to delete permanently!");
         }
 
-        if (! $ids) {
-            return \back()->withErrors('Nothing deleted!');
+        $callback = $this->callback;
+        $filtered = [];
+        foreach ($ids as $id) {
+            if (! $callback || false !== $callback($id, 'destroy')) {
+                $filtered[] = $id;
+                $this->table->crud->getForm()->destroy($id);
+            }
         }
 
-        foreach ($ids as $id) {
-            $this->table->crud->getForm()->destroy($id);
+        if (! $filtered) {
+            return \back()->withErrors('Nothing deleted!');
         }
 
         return \back()->with('success', 'Selected rows deleted permanently!');
