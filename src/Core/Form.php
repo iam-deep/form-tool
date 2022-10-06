@@ -858,6 +858,8 @@ class Form
         $dataCount = [];
         $totalCount = 0;
 
+        $totalReferencesToDisplay = 10;
+
         $result = DB::table('cruds')->get();
         if (\count($result) > 0) {
             foreach ($result as $row) {
@@ -868,7 +870,7 @@ class Form
                     }
 
                     if ($option->foreignKey->dbTable == $this->model->getTableName()) {
-                        $resultData = DB::table($option->current->table)->where($option->current->field, $id)->get();
+                        $resultData = DB::table($option->current->table)->where($option->current->field, $id)->limit($totalReferencesToDisplay)->get();
 
                         $count = \count($resultData);
                         if ($count > 0) {
@@ -886,8 +888,6 @@ class Form
                 }
             }
         }
-
-        $totalReferencesToDisplay = 10;
 
         if ($dataCount) {
             $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to delete the linked data first to delete this item. ';
