@@ -398,25 +398,36 @@ class BluePrint
                 foreach ($input->getOptionData() as $options) {
                     foreach ($options as $type => $optionData) {
                         if ($type == 'db') {
-                            $model = $this->form->getModel();
-                            $temp = new \stdClass();
-                            $temp->foreignKey = $optionData;
-                            $temp->current = (object) [
-                                'title' => $this->form->getResource()->title,
-                                'table' => $model->getTableName(),
-                                'field' => $input->getDbField(),
-                                'label' => $input->getLabel(),
-                                'id' => $model->isToken() ? $model->getToken() : $model->getPrimaryId(),
-                            ];
-
-                            $selects[] = $temp;
+                            $optionData->field = $input->getDbField();
+                            $optionData->label = $input->getLabel();
+                            $selects[] = $optionData;
                         }
                     }
                 }
             }
         }
 
-        return $selects;
+        $data = new \stdClass();
+
+        $temp = (object) [
+            'dbTable' => 'users',
+            'field' => 'createdBy',
+            'label' => 'Created By'
+        ];
+        $selects[] = $temp;
+
+        if ($selects) {
+            $data->foreignKey = $selects;
+
+            $model = $this->form->getModel();
+            $data->main = (object) [
+                'title' => $this->form->getResource()->title,
+                'table' => $model->getTableName(),
+                'id' => $model->isToken() ? $model->getToken() : $model->getPrimaryId(),
+            ];
+        }
+
+        return $data;
     }
 
     public function toObj($type)

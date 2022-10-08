@@ -864,22 +864,22 @@ class Form
         if (\count($result) > 0) {
             foreach ($result as $row) {
                 $data = \json_decode($row->data);
-                foreach ($data as $option) {
-                    if (! isset($option->foreignKey->dbTable)) {
-                        continue;
-                    }
+                if (! isset($data->foreignKey)) {
+                    continue;
+                }
 
-                    if ($option->foreignKey->dbTable == $this->model->getTableName()) {
-                        $resultData = DB::table($option->current->table)->where($option->current->field, $id)->limit($totalReferencesToDisplay)->get();
-
+                foreach ($data->foreignKey as $option) {
+                    if ($option->dbTable == $this->model->getTableName()) {
+                        $resultData = DB::table($data->main->table)->where($option->field, $id)->limit($totalReferencesToDisplay)->get();
+                        
                         $count = \count($resultData);
                         if ($count > 0) {
                             $dataCount[] = [
                                 'count' => $count,
-                                'title' => $option->current->title,
+                                'title' => $data->main->title,
                                 'route' => $row->route,
-                                'label' => $option->current->label,
-                                'id' => $option->current->id,
+                                'label' => $option->label,
+                                'id' => $data->main->id,
                                 'result' => $resultData,
                             ];
                             $totalCount += $count;

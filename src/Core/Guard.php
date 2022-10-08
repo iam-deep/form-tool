@@ -51,68 +51,159 @@ class Guard
             return isset(self::$instance->permissions->{$route}->view) ? true : false;
         }
 
-        return self::$instance->$hasView;
+        return self::$instance->hasView;
     }
 
-    public static function hasCreate()
+    public static function hasCreate(string $route = '')
     {
-        return ! self::$isEnable || self::$instance->hasCreate;
+        if (! self::$isEnable) {
+            return true;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            return isset($permission->{$route}->view, $permission->{$route}->create) ? true : false;
+        }
+
+        return self::$instance->hasView && self::$instance->hasCreate;
     }
 
-    public static function hasEdit()
+    public static function hasEdit(string $route = '')
     {
-        return ! self::$isEnable || self::$instance->hasEdit;
+        if (! self::$isEnable) {
+            return true;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            return isset($permission->{$route}->view, $permission->{$route}->edit) ? true : false;
+        }
+
+        return self::$instance->hasView && self::$instance->hasEdit;
     }
 
-    public static function hasDelete()
+    public static function hasDelete(string $route = '')
     {
-        return ! self::$isEnable || self::$instance->hasDelete;
+        if (! self::$isEnable) {
+            return true;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            return isset($permission->{$route}->view, $permission->{$route}->delete) ? true : false;
+        }
+
+        return self::$instance->hasView && self::$instance->hasDelete;
     }
 
-    public static function hasDestroy()
+    public static function hasDestroy(string $route = '')
     {
-        return ! self::$isEnable || self::$instance->hasDestroy;
+        if (! self::$isEnable) {
+            return true;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            return isset($permission->{$route}->view, $permission->{$route}->destroy) ? true : false;
+        }
+
+        return self::$instance->hasView && self::$instance->hasDestroy;
     }
 
-    public static function hasViewOrAbort()
+    public static function hasViewOrAbort(string $route = '')
     {
-        if (! self::$isEnable || self::$instance->hasView) {
+        if (! self::$isEnable) {
+            return;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            if (isset($permission->{$route}->view)) {
+                return;
+            }
+        }
+
+        if (self::$instance->hasView) {
             return;
         }
 
         self::abort();
     }
 
-    public static function hasCreateOrAbort()
+    public static function hasCreateOrAbort(string $route = '')
     {
-        if (! self::$isEnable || self::$instance->hasCreate) {
+        if (! self::$isEnable) {
+            return;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            if (isset($permission->{$route}->view, $permission->{$route}->create)) {
+                return;
+            }
+        }
+
+        if (self::$instance->hasCreate) {
             return;
         }
 
         self::abort();
     }
 
-    public static function hasEditOrAbort()
+    public static function hasEditOrAbort(string $route = '')
     {
-        if (! self::$isEnable || self::$instance->hasEdit) {
+        if (! self::$isEnable) {
+            return;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            if (isset($permission->{$route}->view, $permission->{$route}->edit)) {
+                return;
+            }
+        }
+
+        if (self::$instance->hasEdit) {
             return;
         }
 
         self::abort();
     }
 
-    public static function hasDeleteOrAbort()
+    public static function hasDeleteOrAbort(string $route = '')
     {
-        if (! self::$isEnable || self::$instance->hasDelete) {
+        if (! self::$isEnable) {
+            return;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            if (isset($permission->{$route}->view, $permission->{$route}->delete)) {
+                return;
+            }
+        }
+
+        if (self::$instance->hasDelete) {
             return;
         }
 
         self::abort();
     }
 
-    public static function hasDestroyOrAbort()
+    public static function hasDestroyOrAbort(string $route = '')
     {
-        if (! self::$isEnable || self::$instance->hasDestroy) {
+        if (! self::$isEnable) {
+            return;
+        }
+
+        if ($route) {
+            $permission = self::$instance->permissions;
+            if (isset($permission->{$route}->view, $permission->{$route}->destroy)) {
+                return;
+            }
+        }
+
+        if (self::$instance->hasDestroy) {
             return;
         }
 
