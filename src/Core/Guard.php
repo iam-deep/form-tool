@@ -62,6 +62,7 @@ class Guard
 
         if ($route) {
             $permission = self::$instance->permissions;
+
             return isset($permission->{$route}->view, $permission->{$route}->create) ? true : false;
         }
 
@@ -76,6 +77,7 @@ class Guard
 
         if ($route) {
             $permission = self::$instance->permissions;
+
             return isset($permission->{$route}->view, $permission->{$route}->edit) ? true : false;
         }
 
@@ -90,6 +92,7 @@ class Guard
 
         if ($route) {
             $permission = self::$instance->permissions;
+
             return isset($permission->{$route}->view, $permission->{$route}->delete) ? true : false;
         }
 
@@ -104,6 +107,7 @@ class Guard
 
         if ($route) {
             $permission = self::$instance->permissions;
+
             return isset($permission->{$route}->view, $permission->{$route}->destroy) ? true : false;
         }
 

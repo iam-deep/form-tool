@@ -871,7 +871,7 @@ class Form
                 foreach ($data->foreignKey as $option) {
                     if ($option->dbTable == $this->model->getTableName()) {
                         $resultData = DB::table($data->main->table)->where($option->field, $id)->limit($totalReferencesToDisplay)->get();
-                        
+
                         $count = \count($resultData);
                         if ($count > 0) {
                             $dataCount[] = [

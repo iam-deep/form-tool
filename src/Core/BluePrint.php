@@ -412,7 +412,7 @@ class BluePrint
         $temp = (object) [
             'dbTable' => 'users',
             'field' => 'createdBy',
-            'label' => 'Created By'
+            'label' => 'Created By',
         ];
         $selects[] = $temp;
 
