@@ -189,7 +189,7 @@ class DataModel
     }
 
     public function updateDelete($id)
-    {        
+    {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedBy = ($metaColumns['deletedBy'] ?? 'deletedBy') ?: 'deletedBy';
         $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
