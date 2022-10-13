@@ -44,6 +44,11 @@ trait Encryption
         return parent::getTableValue();
     }
 
+    public function isEncrypted()
+    {
+        return $this->isEncrypted;
+    }
+
     protected function doEncrypt($value)
     {
         if (! $this->isEncrypted || ! $value) {

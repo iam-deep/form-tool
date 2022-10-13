@@ -168,6 +168,8 @@ class BulkAction
                 }
             }
         }
+
+        //ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result);
     }
 
     protected function delete($ids)
@@ -194,18 +196,15 @@ class BulkAction
 
     protected function restore($ids)
     {
-        $metaColumns = \config('form-tool.table_meta_columns', $this->table->getTableMetaColumns());
-
-        $data = [];
-        $data[$metaColumns['deletedBy'] ?? 'deletedBy'] = null;
-        $data[$metaColumns['deletedAt'] ?? 'deletedAt'] = null;
-
         $callback = $this->callback;
         $filtered = [];
         foreach ($ids as $id) {
             if (! $callback || false !== $callback($id, 'restore')) {
                 $filtered[] = $id;
-                $affected = $this->table->getModel()->updateOne($id, $data);
+                $affected = $this->table->getModel()->restore($id);
+
+                $result = $this->table->getModel()->getOne($id);
+                //ActionLogger::restore($this->table->getBluePrint(), $id, $result);
             }
         }
 

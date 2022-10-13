@@ -17,6 +17,7 @@ class DataModel
     protected bool $isToken = false;
     protected bool $isSoftDelete = true;
 
+    protected Crud $crud;
     protected string $model = '';
 
     public function __construct($model = null)
@@ -120,6 +121,11 @@ class DataModel
         $this->isSoftDelete = $enable;
     }
 
+    public function setCrud(Crud $crud)
+    {
+        $this->crud = $crud;
+    }
+
     //endregion
 
     public function getAll($isFromTrash = false)
@@ -153,6 +159,13 @@ class DataModel
             $data[$this->token] = Random::unique($this);
         }
 
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $createdBy = ($metaColumns['createdBy'] ?? 'createdBy') ?: 'createdBy';
+        $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
+
+        $data[$createdBy] = Auth::user() ? Auth::user()->userId : 0;
+        $data[$createdAt] = \date('Y-m-d H:i:s');
+
         return $this->setup()::add($data);
     }
 
@@ -163,6 +176,41 @@ class DataModel
 
     public function updateOne($id, $data, $isToken = null)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $updatedBy = ($metaColumns['updatedBy'] ?? 'updatedBy') ?: 'updatedBy';
+        $updatedAt = ($metaColumns['updatedAt'] ?? 'updatedAt') ?: 'updatedAt';
+
+        if ($this->crud->isDefaultFormat()) {
+            $data[$updatedBy] = Auth::user() ? Auth::user()->userId : 0;
+            $data[$updatedAt] = \date('Y-m-d H:i:s');
+        }
+
+        return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
+    }
+
+    public function updateDelete($id)
+    {        
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedBy = ($metaColumns['deletedBy'] ?? 'deletedBy') ?: 'deletedBy';
+        $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
+
+        $data = [];
+        $data[$deletedBy] = Auth::user() ? Auth::user()->userId : 0;
+        $data[$deletedAt] = \date('Y-m-d H:i:s');
+
+        return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
+    }
+
+    public function restore($id)
+    {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedBy = ($metaColumns['deletedBy'] ?? 'deletedBy') ?: 'deletedBy';
+        $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
+
+        $data = [];
+        $data[$deletedBy] = null;
+        $data[$deletedAt] = null;
+
         return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
     }
 
@@ -171,9 +219,9 @@ class DataModel
         return $this->setup()::deleteOne($id, $isToken ?? $this->isToken);
     }
 
-    public function deleteWhere($where = null)
+    public function destroyWhere($where = null)
     {
-        return $this->setup()::deleteWhere($where);
+        return $this->setup()::destroyWhere($where);
     }
 
     public function countWhere($where = null)

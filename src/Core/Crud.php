@@ -17,6 +17,7 @@ class Crud
     private Table $table;
 
     protected string $format = 'default';
+    protected string $groupName = 'default';
     protected bool $isSoftDelete = true;
 
     public function create(object $resource, $model, Closure $callback, string $name = 'default'): Crud
@@ -29,6 +30,7 @@ class Crud
         } else {
             $this->model = new DataModel($model);
         }
+        $this->model->setCrud($this);
 
         $this->bluePrint = new BluePrint();
         $callback($this->bluePrint);
@@ -57,12 +59,13 @@ class Crud
      * @param  string  $var  Desired values: (default, keyValue)
      * @return \Biswadeep\FormTool\Core\Crud
      **/
-    public function format(string $format = 'default'): Crud
+    public function format(string $format = 'default', string $groupName = 'default'): Crud
     {
         $this->format = $format;
 
         if ($format != 'default') {
             $this->softDelete(false);
+            $this->groupName = $groupName;
         }
 
         return $this;
@@ -217,5 +220,10 @@ class Crud
     public function isDefaultFormat(): bool
     {
         return $this->format == 'default';
+    }
+
+    public function getGroupName()
+    {
+        return $this->groupName;
     }
 }

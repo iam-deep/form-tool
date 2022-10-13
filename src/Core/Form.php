@@ -379,6 +379,7 @@ class Form
         $insertId = $this->model->add($this->postData);
 
         if ($insertId) {
+            //ActionLogger::create($this->bluePrint, $insertId);
             $this->editId = $insertId;
 
             $this->afterSave();
@@ -392,7 +393,7 @@ class Form
         $this->formStatus = FormStatus::Update;
 
         if ($this->crud->isDefaultFormat()) {
-            $this->parseEditId($id);
+            $id = $this->parseEditId($id);
         }
 
         $validate = $this->validate();
@@ -436,23 +437,19 @@ class Form
 
         if ($this->crud->isDefaultFormat()) {
             $affected = $this->model->updateOne($this->editId, $this->postData, false);
-
-            if ($affected > 0) {
-                $this->afterSave();
-            }
         } else {
-            // This is hard-coded here, as to prevent mistakes or hacks to truncate tables
-            DB::table($this->model->getTableName())->truncate();
+            $this->model->destroyWhere(['groupName' => $this->crud->getGroupName()]);
 
             $insert = [];
             foreach ($this->postData as $key => $value) {
-                $insert[] = ['key' => $key, 'value' => $value];
+                $insert[] = ['groupName' => $this->crud->getGroupName(), 'key' => $key, 'value' => $value];
             }
 
             $affected = $this->model->addMany($insert);
-
-            $this->afterSave();
         }
+
+        $this->afterSave();
+        //ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
 
         return redirect($this->url)->with('success', 'Data updated successfully!');
     }
@@ -623,21 +620,11 @@ class Form
         $postData = $this->postData;
         $this->postData = [];
 
-        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
-
-        if ($this->formStatus == FormStatus::Store) {
-            $this->postData[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::user() ? Auth::user()->userId : 0;
-            $this->postData[$metaColumns['createdAt'] ?? 'createdAt'] = \date('Y-m-d H:i:s');
-        } else {
-            $this->parseEditId($id);
+        if ($this->formStatus == FormStatus::Update) {
+            $id = $this->parseEditId($id);
 
             if (! $this->oldData) {
                 $this->oldData = $this->model->getOne($this->editId);
-            }
-
-            if ($this->crud->isDefaultFormat()) {
-                $this->postData[$metaColumns['updatedBy'] ?? 'updatedBy'] = Auth::user() ? Auth::user()->userId : 0;
-                $this->postData[$metaColumns['updatedAt'] ?? 'updatedAt'] = \date('Y-m-d H:i:s');
             }
         }
 
@@ -717,7 +704,7 @@ class Form
         if ($id) {
             $this->editId = $id;
 
-            return true;
+            return $id;
         }
 
         $url = $this->request->getRequestUri();
@@ -727,7 +714,7 @@ class Form
         if (\count($matches) > 1) {
             $this->editId = $matches[1];
 
-            return true;
+            return $this->editId;
         }
 
         throw new \Exception('Could not fetch "id"! Pass $id manually as parameter.');
@@ -739,6 +726,8 @@ class Form
 
     public function delete($id = false)
     {
+        $id = $this->parseEditId($id);
+
         $response = $this->checkForeignKeyRestriction($id);
         if ($response !== true) {
             return $response;
@@ -750,15 +739,10 @@ class Form
 
         $this->formStatus = FormStatus::Delete;
 
-        $this->parseEditId($id);
+        $result = $this->model->getOne($id);
 
-        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
-
-        $data = [];
-        $data[$metaColumns['deletedBy'] ?? 'deletedBy'] = Auth::user() ? Auth::user()->userId : 0;
-        $data[$metaColumns['deletedAt'] ?? 'deletedAt'] = \date('Y-m-d H:i:s');
-
-        $affected = $this->model->updateOne($id, $data);
+        $affected = $this->model->updateDelete($id);
+        //ActionLogger::delete($this->bluePrint, $id, $result);
 
         return redirect($this->url)->with('success', 'Data deleted successfully!');
     }
@@ -767,7 +751,7 @@ class Form
     {
         $this->formStatus = FormStatus::Destroy;
 
-        $this->parseEditId($id);
+        $id = $this->parseEditId($id);
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
         $deletedAt = $metaColumns['deletedBy'] ?? 'deletedBy';
@@ -846,6 +830,8 @@ class Form
             }
         }
 
+        //ActionLogger::destroy($this->bluePrint, $id, $result);
+
         return redirect($this->url)->with('success', 'Data permanently deleted successfully!');
     }
 
@@ -870,7 +856,7 @@ class Form
 
                 foreach ($data->foreignKey as $option) {
                     if ($option->dbTable == $this->model->getTableName()) {
-                        $resultData = DB::table($data->main->table)->where($option->field, $id)->limit($totalReferencesToDisplay)->get();
+                        $resultData = DB::table($data->main->table)->where($option->field, $id)->get();     //->limit($totalReferencesToDisplay)
 
                         $count = \count($resultData);
                         if ($count > 0) {
@@ -890,7 +876,7 @@ class Form
         }
 
         if ($dataCount) {
-            $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to delete all the linked data first to delete this item. ';
+            $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to destroy all the linked data first to delete this item. ';
 
             if ($totalCount > 10) {
                 $msg .= 'Below are some of the data which are linked to this item:';

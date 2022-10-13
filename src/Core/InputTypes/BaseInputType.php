@@ -283,6 +283,11 @@ class BaseInputType
         $this->value = $value;
     }
 
+    public function getRawValue()
+    {
+        return $this->value;
+    }
+
     public function getValue()
     {
         return $this->value;
