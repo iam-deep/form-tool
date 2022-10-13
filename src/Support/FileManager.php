@@ -30,7 +30,7 @@ class FileManager
             $filename = self::addHypens($file->getClientOriginalName());
 
             // Let's replace the old file if exists
-            if ($oldFilePath) {
+            /*if ($oldFilePath) {
                 $pathinfo = \pathinfo($oldFilePath);
 
                 $ext = $pathinfo['extension'] ?? '';
@@ -43,12 +43,11 @@ class FileManager
                     $filename = $pathinfo['basename'];
                 }
 
-                /* TODO: Delete the cache image
+                // TODO: Delete the cache image
 
-                $cacheImage = $destinationPath . $pathinfo['filename'].'-150x150.'.$pathinfo['extension'];
-                FileManager::deleteFile($cacheImage);
-                */
-            }
+                // $cacheImage = $destinationPath . $pathinfo['filename'].'-150x150.'.$pathinfo['extension'];
+                // FileManager::deleteFile($cacheImage);
+            }*/
 
             return FileManager::doUpload($file, $destinationPath, $filename, $flagCheck);
         }
