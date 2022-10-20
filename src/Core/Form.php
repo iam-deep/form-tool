@@ -236,6 +236,8 @@ class Form
                 $i = 0;
                 foreach ($result as $row) {
                     foreach ($model->getList() as $field) {
+                        $field->setIndex($model->getKey(), $i);
+
                         $field->setValue($row->{$field->getDbField()} ?? null);
                     }
 
@@ -490,21 +492,23 @@ class Form
     private function saveMultipleFields()
     {
         foreach ($this->bluePrint->getList() as $input) {
-            if (! $input instanceof BluePrint || ! $input->getModel()) {
+            if (! $input instanceof BluePrint) {
                 continue;
             }
 
             $model = $input->getModel();
 
             $foreignKey = null;
-            if ($model instanceof \stdClass) {
-                $foreignKey = $model->foreignKey;
-            } else {
-                if (! isset($model::$foreignKey)) {
-                    throw new \Exception('$foreignKey property not defined at '.$model);
-                }
+            if ($model) {
+                if ($model instanceof \stdClass) {
+                    $foreignKey = $model->foreignKey;
+                } else {
+                    if (! isset($model::$foreignKey)) {
+                        throw new \Exception('$foreignKey property not defined at '.$model);
+                    }
 
-                $foreignKey = $model::$foreignKey;
+                    $foreignKey = $model::$foreignKey;
+                }
             }
 
             $postData = $this->request->post($input->getKey());
@@ -512,10 +516,14 @@ class Form
             // Some field don't send data into the post like file
             // And it's a buggy if we only have only file field in multiple
             // So let's create an array of null if have any data in our file field
-            if ($postData == null) {
+            // count() help to determine on edit with some data in post and some new upload
+            if ($postData == null || count($input->getList()) == 1) {
                 foreach ($input->getList() as $field) {
                     if ($this->request->file($input->getKey())) {
-                        $postData = array_fill(0, \count($this->request->file($input->getKey())), null);
+                        if ($postData)
+                            $postData = array_merge($postData, array_fill(0, \count($this->request->file($input->getKey())), null));
+                        else
+                            $postData = array_fill(0, \count($this->request->file($input->getKey())), null);
                         break;
                     }
                 }
@@ -557,23 +565,30 @@ class Form
                         }
                     }
 
-                    $dataRow[$foreignKey] = $this->editId;
+                    if ($foreignKey) {
+                        $dataRow[$foreignKey] = $this->editId;
+                    }
 
                     $data[] = $dataRow;
                 }
             }
 
-            $where = [$foreignKey => $this->editId];
-            if ($model instanceof \stdClass) {
-                DB::table($model->table)->where($where)->delete();
-                if (\count($data)) {
-                    DB::table($model->table)->insert($data);
+            if ($model) {
+                $where = [$foreignKey => $this->editId];
+                if ($model instanceof \stdClass) {
+                    DB::table($model->table)->where($where)->delete();
+                    if (\count($data)) {
+                        DB::table($model->table)->insert($data);
+                    }
+                } else {
+                    $model::deleteWhere($where);
+                    if (\count($data)) {
+                        $model::addMany($data);
+                    }
                 }
-            } else {
-                $model::deleteWhere($where);
-                if (\count($data)) {
-                    $model::addMany($data);
-                }
+            }
+            else {
+                $this->model->updateOne($this->editId, [$input->getKey() => json_encode($data)]);
             }
         }
     }
