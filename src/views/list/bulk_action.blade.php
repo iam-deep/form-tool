@@ -7,5 +7,5 @@
     </select>
     <input type="hidden" id="bulkIds" name="ids" value="">
     @csrf
-    <button class="btn btn-sm btn-default">Apply</button>
+    <button class="btn btn-sm btn-default" name="bulk-action">Apply</button>
 </form>

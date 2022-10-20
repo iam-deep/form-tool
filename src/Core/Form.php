@@ -64,7 +64,7 @@ class Form
     {
         $method = $this->request->method();
 
-        if ('POST' == $method) {
+        if ('POST' == $method && ! isset($_POST['bulk-action'])) {
             return $this->store();
         } elseif ('PUT' == $method) {
             return $this->update();
