@@ -520,10 +520,11 @@ class Form
             if ($postData == null || count($input->getList()) == 1) {
                 foreach ($input->getList() as $field) {
                     if ($this->request->file($input->getKey())) {
-                        if ($postData)
+                        if ($postData) {
                             $postData = array_merge($postData, array_fill(0, \count($this->request->file($input->getKey())), null));
-                        else
+                        } else {
                             $postData = array_fill(0, \count($this->request->file($input->getKey())), null);
+                        }
                         break;
                     }
                 }
@@ -586,8 +587,7 @@ class Form
                         $model::addMany($data);
                     }
                 }
-            }
-            else {
+            } else {
                 $this->model->updateOne($this->editId, [$input->getKey() => json_encode($data)]);
             }
         }

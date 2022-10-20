@@ -212,10 +212,11 @@ class FileType extends BaseInputType
         $name = $key.'['.$index.']['.$this->dbField.']';
 
         if ($this->isRequired) {
-            if ( ! $value)
+            if (! $value) {
                 $this->raw('required');
-            else
+            } else {
                 $this->removeRaw('required');
+            }
         }
 
         $input = '<div class="row">
