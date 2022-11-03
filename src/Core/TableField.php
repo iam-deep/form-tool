@@ -49,6 +49,14 @@ class TableField
         return $cell;
     }
 
+    public function any($closureOrPattern, ...$dbFields): CellDefinition
+    {
+        $cell = CellDefinition::Any($closureOrPattern, $dbFields);
+        $this->cellList[] = $cell;
+
+        return $cell;
+    }
+
     public function text(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\TextType();

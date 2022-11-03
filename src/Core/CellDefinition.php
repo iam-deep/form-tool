@@ -17,6 +17,8 @@ class CellDefinition
     private $label = '';
 
     private $concat = null;
+    private $anyPattern = null;
+    private $anyDbFields = null;
 
     // Styles
     private string $width = '';
@@ -47,6 +49,18 @@ class CellDefinition
         $cell->fieldType = $fieldType;
         $cell->dbField = $dbField;
         $cell->label = $label ?: \ucfirst($dbField);
+
+        return $cell;
+    }
+
+    public static function Any($pattern, $dbFields)
+    {
+        $cell = new CellDefinition();
+
+        $cell->fieldType = '_any';
+        $cell->concat = new \stdClass();
+        $cell->concat->pattern = $pattern;
+        $cell->concat->dbFields = $dbFields;
 
         return $cell;
     }
@@ -137,7 +151,15 @@ class CellDefinition
 
     public function getLabel()
     {
-        return $this->label ? $this->label : $this->inputType->getLabel();
+        if ($this->label) {
+            return $this->label;
+        }
+
+        if (isset($this->inputType)) {
+            return $this->inputType->getLabel();
+        }
+
+        return null;
     }
 
     public function getDbField()

@@ -194,9 +194,38 @@ class Table
                     $viewData->data = '<input type="checkbox" class="bulk" name="bulk[]" value="'.($value->{$primaryId} ?? '').'">';
                     $viewRow->columns[] = $viewData;
                     continue;
+                } elseif ($cell->fieldType == '_any') {
+                    $concat = $cell->getConcat();
+                    if (! $concat->pattern) {
+                        $viewData->data = 'Nothing specified!';
+                        $viewRow->columns[] = $viewData;
+                        continue;
+                    }
+
+                    if ($concat->pattern instanceof Closure) {
+                        $closure = $concat->pattern;
+                        $viewData->data = $closure($value);
+                        $viewRow->columns[] = $viewData;
+                        continue;
+                    }
+
+                    $values = [];
+                    if ($concat->dbFields) {
+                        foreach ($concat->dbFields as $con) {
+                            $con = \trim($con);
+                            if (\property_exists($value, $con)) {
+                                $values[] = $value->{$con};
+                            } else {
+                                $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
+                            }
+                        }
+                    }
+                    $viewData->data = \vsprintf($concat->pattern, $values);
+                    $viewRow->columns[] = $viewData;
+                    continue;
                 }
 
-                // We can't use isset here as isset will be false is value is null, and value can be null
+                // We can't use isset here as isset will be false if value is null, and value can be null
                 if (\property_exists($value, $cell->getDbField())) {
                     $cell->setValue($value->{$cell->getDbField()});
                     $viewData->data = $cell->getValue();
