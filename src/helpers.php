@@ -155,6 +155,6 @@ if (! function_exists('guard')) {
 if (! function_exists('removeSlash')) {
     function removeSlash($path)
     {
-        return \str_replace(['/', "\\"], '', $path);
+        return \str_replace(['/', '\\'], '', $path);
     }
 }
