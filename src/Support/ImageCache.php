@@ -16,7 +16,7 @@ class ImageCache
     private static function getConfigs()
     {
         // Let's get the configs
-        self::$cachePath = \config('form-tool.imageCachePath', self::$cachePath) ?: self::$cachePath;
+        self::$cachePath = removeSlash(\config('form-tool.imageCachePath', self::$cachePath) ?: self::$cachePath);
         self::$width = \config('form-tool.imageCacheWidth', self::$width) ?: self::$width;
         self::$height = \config('form-tool.imageCacheHeight', self::$height) ?: self::$height;
         self::$memoryLimit = \config('form-tool.memoryLimit', self::$memoryLimit) ?: self::$memoryLimit;
@@ -33,7 +33,7 @@ class ImageCache
         $pathinfo = \pathinfo($imagePath);
 
         // Create the cache path
-        $path = \str_replace(\config('form-tool.uploadPath'), self::$cachePath, $pathinfo['dirname']);
+        $path = self::$cachePath.'/'.$pathinfo['dirname'];
 
         // Create the cache filename
         $filename = $pathinfo['filename'].'-'.self::$width.'x'.self::$height.'.'.$pathinfo['extension'];

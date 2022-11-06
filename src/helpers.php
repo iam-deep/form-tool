@@ -95,6 +95,7 @@ if (! function_exists('getJs')) {
     }
 }
 
+// TODO: Need to change this function name as per Package name
 if (! function_exists('getFormCss')) {
     function getFormCss()
     {
@@ -102,6 +103,7 @@ if (! function_exists('getFormCss')) {
     }
 }
 
+// TODO: Need to change this function name as per Package name
 if (! function_exists('getFormJs')) {
     function getFormJs()
     {
@@ -147,5 +149,12 @@ if (! function_exists('guard')) {
     function guard()
     {
         return Guard::class;
+    }
+}
+
+if (! function_exists('removeSlash')) {
+    function removeSlash($path)
+    {
+        return \str_replace(['/', "\\"], '', $path);
     }
 }
