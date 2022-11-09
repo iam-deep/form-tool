@@ -694,6 +694,7 @@ class Form
             $this->postData[$dbField] = $postData[$dbField] ?? null;
 
             $input->setValue($this->postData[$dbField]);
+            $this->postData[$dbField] = $input->getValue();
 
             $response = null;
             if ($this->formStatus == FormStatus::Store) {
@@ -986,6 +987,11 @@ class Form
     public function getEditData()
     {
         return $this->resultData;
+    }
+
+    public function getUrl()
+    {
+        return $this->url;
     }
 
     public function setCrud(Crud $crud)

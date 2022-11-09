@@ -17,6 +17,7 @@ class TextType extends BaseInputType
 
     public bool $isUnique = false;
     private bool $isSlug = false;
+    private bool $forceNullIfEmpty = false;
 
     public function unique()
     {
@@ -31,6 +32,28 @@ class TextType extends BaseInputType
         $this->isUnique = true;
 
         return $this;
+    }
+
+    public function forceNullIfEmpty(bool $flag = true)
+    {
+        $this->forceNullIfEmpty = $flag;
+
+        return $this;
+    }
+
+    public function getValue()
+    {
+        if (! $this->value && $this->forceNullIfEmpty) {
+            return null;
+        }
+
+        // If the field is Number type and is optional and there is no value then put default value as 0
+        // As the default value of a number should be 0
+        if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
+            return 0;
+        }
+
+        return $this->value;
     }
 
     public function getValidations($type)
