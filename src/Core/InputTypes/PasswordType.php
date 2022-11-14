@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Biswadeep\FormTool\Core\Doc;
 use Illuminate\Support\Facades\Hash;
 
 class PasswordType extends BaseInputType
@@ -47,8 +48,15 @@ class PasswordType extends BaseInputType
 
     public function getHTML()
     {
+        $this->addScript();
+
         // We will only display password on validation errors
-        $input = '<input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />';
+        $input = '<div class="input-group">
+            <input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />
+            <span class="input-group-btn">
+                <button class="btn btn-default toggle-password" data-id="'.$this->dbField.'" type="button" data-toggle="tooltip" title="Show Password"><i class="fa fa-eye"></i></button>
+            </span>
+        </div>';
 
         return $this->htmlParentDiv($input);
     }
@@ -61,5 +69,24 @@ class PasswordType extends BaseInputType
         $input = '<input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="" '.$this->raw.$this->inlineCSS.' />';
 
         return $input;
+    }
+
+    private function addScript()
+    {
+        Doc::addJs('
+        $(".toggle-password").on("click", function() {
+            let field = $("#" + $(this).attr("data-id"));
+            let type = field.attr("type") == "password" ? "text" : "password";
+            field.attr("type", type);
+
+            if (type == "password") {
+                $(this).attr("title", "Show Password");
+                $(this).find("i").removeClass("fa-eye-slash").addClass("fa-eye");
+            } else {
+                $(this).attr("title", "Hide Password");
+                $(this).find("i").removeClass("fa-eye").addClass("fa-eye-slash");
+            }
+        });
+        ', 'password-toggle');
     }
 }
