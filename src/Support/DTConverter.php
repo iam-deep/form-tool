@@ -99,7 +99,7 @@ class DTConverter
 
             // format the datetime
             return $dt->format(self::$dbFormatDate);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // Hiding date parsing errors from users
         }
 
@@ -141,7 +141,7 @@ class DTConverter
 
             // format the datetime
             return $dt->format(self::$dbFormatDateTime);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // Hiding date parsing errors from users
         }
 
@@ -183,7 +183,7 @@ class DTConverter
 
             // format the datetime
             return $dt->format($format);
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             // Hiding date parsing errors from users
         }
 
