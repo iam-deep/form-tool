@@ -29,6 +29,7 @@ class Form
     private $editId;
 
     private $url = '';
+    private $queryString = '';
 
     private $resultData = null;
     private $postData = [];
@@ -56,8 +57,9 @@ class Form
         $this->bluePrint->form = $this;
         $this->options = new \stdClass();
 
-        $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
         $this->request = request();
+        $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
+        $this->queryString = '?'.$this->request->getQueryString();
     }
 
     public function init()
@@ -143,9 +145,9 @@ class Form
         if ($isEdit) {
             $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
-            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId);
+            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId.'?'.$this->request->getQueryString());
         } else {
-            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
+            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'?'.$this->request->getQueryString());
         }
 
         return $data;
@@ -387,7 +389,7 @@ class Form
             $this->afterSave();
         }
 
-        return redirect($this->url)->with('success', 'Data added successfully!');
+        return redirect($this->url.$this->queryString)->with('success', 'Data added successfully!');
     }
 
     public function update($id = null)
@@ -453,7 +455,7 @@ class Form
         $this->afterSave();
         //ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
 
-        return redirect($this->url)->with('success', 'Data updated successfully!');
+        return redirect($this->url.$this->queryString)->with('success', 'Data updated successfully!');
     }
 
     private function afterSave()
@@ -760,7 +762,7 @@ class Form
         $affected = $this->model->updateDelete($id);
         //ActionLogger::delete($this->bluePrint, $id, $result);
 
-        return redirect($this->url)->with('success', 'Data deleted successfully!');
+        return redirect($this->url.$this->queryString)->with('success', 'Data deleted successfully!');
     }
 
     public function destroy($id = false)
@@ -787,7 +789,7 @@ class Form
                 }
 
                 if ($result->{$deletedAt} === null) {
-                    return redirect($this->url)->with('error', 'Soft delete is enabled for this CRUD. You need to mark as delete first then only you can delete it permanently!');
+                    return redirect($this->url.$this->queryString)->with('error', 'Soft delete is enabled for this CRUD. You need to mark as delete first then only you can delete it permanently!');
                 }
             }
 
@@ -848,7 +850,7 @@ class Form
 
         //ActionLogger::destroy($this->bluePrint, $id, $result);
 
-        return redirect($this->url)->with('success', 'Data permanently deleted successfully!');
+        return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
     }
 
     private function checkForeignKeyRestriction($id)
@@ -936,7 +938,7 @@ class Form
             }
             $msg .= '</ul>';
 
-            return redirect($this->url)->with('error', $msg);
+            return redirect($this->url.$this->queryString)->with('error', $msg);
         }
 
         return true;
@@ -992,6 +994,11 @@ class Form
     public function getUrl()
     {
         return $this->url;
+    }
+
+    public function getFullUrl()
+    {
+        return $this->url.$this->queryString;
     }
 
     public function setCrud(Crud $crud)
