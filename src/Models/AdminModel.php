@@ -57,7 +57,7 @@ class AdminModel extends Model
         return $query->first();
     }
 
-    public static function search($searchTerm, $fields, $isFromTrash = false)
+    public static function search($searchTerm, $fields, $where = null, $isFromTrash = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
@@ -72,6 +72,8 @@ class AdminModel extends Model
                 }
             });
         }
+
+        self::applyWhere($query, $where);
 
         if (static::$isSoftDelete) {
             if ($isFromTrash) {

@@ -34,7 +34,7 @@ ul.pagination {
                 {{ getTableBulkAction($crudName ?? null) }}
 
                 <div class="box-tools pull-right">
-                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="" placeholder="Search" autocomplete="off">
+                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="{{ request()->query('search') }}" placeholder="Search" autocomplete="off">
 
                     @if (guard()::hasCreate())
                         <a href="{{ url()->current() }}/create" class="btn btn-primary btn-sm btn-flat pull-right" style="margin-left:15px;"><i class="fa fa-plus"></i> &nbsp;Add</a>
@@ -60,20 +60,21 @@ const search = ($input) => {
     const resultBody = $('.box-body');
     const resultFooter = $('.box-footer');
 
-    if (! input) {
+    if (! input && oldBody) {
         resultBody.html(oldBody);
         resultFooter.html(oldFooter);
         return;
     }
 
-    if (! oldBody) {
+    // Let's only cache oldBody if this is non searched result
+    if (! oldBody && @if (request()->query('search')) false @else true  @endif) {
         oldBody = resultBody.html();
         oldFooter = resultFooter.html();
     }
 
     $.ajax({
-        // TODO: (optional) need to remove "search" key from the query string
-        url: "{{ URL::to(url()->current().'/search?' . \http_build_query(request()->query())) }}",
+        // TODO: (optional) need to improve/change the request method
+        url: "{{ URL::to(url()->current().'/search?' . \http_build_query(request()->except('search'))) }}",
         type: "get",
         dataType: "json",
         data: { search: input },

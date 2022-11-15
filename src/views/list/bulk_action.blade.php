@@ -1,4 +1,4 @@
-<form action="{{ url()->current() }}/bulk-action" method="post" class="form-inline pull-left" onSubmit="return beforeBulkSubmit()">
+<form action="{{ $formAction }}" method="post" class="form-inline pull-left" onSubmit="return beforeBulkSubmit()">
     <select class="form-control input-sm" name="bulkAction" required>
         <option value="">Bulk Action</option>
         @foreach ($bulkActions as $key => $text)

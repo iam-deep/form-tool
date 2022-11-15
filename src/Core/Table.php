@@ -94,8 +94,21 @@ class Table
 
     public function search()
     {
-        $this->makeFilter();
+        $where = $this->makeFilter();
 
+        $this->doSearch($where);
+
+        $table = $this->createList();
+        $table->content = $table->content->render();
+        $table->pagination = $table->pagination->render();
+        $table->total = \count($this->dataResult);
+        $table->isSuccess = true;
+
+        return $table;
+    }
+
+    private function doSearch($where)
+    {
         $fieldsToSearch = $this->searchFields;
         if (! $fieldsToSearch) {
             foreach ($this->bluePrint->getList() as $input) {
@@ -123,22 +136,18 @@ class Table
         }
 
         $searchTerm = $this->request->query->get('search');
-        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $this->isFromTrash);
-
-        $table = $this->createList();
-        $table->content = $table->content->render();
-        $table->pagination = $table->pagination->render();
-        $table->total = \count($this->dataResult);
-        $table->isSuccess = true;
-
-        return $table;
+        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $where, $this->isFromTrash);
     }
 
     public function listAll()
     {
         $where = $this->makeFilter();
 
-        $this->dataResult = $this->model->getAll($where, $this->isFromTrash);
+        if ($this->request->query('search')) {
+            $this->doSearch($where);
+        } else {
+            $this->dataResult = $this->model->getAll($where, $this->isFromTrash);
+        }
 
         return $this->createList();
     }
@@ -400,6 +409,7 @@ class Table
 
         $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
         $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
+        $data['formAction'] = $this->url.'?'.$this->request->getQueryString();
 
         return \view('form-tool::list.bulk_action', $data);
     }

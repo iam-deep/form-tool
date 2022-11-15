@@ -138,9 +138,9 @@ class DataModel
         return $this->setup()::getOne($id, $isToken ?? $this->isToken);
     }
 
-    public function search($searchTerm, $fields, $isFromTrash = false)
+    public function search($searchTerm, $fields, $where, $isFromTrash = false)
     {
-        return $this->setup()::search($searchTerm, $fields, $isFromTrash);
+        return $this->setup()::search($searchTerm, $fields, $where, $isFromTrash);
     }
 
     public function getWhereOne($where = null)
