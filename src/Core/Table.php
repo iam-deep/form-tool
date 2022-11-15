@@ -380,8 +380,9 @@ class Table
             $this->isFromTrash = true;
         }
 
-        if ($this->filter)
+        if ($this->filter) {
             return $this->filter->apply();
+        }
 
         return null;
     }

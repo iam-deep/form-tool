@@ -18,8 +18,9 @@ class BaseFilterType extends BaseInputType
 
     public function applyFilter($query, $operator = '=')
     {
-        if ($this->value !== null)
+        if ($this->value !== null) {
             $query->where($this->dbField, $operator, $this->value);
+        }
     }
 
     public function getFilterHTML()

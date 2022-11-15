@@ -184,8 +184,9 @@ class SelectType extends BaseFilterType
     public function applyFilter($query, $operator = '=')
     {
         if ($this->isMultiple) {
-            if ($this->value === null || ! is_array($this->value))
+            if ($this->value === null || ! is_array($this->value)) {
                 return;
+            }
 
             foreach ($this->value as $value) {
                 $raw = \sprintf("JSON_SEARCH(%s, 'one', '%s')", $this->dbField, $value);

@@ -2,10 +2,11 @@
 
 namespace Biswadeep\FormTool\Core;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Core\InputTypes\BaseInputType;
 use Biswadeep\FormTool\Core\InputTypes\BaseFilterType;
+use Biswadeep\FormTool\Core\InputTypes\BaseInputType;
+use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
+
 //use Biswadeep\FormTool\Core\BluePrint;
 
 // Select, Checkbox
@@ -47,7 +48,7 @@ class Filter
                     $field->setValue($request->query($field->getDbField()));
 
                     $html[] = $field->getFilterHTML();
-                } else if ($field) {
+                } elseif ($field) {
                     throw new \Exception('"'.$option.'" is not a Filter Type.');
                 } else {
                     throw new \Exception('"'.$option.'" not found in the BluePrint.');
@@ -67,13 +68,13 @@ class Filter
 
                     $fromField->setValue($request->query($dbField.'From'));
                     $toField->setValue($request->query($dbField.'To'));
-    
+
                     $html[] = $fromField->setDbField($dbField.'From')->label($label.' From')->getFilterHTML();
                     $html[] = $toField->setDbField($dbField.'To')->label($label.' To')->getFilterHTML();
 
                     $this->dateRangeFields[$dbField]['From'] = $fromField;
                     $this->dateRangeFields[$dbField]['To'] = $toField;
-                } else if ($option instanceof BaseFilterType) {
+                } elseif ($option instanceof BaseFilterType) {
                     if (! $option->getDbField()) {
                         $option->setDbField($key);
                     }
@@ -81,7 +82,7 @@ class Filter
                     $option->setValue($request->query($option->getDbField()));
 
                     $html[] = $option->getFilterHTML();
-                } else if ($field || $option instanceof BaseInputType) {
+                } elseif ($field || $option instanceof BaseInputType) {
                     throw new \Exception('"'.$key.'" is not a Filter Type.');
                 } else {
                     throw new \Exception('"'.$key.'" not found in the BluePrint.');
@@ -106,7 +107,7 @@ class Filter
             foreach ($this->fieldsToFilter as $key => $option) {
                 if (\is_integer($key)) {
                     $field = $this->bluePrint->getInputTypeByDbField($option);
-                    if ($field instanceOf BaseFilterType) {
+                    if ($field instanceof BaseFilterType) {
                         $val = $request->query($field->getDbField());
                         $field->setValue($val);
 
@@ -116,7 +117,7 @@ class Filter
                     if (isset($this->dateRangeFields[$key]) && $option == 'range') {
                         $this->dateRangeFields[$key]['From']->setDbField($key)->applyFilter($query, '>=');
                         $this->dateRangeFields[$key]['To']->setDbField($key)->applyFilter($query, '<=');
-                    } else if ($option instanceof BaseFilterType) {
+                    } elseif ($option instanceof BaseFilterType) {
                         $val = $request->query($option->getDbField());
                         $option->setValue($val);
 
