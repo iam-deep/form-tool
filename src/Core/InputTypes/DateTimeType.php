@@ -6,7 +6,7 @@ use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Support\DTConverter;
 
-class DateTimeType extends BaseInputType
+class DateTimeType extends BaseFilterType
 {
     public int $type = InputType::DateTime;
     public string $typeInString = 'datetime';
@@ -26,6 +26,8 @@ class DateTimeType extends BaseInputType
         $this->niceFormat = DTConverter::$niceFormatDateTime;
 
         $this->classes[] = 'datetime-picker';
+        $this->placeholder('Click to select date and time');
+        $this->setFilterOptions(['range']);
 
         // This style is specific to this date picker plugin for the multiple table dates to work properly
         $this->inlineCSS = 'style="position:relative"';
@@ -70,7 +72,10 @@ class DateTimeType extends BaseInputType
     {
         $this->setDependencies();
 
-        $input = '<input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->modifyFormat($this->value)).'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />';
+        $input = '<div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->modifyFormat($this->value)).'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />
+        </div>';
 
         return $this->htmlParentDiv($input);
     }
@@ -82,7 +87,10 @@ class DateTimeType extends BaseInputType
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->modifyFormat($this->value);
 
-        $input = '<input type="text" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />';
+        $input = '<div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+            <input type="text" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />
+        </div>';
 
         return $input;
     }
@@ -111,5 +119,25 @@ class DateTimeType extends BaseInputType
         ',
             'datetime'
         );
+    }
+
+    public function applyFilter($query, $operator = '=')
+    {
+        if ($this->value !== null) {
+            $this->value = DTConverter::toDb($this->value, $this->dbFormat, $this->isConvertToLocal);
+            $query->where($this->dbField, $operator, $this->value);
+        }
+    }
+
+    public function getFilterHTML()
+    {
+        $this->setDependencies();
+
+        $input = '<div class="input-group">
+            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />
+        </div>';
+
+        return $this->htmlParentDivFilter($input);
     }
 }

@@ -97,7 +97,7 @@ class Doc
         }
     }*/
 
-    public static function list(Closure $callback, string $name = null)
+    public static function list(?Closure $callback, string $name = null)
     {
         $crud = self::getCurdByName($name);
         if ($crud) {

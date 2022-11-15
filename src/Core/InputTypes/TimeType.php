@@ -18,6 +18,8 @@ class TimeType extends DateTimeType
         $this->niceFormat = DTConverter::$niceFormatTime;
 
         $this->classes[] = 'time-picker';
+        $this->placeholder('Click to select time');
+        $this->setFilterOptions(['range']);
 
         // This style is specific to this time picker plugin for the multiple table times to work properly
         $this->inlineCSS = 'style="position:relative"';

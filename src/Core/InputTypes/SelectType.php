@@ -7,7 +7,7 @@ use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Core\InputTypes\Common\Options;
 use Illuminate\Support\Facades\DB;
 
-class SelectType extends BaseInputType
+class SelectType extends BaseFilterType
 {
     use Options;
 
@@ -127,7 +127,7 @@ class SelectType extends BaseInputType
         }*/
     }
 
-    private function getCommonHTML($value)
+    private function getOptions($value)
     {
         $this->createOptions();
 
@@ -151,15 +151,11 @@ class SelectType extends BaseInputType
             }
         }
 
-        $input .= '</select>';
-
         return $input;
     }
 
     public function getHTML()
     {
-        $this->setPlugin();
-
         $value = old($this->dbField);
         if ($value === null) {
             $value = $this->value;
@@ -168,9 +164,7 @@ class SelectType extends BaseInputType
             }
         }
 
-        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
-
-        return $this->htmlParentDiv($input.$this->getCommonHTML($value));
+        return $this->htmlParentDiv($this->getInput($value));
     }
 
     public function getHTMLMultiple($key, $index)
@@ -181,7 +175,42 @@ class SelectType extends BaseInputType
         $value = $value[$index] ?? $this->value;
 
         $input = '<select class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
+        $input .= $this->getOptions($value);
+        $input .= '</select>';
 
-        return $input.$this->getCommonHTML($value);
+        return $input;
+    }
+
+    public function applyFilter($query, $operator = '=')
+    {
+        if ($this->isMultiple) {
+            if ($this->value === null || ! is_array($this->value))
+                return;
+
+            foreach ($this->value as $value) {
+                $raw = \sprintf("JSON_SEARCH(%s, 'one', '%s')", $this->dbField, $value);
+                $query->whereNotNull(DB::raw($raw));
+            }
+        } else {
+            parent::applyFilter($query, $operator);
+        }
+    }
+
+    public function getFilterHTML()
+    {
+        $this->raw('onChange="form.submit()"');
+
+        return $this->htmlParentDivFilter($this->getInput($this->value));
+    }
+
+    private function getInput($value)
+    {
+        $this->setPlugin();
+
+        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
+        $input .= $this->getOptions($value);
+        $input .= '</select>';
+
+        return $input;
     }
 }

@@ -35,6 +35,7 @@ class Table
 
     public $crud = null;
     public $bulkAction = null;
+    public $filter = null;
 
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
@@ -54,13 +55,15 @@ class Table
         $this->crud = $crud;
     }
 
-    public function create(Closure $callback)
+    public function create(?Closure $callback)
     {
-        $tableField = new TableField($this);
-        $tableField->bulkActionCheckbox();
+        if ($callback) {
+            $tableField = new TableField($this);
+            $tableField->bulkActionCheckbox();
 
-        $callback($tableField);
-        $this->setTableField($tableField);
+            $callback($tableField);
+            $this->setTableField($tableField);
+        }
 
         return $this;
     }
@@ -75,6 +78,16 @@ class Table
     public function searchIn($fields)
     {
         $this->searchFields = Arr::wrap($fields);
+
+        return $this;
+    }
+
+    public function filter($fields = null)
+    {
+        $fields = Arr::wrap($fields);
+
+        $this->filter = new Filter($fields);
+        $this->filter->setBluePrint($this->bluePrint);
 
         return $this;
     }
@@ -123,9 +136,9 @@ class Table
 
     public function listAll()
     {
-        $this->makeFilter();
+        $where = $this->makeFilter();
 
-        $this->dataResult = $this->model->getAll($this->isFromTrash);
+        $this->dataResult = $this->model->getAll($where, $this->isFromTrash);
 
         return $this->createList();
     }
@@ -255,9 +268,9 @@ class Table
 
                     foreach ($this->field->actions as $action) {
                         if ('edit' == $action->action) {
-                            $viewData->data .= '<a href="'.$this->url.'/'.$value->{$primaryId}.'/edit" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
+                            $viewData->data .= '<a href="'.$this->url.'/'.$value->{$primaryId}.'/edit?'.$this->request->getQueryString().'" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
                         } elseif ('delete' == $action->action) {
-                            $viewData->data .= ' <form action="'.$this->url.'/'.$value->{$primaryId}.'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
+                            $viewData->data .= ' <form action="'.$this->url.'/'.$value->{$primaryId}.'?'.$this->request->getQueryString().'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
                                 '.csrf_field().'
                                 '.method_field('DELETE').'
                                 <button class="btn btn-danger btn-flat btn-sm"><i class="fa fa-trash"></i></button>
@@ -294,6 +307,10 @@ class Table
 
     protected function createFilter()
     {
+        if ($this->filter) {
+            $data['filterInputs'] = $this->filter->create();
+        }
+
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
 
         $quickFilters = [
@@ -336,6 +353,11 @@ class Table
             if ($this->request->query('quick_status') == $key) {
                 $row['active'] = true;
                 $isAllActive = false;
+                $url = $row['href'];
+
+                if (isset($data['filterInputs'])) {
+                    $data['filterInputs'][] = '<input type="hidden" name="quick_status" value="'.$key.'">';
+                }
             }
 
             if (++$i == $countQuickFilters) {
@@ -357,6 +379,11 @@ class Table
         if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
             $this->isFromTrash = true;
         }
+
+        if ($this->filter)
+            return $this->filter->apply();
+
+        return null;
     }
 
     public function getFilter()

@@ -18,6 +18,8 @@ class DateType extends DateTimeType
         $this->niceFormat = DTConverter::$niceFormatDate;
 
         $this->classes[] = 'date-picker';
+        $this->placeholder('Click to select date');
+        $this->setFilterOptions(['range']);
 
         // This style is specific to this date picker plugin for the multiple table dates to work properly
         $this->inlineCSS = 'style="position:relative"';

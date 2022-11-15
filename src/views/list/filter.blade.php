@@ -28,7 +28,18 @@
     color: #000;
     font-weight: 600;
 }
+.form-group {
+    margin-right:15px;
+}
 </style>
+
+@if (isset($filterInputs))
+    <form class="well form-inline">
+        @foreach ($filterInputs as $input)
+            {!! $input !!}
+        @endforeach
+    </form>
+@endif
 
 <ul class="quick-filter">
     @foreach ($quickFilters as $key => $row)

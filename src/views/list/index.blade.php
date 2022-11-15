@@ -2,6 +2,14 @@
 
 @section('content')
 
+@php
+// Called on top to set all the dependencies
+// If called below getFormCss() then we will not get the css
+$filter = getTableFilter($crudName ?? null);
+@endphp
+
+{!! getFormCss(); !!}
+
 <style>
 .table {
     margin-bottom:0;
@@ -17,7 +25,7 @@ ul.pagination {
 <div class="row">
     <div class="col-md-12">
 
-        {{ getTableFilter($crudName ?? null) }}
+        {{ $filter }}
         
         <div class="clearfix"></div>
 
@@ -42,6 +50,8 @@ ul.pagination {
         </div>
     </div>
 </div>
+
+{!! getFormJs(); !!}
 
 <script>
 let oldBody = oldFooter = null;
