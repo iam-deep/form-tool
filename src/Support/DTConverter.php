@@ -88,16 +88,22 @@ class DTConverter
             return null;
         }
 
-        // create a $dt object with the local timezone
-        $dt = new DateTime($date, new DateTimeZone(self::$timezone));
+        try {
+            // create a $dt object with the local timezone
+            $dt = new DateTime($date, new DateTimeZone(self::$timezone));
 
-        if ($isConvertToUTC) {
-            // convert to UTC or project's timezone
-            $dt->setTimezone(new DateTimeZone(self::$appTimezone));
+            if ($isConvertToUTC) {
+                // convert to UTC or project's timezone
+                $dt->setTimezone(new DateTimeZone(self::$appTimezone));
+            }
+
+            // format the datetime
+            return $dt->format(self::$dbFormatDate);
+        } catch(\Exception $e) {
+            // Hiding date parsing errors from users
         }
 
-        // format the datetime
-        return $dt->format(self::$dbFormatDate);
+        return null;
     }
 
     public static function dbTime(?string $time, bool $isConvertToUTC = false): ?string
@@ -124,16 +130,22 @@ class DTConverter
             return null;
         }
 
-        // create a $dt object with the local timezone
-        $dt = new DateTime($dateTime, new DateTimeZone(self::$timezone));
+        try {
+            // create a $dt object with the local timezone
+            $dt = new DateTime($dateTime, new DateTimeZone(self::$timezone));
 
-        if ($isConvertToUTC) {
-            // convert to UTC or project's timezone
-            $dt->setTimezone(new DateTimeZone(self::$appTimezone));
+            if ($isConvertToUTC) {
+                // convert to UTC or project's timezone
+                $dt->setTimezone(new DateTimeZone(self::$appTimezone));
+            }
+
+            // format the datetime
+            return $dt->format(self::$dbFormatDateTime);
+        } catch(\Exception $e) {
+            // Hiding date parsing errors from users
         }
 
-        // format the datetime
-        return $dt->format(self::$dbFormatDateTime);
+        return null;
     }
 
     public static function toNice(?string $dateTime, string $format, bool $isConvertToLocal = false): ?string
@@ -160,16 +172,22 @@ class DTConverter
             return null;
         }
 
-        // create a $dt object with the local timezone
-        $dt = new DateTime($dateTime, new DateTimeZone(self::$timezone));
+        try {
+            // create a $dt object with the local timezone
+            $dt = new DateTime($dateTime, new DateTimeZone(self::$timezone));
 
-        if ($isConvertToUTC) {
-            // convert to UTC or project's timezone
-            $dt->setTimezone(new DateTimeZone(self::$appTimezone));
+            if ($isConvertToUTC) {
+                // convert to UTC or project's timezone
+                $dt->setTimezone(new DateTimeZone(self::$appTimezone));
+            }
+
+            // format the datetime
+            return $dt->format($format);
+        } catch(\Exception $e) {
+            // Hiding date parsing errors from users
         }
 
-        // format the datetime
-        return $dt->format($format);
+        return null;
     }
 
     public static function getTimezones()
