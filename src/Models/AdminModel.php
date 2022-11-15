@@ -19,7 +19,7 @@ class AdminModel extends Model
 
     public static $isSoftDelete = true;
 
-    public static function getAll($isFromTrash = false)
+    public static function getAll($where = null, $isFromTrash = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
@@ -32,6 +32,8 @@ class AdminModel extends Model
                 $query->whereNull($deletedAt);
             }
         }
+
+        self::applyWhere($query, $where);
 
         return $query->orderBy(static::$primaryId, 'desc')->paginate(20);
     }

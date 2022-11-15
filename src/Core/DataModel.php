@@ -128,9 +128,9 @@ class DataModel
 
     //endregion
 
-    public function getAll($isFromTrash = false)
+    public function getAll($where = null, $isFromTrash = false)
     {
-        return $this->setup()::getAll($isFromTrash);
+        return $this->setup()::getAll($where, $isFromTrash);
     }
 
     public function getOne($id, $isToken = null)

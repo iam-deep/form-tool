@@ -52,6 +52,13 @@ class BaseInputType
     }
 
     //region Setter
+    public function setDbField($dbField): BaseInputType
+    {
+        $this->dbField = $dbField;
+
+        return $this;
+    }
+
     public function label(string $label): BaseInputType
     {
         $this->label = $label;

@@ -4,7 +4,7 @@
 
 @php
 // Called on top to set all the dependencies
-// If called below getAllCss() then we will not get the css
+// If called below getFormCss() then we will not get the css
 $form = getHTMLForm($crudName ?? null);
 @endphp
 
