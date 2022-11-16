@@ -21,7 +21,7 @@ class FileManager
         return \trim(config('form-tool.imageTypes', self::$imageTypes));
     }
 
-    public static function uploadFile(?UploadedFile $file, string $subPath, string $oldFilePath = null)
+    public static function uploadFile(?UploadedFile $file, ?string $subPath, string $oldFilePath = null)
     {
         if ($file) {
             $flagCheck = true;

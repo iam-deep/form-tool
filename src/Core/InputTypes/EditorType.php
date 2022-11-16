@@ -80,7 +80,7 @@ class EditorType extends BaseInputType
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 
-        $path = FileManager::uploadFile($fieldName, $request->query('path'));
+        $path = FileManager::uploadFile($request->file($fieldName), $request->query('path'));
         if ($path != null) {
             return \Response::json(['url' => URL::asset($path)], 200);
         }
@@ -107,7 +107,7 @@ class EditorType extends BaseInputType
 
         Doc::addJs('
         // CkEditor config for field: '.$this->dbField."
-        var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
+        var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$this->uploadPath."';
         var selector = document.querySelector('#".$this->dbField."');
         createCkEditor(selector, csrf_token, uploadPath);
         ");
@@ -124,7 +124,7 @@ class EditorType extends BaseInputType
         if ($index != '{__index}') {
             Doc::addJs('
             // CkEditor config for field: '.$key.'-'.$this->dbField.'-'.$index."
-            var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'/?path='.$this->uploadPath."';
+            var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$this->uploadPath."';
             var selector = document.querySelector('#".$key.'-'.$this->dbField.'-'.$index."');
             createCkEditor(selector, csrf_token, uploadPath);
             ");
