@@ -409,7 +409,7 @@ class Table
 
         $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
         $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
-        $data['formAction'] = $this->url.'?'.$this->request->getQueryString();
+        $data['formAction'] = $this->url.'/bulk-action?'.$this->request->getQueryString();
 
         return \view('form-tool::list.bulk_action', $data);
     }

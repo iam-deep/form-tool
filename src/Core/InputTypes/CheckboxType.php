@@ -81,6 +81,7 @@ class CheckboxType extends BaseInputType
             }
 
             // If we have multiple options then let's keep it in json
+            // TODO: May be we have to make the option to keep this in other table
             return \json_encode($val);
         }
 
@@ -98,13 +99,20 @@ class CheckboxType extends BaseInputType
             if ($this->isMultiple) {
                 $value = (array) \json_decode($this->value, true);
             } else {
-                $value = [(string) $value];
+                $value = (string) $value;
             }
         }
 
         $input = '';
-        foreach ($this->options as $val => $text) {
-            $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string) $val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+        if (! $this->isMultiple) {
+            foreach ($this->options as $val => $text) {
+                $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.$val.'" '.(\is_string($value) && $val == $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+                break;
+            }
+        } else {
+            foreach ($this->options as $val => $text) {
+                $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'-'.preg_replace('/\s+/', '', $val).'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string) $val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+            }
         }
 
         return $this->htmlParentDiv($input);
@@ -112,7 +120,7 @@ class CheckboxType extends BaseInputType
 
     public function getHTMLMultiple($key, $index)
     {
-        // TODO: Everything here
+        // TODO: Multiple not yet done
 
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
