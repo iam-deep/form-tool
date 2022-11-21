@@ -20,6 +20,11 @@ trait Encryption
     {
         $value = parent::beforeStore($newData) ?: $this->value;
 
+        // Default need to manage by encryption otherwise non encrypted value will be saved
+        if ($value === null) {
+            $value = $this->defaultValue;
+        }
+
         return $this->doEncrypt($value);
     }
 
@@ -27,21 +32,26 @@ trait Encryption
     {
         $value = parent::beforeUpdate($oldData, $newData) ?: $this->value;
 
+        // Default need to manage by encryption otherwise non encrypted value will be saved
+        if ($value === null) {
+            $value = $this->defaultValue;
+        }
+
         return $this->doEncrypt($value);
     }
 
     public function getValue()
     {
-        $this->doDecrypt();
+        $this->doDecrypt($this->value);
 
-        return parent::getValue();
+        return $this->value;
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
-        $this->doDecrypt();
+        $this->doDecrypt($value);
 
-        return parent::getTableValue();
+        return $this->value;
     }
 
     public function isEncrypted()
@@ -51,24 +61,28 @@ trait Encryption
 
     protected function doEncrypt($value)
     {
-        if (! $this->isEncrypted || ! $value) {
+        if (! $this->isEncrypted || isNullOrEmpty($value)) {
             return $value;
         }
 
-        $this->value = $value;
+        $this->value = Crypt::encryptString($value);
 
-        return Crypt::encryptString($value);
+        return $this->value;
     }
 
-    protected function doDecrypt()
+    protected function doDecrypt($value)
     {
-        if ($this->isEncrypted && $this->value) {
-            try {
-                $this->value = Crypt::decryptString($this->value);
-            } catch (DecryptException $e) {
-                $this->value = $e->getMessage();
-            }
+        if (! $this->isEncrypted || isNullOrEmpty($value)) {
+            return $value;
         }
+
+        try {
+            $value = Crypt::decryptString($value);
+        } catch (DecryptException $e) {
+            $value = $e->getMessage();
+        }
+
+        $this->value = $value;
 
         return $this->value;
     }

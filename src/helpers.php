@@ -158,3 +158,10 @@ if (! function_exists('removeSlash')) {
         return \str_replace(['/', '\\'], '', $path);
     }
 }
+
+if (! function_exists('isNullOrEmpty')) {
+    function isNullOrEmpty($value)
+    {
+        return $value === null || trim($value) === '';
+    }
+}

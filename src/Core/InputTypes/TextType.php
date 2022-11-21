@@ -8,7 +8,9 @@ use Illuminate\Support\Str;
 
 class TextType extends BaseInputType
 {
-    use Encryption;
+    use Encryption {
+        getValue as protected getDecryptedValue;
+    }
 
     public int $type = InputType::Text;
     public string $typeInString = 'text';
@@ -52,6 +54,8 @@ class TextType extends BaseInputType
         if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
             return 0;
         }
+
+        $this->getDecryptedValue();
 
         return $this->value;
     }
