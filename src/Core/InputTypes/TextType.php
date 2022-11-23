@@ -3,10 +3,11 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
+use Biswadeep\FormTool\Core\InputTypes\Common\IEncryptable;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Str;
 
-class TextType extends BaseInputType
+class TextType extends BaseInputType implements IEncryptable
 {
     use Encryption {
         getValue as protected getDecryptedValue;
@@ -79,7 +80,7 @@ class TextType extends BaseInputType
                     $model->getTableName(),
                     $this->dbField,
                     $this->bluePrint->form->getId(),
-                    ($model->isToken() ? $model->getToken() : $model->getPrimaryId())
+                    ($model->isToken() ? $model->getTokenCol() : $model->getPrimaryId())
                 );
             }
         }

@@ -13,6 +13,9 @@ class CreateCrudsTable extends Migration
      */
     public function up()
     {
+        if (! \config('form-tool.isPreventForeignKeyDelete'))
+            return;
+        
         Schema::create('cruds', function (Blueprint $table) {
             $table->id();
             $table->string('route');
@@ -27,6 +30,9 @@ class CreateCrudsTable extends Migration
      */
     public function down()
     {
+        if (! \config('form-tool.isPreventForeignKeyDelete'))
+            return;
+        
         Schema::dropIfExists('cruds');
     }
 }

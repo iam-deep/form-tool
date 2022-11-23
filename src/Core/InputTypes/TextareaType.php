@@ -3,9 +3,10 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
+use Biswadeep\FormTool\Core\InputTypes\Common\IEncryptable;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 
-class TextareaType extends BaseInputType
+class TextareaType extends BaseInputType implements IEncryptable
 {
     use Encryption;
 

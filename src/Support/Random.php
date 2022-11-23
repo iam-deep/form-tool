@@ -38,7 +38,7 @@ class Random
 
     public static function unique(DataModel $model, int $length = 32)
     {
-        $token = $model->getToken();
+        $token = $model->getTokenCol();
 
         $random = '';
         do {
@@ -62,7 +62,7 @@ class Random
     public static function createTokenForTable(DataModel $model, int $length = 32)
     {
         $primaryId = $model->getPrimaryId();
-        $token = $model->getToken();
+        $token = $model->getTokenCol();
 
         $result = $model->getWhere();
         foreach ($result as $row) {

@@ -118,6 +118,27 @@ if (! function_exists('decodeHTML')) {
     }
 }
 
+if (! function_exists('encryptText')) {
+    function encryptText($value)
+    {
+        return (new Biswadeep\FormTool\Core\InputTypes\TextType())->encrypt()->doEncrypt($value);
+    }
+}
+
+if (! function_exists('decryptText')) {
+    function decryptText($value)
+    {
+        return (new Biswadeep\FormTool\Core\InputTypes\TextType())->encrypt()->doDecrypt($value);
+    }
+}
+
+if (! function_exists('imageThumb')) {
+    function imageThumb($value)
+    {
+        return (new Biswadeep\FormTool\Core\InputTypes\ImageType())->getNiceValue($value);
+    }
+}
+
 if (! function_exists('ftAuth')) {
     function ftAuth()
     {
@@ -163,5 +184,26 @@ if (! function_exists('isNullOrEmpty')) {
     function isNullOrEmpty($value)
     {
         return $value === null || trim($value) === '';
+    }
+}
+
+if (! function_exists('niceDateTime')) {
+    function niceDateTime($dateTime)
+    {
+        return \Biswadeep\FormTool\Support\DTConverter::niceDateTime($dateTime, true);
+    }
+}
+
+if (! function_exists('niceDate')) {
+    function niceDate($date)
+    {
+        return \Biswadeep\FormTool\Support\DTConverter::niceDate($date, true);
+    }
+}
+
+if (! function_exists('niceTime')) {
+    function niceTime($dateTime)
+    {
+        return \Biswadeep\FormTool\Support\DTConverter::niceTime($dateTime, true);
     }
 }

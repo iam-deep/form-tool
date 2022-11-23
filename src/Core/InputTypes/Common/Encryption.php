@@ -9,6 +9,9 @@ trait Encryption
 {
     protected bool $isEncrypted = false;
 
+    private string $valueEncrypted = '';
+    private string $valueDecrypted = '';
+
     public function encrypt()
     {
         $this->isEncrypted = true;
@@ -25,7 +28,9 @@ trait Encryption
             $value = $this->defaultValue;
         }
 
-        return $this->doEncrypt($value);
+        $this->value = $this->doEncrypt($value);
+
+        return $this->value;
     }
 
     public function beforeUpdate(object $oldData, object $newData)
@@ -37,21 +42,46 @@ trait Encryption
             $value = $this->defaultValue;
         }
 
-        return $this->doEncrypt($value);
-    }
+        $this->value = $this->doEncrypt($value);
 
+        return $this->value;
+    }
+ 
     public function getValue()
     {
-        $this->doDecrypt($this->value);
+        $this->value = $this->doDecrypt($this->value);
 
         return $this->value;
     }
 
     public function getNiceValue($value)
     {
-        $this->doDecrypt($value);
+        $value = $this->doDecrypt($value);
 
-        return $this->value;
+        return $value;
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        if (! $this->isEncrypted) {
+            return parent::getLoggerValue($action, $oldValue);
+        }
+
+        if ($action == 'update') {
+            // oldValue will be database value and will be encrypted string
+            $oldValueDecrypted = $this->doDecrypt($oldValue);
+            $newValueDecrypted = $this->doDecrypt($this->value);
+            if ($newValueDecrypted != $oldValueDecrypted) {
+                return [
+                    'type' => 'encrypted',
+                    'data' => [$oldValue, $this->value]
+                ];
+            }
+
+            return '';
+        }
+
+        return $this->value ? ['type' => 'encrypted', 'data' => $this->value] : '';
     }
 
     public function isEncrypted()
@@ -59,22 +89,28 @@ trait Encryption
         return $this->isEncrypted;
     }
 
-    protected function doEncrypt($value)
+    public function doEncrypt($value)
     {
         if (! $this->isEncrypted || isNullOrEmpty($value)) {
             return $value;
         }
 
-        $this->value = Crypt::encryptString($value);
+        $this->valueDecrypted = $value;
 
-        return $this->value;
+        $value = Crypt::encryptString($value);
+
+        $this->valueEncrypted = $value;
+
+        return $value;
     }
 
-    protected function doDecrypt($value)
+    public function doDecrypt($value)
     {
         if (! $this->isEncrypted || isNullOrEmpty($value)) {
             return $value;
         }
+
+        $this->valueEncrypted = $value;
 
         try {
             $value = Crypt::decryptString($value);
@@ -82,8 +118,8 @@ trait Encryption
             $value = $e->getMessage();
         }
 
-        $this->value = $value;
+        $this->valueDecrypted = $value;
 
-        return $this->value;
+        return $value;
     }
 }

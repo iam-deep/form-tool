@@ -123,7 +123,7 @@ class Table
             }
 
             if ($this->model->isToken()) {
-                $fieldsToSearch[] = $this->model->getToken();
+                $fieldsToSearch[] = $this->model->getTokenCol();
             }
         }
 
@@ -179,7 +179,7 @@ class Table
 
     protected function createList(): object
     {
-        $primaryId = $this->model->isToken() ? $this->model->getToken() : $this->model->getPrimaryId();
+        $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
 
         if (! $this->field) {
             $this->setDefaultField();
@@ -387,6 +387,12 @@ class Table
     {
         if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
             $this->isFromTrash = true;
+        }
+
+        if ($this->request->query('id')) {
+            $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
+
+            return [$primaryId => $this->request->query('id')];
         }
 
         if ($this->filter) {

@@ -39,6 +39,8 @@ class Form
     private $crud = null;
     private $options = null;
 
+    private bool $isLogAction = true;
+
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
         'updatedAt' => 'updatedAt',
@@ -60,6 +62,8 @@ class Form
         $this->request = request();
         $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
         $this->queryString = '?'.$this->request->getQueryString();
+        
+        $this->isLogAction = \config('form-tool.isLogActions');
     }
 
     public function init()
@@ -103,6 +107,11 @@ class Form
         return $this->crud;
     }
 
+    public function actionLog(bool $flag = true)
+    {
+        $this->isActionLog = $flag;
+    }
+
     //endregion
 
     //region GenerateForm
@@ -143,7 +152,7 @@ class Form
         $data->isEdit = $isEdit;
 
         if ($isEdit) {
-            $editId = $this->model->isToken() ? $this->resultData->{$this->model->getToken()} : ($this->resultData->{$this->model->getPrimaryId()} ?? null);
+            $editId = $this->model->isToken() ? $this->resultData->{$this->model->getTokenCol()} : ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
             $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId.'?'.$this->request->getQueryString());
         } else {
@@ -383,10 +392,11 @@ class Form
         $insertId = $this->model->add($this->postData);
 
         if ($insertId) {
-            //ActionLogger::create($this->bluePrint, $insertId);
             $this->editId = $insertId;
 
             $this->afterSave();
+
+            ActionLogger::create($this->bluePrint, $insertId);
         }
 
         return redirect($this->url.$this->queryString)->with('success', 'Data added successfully!');
@@ -405,6 +415,7 @@ class Form
             return $validate;
         }
 
+        $token = null;
         if ($this->crud->isDefaultFormat()) {
             if (! $this->oldData) {
                 $this->oldData = $this->model->getOne($this->editId);
@@ -453,7 +464,8 @@ class Form
         }
 
         $this->afterSave();
-        //ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
+
+        ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
 
         return redirect($this->url.$this->queryString)->with('success', 'Data updated successfully!');
     }
@@ -696,7 +708,6 @@ class Form
             $this->postData[$dbField] = $postData[$dbField] ?? null;
 
             $input->setValue($this->postData[$dbField]);
-            $this->postData[$dbField] = $input->getValue();
 
             $response = null;
             if ($this->formStatus == FormStatus::Store) {
@@ -760,7 +771,12 @@ class Form
         $result = $this->model->getOne($id);
 
         $affected = $this->model->updateDelete($id);
-        //ActionLogger::delete($this->bluePrint, $id, $result);
+
+        $refId = $id;
+        if ($this->model->isToken()) {
+            $refId = $result->{$this->model->getPrimaryId()} ?? null;
+        }
+        ActionLogger::delete($this->bluePrint, $refId, $result);
 
         return redirect($this->url.$this->queryString)->with('success', 'Data deleted successfully!');
     }
@@ -779,7 +795,7 @@ class Form
         //      permission to delete
         //      can delete this row
 
-        $idCol = $this->model->isToken() ? $this->model->getToken() : $this->model->getPrimaryId();
+        $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
 
         $result = $this->model->getWhereOne([$idCol => $id]);
         if ($result) {
@@ -806,6 +822,11 @@ class Form
 
         $affected = $this->model->deleteOne($id);
 
+        $pId = $id;
+        if ($this->model->isToken()) {
+            $pId = $result->{$this->model->getPrimaryId()} ?? null;
+        }
+
         if ($affected > 0 && $result) {
             foreach ($this->bluePrint->getList() as $input) {
                 if ($input instanceof BluePrint) {
@@ -825,7 +846,7 @@ class Form
                             $foreignKey = $model::$foreignKey;
                         }
 
-                        $where = [$foreignKey => $result->{$this->model->getPrimaryId()}];
+                        $where = [$foreignKey => $pId];
                         $childResult = DB::table($model->table)->where($where)->orderBy($model->id, 'asc')->get();
 
                         if ($model instanceof \stdClass) {
@@ -848,7 +869,7 @@ class Form
             }
         }
 
-        //ActionLogger::destroy($this->bluePrint, $id, $result);
+        ActionLogger::destroy($this->bluePrint, $pId, $result);
 
         return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
     }
@@ -1004,6 +1025,11 @@ class Form
     public function setCrud(Crud $crud)
     {
         $this->crud = $crud;
+    }
+
+    public function isLogAction()
+    {
+        return $this->isLogAction;
     }
 
     //endregion

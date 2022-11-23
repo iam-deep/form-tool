@@ -18,13 +18,41 @@ class PasswordType extends BaseInputType
         return $validations;
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
         if ($this->value) {
             return '*****';
         }
 
         return '';
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        if ($action == 'update') {
+            if ($oldValue && $this->value)
+                return [
+                    'type' => $this->typeInString,
+                    'data' => [
+                        $this->getNiceValue($oldValue) ?: '', 
+                        $this->getNiceValue($this->value) ?: ''
+                    ]
+                ];
+
+            if (! $oldValue && $this->value) {
+                return [
+                    'type' => $this->typeInString,
+                    'data' => [
+                        '', 
+                        $this->getNiceValue($this->value) ?: ''
+                    ]
+                ];
+            }
+
+            return '';
+        }
+
+        return $this->value ? ['type' => $this->typeInString, 'data' => $this->getNiceValue($this->value)] : '';
     }
 
     public function beforeStore(object $newData)

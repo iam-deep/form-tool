@@ -101,11 +101,14 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            return FileManager::uploadFile($file, $this->path);
+            $this->value = FileManager::uploadFile($file, $this->path);
+
+            return $this->value;
         } else {
             $file = $request->file($this->dbField);
+            $this->value = FileManager::uploadFile($file, $this->path);
 
-            return FileManager::uploadFile($file, $this->path);
+            return $this->value;
         }
     }
 
@@ -122,7 +125,9 @@ class FileType extends BaseInputType
 
             $filename = FileManager::uploadFile($file, $this->path, $oldFile);
             if ($filename !== null) {
-                return $filename;
+                $this->value = $filename;
+
+                return $this->value;
             }
         } else {
             $oldFile = $request->post($this->dbField);
@@ -130,12 +135,16 @@ class FileType extends BaseInputType
 
             $filename = FileManager::uploadFile($file, $this->path, $oldFile);
             if ($filename !== null) {
-                return $filename;
+                $this->value = $filename;
+
+                return $this->value;
             }
         }
 
         // No files have been uploaded let's return the old file if we have
-        return $oldFile ?? null;
+        $this->value = $oldFile ?? null;
+
+        return $this->value;
     }
 
     public function afterUpdate(object $oldData, object $newData)
@@ -153,13 +162,31 @@ class FileType extends BaseInputType
         FileManager::deleteFile($oldData->{$this->dbField} ?? null);
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
-        if ($this->value) {
-            return '<a href="'.asset($this->value).'" target="_blank"><i class="fa '.FileManager::getFileIcon($this->value).' fa-2x"></i></a>';
+        if ($value) {
+            return '<a href="'.asset($value).'" target="_blank"><i class="fa '.FileManager::getFileIcon($value).' fa-2x"></i></a>';
         }
 
         return null;
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        $newValue = $this->value;
+        
+        if ($action == 'update') {
+            if ($oldValue != $newValue) {
+                return [
+                    'type' => $this->typeInString,
+                    'data' => [$oldValue ?: '', $newValue ?: '']
+                ];
+            }
+
+            return '';
+        }
+
+        return $newValue ? ['type' => $this->typeInString, 'data' => $newValue] : '';
     }
 
     public function getHTML()

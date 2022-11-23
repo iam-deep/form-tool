@@ -295,6 +295,7 @@ class BaseInputType
         return $this->value;
     }
 
+    // getValue is for before creating form not before form save
     public function getValue()
     {
         return $this->value;
@@ -307,7 +308,42 @@ class BaseInputType
 
     public function getTableValue()
     {
-        return $this->value;
+        return $this->getNiceValue($this->value);
+    }
+
+    public function getNiceValue($value)
+    {
+        return $value;
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        switch ($action)
+        {
+            case 'update';
+                $oldValue = $this->getNiceValue($oldValue);
+                $newValue = $this->getNiceValue($this->value);
+        
+                if ($oldValue != $newValue) {
+                    return [
+                        'type' => 'text',
+                        'data' => [$oldValue ?: '', $newValue ?: '']
+                    ];
+                }
+
+                break;
+
+            case 'create':
+            case 'delete':
+            case 'destroy':
+            case 'duplicate':
+            case 'restore':
+                return $this->getNiceValue($this->value) ?? '';
+
+                break;
+        }
+
+        return '';
     }
 
     public function getPlaceholder()

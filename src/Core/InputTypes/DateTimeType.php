@@ -49,23 +49,45 @@ class DateTimeType extends BaseFilterType
         return $validations;
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
-        return $this->modifyFormat($this->value);
+        return $this->modifyFormat($value);
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        $newValue = $this->value;
+
+        if ($action == 'update') {
+            if ($oldValue != $newValue) {
+                return [
+                    'type' => $this->typeInString,
+                    'data' => [$oldValue ?: '', $newValue ?: '']
+                ];
+            }
+
+            return '';
+        }
+
+        return $newValue ? ['type' => $this->typeInString, 'data' => $newValue] : '';
     }
 
     public function beforeStore(object $newData)
     {
         $val = \trim($newData->{$this->dbField});
 
-        return DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
+        $this->value = DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
+
+        return $this->value;
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
         $val = \trim($newData->{$this->dbField});
 
-        return DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
+        $this->value = DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
+
+        return $this->value;
     }
 
     public function getHTML()

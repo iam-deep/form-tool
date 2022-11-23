@@ -108,7 +108,10 @@ class BulkAction
 
     protected function doDuplicate($id, $data)
     {
+        // TODO: Duplicate the actual images and files
+
         $result = $this->table->getModel()->getOne($id);
+        $oldData = clone $result;
 
         $primaryIdColumn = $this->table->getModel()->getPrimaryId();
 
@@ -169,7 +172,7 @@ class BulkAction
             }
         }
 
-        //ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result);
+        ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result, $oldData);
     }
 
     protected function delete($ids)
@@ -204,7 +207,12 @@ class BulkAction
                 $affected = $this->table->getModel()->restore($id);
 
                 $result = $this->table->getModel()->getOne($id);
-                //ActionLogger::restore($this->table->getBluePrint(), $id, $result);
+
+                $pId = $id;
+                if ($this->table->getModel()->isToken()) {
+                    $pId = $result->{$this->table->getModel()->getPrimaryId()} ?? null;
+                }
+                ActionLogger::restore($this->table->getBluePrint(), $pId, $result);
             }
         }
 

@@ -169,9 +169,9 @@ trait Options
         return \count((array) $this->options);
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
-        if ($this->value === null) {
+        if ($value === null && $this->optionType != InputType::Checkbox) {
             return null;
         }
 
@@ -180,7 +180,13 @@ trait Options
 
         if ($this->isMultiple) {
             $values = [];
-            $rawValues = (array) \json_decode($this->value, true);
+
+            if (\is_array($value)) {
+                $rawValues = $value;
+            } else {
+                $rawValues = (array) \json_decode($value, true);
+            }
+
             $i = 0;
             foreach ($rawValues as $val) {
                 $values[] = $this->options->{$val} ?? null;
@@ -193,10 +199,10 @@ trait Options
             return implode(', ', $values).(\count($rawValues) > 3 ? '...' : '');
         } else {
             if ($this->optionType == InputType::Checkbox && $this->singleOptions) {
-                return $this->value == $this->valueYes ? $this->captionYes : $this->captionNo;
+                return $value == $this->valueYes ? $this->captionYes : $this->captionNo;
             }
 
-            return $this->options->{$this->value} ?? null;
+            return $this->options->{$value} ?? null;
         }
     }
 

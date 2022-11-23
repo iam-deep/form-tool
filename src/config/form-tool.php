@@ -58,7 +58,7 @@ return [
     // You need first delete all the data linked with the foreign key id
     'isPreventForeignKeyDelete' => true,
 
-    // This will log actions for create, edit, delete
+    // This will log actions for create, edit, duplicate, delete, restore, destroy
     'isLogActions' => true,
 
     // Table meta columns

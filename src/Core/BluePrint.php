@@ -363,6 +363,11 @@ class BluePrint
 
     //endregion
 
+    public function getForm()
+    {
+        return $this->form;
+    }
+
     public function getKey()
     {
         return $this->key;
@@ -423,7 +428,7 @@ class BluePrint
             $data->main = (object) [
                 'title' => $this->form->getResource()->title,
                 'table' => $model->getTableName(),
-                'id' => $model->isToken() ? $model->getToken() : $model->getPrimaryId(),
+                'id' => $model->isToken() ? $model->getTokenCol() : $model->getPrimaryId(),
             ];
         }
 

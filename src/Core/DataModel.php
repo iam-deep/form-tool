@@ -20,6 +20,8 @@ class DataModel
     protected Crud $crud;
     protected string $model = '';
 
+    private ?string $lastToken = null;
+
     public function __construct($model = null)
     {
         if ($model) {
@@ -101,9 +103,14 @@ class DataModel
         return $this->isToken;
     }
 
-    public function getToken()
+    public function getTokenCol()
     {
         return $this->token ?: $this->model::$token;
+    }
+
+    public function getLastToken()
+    {
+        return $this->lastToken;
     }
 
     public function getOrderBy()
@@ -156,7 +163,7 @@ class DataModel
     public function add($data)
     {
         if ($this->isToken) {
-            $data[$this->token] = Random::unique($this);
+            $data[$this->token] = $this->lastToken = Random::unique($this);
         }
 
         $metaColumns = \config('form-tool.table_meta_columns');

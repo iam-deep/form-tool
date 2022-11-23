@@ -80,16 +80,16 @@ class ImageType extends FileType
         return $validations;
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
-        if ($this->value) {
-            if (FileManager::isImage($this->value)) {
-                $image = ImageCache::resize($this->value);
+        if ($value) {
+            if (FileManager::isImage($value)) {
+                $image = ImageCache::resize($value);
 
-                return '<a href="'.asset($this->value).'" target="_blank"><img class="img-thumbnail" src="'.asset($image).'" style="max-height:150px;max-width:150px;"></a>';
+                return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" src="'.asset($image).'" style="max-height:150px;max-width:150px;"></a>';
             }
 
-            return parent::getTableValue($this->value);
+            return parent::getNiceValue($value);
         }
 
         return null;

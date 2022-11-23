@@ -27,7 +27,7 @@ class FileManager
             $flagCheck = true;
 
             $destinationPath = FileManager::getUploadPath($subPath);
-            $filename = self::addHypens($file->getClientOriginalName());
+            $filename = self::filterFilename($file->getClientOriginalName());
 
             // Let's replace the old file if exists
             /*if ($oldFilePath) {
@@ -209,11 +209,13 @@ class FileManager
         }
     }
 
-    private function addHypens($value)
+    private function filterFilename($value)
     {
         do {
             $value = \str_replace([' ', '--'], '-', $value);
         } while (false !== \strpos($value, '--'));
+
+        $value = \preg_replace("/[^a-z0-9\_\-\.]/i", '', $value);
 
         return $value;
     }

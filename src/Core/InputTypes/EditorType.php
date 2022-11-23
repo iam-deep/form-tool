@@ -42,12 +42,30 @@ class EditorType extends BaseInputType
         return $validations;
     }
 
-    public function getTableValue()
+    public function getNiceValue($value)
     {
-        $value = \strip_tags($this->decodeHTML($this->value));
+        $value = \strip_tags($this->decodeHTML($value));
         $length = \mb_strlen($value);
 
         return \mb_substr($value, 0, $this->limitTableViewLength).($length > $this->limitTableViewLength ? '...' : '');
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        $newValue = \htmlentities($this->value);
+
+        if ($action == 'update') {
+            if ($oldValue != $newValue) {
+                return [
+                    'type' => $this->typeInString,
+                    'data' => [$oldValue ?: '', $newValue ?: '']
+                ];
+            }
+
+            return '';
+        }
+
+        return $newValue ? ['type' => $this->typeInString, 'data' => $newValue] : '';
     }
 
     public function beforeStore(object $newData)

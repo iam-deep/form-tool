@@ -183,6 +183,8 @@ class CellDefinition
         if ($this->fieldType == '_input') {
             return $this->inputType->getTableValue();
         }
+
+        return null;
     }
 
     public function getConcat()
