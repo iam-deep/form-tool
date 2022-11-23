@@ -30,22 +30,23 @@ class PasswordType extends BaseInputType
     public function getLoggerValue(string $action, $oldValue = null)
     {
         if ($action == 'update') {
-            if ($oldValue && $this->value)
+            if ($oldValue && $this->value) {
                 return [
                     'type' => $this->typeInString,
                     'data' => [
-                        $this->getNiceValue($oldValue) ?: '', 
-                        $this->getNiceValue($this->value) ?: ''
-                    ]
+                        $this->getNiceValue($oldValue) ?: '',
+                        $this->getNiceValue($this->value) ?: '',
+                    ],
                 ];
+            }
 
             if (! $oldValue && $this->value) {
                 return [
                     'type' => $this->typeInString,
                     'data' => [
-                        '', 
-                        $this->getNiceValue($this->value) ?: ''
-                    ]
+                        '',
+                        $this->getNiceValue($this->value) ?: '',
+                    ],
                 ];
             }
 

@@ -174,12 +174,12 @@ class FileType extends BaseInputType
     public function getLoggerValue(string $action, $oldValue = null)
     {
         $newValue = $this->value;
-        
+
         if ($action == 'update') {
             if ($oldValue != $newValue) {
                 return [
                     'type' => $this->typeInString,
-                    'data' => [$oldValue ?: '', $newValue ?: '']
+                    'data' => [$oldValue ?: '', $newValue ?: ''],
                 ];
             }
 

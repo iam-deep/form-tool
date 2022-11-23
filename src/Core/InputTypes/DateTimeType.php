@@ -62,7 +62,7 @@ class DateTimeType extends BaseFilterType
             if ($oldValue != $newValue) {
                 return [
                     'type' => $this->typeInString,
-                    'data' => [$oldValue ?: '', $newValue ?: '']
+                    'data' => [$oldValue ?: '', $newValue ?: ''],
                 ];
             }
 

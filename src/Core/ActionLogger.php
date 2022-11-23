@@ -13,8 +13,9 @@ class ActionLogger
 {
     public static function create(BluePrint $bluePrint, $refId)
     {
-        if ( ! $bluePrint->form->isLogAction())
+        if (! $bluePrint->form->isLogAction()) {
             return;
+        }
 
         $action = 'create';
 
@@ -33,8 +34,9 @@ class ActionLogger
 
     public static function duplicate(BluePrint $bluePrint, $refId, $result, $oldData)
     {
-        if ( ! $bluePrint->form->isLogAction())
+        if (! $bluePrint->form->isLogAction()) {
             return;
+        }
 
         $action = 'duplicate';
 
@@ -52,7 +54,7 @@ class ActionLogger
         $token = $model->isToken() ? ($oldData->{$model->getTokenCol()} ?? '') : '';
         $data['copyFrom'] = [
             'refId' => $oldData->{$model->getPrimaryId()} ?? '',
-            'token' => $token
+            'token' => $token,
         ];
 
         $token = $bluePrint->form->getModel()->getLastToken();
@@ -61,8 +63,9 @@ class ActionLogger
 
     public static function update(BluePrint $bluePrint, $refId, $oldData, $newData)
     {
-        if ( ! $bluePrint->form->isLogAction())
+        if (! $bluePrint->form->isLogAction()) {
             return;
+        }
 
         $action = 'update';
 
@@ -78,8 +81,9 @@ class ActionLogger
             $oldValue = $oldData->{$dbField} ?? '';
 
             $value = $input->getLoggerValue($action, $oldValue);
-            if ($value)
+            if ($value) {
                 $data['data'][$input->getLabel()] = $value;
+            }
         }
 
         self::insert($bluePrint, $action, $refId, $data, self::getToken($bluePrint, $oldData));
@@ -87,8 +91,9 @@ class ActionLogger
 
     public static function delete(BluePrint $bluePrint, $refId, $oldData)
     {
-        if ( ! $bluePrint->form->isLogAction())
+        if (! $bluePrint->form->isLogAction()) {
             return;
+        }
 
         $action = 'delete';
 
@@ -97,8 +102,9 @@ class ActionLogger
 
     public static function destroy(BluePrint $bluePrint, $refId, $oldData)
     {
-        if ( ! $bluePrint->form->isLogAction())
+        if (! $bluePrint->form->isLogAction()) {
             return;
+        }
 
         $action = 'destroy';
 
@@ -117,8 +123,9 @@ class ActionLogger
 
     public static function restore(BluePrint $bluePrint, $refId, $oldData)
     {
-        if ( ! $bluePrint->form->isLogAction())
+        if (! $bluePrint->form->isLogAction()) {
             return;
+        }
 
         $action = 'restore';
 
@@ -145,6 +152,7 @@ class ActionLogger
     private static function getToken(BluePrint $bluePrint, $result)
     {
         $model = $bluePrint->form->getModel();
+
         return $model->isToken() ? ($result->{$model->getTokenCol()} ?? null) : null;
     }
 }

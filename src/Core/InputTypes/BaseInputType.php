@@ -318,16 +318,15 @@ class BaseInputType
 
     public function getLoggerValue(string $action, $oldValue = null)
     {
-        switch ($action)
-        {
-            case 'update';
+        switch ($action) {
+            case 'update':
                 $oldValue = $this->getNiceValue($oldValue);
                 $newValue = $this->getNiceValue($this->value);
-        
+
                 if ($oldValue != $newValue) {
                     return [
                         'type' => 'text',
-                        'data' => [$oldValue ?: '', $newValue ?: '']
+                        'data' => [$oldValue ?: '', $newValue ?: ''],
                     ];
                 }
 

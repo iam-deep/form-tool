@@ -46,7 +46,7 @@ trait Encryption
 
         return $this->value;
     }
- 
+
     public function getValue()
     {
         $this->value = $this->doDecrypt($this->value);
@@ -74,7 +74,7 @@ trait Encryption
             if ($newValueDecrypted != $oldValueDecrypted) {
                 return [
                     'type' => 'encrypted',
-                    'data' => [$oldValue, $this->value]
+                    'data' => [$oldValue, $this->value],
                 ];
             }
 

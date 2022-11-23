@@ -13,8 +13,9 @@ class CreateActionLoggerTable extends Migration
      */
     public function up()
     {
-        if (! \config('form-tool.isLogActions'))
+        if (! \config('form-tool.isLogActions')) {
             return;
+        }
 
         Schema::create('action_logs', function (Blueprint $table) {
             $table->id();
@@ -37,9 +38,10 @@ class CreateActionLoggerTable extends Migration
      */
     public function down()
     {
-        if (! \config('form-tool.isLogActions'))
+        if (! \config('form-tool.isLogActions')) {
             return;
-            
+        }
+
         Schema::dropIfExists('action_logs');
     }
 }

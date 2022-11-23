@@ -62,7 +62,7 @@ class Form
         $this->request = request();
         $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
         $this->queryString = '?'.$this->request->getQueryString();
-        
+
         $this->isLogAction = \config('form-tool.isLogActions');
     }
 

@@ -58,7 +58,7 @@ class EditorType extends BaseInputType
             if ($oldValue != $newValue) {
                 return [
                     'type' => $this->typeInString,
-                    'data' => [$oldValue ?: '', $newValue ?: '']
+                    'data' => [$oldValue ?: '', $newValue ?: ''],
                 ];
             }
 
