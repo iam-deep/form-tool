@@ -110,6 +110,8 @@ class Form
     public function actionLog(bool $flag = true)
     {
         $this->isActionLog = $flag;
+
+        return $this->crud;
     }
 
     //endregion
