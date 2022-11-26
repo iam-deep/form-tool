@@ -37,7 +37,7 @@ class Doc
         $crud = new Crud();
         self::$crudList->{$name} = $crud;
 
-        $crud->create($resource, $model, $callback, $name);
+        $crud->make($resource, $model, $callback, $name);
 
         return $crud;
     }
@@ -63,96 +63,6 @@ class Doc
     public static function getCruds()
     {
         return self::$crudList;
-    }
-
-    /*public static function store(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->add();
-        }
-    }
-
-    public static function edit($id = null, string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->edit($id);
-        }
-    }
-
-    public static function update($id, string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->update($id);
-        }
-    }
-
-    public static function destroy($id, string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->destroy($id);
-        }
-    }*/
-
-    public static function list(?Closure $callback, string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->getTable()->create($callback);
-        }
-    }
-
-    public static function getTableFilter(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->getTable()->getFilter();
-        }
-    }
-
-    public static function getTableBulkAction(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->getTable()->getBulkAction();
-        }
-    }
-
-    public static function getTableContent(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            $crud->save();
-
-            return $crud->getTable()->getContent();
-        }
-    }
-
-    public static function getTablePagination(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->getTable()->getPagination();
-        }
-    }
-
-    /*public static function getForm(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->getForm();
-        }
-    }*/
-
-    public static function getHTMLForm(string $name = null)
-    {
-        $crud = self::getCurdByName($name);
-        if ($crud) {
-            return $crud->getHTMLForm();
-        }
     }
 
     //region Css&Js

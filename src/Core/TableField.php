@@ -152,7 +152,7 @@ class TableField
             }
         }
 
-        $cell = CellDefinition::Other('action', '', 'Actions')->width('85px');
+        $cell = CellDefinition::Other('action', '', 'Actions')->width('100px')->right();
         if (\count($this->actions)) {
             $this->cellList['actions'] = $cell;
         }
@@ -171,7 +171,7 @@ class TableField
 
     public function bulkActionCheckbox()
     {
-        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('50px');
+        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('25px');
         $this->cellList[] = $cell;
 
         return $cell;

@@ -2,13 +2,7 @@
 
 @section('content')
 
-@php
-// Called on top to set all the dependencies
-// If called below getFormCss() then we will not get the css
-$filter = getTableFilter($crudName ?? null);
-@endphp
-
-{!! getFormCss(); !!}
+{!! $page->style !!}
 
 <style>
 .table {
@@ -20,38 +14,53 @@ ul.pagination {
 .box-header {
     padding-bottom:0px;
 }
+.loader {
+    position: absolute;
+    top: 50px;
+    width: 100%;
+    height: 95%;
+    text-align: center;
+    background-color: #efefef55;
+}
+.loader i {
+    margin-top: 25px;
+}
 </style>
 
 <div class="row">
     <div class="col-md-12">
 
-        {{ $filter }}
+        {{ $page->filter }}
+
+        @if ($page->hasCreate)
+            <a href="{{ $page->createLink }}" class="btn btn-success btn-sm btn-flat pull-right" style="margin-left:15px;"><i class="fa fa-plus"></i> &nbsp;Add</a>
+        @endif
         
         <div class="clearfix"></div>
 
         <div class="box box-primary">
             <div class="box-header">
-                {{ getTableBulkAction($crudName ?? null) }}
+                {{ $page->bulkAction }}
 
                 <div class="box-tools pull-right">
-                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="{{ request()->query('search') }}" placeholder="Search" autocomplete="off">
-
-                    @if (guard()::hasCreate())
-                        <a href="{{ url()->current() }}/create" class="btn btn-primary btn-sm btn-flat pull-right" style="margin-left:15px;"><i class="fa fa-plus"></i> &nbsp;Add</a>
-                    @endif
+                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="{{ $page->searchQuery }}" placeholder="Search" autocomplete="off">
                 </div>
             </div>
             <div class="box-body">
-                {{ getTableContent($crudName ?? null) }}
+                {{ $page->tableContent }}
             </div>
             <div class="box-footer">
-                {{ getTablePagination($crudName ?? null) }}
+                {{ $page->pagination }}
+            </div>
+            <div class="loader" style="display:none;">
+                <i class="fa fa-refresh fa-spin fa-3x"></i>
+                <span class="sr-only">Loading...</span>
             </div>
         </div>
     </div>
 </div>
 
-{!! getFormJs(); !!}
+{!! $page->script !!}
 
 <script>
 let oldBody = oldFooter = null;
@@ -67,14 +76,16 @@ const search = ($input) => {
     }
 
     // Let's only cache oldBody if this is non searched result
-    if (! oldBody && @if (request()->query('search')) false @else true  @endif) {
+    if (! oldBody && @if ($page->searchQuery) false @else true  @endif) {
         oldBody = resultBody.html();
         oldFooter = resultFooter.html();
     }
 
+    $('.loader').show();
+
     $.ajax({
         // TODO: (optional) need to improve/change the request method
-        url: "{{ URL::to(url()->current().'/search?' . \http_build_query(request()->except('search'))) }}",
+        url: "{{ $page->searchLink }}",
         type: "get",
         dataType: "json",
         data: { search: input },
@@ -85,6 +96,7 @@ const search = ($input) => {
         error: function() {
             $("#loadingSearch").html("<span style=\"color:#f00;\">Something goes wrong, Please refresh the page</span>");
             $("#loadingSearch").show();
+            $('.loader').hide();
         },
         success: function(json) {
             if (! json.isSuccess) {
@@ -95,6 +107,7 @@ const search = ($input) => {
 
                 resultBody.html(json.content);
                 resultFooter.html(json.pagination);
+                $('.loader').hide();
             }
         }
     });

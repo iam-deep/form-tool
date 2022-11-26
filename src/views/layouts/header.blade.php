@@ -26,6 +26,22 @@
 <!-- jQuery 3 -->
 <script src="{{ URL::asset('/assets/form-tool/plugins/jquery/dist/jquery.min.js') }}"></script>
 <script src="https://code.jquery.com/ui/1.11.2/jquery-ui.js"></script>
+<style>
+.has-help {
+    border-bottom:1px dashed grey;
+}
+input[type=checkbox], input[type=radio] {
+    margin: 10px 0 0;
+}
+.footer-sticky {
+    position: fixed;
+    bottom: 0;
+    left: 230px;
+    width: 89%;
+    z-index: 99999;
+    box-shadow: 0 -4px 5px -3px rgb(0 0 0 / 10%);
+}
+</style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
 <div class="wrapper">

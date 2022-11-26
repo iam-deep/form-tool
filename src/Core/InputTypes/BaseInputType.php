@@ -38,12 +38,6 @@ class BaseInputType
     protected $classes = ['form-control'];
     protected $inlineCSS = '';
 
-    // Design Class Constants
-    protected const classDiv = 'form-group';
-    protected const classDivError = 'has-error';
-    protected const classLabel = '';
-    protected const classDisplayError = 'help-block';
-
     public function init($bluePrint, string $dbField, string $label = null)
     {
         $this->bluePrint = $bluePrint;
@@ -322,7 +316,6 @@ class BaseInputType
             case 'update':
                 $oldValue = $this->getNiceValue($oldValue);
                 $newValue = $this->getNiceValue($this->value);
-
                 if ($oldValue != $newValue) {
                     return [
                         'type' => 'text',
@@ -378,16 +371,20 @@ class BaseInputType
     protected function htmlParentDiv($input): string
     {
         $errors = Session::get('errors');
-        $error = $errors ? $errors->first($this->dbField, '<p class="help-block">:message</p>') : null;
+        $error = $errors ? $errors->first($this->dbField) : null;
 
-        $help = $this->help ? ' <i class="fa fa-question-circle" data-toggle="tooltip" data-placement="right" title="'.$this->help.'"></i>' : '';
+        $field = new \stdClass();
+        $field->type = $this->typeInString;
+        $field->error = $error;
+        $field->help = $this->help;
+        $field->isRequired = $this->isRequired;
+        $field->dbField = $this->dbField;
+        $field->input = $input;
+        $field->label = $this->label;
 
-        $required = ($this->isRequired ? ' <span class="text-danger">*</span>' : '');
+        $data['field'] = $field;
 
-        return '<div class="'.self::classDiv.' '.($error ? self::classDivError : null).'">
-            <label for="'.$this->dbField.'">'.$this->label.$help.$required.'</label>
-            '.$input.$error.'
-        </div>';
+        return \view('form-tool::form.base_input', $data)->render();
     }
 
     public function toObj($type)

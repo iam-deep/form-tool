@@ -70,14 +70,12 @@ class Form
     {
         $method = $this->request->method();
 
-        if ('POST' == $method && ! isset($_POST['bulk-action'])) {
+        if ('POST' == $method && \strtoupper($this->request->post('method')) == 'CREATE') {
             return $this->store();
         } elseif ('PUT' == $method) {
             return $this->update();
         } elseif ('DELETE' == $method) {
             return $this->delete();
-        } elseif (strpos($this->request->getRequestUri(), '/edit')) {
-            return $this->edit();
         }
     }
 
@@ -118,13 +116,6 @@ class Form
 
     //region GenerateForm
 
-    public function getHTMLForm()
-    {
-        $data['form'] = $this->create();
-
-        return view('form-tool::form.form', $data);
-    }
-
     public function create()
     {
         $data = new \stdClass();
@@ -133,11 +124,7 @@ class Form
 
         foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
-                $html = '<div class="form-group"><label>'.$input->label.'</label>';
-                $html .= $this->getMultipleFields($input);
-                $html .= '</div>';
-
-                $data->fields->{$input->getKey()} = $html;
+                $data->fields->{$input->getKey()} = $this->getMultipleTable($input);
             } else {
                 // Let's modify value before if needed like for decryption
                 // We wil not modify anything on create as default values must be set as it is
@@ -149,55 +136,65 @@ class Form
             }
         }
 
-        $isEdit = $this->formStatus == FormStatus::Edit;
+        $data->isEdit = $this->formStatus == FormStatus::Edit;
 
-        $data->isEdit = $isEdit;
+        $url = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
+        $data->action = $data->cancel = $url.$this->queryString;
 
-        if ($isEdit) {
+        if ($data->isEdit) {
             $editId = $this->model->isToken() ? $this->resultData->{$this->model->getTokenCol()} : ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
-            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'/'.$editId.'?'.$this->request->getQueryString());
-        } else {
-            $data->action = URL::to(config('form-tool.adminURL').'/'.$this->resource->route.'?'.$this->request->getQueryString());
+            if ($editId) {
+                $data->action = $url.'/'.$editId.$this->queryString;
+            } else {
+                $data->action = $url.$this->queryString;
+            }
         }
 
         return $data;
     }
 
-    private function getMultipleFields($model)
+    private function getMultipleTable($model)
     {
         $key = $model->getFullKey();
         $keyName = \str_replace(['[', ']'], '-', $key);
 
         // Getting the template at the beginning will make sure that it will not contain any values of the field
-        $template = $this->getTemplate($model, $key, $keyName);
+        $template = $this->getTableRow($model, $key, $keyName);
 
-        $classes = '';
+        $tableData = new \stdClass();
+        $tableData->label = $model->label;
+        $tableData->classes = '';
+        $tableData->id = $keyName;
+        $tableData->required = $model->getRequired();
+        $tableData->header = [];
+        $tableData->rows = '';
+        $tableData->totalColumns = 0;
+
+        // TODO: Add help & other attributes in multiple table
+        //$tableData->help = $model->help;
+
         if ($model->isSortable()) {
-            $classes .= ' table-sortable';
+            $tableData->classes .= ' table-sortable';
         }
 
         if ($model->isConfirmBeforeDelete()) {
-            $classes .= ' confirm-delete';
+            $tableData->classes .= ' confirm-delete';
         }
-
-        $data = '<table class="table table-multiple table-bordered'.$classes.'" id="'.$keyName.'" data-required="'.$model->getRequired().'"><thead>
-        <tr class="active">';
 
         $totalCols = 0;
         foreach ($model->getList() as $field) {
             if (! $field instanceof BluePrint) {
                 if ($field->getType() != InputType::Hidden) {
-                    $data .= '<th>'.$field->getLabel().'</th>';
+                    $tableData->header[] = $field->getLabel();
                     $totalCols++;
                 }
             } else {
-                $data .= '<th></th>';
+                $tableData->header[] = '';
                 $totalCols++;
             }
         }
-
-        $data .= '<th></th></tr></thead><tbody>';
+        $tableData->header[] = '';
 
         // TODO: Need to work for only one file field
         // Check if any session data exists
@@ -254,7 +251,7 @@ class Form
                         $field->setValue($row->{$field->getDbField()} ?? null);
                     }
 
-                    $data .= $this->getTemplate($model, $key, $keyName, $i++);
+                    $tableData->rows .= $this->getTableRow($model, $key, $keyName, $i++);
                 }
             }
         }
@@ -275,60 +272,49 @@ class Form
 
         for ($i = 0; $i < $appendCount; $i++) {
             // Sending index will get the field value if there any in the session
-            $data .= $this->getTemplate($model, $key, $keyName, $i + $totalRowsInEdit);
+            $tableData->rows .= $this->getTableRow($model, $key, $keyName, $i + $totalRowsInEdit);
         }
 
-        $data .= '</tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="'.++$totalCols.'" class="text-right">
-                        <a class="btn btn-primary btn-xs d_add"><i class="fa fa-plus"></i></a>
-                    </td>
-                </tr>
-            </tfoot>
-        </table>';
+        $tableData->totalColumns = ++$totalCols;
 
         Doc::addJs('template["'.$keyName.'"]=`'.$template.'`', $keyName);
 
-        return $data;
+        $data['table'] = $tableData;
+
+        return \view('form-tool::form.multiple_table', $data)->render();
     }
 
-    private function getTemplate($model, $key, $keyName, $index = -1)
+    private function getTableRow($model, $key, $keyName, $index = -1)
     {
         // If $index is -1 means we just need the template
         if ($index == -1) {
             $index = '{__index}';
         }
 
-        $template = '<tr class="d_block" id="'.$key.'-row-'.$index.'">';
+        $rowData = new \stdClass();
+        $rowData->id = $key.'-row-'.$index;
+        $rowData->isSortable = $model->isSortable();
+        $rowData->hidden = '';
+        $rowData->columns = '';
 
-        $hidden = '';
         foreach ($model->getList() as $field) {
             if ($field instanceof BluePrint) {
-                $template .= '<td>'.$this->getMultipleFields($field).'</td>';
+                $rowData->columns .= '<td>'.$this->getMultipleTable($field).'</td>';
             } else {
                 // Let's modify value before if needed like for decryption
                 $field->setValue($field->getValue());
 
                 if ($field->getType() == InputType::Hidden) {
-                    $hidden .= $field->getHTMLMultiple($key, $index);
+                    $rowData->hidden .= $field->getHTMLMultiple($key, $index);
                 } else {
-                    $template .= '<td>'.$field->getHTMLMultiple($key, $index).'</td>';
+                    $rowData->columns .= '<td>'.$field->getHTMLMultiple($key, $index).'</td>';
                 }
             }
         }
 
-        $template .= '<td colspan="2" class="text-right">';
+        $data['row'] = $rowData;
 
-        if ($model->isSortable()) {
-            $template .= $hidden
-                .'<a class="btn btn-default handle btn-xs" style="display:none"><i class="fa fa-arrows"></i></a>&nbsp; ';
-        }
-
-        $template .= '<a class="btn btn-default btn-xs text-danger d_remove" style="display:none"><i class="fa fa-times"></i></a>';
-        $template .= '</td></tr>';
-
-        return $template;
+        return \view('form-tool::form.multiple_table_row', $data)->render();
     }
 
     //endregion
@@ -764,7 +750,7 @@ class Form
             return $response;
         }
 
-        if (! $this->crud->getSoftDelete()) {
+        if (! $this->crud->isSoftDelete()) {
             return $this->destroy($id);
         }
 
@@ -790,7 +776,7 @@ class Form
         $id = $this->parseEditId($id);
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
-        $deletedAt = $metaColumns['deletedBy'] ?? 'deletedBy';
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
 
         // TODO:
         // validations
@@ -801,7 +787,7 @@ class Form
 
         $result = $this->model->getWhereOne([$idCol => $id]);
         if ($result) {
-            if ($this->crud->getSoftDelete()) {
+            if ($this->crud->isSoftDelete()) {
                 if (! \property_exists($result, $deletedAt)) {
                     throw new \Exception('Column "deletedAt" not found!');
                 }
@@ -973,11 +959,6 @@ class Form
 
     public function getPostData($id = null)
     {
-        /*$result = $this->createPostData($id);
-        if ($result !== true) {
-            return $result;
-        }*/
-
         if ($this->postData) {
             return $this->postData;
         }

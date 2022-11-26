@@ -1,7 +1,7 @@
 <style>
 .quick-filter {
     list-style: none;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
     padding: 0;
     font-size: 13px;
     float: left;

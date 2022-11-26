@@ -4,11 +4,12 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
 use Biswadeep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 
-class EditorType extends BaseInputType
+class EditorType extends BaseInputType implements ISearchable
 {
     public int $type = InputType::Editor;
     public string $typeInString = 'editor';

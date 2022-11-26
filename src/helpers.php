@@ -4,41 +4,6 @@ use Biswadeep\FormTool\Core\Auth;
 use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\Guard;
 
-if (! function_exists('getHTMLForm')) {
-    function getHTMLForm(string $name = null)
-    {
-        return Doc::getHTMLForm($name);
-    }
-}
-
-if (! function_exists('getTableFilter')) {
-    function getTableFilter(string $name = null)
-    {
-        return Doc::getTableFilter($name);
-    }
-}
-
-if (! function_exists('getTableBulkAction')) {
-    function getTableBulkAction(string $name = null)
-    {
-        return Doc::getTableBulkAction($name);
-    }
-}
-
-if (! function_exists('getTableContent')) {
-    function getTableContent(string $name = null)
-    {
-        return Doc::getTableContent($name);
-    }
-}
-
-if (! function_exists('getTablePagination')) {
-    function getTablePagination(string $name = null)
-    {
-        return Doc::getTablePagination($name);
-    }
-}
-
 if (! function_exists('addCssLink')) {
     function addCssLink($link)
     {

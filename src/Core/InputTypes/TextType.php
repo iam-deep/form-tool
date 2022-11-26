@@ -4,10 +4,11 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
 use Biswadeep\FormTool\Core\InputTypes\Common\IEncryptable;
+use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Str;
 
-class TextType extends BaseInputType implements IEncryptable
+class TextType extends BaseInputType implements IEncryptable, ISearchable
 {
     use Encryption {
         getValue as protected getDecryptedValue;

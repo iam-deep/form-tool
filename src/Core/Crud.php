@@ -20,7 +20,7 @@ class Crud
     protected string $groupName = 'default';
     protected bool $isSoftDelete = true;
 
-    public function create(object $resource, $model, Closure $callback, string $name = 'default'): Crud
+    public function make(object $resource, $model, Closure $callback, string $name = 'default'): Crud
     {
         $this->resource = $resource;
         $this->name = $name;
@@ -97,36 +97,12 @@ class Crud
         return $this;
     }
 
-    //region FormGetter
-
-    /*public function getHTMLForm()
+    public function __call($method, $parameters)
     {
-        return $this->form->getHTMLForm();
+        return $this->form->{$method}(...$parameters);
     }
 
-    public function store()
-    {
-        return $this->form->store();
-    }
-
-    public function edit($id = null)
-    {
-        return $this->form->edit($id);
-    }
-
-    public function update($id = null)
-    {
-        return $this->form->update($id);
-    }
-
-    public function destroy($id = null)
-    {
-        return $this->form->destroy($id);
-    }*/
-
-    //endregion
-
-    public function save()
+    private function save()
     {
         if (! \config('form-tool.isPreventForeignKeyDelete')) {
             return;
@@ -151,22 +127,7 @@ class Crud
         }
     }
 
-    public function __call($method, $parameters)
-    {
-        return $this->form->{$method}(...$parameters);
-    }
-
-    //region TableMethod
-
-    public function getTableContent()
-    {
-        return $this->table->getContent();
-    }
-
-    public function getTablePagination()
-    {
-        return $this->table->getPagination();
-    }
+    //region TableOptions
 
     public function searchIn($fields)
     {
@@ -175,9 +136,32 @@ class Crud
         return $this;
     }
 
-    public function search()
+    //endregion
+
+    public function index()
     {
-        return $this->table->search();
+        $request = request();
+        $currentUrl = url()->current();
+
+        $this->save();
+
+        $page = new \stdClass();
+
+        $page->hasCreate = Guard::hasCreate();
+        $page->createLink = $currentUrl.'/create';
+
+        $page->filter = $this->table->getFilter();
+        $page->searchQuery = $request->query('search');
+        $page->searchLink = $currentUrl.'/search?' . \http_build_query($request->except('search'));
+
+        $page->bulkAction = $this->table->getBulkAction();
+        $page->tableContent = $this->table->getContent();
+        $page->pagination = $this->table->getPagination();
+
+        $page->style = Doc::getCssLinks().Doc::getCss();
+        $page->script = Doc::getJsLinks().Doc::getJs();
+
+        return $page;
     }
 
     public function bulkAction(Closure $callback = null)
@@ -185,12 +169,42 @@ class Crud
         return $this->table->bulkAction->perform($callback);
     }
 
-    //endregion
-
-    public function createForm()
+    public function list($callback)
     {
-        return $this->form->create();
+        return $this->table->create($callback);
     }
+
+    public function create()
+    {
+        $page = new \stdClass();
+
+        $page->form = $this->form->create();
+
+        $page->style = Doc::getCssLinks().Doc::getCss();
+        $page->script = Doc::getJsLinks().Doc::getJs();
+
+        return $page;
+    }
+
+    public function edit($id = null)
+    {
+        $page = new \stdClass();
+
+        $this->form->edit($id);
+        $page->form = $this->form->create();
+
+        $page->style = Doc::getCssLinks().Doc::getCss();
+        $page->script = Doc::getJsLinks().Doc::getJs();
+
+        return $page;
+    }
+
+    public function search()
+    {
+        return $this->table->search();
+    }
+
+    //region Getter
 
     public function getForm()
     {
@@ -212,7 +226,7 @@ class Crud
         return $this->resource;
     }
 
-    public function getSoftDelete(): bool
+    public function isSoftDelete(): bool
     {
         return $this->isSoftDelete;
     }
@@ -226,4 +240,11 @@ class Crud
     {
         return $this->groupName;
     }
+
+    public function getName()
+    {
+        return $this->name;
+    }
+
+    //endregion
 }

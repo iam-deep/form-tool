@@ -1,7 +1,7 @@
 <div class="table-responsive">
-    <table class="table table-bordered">
+    <table class="table">
         <thead>
-            <tr>
+            <tr class="active">
                 @foreach ($headings as $header)
                     <th {!! $header->raw !!}>
                         {!! $header->getLabel() !!}

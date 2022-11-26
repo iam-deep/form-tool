@@ -83,7 +83,7 @@ class PasswordType extends BaseInputType
         $input = '<div class="input-group">
             <input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />
             <span class="input-group-btn">
-                <button class="btn btn-default toggle-password" data-id="'.$this->dbField.'" type="button" data-toggle="tooltip" title="Show Password"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-default toggle-password" data-id="'.$this->dbField.'" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
             </span>
         </div>';
 
@@ -100,7 +100,7 @@ class PasswordType extends BaseInputType
         $input = '<div class="input-group">
             <input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$id.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="" '.$this->raw.$this->inlineCSS.' />
             <span class="input-group-btn">
-                <button class="btn btn-default toggle-password btn-sm" data-id="'.$id.'" type="button" data-toggle="tooltip" title="Show Password"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-default toggle-password btn-sm" data-id="'.$id.'" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
             </span>
         </div>';
 

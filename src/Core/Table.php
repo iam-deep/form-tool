@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core;
 
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
 use Closure;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
@@ -112,12 +113,7 @@ class Table
         $fieldsToSearch = $this->searchFields;
         if (! $fieldsToSearch) {
             foreach ($this->bluePrint->getList() as $input) {
-                if (! $input instanceof BluePrint &&
-                    ($input->getType() == InputType::Text
-                    || $input->getType() == InputType::Textarea
-                    || $input->getType() == InputType::Hidden
-                    || $input->getType() == InputType::Editor)
-                    ) {
+                if ($input instanceof ISearchable) {
                     $fieldsToSearch[] = $input->getDbField();
                 }
             }
@@ -198,6 +194,8 @@ class Table
             $data['headings'][] = $row;
         }
 
+        $crudName = $this->crud->getName();
+
         $perPage = $this->dataResult->perPage();
         $page = $this->request->query('page');
 
@@ -275,17 +273,30 @@ class Table
                         continue;
                     }
 
+                    $actionData['primary'] = null;
+                    $actionData['secondaries'] = [];
                     foreach ($this->field->actions as $action) {
                         if ('edit' == $action->action) {
-                            $viewData->data .= '<a href="'.$this->url.'/'.$value->{$primaryId}.'/edit?'.$this->request->getQueryString().'" class="btn btn-primary btn-flat btn-sm"><i class="fa fa-pencil"></i></a>';
+                            $actionData['primary'] = new \stdClass();
+                            $actionData['primary']->link = $this->url.'/'.$value->{$primaryId}.'/edit?'.$this->request->getQueryString();
+                            $actionData['primary']->text = 'Edit';
                         } elseif ('delete' == $action->action) {
-                            $viewData->data .= ' <form action="'.$this->url.'/'.$value->{$primaryId}.'?'.$this->request->getQueryString().'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete?\')">
+                            $deleteSelectorId = $crudName.'_delete_'.$value->{$primaryId};
+
+                            $button = new \stdClass();
+                            $button->type = 'html';
+                            $button->html = '<a href="javascript:;" onClick="$(\'#'.$deleteSelectorId.'\').submit()"><i class="fa fa-trash"></i> Delete</a>
+                            <form id="'.$deleteSelectorId.'" action="'.$this->url.'/'.$value->{$primaryId}.'?'.$this->request->getQueryString().'" method="POST" onsubmit="return confirm(\'Are you sure you want to delete?\')" style="display:none">
                                 '.csrf_field().'
                                 '.method_field('DELETE').'
-                                <button class="btn btn-danger btn-flat btn-sm"><i class="fa fa-trash"></i></button>
                             </form>';
+
+                            $actionData['secondaries'][] = $button;
                         }
                     }
+
+                    $viewData->data = \view('form-tool::list.actions', $actionData);
+
                 } else {
                     $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
                 }
@@ -339,7 +350,7 @@ class Table
             ],
         ];
 
-        if (! Guard::hasDestroy() || ! $this->crud->getSoftDelete()) {
+        if (! Guard::hasDestroy() || ! $this->crud->isSoftDelete()) {
             unset($quickFilters['trash']);
         }
 
@@ -349,7 +360,7 @@ class Table
         foreach ($quickFilters as $key => &$row) {
             if ($key == 'all') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($metaColumns) {
-                    if ($this->crud->getSoftDelete()) {
+                    if ($this->crud->isSoftDelete()) {
                         $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
                     }
                 });

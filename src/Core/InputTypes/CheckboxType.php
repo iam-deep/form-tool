@@ -106,12 +106,12 @@ class CheckboxType extends BaseInputType
         $input = '';
         if (! $this->isMultiple) {
             foreach ($this->options as $val => $text) {
-                $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.$val.'" '.(\is_string($value) && $val == $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+                $input .= '<label><input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.$val.'" '.(\is_string($value) && $val == $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
                 break;
             }
         } else {
             foreach ($this->options as $val => $text) {
-                $input .= '<label>&nbsp; &nbsp;<input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'-'.preg_replace('/\s+/', '', $val).'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string) $val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; ';
+                $input .= '<label><input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'-'.preg_replace('/\s+/', '', $val).'" name="'.$this->dbField.'[]" value="'.$val.'" '.(\is_array($value) && \in_array((string) $val, $value, true) ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.$text.'</label> &nbsp; &nbsp; ';
             }
         }
 

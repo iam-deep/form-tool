@@ -18,5 +18,10 @@
 <!-- AdminLTE App -->
 <script src="{{ URL::asset('/assets/form-tool/dist/js/adminlte.min.js') }}"></script>
 
+<script>
+$(document).ready(function() {
+    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
+});
+</script>
 </body>
 </html>
