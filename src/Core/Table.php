@@ -296,7 +296,6 @@ class Table
                     }
 
                     $viewData->data = \view('form-tool::list.actions', $actionData);
-
                 } else {
                     $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
                 }
