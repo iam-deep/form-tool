@@ -38,7 +38,7 @@ class AdminModel extends Model
     public static function getOne($id, $isToken = false)
     {
         $query = DB::table(static::$tableName);
-        if (self::$isSoftDelete) {    
+        if (self::$isSoftDelete) {
             $metaColumns = \config('form-tool.table_meta_columns');
             $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
 

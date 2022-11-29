@@ -81,7 +81,7 @@ class CellDefinition
 
     public function sortable($dbField = null): CellDefinition
     {
-        if ($dbField === false){
+        if ($dbField === false) {
             $this->sortable = false;
 
             return $this;

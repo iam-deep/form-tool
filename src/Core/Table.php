@@ -6,9 +6,9 @@ use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Pagination\Paginator;
 
 class Table
 {
@@ -213,7 +213,7 @@ class Table
                     $row->sortUrl = '?sortby='.$sortedField.'&order=desc&'.$sortUrlQueryString;
                 }
             }
-            
+
             $data['headings'][] = $row;
         }
 
@@ -429,12 +429,12 @@ class Table
         $where = [];
         if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
             $this->isFromTrash = true;
-            
-            $where[] = function($query) use ($deletedAt) {
+
+            $where[] = function ($query) use ($deletedAt) {
                 $query->whereNotNull($deletedAt);
-            }; 
+            };
         } else {
-            $where[] = function($query) use ($deletedAt) {
+            $where[] = function ($query) use ($deletedAt) {
                 $query->whereNull($deletedAt);
             };
         }
@@ -467,7 +467,7 @@ class Table
                     break;
                 }
             }
-        } else if ($this->isFromTrash && ! $this->sortBy) {
+        } elseif ($this->isFromTrash && ! $this->sortBy) {
             $this->sortBy = $deletedAt;
         } else {
             $this->sortBy = $this->model->getOrderBy();
