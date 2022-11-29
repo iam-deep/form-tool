@@ -24,6 +24,7 @@ class CreateActionLoggerTable extends Migration
             $table->string('route')->nullable();
             $table->string('refId')->nullable()->index();
             $table->string('token')->nullable()->index();
+            $table->string('description')->nullable();
             $table->mediumText('data')->nullable();         // MediumText or higher is recommended as there may be multiple EditorType data
             $table->integer('actionBy')->nullable();
             $table->string('actionByName')->nullable();

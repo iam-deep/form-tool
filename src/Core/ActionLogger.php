@@ -28,8 +28,24 @@ class ActionLogger
             $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
         }
 
-        $token = $bluePrint->form->getModel()->getLastToken();
-        self::insert($bluePrint, $action, $refId, $data, $token);
+        $description = null;
+        $heroField = $bluePrint->getHeroField();
+        if ($heroField) {
+            $input = $bluePrint->getInputTypeByDbField($heroField);
+            $resource = $bluePrint->getForm()->getResource();
+            $title = $resource->singularTitle ?? $resource->title;
+
+            $description = $title.' '.$input->getValue().' created';
+        }
+
+        $request = [
+            'action' => $action,
+            'refId' => $refId,
+            'token' => $bluePrint->form->getModel()->getLastToken(),
+            'description' => $description,
+            'data' => $data,
+        ];
+        self::insert($bluePrint, $request);
     }
 
     public static function duplicate(BluePrint $bluePrint, $refId, $result, $oldData)
@@ -57,8 +73,22 @@ class ActionLogger
             'token' => $token,
         ];
 
-        $token = $bluePrint->form->getModel()->getLastToken();
-        self::insert($bluePrint, $action, $refId, $data, $token);
+        $description = null;
+        $heroField = $bluePrint->getHeroField();
+        if ($heroField) {
+            $resource = $bluePrint->getForm()->getResource();
+            $title = $resource->singularTitle ?? $resource->title;
+            $description = $title.' '.($oldData->{$heroField} ?? '').' duplicated';
+        }
+
+        $request = [
+            'action' => $action,
+            'refId' => $refId,
+            'token' => $bluePrint->form->getModel()->getLastToken(),
+            'description' => $description,
+            'data' => $data,
+        ];
+        self::insert($bluePrint, $request);
     }
 
     public static function update(BluePrint $bluePrint, $refId, $oldData, $newData)
@@ -86,7 +116,27 @@ class ActionLogger
             }
         }
 
-        self::insert($bluePrint, $action, $refId, $data, self::getToken($bluePrint, $oldData));
+        $description = null;
+        if ($bluePrint->getForm()->getCrud()->isDefaultFormat()) {
+            $heroField = $bluePrint->getHeroField();
+            if ($heroField) {
+                $resource = $bluePrint->getForm()->getResource();
+                $title = $resource->singularTitle ?? $resource->title;
+                $description = $title.' '.($oldData->{$heroField} ?? '').' updated';
+            }
+        } else {
+            $title = $bluePrint->getForm()->getResource()->title;
+            $description = $title.' updated';
+        }
+
+        $request = [
+            'action' => $action,
+            'refId' => $refId,
+            'token' => self::getToken($bluePrint, $oldData),
+            'description' => $description,
+            'data' => $data,
+        ];
+        self::insert($bluePrint, $request);
     }
 
     public static function delete(BluePrint $bluePrint, $refId, $oldData)
@@ -97,7 +147,22 @@ class ActionLogger
 
         $action = 'delete';
 
-        self::insert($bluePrint, $action, $refId, null, self::getToken($bluePrint, $oldData));
+        $description = null;
+        $heroField = $bluePrint->getHeroField();
+        if ($heroField) {
+            $resource = $bluePrint->getForm()->getResource();
+            $title = $resource->singularTitle ?? $resource->title;
+            $description = $title.' '.($oldData->{$heroField} ?? '').' deleted';
+        }
+
+        $request = [
+            'action' => $action,
+            'refId' => $refId,
+            'token' => self::getToken($bluePrint, $oldData),
+            'description' => $description,
+            'data' => null,
+        ];
+        self::insert($bluePrint, $request);
     }
 
     public static function destroy(BluePrint $bluePrint, $refId, $oldData)
@@ -118,7 +183,22 @@ class ActionLogger
             $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
         }
 
-        self::insert($bluePrint, $action, $refId, $data, self::getToken($bluePrint, $oldData));
+        $description = null;
+        $heroField = $bluePrint->getHeroField();
+        if ($heroField) {
+            $resource = $bluePrint->getForm()->getResource();
+            $title = $resource->singularTitle ?? $resource->title;
+            $description = $title.' '.($oldData->{$heroField} ?? '').' permanently deleted';
+        }
+
+        $request = [
+            'action' => $action,
+            'refId' => $refId,
+            'token' => self::getToken($bluePrint, $oldData),
+            'description' => $description,
+            'data' => $data,
+        ];
+        self::insert($bluePrint, $request);
     }
 
     public static function restore(BluePrint $bluePrint, $refId, $oldData)
@@ -129,22 +209,36 @@ class ActionLogger
 
         $action = 'restore';
 
-        self::insert($bluePrint, $action, $refId, null, self::getToken($bluePrint, $oldData));
+        $description = null;
+        $heroField = $bluePrint->getHeroField();
+        if ($heroField) {
+            $resource = $bluePrint->getForm()->getResource();
+            $title = $resource->singularTitle ?? $resource->title;
+            $description = $title.' '.($oldData->{$heroField} ?? '').' restored';
+        }
+
+        $request = [
+            'action' => $action,
+            'refId' => $refId,
+            'token' => self::getToken($bluePrint, $oldData),
+            'description' => $description,
+            'data' => null,
+        ];
+        self::insert($bluePrint, $request);
     }
 
-    private static function insert(BluePrint $bluePrint, string $action, ?string $refId, $data, ?string $token = null)
+    private static function insert(BluePrint $bluePrint, $data)
     {
         $insert = [
             'module' => $bluePrint->getForm()->getResource()->title,
             'route' => $bluePrint->getForm()->getResource()->route,
-            'action' => $action,
-            'refId' => $refId,
-            'token' => $token,
-            'data' => $data ? \json_encode($data) : null,
             'actionBy' => Auth::user()->userId,
             'actionByName' => Auth::user()->name,
             'actionAt' => \date('Y-m-d H:i:s'),
         ];
+
+        $data['data'] = $data['data'] ? \json_encode($data['data']) : null;
+        $insert = array_merge($insert, $data);
 
         DB::table('action_logs')->insert($insert);
     }

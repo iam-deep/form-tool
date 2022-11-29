@@ -169,7 +169,7 @@ class Crud
         return $this->table->bulkAction->perform($callback);
     }
 
-    public function list($callback)
+    public function list($callback = null)
     {
         return $this->table->create($callback);
     }

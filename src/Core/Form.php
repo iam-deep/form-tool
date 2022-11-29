@@ -107,7 +107,7 @@ class Form
 
     public function actionLog(bool $flag = true)
     {
-        $this->isActionLog = $flag;
+        $this->isLogAction = $flag;
 
         return $this->crud;
     }
@@ -410,11 +410,7 @@ class Form
             }
 
             if (! $this->oldData) {
-                if (\App::environment(['local'])) {
-                    throw new \Exception('Data not found for ID: '.$this->editId);
-                } else {
-                    \abort(403);
-                }
+                return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
             }
 
             $this->editId = $this->oldData->{$this->model->getPrimaryId()};
@@ -448,7 +444,7 @@ class Form
                 $insert[] = ['groupName' => $this->crud->getGroupName(), 'key' => $key, 'value' => $value];
             }
 
-            $affected = $this->model->addMany($insert);
+            $this->model->addMany($insert);
         }
 
         $this->afterSave();
@@ -727,7 +723,7 @@ class Form
         $url = $this->request->getRequestUri();
 
         $matches = [];
-        $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/?/', $url, $matches);
+        $t = \preg_match('/'.$this->resource->route.'\/([^\/\?$]*)/', $url, $matches);
         if (\count($matches) > 1) {
             $this->editId = $matches[1];
 
@@ -757,6 +753,9 @@ class Form
         $this->formStatus = FormStatus::Delete;
 
         $result = $this->model->getOne($id);
+        if (! $result) {
+            return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
+        }
 
         $affected = $this->model->updateDelete($id);
 
@@ -810,12 +809,12 @@ class Form
 
         $affected = $this->model->deleteOne($id);
 
-        $pId = $id;
-        if ($this->model->isToken()) {
-            $pId = $result->{$this->model->getPrimaryId()} ?? null;
-        }
-
         if ($affected > 0 && $result) {
+            $pId = $id;
+            if ($this->model->isToken()) {
+                $pId = $result->{$this->model->getPrimaryId()} ?? null;
+            }
+
             foreach ($this->bluePrint->getList() as $input) {
                 if ($input instanceof BluePrint) {
                     // Let's delete the file and image of sub tables, and data
@@ -855,11 +854,13 @@ class Form
                     $input->afterDestroy($result);
                 }
             }
+
+            ActionLogger::destroy($this->bluePrint, $pId, $result);
+
+            return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
         }
 
-        ActionLogger::destroy($this->bluePrint, $pId, $result);
-
-        return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
+        return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
     }
 
     private function checkForeignKeyRestriction($id)
@@ -911,24 +912,35 @@ class Form
                 $msg .= 'Below data are linked to this item:';
             }
 
+            $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+            $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
             $msg .= '<br /><ul>';
             $i = 0;
             foreach ($dataCount as $result) {
                 $msg .= \sprintf('<li>%s data of <b>%s</b> in field "%s"</li>', $result['count'], $result['title'], $result['label']);
 
                 $url = URL::to(\config('form-tool.adminURL').'/'.$result['route']);
-                $hasPermission = Guard::hasEdit($result['route']);
+                $hasEditPermission = Guard::hasEdit($result['route']);
+                $hasDestroyPermission = Guard::hasDestroy($result['route']);
 
                 $msg .= '<ul>';
                 foreach ($result['result'] as $row) {
                     $id = $row->{$result['id']} ?? null;
 
                     if ($id) {
-                        if ($hasPermission) {
-                            $msg .= '<li>ID: <a href="'.$url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
-                        } else {
-                            $msg .= '<li>ID: '.$id.'</li>';
+                        $newMsg = '<li>ID: '.$id.'</li>';
+
+                        $isDeleted = $row->{$deletedAt} ?? null;
+                        if ($isDeleted) {
+                            if ($hasDestroyPermission) {
+                                $newMsg = '<li>ID: <a href="'.$url.'/?id='.$id.'&quick_status=trash" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                            }
+                        } else if ($hasEditPermission) {
+                            $newMsg = '<li>ID: <a href="'.$url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
                         }
+
+                        $msg .= $newMsg;
                     } else {
                         $msg .= "<li>ID: <i>{$result['id']} column not found</i></li>";
                     }
@@ -1008,6 +1020,11 @@ class Form
     public function setCrud(Crud $crud)
     {
         $this->crud = $crud;
+    }
+
+    public function getCrud()
+    {
+        return $this->crud;
     }
 
     public function isLogAction()

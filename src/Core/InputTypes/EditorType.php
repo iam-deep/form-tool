@@ -53,7 +53,7 @@ class EditorType extends BaseInputType implements ISearchable
 
     public function getLoggerValue(string $action, $oldValue = null)
     {
-        $newValue = \htmlentities($this->value);
+        $newValue = $this->value;
 
         if ($action == 'update') {
             if ($oldValue != $newValue) {
@@ -71,12 +71,16 @@ class EditorType extends BaseInputType implements ISearchable
 
     public function beforeStore(object $newData)
     {
-        return $this->encodeHTML($newData->{$this->dbField});
+        $this->value = $this->encodeHTML($newData->{$this->dbField});
+
+        return $this->value;
     }
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-        return $this->encodeHTML($newData->{$this->dbField});
+        $this->value = $this->encodeHTML($newData->{$this->dbField});
+
+        return $this->value;
     }
 
     public function uploadImage(Request $request)

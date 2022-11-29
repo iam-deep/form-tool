@@ -10,6 +10,8 @@ class BluePrint
     private $dataTypeList = [];
     public $actions = [];
 
+    private $heroDbField = null;
+
     public $form = null;
 
     public bool $isMultiple = false;
@@ -393,6 +395,21 @@ class BluePrint
         }
 
         return $key.']';
+    }
+
+    public function getHeroField()
+    {
+        if ($this->heroDbField) {
+            return $this->heroDbField;
+        }
+
+        foreach ($this->dataTypeList as $input) {
+            if ($input->type == InputTypes\Common\InputType::Text && ! $input->isEncrypted()) {
+                return $input->getDbField();
+            }
+        }
+
+        return null;
     }
 
     public function getSelectDbOptions()
