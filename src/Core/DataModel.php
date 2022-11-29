@@ -11,7 +11,7 @@ class DataModel
     protected string $tableName = '';
     protected string $primaryId = '';
     protected string $token = '';
-    protected string $orderBy = '';
+    protected ?string $orderBy = '';
     protected string $foreignKey = '';
 
     protected bool $isToken = false;
@@ -26,6 +26,9 @@ class DataModel
     {
         if ($model) {
             $this->model = $model;
+            if (! isset($this->model::$tableName) || ! $this->model::$tableName) {
+                throw new \Exception('$tableName not set or not declared as public at ['.$this->model.']');
+            }
         } else {
             $this->model = AdminModel::class;
         }
@@ -135,9 +138,11 @@ class DataModel
 
     //endregion
 
-    public function getAll($where = null, $isFromTrash = false)
+    public function getAll($where = null, $sortBy = null)
     {
-        return $this->setup()::getAll($where, $isFromTrash);
+        $this->orderBy = $sortBy;
+
+        return $this->setup()::getAll($where);
     }
 
     public function getOne($id, $isToken = null)
@@ -145,9 +150,11 @@ class DataModel
         return $this->setup()::getOne($id, $isToken ?? $this->isToken);
     }
 
-    public function search($searchTerm, $fields, $where, $isFromTrash = false)
+    public function search($searchTerm, $fields, $where = null, $sortBy = null)
     {
-        return $this->setup()::search($searchTerm, $fields, $where, $isFromTrash);
+        $this->orderBy = $sortBy;
+
+        return $this->setup()::search($searchTerm, $fields, $where);
     }
 
     public function getWhereOne($where = null)
@@ -241,10 +248,10 @@ class DataModel
         $this->model::$tableName = $this->tableName ?: $this->model::$tableName;
         $this->model::$primaryId = $this->primaryId ?: $this->model::$primaryId;
         $this->model::$token = $this->token ?: $this->model::$token;
-        $this->model::$orderBy = $this->orderBy ?: $this->model::$orderBy;
+        $this->model::$orderBy = $this->orderBy ?: ($this->model::$orderBy ?: $this->model::$primaryId);
         $this->model::$foreignKey = $this->foreignKey ?: $this->model::$foreignKey;
 
-        $this->model::$isSoftDelete = $this->isSoftDelete;
+        $this->model::setSoftDelete($this->isSoftDelete);
 
         return $this->model;
     }

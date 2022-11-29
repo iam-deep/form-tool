@@ -85,7 +85,7 @@ const search = ($input) => {
 
     $.ajax({
         // TODO: (optional) need to improve/change the request method
-        url: "{{ $page->searchLink }}",
+        url: "{!! $page->searchLink !!}",
         type: "get",
         dataType: "json",
         data: { search: input },

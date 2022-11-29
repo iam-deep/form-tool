@@ -16,7 +16,7 @@ class TableField
         $this->table = $table;
     }
 
-    public function default(string $dbField, string $label = null)
+    public function default(string $dbField, string $label = null): CellDefinition
     {
         $input = $this->table->getBluePrint()->getInputTypeByDbField($dbField);
         if (! $input) {
@@ -29,7 +29,7 @@ class TableField
         return $cell;
     }
 
-    public function custom($class, string $dbField, string $label = null)
+    public function custom($class, string $dbField, string $label = null): CellDefinition
     {
         $inputType = new $class();
 
@@ -152,7 +152,7 @@ class TableField
             }
         }
 
-        $cell = CellDefinition::Other('action', '', 'Actions')->width('100px')->right();
+        $cell = CellDefinition::Other('action', '', 'Actions')->width('100px')->right()->sortable(false);
         if (\count($this->actions)) {
             $this->cellList['actions'] = $cell;
         }
@@ -169,9 +169,9 @@ class TableField
         return null;
     }
 
-    public function bulkActionCheckbox()
+    public function bulkActionCheckbox(): CellDefinition
     {
-        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('25px');
+        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('25px')->sortable(false);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -179,7 +179,7 @@ class TableField
 
     public function slNo(string $label = null): CellDefinition
     {
-        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px');
+        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px')->sortable(false);
         $this->cellList[] = $cell;
 
         return $cell;

@@ -41,6 +41,9 @@ input[type=checkbox], input[type=radio] {
     z-index: 99999;
     box-shadow: 0 -4px 5px -3px rgb(0 0 0 / 10%);
 }
+.table>thead>tr>th, .table>tbody>tr>th, .table>tfoot>tr>th, .table>thead>tr>td, .table>tbody>tr>td, .table>tfoot>tr>td {
+    vertical-align: middle;
+}
 </style>
 </head>
 <body class="hold-transition skin-blue sidebar-mini">
@@ -50,7 +53,7 @@ input[type=checkbox], input[type=radio] {
   <header class="main-header">
 
     <!-- Logo -->
-    <a href="{{ URL::to('dashboard') }}" class="logo">
+    <a href="{{ URL::to(config('form-tool.adminURL') . '/dashboard') }}" class="logo">
       <!-- mini logo for sidebar mini 50x50 pixels -->
       <span class="logo-mini">Adm</span>
       <!-- logo for regular state and mobile devices -->

@@ -152,7 +152,7 @@ class Crud
 
         $page->filter = $this->table->getFilter();
         $page->searchQuery = $request->query('search');
-        $page->searchLink = $currentUrl.'/search?'.\http_build_query($request->except('search'));
+        $page->searchLink = $currentUrl.'/search?'.\http_build_query($request->except(['search', 'page']));
 
         $page->bulkAction = $this->table->getBulkAction();
         $page->tableContent = $this->table->getContent();

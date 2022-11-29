@@ -4,7 +4,22 @@
             <tr class="active">
                 @foreach ($headings as $header)
                     <th {!! $header->raw !!}>
-                        {!! $header->getLabel() !!}
+                        @if ($header->isSortable())
+                            @if ($header->isSorted)
+                                <a href="{{ $route.$header->sortUrl }}">
+                                    {!! $header->getLabel() !!} 
+                                    @if ($header->sortedOrder == 'desc')
+                                        <i class="fa fa-caret-down"></i>
+                                    @else
+                                        <i class="fa fa-caret-up"></i>
+                                    @endif
+                                </a>
+                            @else
+                                <a href="{{ $route.$header->sortUrl }}">{!! $header->getLabel() !!}</a>
+                            @endif
+                        @else
+                            {!! $header->getLabel() !!}
+                        @endif
                     </th>
                 @endforeach
             </tr>

@@ -5,14 +5,16 @@ namespace Biswadeep\FormTool\Core;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
 use Closure;
+use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Pagination\Paginator;
 
 class Table
 {
-    private $bluePrint;
+    private BluePrint $bluePrint;
     private $resource;
-    private $model;
+    private DataModel $model;
 
     private $table;
     private $field;
@@ -20,10 +22,11 @@ class Table
 
     private $dataResult;
 
-    private $request;
+    private Request $request;
     private $url;
 
     private $isFromTrash = false;
+    private ?string $sortBy = null;
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -56,7 +59,7 @@ class Table
         $this->crud = $crud;
     }
 
-    public function create(?Closure $callback)
+    public function create(?Closure $callback): Table
     {
         if ($callback) {
             $tableField = new TableField($this);
@@ -76,14 +79,16 @@ class Table
         return $this;
     }
 
-    public function searchIn($fields)
+    //region Options
+
+    public function searchIn($fields): Table
     {
         $this->searchFields = Arr::wrap($fields);
 
         return $this;
     }
 
-    public function filter($fields = null)
+    public function filter($fields = null): Table
     {
         $fields = Arr::wrap($fields);
 
@@ -93,10 +98,18 @@ class Table
         return $this;
     }
 
+    public function orderBy(string $field): Table
+    {
+        $this->model->orderBy($field);
+
+        return $this;
+    }
+
+    //endregion
+
     public function search()
     {
-        $where = $this->makeFilter();
-
+        $where = $this->setupTable();
         $this->doSearch($where);
 
         $table = $this->createList();
@@ -132,17 +145,16 @@ class Table
         }
 
         $searchTerm = $this->request->query->get('search');
-        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $where, $this->isFromTrash);
+        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $where, $this->sortBy);
     }
 
     public function listAll()
     {
-        $where = $this->makeFilter();
-
+        $where = $this->setupTable();
         if ($this->request->query('search')) {
             $this->doSearch($where);
         } else {
-            $this->dataResult = $this->model->getAll($where, $this->isFromTrash);
+            $this->dataResult = $this->model->getAll($where, $this->sortBy);
         }
 
         return $this->createList();
@@ -161,12 +173,9 @@ class Table
         }
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
-
         $tableField->datetime($metaColumns['createdAt'] ?? 'createdAt', 'Created At');
 
-        if ($this->isFromTrash) {
-            $tableField->datetime($metaColumns['deletedAt'] ?? 'deletedAt', 'Deleted At');
-        } else {
+        if (! $this->isFromTrash) {
             $tableField->actions(['edit', 'delete']);
         }
 
@@ -177,9 +186,7 @@ class Table
     {
         $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
 
-        if (! $this->field) {
-            $this->setDefaultField();
-        } elseif ($this->isFromTrash) {
+        if ($this->isFromTrash) {
             // Remove actions if we are listing trash data
             $this->field->removeActions();
 
@@ -187,17 +194,33 @@ class Table
             $this->field->datetime($metaColumns['deletedAt'] ?? 'deletedAt', 'Deleted At');
         }
 
+        $sortUrlQueryString = \http_build_query($this->request->except(['sortby', 'order', 'page']));
+
         $data['headings'] = $data['tableData'] = [];
+        $data['route'] = $this->url;
 
         foreach ($this->field->cellList as $row) {
             $row->setup();
+
+            if ($row->isSortable()) {
+                $sortedField = $row->getSortableField();
+                if ($this->sortBy == $sortedField) {
+                    $row->isSorted = true;
+                    $row->sortedOrder = $this->request->query('order', 'desc');
+
+                    $row->sortUrl = '?sortby='.$sortedField.'&order='.($row->sortedOrder == 'asc' ? 'desc' : 'asc').'&'.$sortUrlQueryString;
+                } else {
+                    $row->sortUrl = '?sortby='.$sortedField.'&order=desc&'.$sortUrlQueryString;
+                }
+            }
+            
             $data['headings'][] = $row;
         }
 
         $crudName = $this->crud->getName();
 
         $perPage = $this->dataResult->perPage();
-        $page = $this->request->query('page');
+        $page = (int) $this->request->query('page');
 
         $i = $page ? (($page - 1) * $perPage) : 0;
         foreach ($this->dataResult as $value) {
@@ -317,6 +340,9 @@ class Table
             $data['tableData'][] = $viewRow;
         }
 
+        // Set paginator base url, needed for search result
+        $this->dataResult->withPath($this->resource->route);
+
         $this->table = new \stdClass();
         $this->table->content = view('form-tool::list.table', $data);
         $this->table->pagination = $this->dataResult->onEachSide(2)->withQueryString()->links();
@@ -331,6 +357,7 @@ class Table
         }
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+        $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
         $quickFilters = [
             'all' => [
@@ -358,14 +385,14 @@ class Table
         $i = 0;
         foreach ($quickFilters as $key => &$row) {
             if ($key == 'all') {
-                $row['count'] = $this->model->countWhere(function ($query, $class) use ($metaColumns) {
+                $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
                     if ($this->crud->isSoftDelete()) {
-                        $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
+                        $query->whereNull($deletedAt);
                     }
                 });
             } elseif ($key == 'trash') {
-                $row['count'] = $this->model->countWhere(function ($query, $class) use ($metaColumns) {
-                    $query->whereNotNull($metaColumns['deletedAt'] ?? 'deletedAt');
+                $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
+                    $query->whereNotNull($deletedAt);
                 });
             }
 
@@ -393,23 +420,60 @@ class Table
         return \view('form-tool::list.filter', $data);
     }
 
-    protected function makeFilter()
+    protected function setupTable()
     {
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+        $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
+
+        // Let's setup filter first
+        $where = [];
         if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
             $this->isFromTrash = true;
+            
+            $where[] = function($query) use ($deletedAt) {
+                $query->whereNotNull($deletedAt);
+            }; 
+        } else {
+            $where[] = function($query) use ($deletedAt) {
+                $query->whereNull($deletedAt);
+            };
         }
 
         if ($this->request->query('id')) {
             $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
+            $where[] = [$primaryId => $this->request->query('id')];
 
-            return [$primaryId => $this->request->query('id')];
+            return $where;
         }
 
         if ($this->filter) {
-            return $this->filter->apply();
+            $isFilter = $this->filter->apply();
+            if ($isFilter) {
+                $where = array_merge($where, [$isFilter]);
+            }
         }
 
-        return null;
+        // Let's setup sort
+        if (! $this->field) {
+            $this->setDefaultField();
+        }
+
+        $this->sortBy = null;
+        $requestSortBy = $this->request->query('sortby');
+        if ($requestSortBy) {
+            foreach ($this->field->cellList as $field) {
+                if ($field->isSortable() && $field->getSortableField() == $requestSortBy) {
+                    $this->sortBy = $field->getSortableField();
+                    break;
+                }
+            }
+        } else if ($this->isFromTrash && ! $this->sortBy) {
+            $this->sortBy = $deletedAt;
+        } else {
+            $this->sortBy = $this->model->getOrderBy();
+        }
+
+        return $where;
     }
 
     public function getFilter()
@@ -421,7 +485,9 @@ class Table
 
     protected function createBulkAction()
     {
-        $this->makeFilter();
+        if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
+            $this->isFromTrash = true;
+        }
 
         $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
         $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
@@ -458,7 +524,7 @@ class Table
         return $this->bluePrint;
     }
 
-    public function getModel()
+    public function getModel(): DataModel
     {
         return $this->model;
     }

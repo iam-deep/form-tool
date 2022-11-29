@@ -10,11 +10,16 @@ class CellDefinition
     private BaseInputType $inputType;
 
     public string $fieldType;
-    private string $dbField;
-    private bool $sortable = true;
+    private ?string $dbField = null;
+    private ?string $label = '';
 
-    // Label can be nullable
-    private $label = '';
+    private bool $sortable = true;
+    private ?string $sortableField = null;
+
+    // Only for Table Header Info
+    public bool $isSorted = false;
+    public ?string $sortedOrder = null;
+    public ?string $sortUrl = null;
 
     private $concat = null;
     private $anyPattern = null;
@@ -53,7 +58,7 @@ class CellDefinition
         return $cell;
     }
 
-    public static function Any($pattern, $dbFields)
+    public static function Any($pattern, $dbFields): CellDefinition
     {
         $cell = new CellDefinition();
 
@@ -62,12 +67,28 @@ class CellDefinition
         $cell->concat->pattern = $pattern;
         $cell->concat->dbFields = $dbFields;
 
+        $cell->sortable = false;
+
         return $cell;
     }
 
-    public function typeOptions(Closure $options)
+    public function typeOptions(Closure $options): CellDefinition
     {
         $options($this->inputType);
+
+        return $this;
+    }
+
+    public function sortable($dbField = null): CellDefinition
+    {
+        if ($dbField === false){
+            $this->sortable = false;
+
+            return $this;
+        }
+
+        $this->sortable = true;
+        $this->sortableField = $dbField;
 
         return $this;
     }
@@ -107,7 +128,7 @@ class CellDefinition
         return $this;
     }
 
-    public function concat($pattern = '', ...$dbFields)
+    public function concat($pattern = '', ...$dbFields): CellDefinition
     {
         $this->concat = new \stdClass();
         $this->concat->pattern = $pattern;
@@ -192,7 +213,21 @@ class CellDefinition
         return $this->concat;
     }
 
-    public function __call($method, $parameters)
+    public function isSortable()
+    {
+        return $this->sortable;
+    }
+
+    public function getSortableField()
+    {
+        if ($this->sortableField) {
+            return $this->sortableField;
+        }
+
+        return $this->getDbField();
+    }
+
+    public function __call($method, $parameters): CellDefinition
     {
         $this->inputType->{$method}(...$parameters);
 
