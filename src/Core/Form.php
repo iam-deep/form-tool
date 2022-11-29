@@ -936,7 +936,7 @@ class Form
                             if ($hasDestroyPermission) {
                                 $newMsg = '<li>ID: <a href="'.$url.'/?id='.$id.'&quick_status=trash" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
                             }
-                        } else if ($hasEditPermission) {
+                        } elseif ($hasEditPermission) {
                             $newMsg = '<li>ID: <a href="'.$url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
                         }
 
