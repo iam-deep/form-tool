@@ -758,7 +758,7 @@ class Form
         if (! $result) {
             return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
         }
-        
+
         $pId = $id;
         if ($this->model->isToken()) {
             $pId = $result->{$this->model->getPrimaryId()} ?? null;
