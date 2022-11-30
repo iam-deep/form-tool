@@ -78,7 +78,7 @@ class ActionLogger
         if ($heroField) {
             $resource = $bluePrint->getForm()->getResource();
             $title = $resource->singularTitle ?? $resource->title;
-            $description = $title.' '.($oldData->{$heroField} ?? '').' duplicated';
+            $description = $title.' '.($result->{$heroField} ?? '').' duplicated';
         }
 
         $request = [
@@ -122,7 +122,7 @@ class ActionLogger
             if ($heroField) {
                 $resource = $bluePrint->getForm()->getResource();
                 $title = $resource->singularTitle ?? $resource->title;
-                $description = $title.' '.($oldData->{$heroField} ?? '').' updated';
+                $description = $title.' '.($newData->{$heroField} ?? '').' updated';
             }
         } else {
             $title = $bluePrint->getForm()->getResource()->title;

@@ -176,7 +176,7 @@ class AdminModel extends Model
     {
         if ($where instanceof Closure) {
             $where($query, static::class);
-        } elseif (isset($where[0]) && \is_string($where[0])) {
+        } elseif ($where && \is_string($where[array_key_first($where)])) {
             $query->where($where);
         } elseif ($where) {
             foreach ($where as $expression) {

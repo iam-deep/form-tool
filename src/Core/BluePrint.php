@@ -397,6 +397,11 @@ class BluePrint
         return $key.']';
     }
 
+    public function setHeroField($field)
+    {
+        $this->heroDbField = $field;
+    }
+
     public function getHeroField()
     {
         if ($this->heroDbField) {

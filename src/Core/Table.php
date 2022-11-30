@@ -422,6 +422,10 @@ class Table
 
     protected function setupTable()
     {
+        if (! $this->field) {
+            $this->setDefaultField();
+        }
+
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
         $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
@@ -454,10 +458,6 @@ class Table
         }
 
         // Let's setup sort
-        if (! $this->field) {
-            $this->setDefaultField();
-        }
-
         $this->sortBy = null;
         $requestSortBy = $this->request->query('sortby');
         if ($requestSortBy) {

@@ -81,7 +81,7 @@ class Form
 
     //region Options
 
-    public function doNotSave($fields)
+    public function doNotSave($fields): Crud
     {
         $this->options->doNotSave = [];
         if (\is_string($fields)) {
@@ -93,7 +93,7 @@ class Form
         return $this->crud;
     }
 
-    public function saveOnly($fields)
+    public function saveOnly($fields): Crud
     {
         $this->options->saveOnly = [];
         if (\is_string($fields)) {
@@ -105,9 +105,16 @@ class Form
         return $this->crud;
     }
 
-    public function actionLog(bool $flag = true)
+    public function actionLog(bool $flag = true): Crud
     {
         $this->isLogAction = $flag;
+
+        return $this->crud;
+    }
+
+    public function heroField(string $field): Crud
+    {
+        $this->bluePrint->setHeroField($field);
 
         return $this->crud;
     }
@@ -319,7 +326,7 @@ class Form
 
     //endregion
 
-    public function edit($id = false)
+    public function edit($id = null)
     {
         $this->formStatus = FormStatus::Edit;
 
@@ -737,38 +744,39 @@ class Form
 
     //region FormAction DeleteAndDestroy
 
-    public function delete($id = false)
+    public function delete($id = null)
     {
-        $id = $this->parseEditId($id);
-
-        $response = $this->checkForeignKeyRestriction($id);
-        if ($response !== true) {
-            return $response;
-        }
-
         if (! $this->crud->isSoftDelete()) {
             return $this->destroy($id);
         }
 
         $this->formStatus = FormStatus::Delete;
 
+        $id = $this->parseEditId($id);
+
         $result = $this->model->getOne($id);
         if (! $result) {
             return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
         }
+        
+        $pId = $id;
+        if ($this->model->isToken()) {
+            $pId = $result->{$this->model->getPrimaryId()} ?? null;
+        }
+
+        $response = $this->checkForeignKeyRestriction($pId, $result);
+        if ($response !== true) {
+            return $response;
+        }
 
         $affected = $this->model->updateDelete($id);
 
-        $refId = $id;
-        if ($this->model->isToken()) {
-            $refId = $result->{$this->model->getPrimaryId()} ?? null;
-        }
-        ActionLogger::delete($this->bluePrint, $refId, $result);
+        ActionLogger::delete($this->bluePrint, $pId, $result);
 
         return redirect($this->url.$this->queryString)->with('success', 'Data deleted successfully!');
     }
 
-    public function destroy($id = false)
+    public function destroy($id = null)
     {
         $this->formStatus = FormStatus::Destroy;
 
@@ -782,39 +790,44 @@ class Form
         //      permission to delete
         //      can delete this row
 
+        // We can't use getOne, as we need to fetch deleted item
         $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
-
         $result = $this->model->getWhereOne([$idCol => $id]);
-        if ($result) {
-            if ($this->crud->isSoftDelete()) {
-                if (! \property_exists($result, $deletedAt)) {
-                    throw new \Exception('Column "deletedAt" not found!');
-                }
+        if (! $result) {
+            return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
+        }
 
-                if ($result->{$deletedAt} === null) {
-                    return redirect($this->url.$this->queryString)->with('error', 'Soft delete is enabled for this CRUD. You need to mark as delete first then only you can delete it permanently!');
-                }
+        $pId = $id;
+        if ($this->model->isToken()) {
+            $pId = $result->{$this->model->getPrimaryId()} ?? null;
+        }
+
+        $response = $this->checkForeignKeyRestriction($pId, $result);
+        if ($response !== true) {
+            return $response;
+        }
+
+        if ($this->crud->isSoftDelete()) {
+            if (! \property_exists($result, $deletedAt)) {
+                throw new \Exception('Column "deletedAt" not found!');
             }
 
-            foreach ($this->bluePrint->getList() as $field) {
-                if ($field instanceof BluePrint) {
-                    // TODO: Still now not needed
-                } else {
-                    $field->beforeDestroy($result);
-                }
+            if ($result->{$deletedAt} === null) {
+                return redirect($this->url.$this->queryString)->with('error', 'Soft delete is enabled for this module. You need to mark as delete first then only you can delete it permanently!');
             }
-        } else {
-            // TODO: Log result not found on delete id
+        }
+
+        foreach ($this->bluePrint->getList() as $field) {
+            if ($field instanceof BluePrint) {
+                // TODO: Still now not needed
+            } else {
+                $field->beforeDestroy($result);
+            }
         }
 
         $affected = $this->model->deleteOne($id);
 
-        if ($affected > 0 && $result) {
-            $pId = $id;
-            if ($this->model->isToken()) {
-                $pId = $result->{$this->model->getPrimaryId()} ?? null;
-            }
-
+        if ($affected > 0) {
             foreach ($this->bluePrint->getList() as $input) {
                 if ($input instanceof BluePrint) {
                     // Let's delete the file and image of sub tables, and data
@@ -860,10 +873,10 @@ class Form
             return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
         }
 
-        return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
+        return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not deleted fully, please contact Support Administartor.');
     }
 
-    private function checkForeignKeyRestriction($id)
+    private function checkForeignKeyRestriction($id, $dataToDelete)
     {
         if (! \config('form-tool.isPreventForeignKeyDelete')) {
             return true;
@@ -873,6 +886,7 @@ class Form
         $totalCount = 0;
 
         $totalReferencesToDisplay = 10;
+        $totalReferencesToFetch = 100;
 
         $result = DB::table('cruds')->get();
         if (\count($result) > 0) {
@@ -884,7 +898,7 @@ class Form
 
                 foreach ($data->foreignKey as $option) {
                     if ($option->dbTable == $this->model->getTableName()) {
-                        $resultData = DB::table($data->main->table)->where($option->field, $id)->get();     //->limit($totalReferencesToDisplay)
+                        $resultData = DB::table($data->main->table)->where($option->field, $id)->limit($totalReferencesToFetch)->get();
 
                         $count = \count($resultData);
                         if ($count > 0) {
@@ -897,14 +911,37 @@ class Form
                                 'result' => $resultData,
                             ];
                             $totalCount += $count;
+
+                            // Let's break, we will not fetch more than $totalReferencesToFetch items
+                            if ($totalCount >= $totalReferencesToFetch) {
+                                break;
+                            }
                         }
                     }
+                }
+
+                // Let's break, we will not fetch more than $totalReferencesToFetch items
+                if ($totalCount >= $totalReferencesToFetch) {
+                    break;
                 }
             }
         }
 
         if ($dataCount) {
-            $msg = 'ID: '.$id.' is linked with <b>'.$totalCount.'</b> data. You need to destroy all the linked data first to delete this item. ';
+            $displayId = $id;
+            if ($this->model->isToken()) {
+                $displayId = $dataToDelete->{$this->model->getTokenCol()} ?? null;
+            }
+
+            $msg = '';
+            $heroField = $this->bluePrint->getHeroField();
+            if ($heroField && isset($dataToDelete->{$heroField}) && $dataToDelete->{$heroField}) {
+                $msg .= 'Data: <b>"'.$dataToDelete->{$heroField}.'" (ID: '.$displayId.')</b> ';
+            } else {
+                $msg .= '<b>ID: '.$displayId.'</b> ';
+            }
+
+            $msg .= 'is linked with <b>'.$totalCount.'</b> data. You need to destroy all the linked data first to delete this item. ';
 
             if ($totalCount > 10) {
                 $msg .= 'Below are some of the data which are linked to this item:';
@@ -934,10 +971,10 @@ class Form
                         $isDeleted = $row->{$deletedAt} ?? null;
                         if ($isDeleted) {
                             if ($hasDestroyPermission) {
-                                $newMsg = '<li>ID: <a href="'.$url.'/?id='.$id.'&quick_status=trash" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                                $newMsg = '<li>ID: <a href="'.$url.'?id='.$id.'&quick_status=trash" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
                             }
                         } elseif ($hasEditPermission) {
-                            $newMsg = '<li>ID: <a href="'.$url.'/'.$id.'/edit" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                            $newMsg = '<li>ID: <a href="'.$url.'?id='.$id.'" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
                         }
 
                         $msg .= $newMsg;
@@ -953,7 +990,11 @@ class Form
                 $msg .= '</ul>';
 
                 if ($i >= $totalReferencesToDisplay) {
-                    $msg .= '<li><i>+'.($totalCount - $totalReferencesToDisplay).' more item(s)...</i></li>';
+                    if ($totalCount == $totalReferencesToFetch) {
+                        $msg .= '<li><i>More than '.$totalReferencesToFetch.'+ items...</i></li>';
+                    } else {
+                        $msg .= '<li><i>+'.($totalCount - $totalReferencesToDisplay).' more item(s)...</i></li>';
+                    }
                     break;
                 }
             }
