@@ -232,15 +232,13 @@ class ActionLogger
         $insert = [
             'module' => $bluePrint->getForm()->getResource()->title,
             'route' => $bluePrint->getForm()->getResource()->route,
-            'actionBy' => Auth::user()->userId,
-            'actionByName' => Auth::user()->name,
-            'actionAt' => \date('Y-m-d H:i:s'),
+            'createdByName' => Auth::user()->name,
         ];
 
         $data['data'] = $data['data'] ? \json_encode($data['data']) : null;
         $insert = array_merge($insert, $data);
 
-        DB::table('action_logs')->insert($insert);
+        (new DataModel())->db('action_logs', 'id')->add($insert);
     }
 
     private static function getToken(BluePrint $bluePrint, $result)

@@ -397,7 +397,7 @@ class Form
         return redirect($this->url.$this->queryString)->with('success', 'Data added successfully!');
     }
 
-    public function update($id = null)
+    public function update($id = null, callable $callbackBeforeUpdate = null)
     {
         $this->formStatus = FormStatus::Update;
 
@@ -442,6 +442,13 @@ class Form
         }
 
         if ($this->crud->isDefaultFormat()) {
+            if ($callbackBeforeUpdate) {
+                $response = $callbackBeforeUpdate($this->postData);
+                if ($response !== null) {
+                    $this->postData = $response;
+                }
+            }
+
             $affected = $this->model->updateOne($this->editId, $this->postData, false);
         } else {
             $this->model->destroyWhere(['groupName' => $this->crud->getGroupName()]);
@@ -449,6 +456,13 @@ class Form
             $insert = [];
             foreach ($this->postData as $key => $value) {
                 $insert[] = ['groupName' => $this->crud->getGroupName(), 'key' => $key, 'value' => $value];
+            }
+
+            if ($callbackBeforeUpdate) {
+                $response = $callbackBeforeUpdate($insert);
+                if ($response !== null) {
+                    $insert = $response;
+                }
             }
 
             $this->model->addMany($insert);

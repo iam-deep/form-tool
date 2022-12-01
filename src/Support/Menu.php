@@ -95,7 +95,7 @@ class Menu
             return $this->activeLink;
         }
 
-        return $this->activeLink = Request::segment(2);
+        return $this->activeLink = str_replace(url(\config('form-tool.adminURL')).'/', '', url()->current());
     }
 
     public function make()
