@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 
-class AdminModel extends Model
+class BaseModel extends Model
 {
     // This public variables can be changed from the child class
     public static $tableName = '';

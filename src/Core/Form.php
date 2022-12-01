@@ -353,7 +353,7 @@ class Form
             $this->editId = $this->resultData->{$this->model->getPrimaryId()};
         } else {
             // We are into key value pair format, let's format data
-            $result = $this->model->getAll();
+            $result = $this->model->getWhere(['groupName' => $this->crud->getGroupName()]);
 
             $this->resultData = new \stdClass();
             foreach ($result as $row) {
@@ -422,7 +422,7 @@ class Form
 
             $this->editId = $this->oldData->{$this->model->getPrimaryId()};
         } else {
-            $result = $this->model->getAll();
+            $result = $this->model->getWhere(['groupName' => $this->crud->getGroupName()]);
             $this->editId = -1;
 
             $this->oldData = new \stdClass();
@@ -471,7 +471,7 @@ class Form
         if ($this->crud->isDefaultFormat()) {
             $result = $this->model->getOne($this->editId, false);
         } else {
-            $data = $this->model->getAll();
+            $data = $this->model->getWhere(['groupName' => $this->crud->getGroupName()]);
 
             $result = new \stdClass();
             foreach ($data as $row) {

@@ -2,7 +2,7 @@
 
 namespace Biswadeep\FormTool\Core;
 
-use Biswadeep\FormTool\Models\AdminModel;
+use Biswadeep\FormTool\Models\BaseModel;
 use Biswadeep\FormTool\Support\Random;
 use Closure;
 
@@ -30,7 +30,12 @@ class DataModel
                 throw new \Exception('$tableName not set or not declared as public at ['.$this->model.']');
             }
         } else {
-            $this->model = AdminModel::class;
+            $defaultModelClass = \config('form-tool.defaultModel');
+            if ($defaultModelClass) {
+                $this->model = $defaultModelClass;
+            } else {
+                $this->model = BaseModel::class;
+            }
         }
     }
 

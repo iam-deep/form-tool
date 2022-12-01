@@ -50,6 +50,9 @@ return [
     // Enable User Permission for View, Create, Edit and Delete
     'isGuarded' => true,
 
+    // You can set your own default model for CRUD operations (Methods should be similar to BaseModel)
+    'defaultModel' => null,
+
     // Prevent direct deletion of data from database
     // This will mark the data/row as deleted and then you can delete it permanently
     'isSoftDelete' => true,
