@@ -295,10 +295,10 @@ class BluePrint
     {
         if ($idCol && $foreignKeyCol) {
             $this->multipleTable = (object) [
-                'table'         => \trim($model),
-                'id'            => \trim($idCol),
-                'foreignKey'    => \trim($foreignKeyCol),
-                'orderBy'       => \trim($orderBy),
+                'table' => \trim($model),
+                'id' => \trim($idCol),
+                'foreignKey' => \trim($foreignKeyCol),
+                'orderBy' => \trim($orderBy),
             ];
         } else {
             if (class_exists($model)) {

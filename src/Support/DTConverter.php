@@ -193,16 +193,16 @@ class DTConverter
     public static function getTimezones()
     {
         $continents = [
-            'Africa'     => DateTimeZone::AFRICA,
-            'America'    => DateTimeZone::AMERICA,
+            'Africa' => DateTimeZone::AFRICA,
+            'America' => DateTimeZone::AMERICA,
             'Antarctica' => DateTimeZone::ANTARCTICA,
-            'Arctic'     => DateTimeZone::ARCTIC,
-            'Asia'       => DateTimeZone::ASIA,
-            'Atlantic'   => DateTimeZone::ATLANTIC,
-            'Australia'  => DateTimeZone::AUSTRALIA,
-            'Europe'     => DateTimeZone::EUROPE,
-            'Indian'     => DateTimeZone::INDIAN,
-            'Pacific'    => DateTimeZone::PACIFIC,
+            'Arctic' => DateTimeZone::ARCTIC,
+            'Asia' => DateTimeZone::ASIA,
+            'Atlantic' => DateTimeZone::ATLANTIC,
+            'Australia' => DateTimeZone::AUSTRALIA,
+            'Europe' => DateTimeZone::EUROPE,
+            'Indian' => DateTimeZone::INDIAN,
+            'Pacific' => DateTimeZone::PACIFIC,
         ];
 
         $tzlist = ['UTC' => '(GMT/UTC '.self::getOffset('UTC').') &#160; - &#160; GMT/UTC'];

@@ -133,7 +133,8 @@ class DateTimeType extends BaseFilterType
         $this->pickerFormatDate = \trim(config('form-tool.pickerFormatDate', $this->pickerFormatDate));
         $this->pickerFormatTime = \trim(config('form-tool.pickerFormatTime', $this->pickerFormatTime));
 
-        Doc::addJs('
+        Doc::addJs(
+            '
         // Date and DateTimePicker
         $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
         $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", useCurrent: false});

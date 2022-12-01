@@ -31,10 +31,6 @@ class CreateCrudsTable extends Migration
      */
     public function down()
     {
-        if (! \config('form-tool.isPreventForeignKeyDelete')) {
-            return;
-        }
-
         Schema::dropIfExists('cruds');
     }
 }

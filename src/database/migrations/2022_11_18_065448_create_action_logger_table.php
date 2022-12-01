@@ -26,9 +26,9 @@ class CreateActionLoggerTable extends Migration
             $table->string('token')->nullable()->index();
             $table->string('description')->nullable();
             $table->mediumText('data')->nullable();         // MediumText or higher is recommended as there may be multiple EditorType data
-            $table->integer('actionBy')->nullable();
-            $table->string('actionByName')->nullable();
-            $table->dateTime('actionAt')->nullable();
+            $table->integer('createdBy')->nullable();
+            $table->string('createdByName')->nullable();
+            $table->dateTime('createdAt')->nullable();
         });
     }
 
@@ -39,10 +39,6 @@ class CreateActionLoggerTable extends Migration
      */
     public function down()
     {
-        if (! \config('form-tool.isLogActions')) {
-            return;
-        }
-
         Schema::dropIfExists('action_logs');
     }
 }
