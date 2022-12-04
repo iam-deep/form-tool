@@ -10,6 +10,7 @@ class CrudRoute
     {
         Route::get($route.'/search', [$class, 'search'])->name($route.'.search');
         Route::post($route.'/bulk-action', [$class, 'bulkAction'])->name($route.'.bulk-action');
+        Route::post($route.'/get-options', [$class, 'getOptions'])->name($route.'.get-options');
         Route::resource($route, $class);
     }
 

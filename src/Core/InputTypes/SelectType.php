@@ -22,7 +22,7 @@ class SelectType extends BaseFilterType
     protected $plugins = ['default', 'chosen'];
     protected string $currentPlugin = '';
 
-    //region Setter
+    //region Options
     public function noFirst()
     {
         $this->isFirstOption = false;
@@ -164,12 +164,15 @@ class SelectType extends BaseFilterType
             }
         }
 
+        $this->value = $value;
+
         return $this->htmlParentDiv($this->getInput($value));
     }
 
     public function getHTMLMultiple($key, $index)
     {
         $this->setPlugin(true);
+        $this->addScript();
 
         $value = old($key.'.'.$this->dbField);
         $value = $value[$index] ?? $this->value;
@@ -204,9 +207,15 @@ class SelectType extends BaseFilterType
         return $this->htmlParentDivFilter($this->getInput($this->value));
     }
 
+    private function getDependOptions()
+    {
+        return $this->getOptions($this->value);
+    }
+
     private function getInput($value)
     {
         $this->setPlugin();
+        $this->addScript();
 
         $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
         $input .= $this->getOptions($value);

@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <title>@if (isset($title)) {{ $title }} @endif | {{ config('app.name', 'Admin') }}</title>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+  
   <!-- Tell the browser to be responsive to screen width -->
   <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
   <link rel="stylesheet" href="{{ URL::asset('/assets/form-tool/plugins/bootstrap/dist/css/bootstrap.min.css') }}">

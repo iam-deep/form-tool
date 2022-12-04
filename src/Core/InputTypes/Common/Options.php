@@ -2,9 +2,12 @@
 
 namespace Biswadeep\FormTool\Core\InputTypes\Common;
 
+use Biswadeep\FormTool\Core\DataModel;
+use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;
+use Closure;
 
 trait Options
 {
@@ -20,6 +23,10 @@ trait Options
 
     protected bool $isRemoveTrash = true;
 
+    protected ?string $dependField = null;
+    protected ?string $dependColumn = null;
+    protected ?string $dependValue = null;
+
     //region Setter
     public function options($options, ...$patternDbFields)
     {
@@ -28,12 +35,14 @@ trait Options
 
             $tableInfo = new \stdClass();
             if (\count($db) >= 3) {
-                $tableInfo->dbTable = \trim($db[0]);
-                $tableInfo->dbTableValue = \trim($db[1]);
-                $tableInfo->dbTableTitle = \trim($db[2]);
+                $tableInfo->table = \trim($db[0]);
+                $tableInfo->valueCol = \trim($db[1]);
+                $tableInfo->textCol = \trim($db[2]);
+                $tableInfo->orderByCol = \trim($db[3] ?? null);
+                $tableInfo->orderByDirection = \trim($db[4] ?? 'asc');
                 $tableInfo->dbPatternFields = $patternDbFields;
             } else {
-                throw new \Exception('Wrong format! It should be table_name.value_column.text_column');
+                throw new \Exception('Wrong format! It should be tableName.valueColumn.textColumn[.orderByColumn[.orderDirection]]');
             }
 
             $this->optionData[] = ['db' => $tableInfo];
@@ -91,6 +100,18 @@ trait Options
 
         return $this;
     }
+
+    public function depend($field, $foreignKey = null)
+    {
+        $this->dependField = trim($field);
+        $this->dependColumn = trim($foreignKey);
+
+        if (! $foreignKey) {
+            $this->dependColumn = $this->dependField;
+        }
+
+        return $this;
+    }
     //endregion
 
     protected function createOptions()
@@ -100,18 +121,49 @@ trait Options
         }
 
         $metaColumns = \config('form-tool.table_meta_columns');
+        $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
         $this->options = new \stdClass();
         if ($this->optionData) {
             foreach ($this->optionData as $optionData) {
                 foreach ($optionData as $type => $options) {
                     if ('db' == $type) {
-                        $query = DB::table($options->dbTable);
-                        if ($this->isRemoveTrash) {
-                            $query->whereNull($metaColumns['deletedAt'] ?? 'deletedAt');
+                        $where = [];
+                        if ($this->dependField) {
+                            if (! $this->dependValue) {
+                                $this->dependValue = $this->bluePrint->getInputTypeByDbField($this->dependField)->getValue();
+                            }
+                            if (! $this->dependValue) {
+                                continue;
+                            }
+                            $where[] = [$this->dependColumn => $this->dependValue];
                         }
-                        $result = $query->orderBy($options->dbTableValue)->get();
 
+                        if (isset($options->dbPatternFields[0])) {
+                            $flag = false;
+                            $condition = $options->dbPatternFields[0];
+                            if ($condition instanceof Closure) {
+                                $where[] = $condition;
+                                $flag = true;
+                            } elseif ($condition && \is_string($condition[array_key_first($condition)])) {
+                                $where[] = $condition;
+                                $flag = true;
+                            } elseif ($condition) {
+                                $where = array_merge($where, $condition);
+                                $flag = true;
+                            }
+
+                            if ($flag) {
+                                array_shift($options->dbPatternFields);
+                            }
+                        }
+
+                        if ($this->isRemoveTrash) {
+                            $where[] = function ($query) use ($deletedAt) { $query->whereNull($deletedAt); };
+                        }
+
+                        $model = (new DataModel())->db($options->table);
+                        $result = $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
                         foreach ($result as $row) {
                             $text = '';
                             if ($options->dbPatternFields) {
@@ -125,12 +177,12 @@ trait Options
                                     }
                                 }
 
-                                $text = \vsprintf($options->dbTableTitle, $values);
+                                $text = \vsprintf($options->textCol, $values);
                             } else {
-                                $text = $row->{$options->dbTableTitle};
+                                $text = $row->{$options->textCol};
                             }
 
-                            $val = $row->{$options->dbTableValue};
+                            $val = $row->{$options->valueCol};
                             $this->options->{$val} = $text;
                         }
                     } else {
@@ -155,6 +207,32 @@ trait Options
                 }
             }
         }
+    }
+
+    protected function addScript()
+    {
+        if (! $this->dependField) {
+            return;
+        }
+
+        $input = new \stdClass();
+        $input->field = $this->dbField;
+        $input->dependField = $this->dependField;
+        $input->isChosen = $this->currentPlugin == 'chosen';
+        $input->route = $this->bluePrint->getForm()->getResource()->route;
+
+        $data['input'] = $input;
+
+        Doc::addJs(\view('form-tool::form.scripts.select_depend', $data), $this->dbField.'-depend');
+    }
+
+    public function getChildOptions($parentId)
+    {
+        $this->dependValue = $parentId;
+
+        $options = $this->getDependOptions();
+
+        return $options;
     }
 
     // This function have not used in checkbox

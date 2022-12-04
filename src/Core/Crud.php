@@ -204,6 +204,39 @@ class Crud
         return $this->table->search();
     }
 
+    //TODO: This method need to move somewhere
+    public function getOptionsByParentId()
+    {
+        $request = \request();
+        $parentId = trim($request->post('id'));
+        $field = trim($request->post('field'));
+        if (! $parentId || ! $field) {
+            $data['isSuccess'] = false;
+            $data['error'] = 'Parameter field or id is missing!';
+            return \response()->json($data);
+        }
+
+        $input = $this->bluePrint->getInputTypeByDbField($field);
+        if (! $input) {
+            $data['isSuccess'] = false;
+            $data['error'] = 'Field not found in the BluePrint!';
+            return \response()->json($data);
+        }
+
+        if (! $input instanceof \Biswadeep\FormTool\Core\InputTypes\SelectType) {
+            $data['isSuccess'] = false;
+            $data['error'] = 'Field "'.$field.'" is not a Select Type!';
+            return \response()->json($data);
+        }
+
+        $result = $input->getChildOptions($parentId);
+
+        $data['isSuccess'] = true;
+        $data['data'] = $result;
+
+        return \response()->json($data);
+    }
+
     //region Getter
 
     public function getForm()
