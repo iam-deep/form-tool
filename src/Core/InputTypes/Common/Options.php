@@ -5,9 +5,9 @@ namespace Biswadeep\FormTool\Core\InputTypes\Common;
 use Biswadeep\FormTool\Core\DataModel;
 use Biswadeep\FormTool\Core\Doc;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Closure;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;
-use Closure;
 
 trait Options
 {
@@ -159,7 +159,9 @@ trait Options
                         }
 
                         if ($this->isRemoveTrash) {
-                            $where[] = function ($query) use ($deletedAt) { $query->whereNull($deletedAt); };
+                            $where[] = function ($query) use ($deletedAt) {
+                                $query->whereNull($deletedAt);
+                            };
                         }
 
                         $model = (new DataModel())->db($options->table);

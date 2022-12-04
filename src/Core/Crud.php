@@ -213,6 +213,7 @@ class Crud
         if (! $parentId || ! $field) {
             $data['isSuccess'] = false;
             $data['error'] = 'Parameter field or id is missing!';
+
             return \response()->json($data);
         }
 
@@ -220,12 +221,14 @@ class Crud
         if (! $input) {
             $data['isSuccess'] = false;
             $data['error'] = 'Field not found in the BluePrint!';
+
             return \response()->json($data);
         }
 
         if (! $input instanceof \Biswadeep\FormTool\Core\InputTypes\SelectType) {
             $data['isSuccess'] = false;
             $data['error'] = 'Field "'.$field.'" is not a Select Type!';
+
             return \response()->json($data);
         }
 

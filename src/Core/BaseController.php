@@ -96,6 +96,7 @@ class BaseController
     public function getOptions(Request $request)
     {
         $this->setup();
+
         return $this->crud->getOptionsByParentId();
     }
 }
