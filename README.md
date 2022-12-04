@@ -1,4 +1,4 @@
-[![StyleCI](https://github.styleci.io/repos/510375806/shield?branch=main)]
+![StyleCI](https://github.styleci.io/repos/510375806/shield?branch=main)
 
 # Form Tool Package for Laravel 8
 
