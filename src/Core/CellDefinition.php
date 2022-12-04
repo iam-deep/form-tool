@@ -13,13 +13,13 @@ class CellDefinition
     private ?string $dbField = null;
     private ?string $label = '';
 
-    private bool $sortable = true;
-    private ?string $sortableField = null;
+    private bool $orderable = true;
+    private ?string $orderByColumn = null;
 
     // Only for Table Header Info
-    public bool $isSorted = false;
-    public ?string $sortedOrder = null;
-    public ?string $sortUrl = null;
+    public bool $isOrdered = false;
+    public ?string $direction = null;
+    public ?string $orderUrl = null;
 
     private $concat = null;
     private $anyPattern = null;
@@ -67,7 +67,7 @@ class CellDefinition
         $cell->concat->pattern = $pattern;
         $cell->concat->dbFields = $dbFields;
 
-        $cell->sortable = false;
+        $cell->orderable = false;
 
         return $cell;
     }
@@ -79,16 +79,16 @@ class CellDefinition
         return $this;
     }
 
-    public function sortable($dbField = null): CellDefinition
+    public function orderable($column = null): CellDefinition
     {
-        if ($dbField === false) {
-            $this->sortable = false;
+        if ($column === false) {
+            $this->orderable = false;
 
             return $this;
         }
 
-        $this->sortable = true;
-        $this->sortableField = $dbField;
+        $this->orderable = true;
+        $this->orderByColumn = $column;
 
         return $this;
     }
@@ -213,15 +213,15 @@ class CellDefinition
         return $this->concat;
     }
 
-    public function isSortable()
+    public function isOrderable()
     {
-        return $this->sortable;
+        return $this->orderable;
     }
 
-    public function getSortableField()
+    public function getOrderByColumn()
     {
-        if ($this->sortableField) {
-            return $this->sortableField;
+        if ($this->orderByColumn) {
+            return $this->orderByColumn;
         }
 
         return $this->getDbField();

@@ -22,8 +22,8 @@ class BluePrint
 
     private $multipleRequired = 0;
     private $isMultipleConfirmBeforeDelete = false;
-    private $isMultipleSortable = false;
-    private $multipleSortableField = '';
+    private $isMultipleOrderable = false;
+    private $multipleOrderColumn = '';
 
     private $multipleModel = null;
     private $multipleTable = null;
@@ -271,14 +271,14 @@ class BluePrint
         return $this;
     }
 
-    public function sortable($dbField = null)
+    public function orderable($column = null)
     {
-        $this->isMultipleSortable = true;
+        $this->isMultipleOrderable = true;
 
-        $dbField = \trim($dbField);
-        if ($dbField) {
-            $this->multipleSortableField = $dbField;
-            $this->hidden($dbField)->default(0)->addClass('sort-value');
+        $column = \trim($column);
+        if ($column) {
+            $this->multipleOrderColumn = $column;
+            $this->hidden($column)->default(0)->addClass('order-value');
         }
 
         return $this;
@@ -321,8 +321,8 @@ class BluePrint
             throw new \Exception('keepId only works with db table, Please assign the table first. And keepId must called at last.');
         }
 
-        if ($this->isMultipleSortable && ! $this->multipleSortableField) {
-            throw new \Exception('You must pass a dbField in sortable to make work with keepId. And keepId must called at last.');
+        if ($this->isMultipleOrderable && ! $this->multipleOrderColumn) {
+            throw new \Exception('You must pass a dbField in orderable to make work with keepId. And keepId must called at last.');
         }
 
         if ($this->multipleModel) {
@@ -339,9 +339,9 @@ class BluePrint
         return $this->multipleRequired;
     }
 
-    public function isSortable()
+    public function isOrderable()
     {
-        return $this->isMultipleSortable;
+        return $this->isMultipleOrderable;
     }
 
     public function isConfirmBeforeDelete()
@@ -358,9 +358,9 @@ class BluePrint
         return $this->multipleModel;
     }
 
-    public function getSortableField()
+    public function getOrderByColumn()
     {
-        return $this->multipleSortableField;
+        return $this->multipleOrderColumn;
     }
 
     //endregion
@@ -425,9 +425,11 @@ class BluePrint
                 foreach ($input->getOptionData() as $options) {
                     foreach ($options as $type => $optionData) {
                         if ($type == 'db') {
-                            $optionData->field = $input->getDbField();
-                            $optionData->label = $input->getLabel();
-                            $selects[] = $optionData;
+                            $selects[] = (object) [
+                                'table' => $optionData->table,
+                                'column' => $input->getDbField(),
+                                'label' => $input->getLabel(),
+                            ];
                         }
                     }
                 }
@@ -437,8 +439,8 @@ class BluePrint
         $data = new \stdClass();
 
         $temp = (object) [
-            'dbTable' => 'users',
-            'field' => 'createdBy',
+            'table' => 'users',
+            'column' => 'createdBy',
             'label' => 'Created By',
         ];
         $selects[] = $temp;

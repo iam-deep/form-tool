@@ -152,7 +152,7 @@ class TableField
             }
         }
 
-        $cell = CellDefinition::Other('action', '', 'Actions')->width('100px')->right()->sortable(false);
+        $cell = CellDefinition::Other('action', '', 'Actions')->width('100px')->right()->orderable(false);
         if (\count($this->actions)) {
             $this->cellList['actions'] = $cell;
         }
@@ -171,7 +171,7 @@ class TableField
 
     public function bulkActionCheckbox(): CellDefinition
     {
-        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('25px')->sortable(false);
+        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('25px')->orderable(false);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -179,7 +179,7 @@ class TableField
 
     public function slNo(string $label = null): CellDefinition
     {
-        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px')->sortable(false);
+        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px')->orderable(false);
         $this->cellList[] = $cell;
 
         return $cell;

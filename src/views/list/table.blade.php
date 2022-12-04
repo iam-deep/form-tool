@@ -4,18 +4,18 @@
             <tr class="active">
                 @foreach ($headings as $header)
                     <th {!! $header->raw !!}>
-                        @if ($header->isSortable())
-                            @if ($header->isSorted)
-                                <a href="{{ $route.$header->sortUrl }}">
+                        @if ($header->isOrderable())
+                            @if ($header->isOrdered)
+                                <a href="{{ $route.$header->orderUrl }}">
                                     {!! $header->getLabel() !!} 
-                                    @if ($header->sortedOrder == 'desc')
+                                    @if ($header->direction == 'desc')
                                         <i class="fa fa-caret-down"></i>
                                     @else
                                         <i class="fa fa-caret-up"></i>
                                     @endif
                                 </a>
                             @else
-                                <a href="{{ $route.$header->sortUrl }}">{!! $header->getLabel() !!}</a>
+                                <a href="{{ $route.$header->orderUrl }}">{!! $header->getLabel() !!}</a>
                             @endif
                         @else
                             {!! $header->getLabel() !!}

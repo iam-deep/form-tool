@@ -9,15 +9,22 @@ use Illuminate\Support\Facades\DB;
 
 class BaseModel extends Model
 {
-    // This public variables can be changed from the child class
+    // All the public variables/methods can be overridden from the child class
     public static $tableName = '';
     public static $primaryId = 'id';
     public static $token = 'token';
-    public static $orderBy = null;
     public static $foreignKey = '';
 
-    // You should not modify this variable from child class
-    protected static $isSoftDelete = true;
+    // Don't be confuse with primary id, this would be the title field for an blog post table
+    public static $primaryCol = null;
+
+    public static $orderByCol = null;
+    public static $orderByDirection = 'asc';
+
+    public static $limit = 20;
+
+    // If you dont' want to soft delete for this module then call softDelete(false) on CRUD
+    private static $isSoftDelete = true;
 
     public static function getAll($where = null)
     {
@@ -26,13 +33,13 @@ class BaseModel extends Model
         self::applyWhere($query, $where);
 
         $request = \request();
-        if (static::$orderBy) {
-            $query->orderBy(static::$orderBy, $request->query('order') == 'asc' ? 'asc' : 'desc');
+        if (static::$orderByCol) {
+            $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
             $query->orderBy(static::$primaryId, 'desc');
         }
 
-        return $query->paginate(20);
+        return $query->paginate(static::$limit);
     }
 
     public static function getOne($id, $isToken = false)
@@ -76,7 +83,7 @@ class BaseModel extends Model
             $query->orderBy(static::$primaryId, 'desc');
         }
 
-        return $query->paginate(20);
+        return $query->paginate(static::$limit);
     }
 
     public static function getWhereOne($where = null)
@@ -87,12 +94,20 @@ class BaseModel extends Model
         return $query->first();
     }
 
-    public static function getWhere($where = null)
+    public static function getWhere($where = null, $orderBy = null, $direction = 'asc')
     {
         $query = DB::table(static::$tableName);
         self::applyWhere($query, $where);
 
-        return $query->orderByRaw(1, 'asc')->get();
+        if ($orderBy) {
+            $query->orderBy($orderBy, $direction ?? 'asc');
+        } elseif (static::$orderByCol) {
+            $query->orderBy(static::$orderByCol, static::$orderByDirection);
+        } else {
+            $query->orderByRaw(2, 'asc');
+        }
+
+        return $query->get();
     }
 
     public static function countWhere($where = null)

@@ -26,7 +26,7 @@ class Table
     private $url;
 
     private $isFromTrash = false;
-    private ?string $sortBy = null;
+    private ?string $orderBy = null;
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -98,9 +98,9 @@ class Table
         return $this;
     }
 
-    public function orderBy(string $field): Table
+    public function orderBy(string $column, string $direction = 'desc'): Table
     {
-        $this->model->orderBy($field);
+        $this->model->orderBy($column, $direction);
 
         return $this;
     }
@@ -145,7 +145,7 @@ class Table
         }
 
         $searchTerm = $this->request->query->get('search');
-        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $where, $this->sortBy);
+        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $where, $this->orderBy, $this->request->query('direction') == 'asc' ? 'asc' : 'desc');
     }
 
     public function listAll()
@@ -154,7 +154,7 @@ class Table
         if ($this->request->query('search')) {
             $this->doSearch($where);
         } else {
-            $this->dataResult = $this->model->getAll($where, $this->sortBy);
+            $this->dataResult = $this->model->getAll($where, $this->orderBy, $this->request->query('direction') == 'asc' ? 'asc' : 'desc');
         }
 
         return $this->createList();
@@ -194,7 +194,7 @@ class Table
             $this->field->datetime($metaColumns['deletedAt'] ?? 'deletedAt', 'Deleted At');
         }
 
-        $sortUrlQueryString = \http_build_query($this->request->except(['sortby', 'order', 'page']));
+        $orderUrlQueryString = \http_build_query($this->request->except(['orderby', 'direction', 'page']));
 
         $data['headings'] = $data['tableData'] = [];
         $data['route'] = $this->url;
@@ -202,15 +202,15 @@ class Table
         foreach ($this->field->cellList as $row) {
             $row->setup();
 
-            if ($row->isSortable()) {
-                $sortedField = $row->getSortableField();
-                if ($this->sortBy == $sortedField) {
-                    $row->isSorted = true;
-                    $row->sortedOrder = $this->request->query('order', 'desc');
+            if ($row->isOrderable()) {
+                $orderColumn = $row->getOrderByColumn();
+                if ($this->orderBy == $orderColumn) {
+                    $row->isOrdered = true;
+                    $row->direction = $this->request->query('direction', 'desc');
 
-                    $row->sortUrl = '?sortby='.$sortedField.'&order='.($row->sortedOrder == 'asc' ? 'desc' : 'asc').'&'.$sortUrlQueryString;
+                    $row->orderUrl = '?orderby='.$orderColumn.'&direction='.($row->direction == 'asc' ? 'desc' : 'asc').'&'.$orderUrlQueryString;
                 } else {
-                    $row->sortUrl = '?sortby='.$sortedField.'&order=desc&'.$sortUrlQueryString;
+                    $row->orderUrl = '?orderby='.$orderColumn.'&direction=desc&'.$orderUrlQueryString;
                 }
             }
 
@@ -457,20 +457,20 @@ class Table
             }
         }
 
-        // Let's setup sort
-        $this->sortBy = null;
-        $requestSortBy = $this->request->query('sortby');
-        if ($requestSortBy) {
+        // Let's setup order
+        $this->orderBy = null;
+        $requestOrderBy = $this->request->query('orderby');
+        if ($requestOrderBy) {
             foreach ($this->field->cellList as $field) {
-                if ($field->isSortable() && $field->getSortableField() == $requestSortBy) {
-                    $this->sortBy = $field->getSortableField();
+                if ($field->isOrderable() && $field->getOrderByColumn() == $requestOrderBy) {
+                    $this->orderBy = $field->getOrderByColumn();
                     break;
                 }
             }
-        } elseif ($this->isFromTrash && ! $this->sortBy) {
-            $this->sortBy = $deletedAt;
+        } elseif ($this->isFromTrash && ! $this->orderBy) {
+            $this->orderBy = $deletedAt;
         } else {
-            $this->sortBy = $this->model->getOrderBy();
+            $this->orderBy = $this->model->getOrderBy();
         }
 
         return $where;

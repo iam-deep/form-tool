@@ -86,7 +86,7 @@ $(function() {
             table.find('.handle').hide();
 
         let i = 1;
-        table.find('.sort-value').each(function(){
+        table.find('.order-value').each(function(){
             table.val(i++);
         });
     });
@@ -112,7 +112,7 @@ $(function() {
         table.find('.handle').show();
 
         let i = 1;
-        table.find('.sort-value').each(function(){
+        table.find('.order-value').each(function(){
             $(this).val(i++);
         });
 	});
@@ -143,7 +143,7 @@ $(function() {
             }
 
             let i = 1;
-            table.find('.sort-value').each(function(){
+            table.find('.order-value').each(function(){
                 $(this).val(i++);
             });
         }
@@ -154,7 +154,7 @@ $(function() {
     });
     
     // Sort table rows
-    $( ".table-sortable tbody" ).sortable({
+    $( ".table-orderable tbody" ).sortable({
         placeholder : "ui-state-highlight",
         handle: ".handle",
         cursor: "move",
@@ -168,7 +168,7 @@ $(function() {
         update  : function(event, ui)
         {
             let i = 1;
-            ui.item.closest('.table-sortable').find('.sort-value').each(function(){
+            ui.item.closest('.table-orderable').find('.order-value').each(function(){
                 $(this).val(i++);
             });
         }

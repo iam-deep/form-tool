@@ -181,8 +181,8 @@ class Form
         // TODO: Add help & other attributes in multiple table
         //$tableData->help = $model->help;
 
-        if ($model->isSortable()) {
-            $tableData->classes .= ' table-sortable';
+        if ($model->isOrderable()) {
+            $tableData->classes .= ' table-orderable';
         }
 
         if ($model->isConfirmBeforeDelete()) {
@@ -228,16 +228,16 @@ class Form
                     $query = DB::table($dbModel->table)->where($where);
                     if ($dbModel->orderBy) {
                         $query->orderBy($dbModel->orderBy, 'asc');
-                    } elseif ($model->getSortableField()) {
-                        $query->orderBy($model->getSortableField());
+                    } elseif ($model->getOrderByColumn()) {
+                        $query->orderBy($model->getOrderByColumn());
                     } else {
                         $query->orderBy($dbModel->id, 'asc');
                     }
 
                     $result = $query->get();
                 } else {
-                    if ($model->getSortableField()) {
-                        $dbModel::$orderBy = $model->getSortableField();
+                    if ($model->getOrderByColumn()) {
+                        $dbModel::$orderBy = $model->getOrderByColumn();
                     }
 
                     $where = [$dbModel::$foreignKey => $this->editId];
@@ -300,7 +300,7 @@ class Form
 
         $rowData = new \stdClass();
         $rowData->id = $key.'-row-'.$index;
-        $rowData->isSortable = $model->isSortable();
+        $rowData->isOrderable = $model->isOrderable();
         $rowData->hidden = '';
         $rowData->columns = '';
 
@@ -394,7 +394,7 @@ class Form
             ActionLogger::create($this->bluePrint, $insertId);
         }
 
-        return redirect($this->url.$this->queryString)->with('success', 'Data added successfully!');
+        return back()->with('success', 'Data added successfully!');
     }
 
     public function update($id = null, callable $callbackBeforeUpdate = null)
@@ -911,8 +911,8 @@ class Form
                 }
 
                 foreach ($data->foreignKey as $option) {
-                    if ($option->dbTable == $this->model->getTableName()) {
-                        $resultData = DB::table($data->main->table)->where($option->field, $id)->limit($totalReferencesToFetch)->get();
+                    if ($option->table == $this->model->getTableName()) {
+                        $resultData = DB::table($data->main->table)->where($option->column, $id)->limit($totalReferencesToFetch)->get();
 
                         $count = \count($resultData);
                         if ($count > 0) {

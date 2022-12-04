@@ -8,17 +8,21 @@ use Closure;
 
 class DataModel
 {
-    protected string $tableName = '';
-    protected string $primaryId = '';
-    protected string $token = '';
-    protected ?string $orderBy = '';
-    protected string $foreignKey = '';
+    protected ?string $tableName = null;
+    protected ?string $primaryId = null;
+    protected ?string $token = null;
+    protected ?string $foreignKey = null;
+
+    protected ?string $primaryCol = null;
+
+    protected ?string $orderByCol = null;
+    protected string $orderByDirection = 'asc';
 
     protected bool $isToken = false;
     protected bool $isSoftDelete = true;
 
     protected Crud $crud;
-    protected string $model = '';
+    protected $model = '';
 
     private ?string $lastToken = null;
 
@@ -26,9 +30,21 @@ class DataModel
     {
         if ($model) {
             $this->model = $model;
+            if (! \is_subclass_of($this->model, BaseModel::class)) {
+                throw new \Exception($this->model.' should extend '.BaseModel::class);
+            }
             if (! isset($this->model::$tableName) || ! $this->model::$tableName) {
                 throw new \Exception('$tableName not set or not declared as public at ['.$this->model.']');
             }
+
+            // Let's copy the configs
+            $this->tableName = $this->model::$tableName;
+            $this->primaryId = $this->model::$primaryId;
+            $this->token = $this->model::$token;
+            $this->foreignKey = $this->model::$foreignKey;
+            $this->primaryCol = $this->model::$primaryCol;
+            $this->orderByCol = $this->model::$orderByCol;
+            $this->orderByDirection = $this->model::$orderByDirection;
         } else {
             $defaultModelClass = \config('form-tool.defaultModel');
             if ($defaultModelClass) {
@@ -41,12 +57,12 @@ class DataModel
 
     //region Options
 
-    public function db($tableName, $primaryId = 'id', $token = '', $orderBy = '', $foreignKey = '')
+    public function db($tableName, $primaryId = 'id', $token = '', $orderByCol = '', $foreignKey = '')
     {
         $this->tableName = \trim($tableName);
         $this->primaryId = \trim($primaryId);
         $this->token = \trim($token);
-        $this->orderBy = \trim($orderBy);
+        $this->orderByCol = \trim($orderByCol);
         $this->foreignKey = \trim($foreignKey);
 
         if ($this->token) {
@@ -70,24 +86,24 @@ class DataModel
         return $this;
     }
 
-    public function token(string $tokenColumn = 'token')
+    public function token(string $column = 'token')
     {
         $this->isToken = true;
-        $this->token = \trim($tokenColumn);
+        $this->token = \trim($column);
 
         return $this;
     }
 
-    public function orderBy(string $orderByColumn)
+    public function orderBy(string $column, string $direction = 'desc')
     {
-        $this->orderBy = \trim($orderByColumn);
+        $this->orderByCol = \trim($column);
 
         return $this;
     }
 
-    public function foreignKey(string $foreignKeyColumn)
+    public function foreignKey(string $column)
     {
-        $this->foreignKey = \trim($foreignKeyColumn);
+        $this->foreignKey = \trim($column);
 
         return $this;
     }
@@ -123,7 +139,7 @@ class DataModel
 
     public function getOrderBy()
     {
-        return $this->orderBy ?: $this->model::$orderBy;
+        return $this->orderByCol ?: $this->model::$orderByCol;
     }
 
     public function getForeignKey()
@@ -143,9 +159,10 @@ class DataModel
 
     //endregion
 
-    public function getAll($where = null, $sortBy = null)
+    public function getAll($where = null, ?string $orderByCol = null, string $direction = 'desc')
     {
-        $this->orderBy = $sortBy;
+        $this->orderByCol = $orderByCol;
+        $this->orderByDirection = $direction;
 
         return $this->setup()::getAll($where);
     }
@@ -155,9 +172,10 @@ class DataModel
         return $this->setup()::getOne($id, $isToken ?? $this->isToken);
     }
 
-    public function search($searchTerm, $fields, $where = null, $sortBy = null)
+    public function search($searchTerm, $fields, $where = null, $orderByCol = null, string $direction = 'desc')
     {
-        $this->orderBy = $sortBy;
+        $this->orderByCol = $orderByCol;
+        $this->orderByDirection = $direction;
 
         return $this->setup()::search($searchTerm, $fields, $where);
     }
@@ -167,9 +185,9 @@ class DataModel
         return $this->setup()::getWhereOne($where);
     }
 
-    public function getWhere($where = null)
+    public function getWhere($where = null, ?string $orderByCol = null, string $direction = 'asc')
     {
-        return $this->setup()::getWhere($where);
+        return $this->setup()::getWhere($where, $orderByCol, $direction);
     }
 
     public function add($data)
@@ -250,11 +268,15 @@ class DataModel
 
     private function setup()
     {
-        $this->model::$tableName = $this->tableName ?: $this->model::$tableName;
-        $this->model::$primaryId = $this->primaryId ?: $this->model::$primaryId;
-        $this->model::$token = $this->token ?: $this->model::$token;
-        $this->model::$orderBy = $this->orderBy ?: ($this->model::$orderBy ?: $this->model::$primaryId);
-        $this->model::$foreignKey = $this->foreignKey ?: $this->model::$foreignKey;
+        $this->model::$tableName = $this->tableName;
+        $this->model::$primaryId = $this->primaryId;
+        $this->model::$token = $this->token;
+        $this->model::$foreignKey = $this->foreignKey;
+
+        $this->model::$primaryCol = $this->primaryCol;
+
+        $this->model::$orderByCol = $this->orderByCol;
+        $this->model::$orderByDirection = $this->orderByDirection;
 
         $this->model::setSoftDelete($this->isSoftDelete);
 
