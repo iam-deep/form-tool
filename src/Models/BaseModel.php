@@ -77,8 +77,8 @@ class BaseModel extends Model
         self::applyWhere($query, $where);
 
         $request = \request();
-        if (static::$orderBy) {
-            $query->orderBy(static::$orderBy, $request->query('order') == 'asc' ? 'asc' : 'desc');
+        if (static::$orderByCol) {
+            $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
             $query->orderBy(static::$primaryId, 'desc');
         }

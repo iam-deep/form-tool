@@ -133,7 +133,7 @@ class EditorType extends BaseInputType implements ISearchable
         var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$this->uploadPath."';
         var selector = document.querySelector('#".$this->dbField."');
         createCkEditor(selector, csrf_token, uploadPath);
-        ");
+        ", 'editor-'.$this->dbField);
 
         $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.old($this->dbField, $this->decodeHTML($this->value)).'</textarea>';
 
@@ -144,19 +144,21 @@ class EditorType extends BaseInputType implements ISearchable
     {
         $this->setDependencies();
 
+        $selectorId = $key.'-'.$this->dbField.'-'.$index;
+
         if ($index != '{__index}') {
             Doc::addJs('
-            // CkEditor config for field: '.$key.'-'.$this->dbField.'-'.$index."
+            // CkEditor config for field: '.$selectorId."
             var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$this->uploadPath."';
-            var selector = document.querySelector('#".$key.'-'.$this->dbField.'-'.$index."');
+            var selector = document.querySelector('#".$selectorId."');
             createCkEditor(selector, csrf_token, uploadPath);
-            ");
+            ", $selectorId);
         }
 
         $value = old($key.'.'.$this->dbField);
         $value = $this->decodeHTML($value[$index] ?? $this->value);
 
-        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
+        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$selectorId.'" name="'.$key.'['.$index.']['.$this->dbField.']" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
 
         return $input;
     }

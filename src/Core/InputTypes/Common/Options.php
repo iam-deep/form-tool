@@ -225,7 +225,7 @@ trait Options
 
         $data['input'] = $input;
 
-        Doc::addJs(\view('form-tool::form.scripts.select_depend', $data), $this->dbField.'-depend');
+        Doc::addJs(\view('form-tool::form.scripts.select_depend', $data), 'depend-'.$this->dbField);
     }
 
     public function getChildOptions($parentId)

@@ -18,7 +18,7 @@ class BaseController
         // You may setup the list columns here it have been called in index and search
     }
 
-    public function index()
+    public function index(Request $request)
     {
         $this->setup();
         $this->createList();
@@ -55,12 +55,12 @@ class BaseController
         return $this->crud->store();
     }
 
-    public function show($id)
+    public function show(Request $request, $id = null)
     {
         $this->setup();
     }
 
-    public function edit(Request $request, $id)
+    public function edit(Request $request, $id = null)
     {
         $this->setup();
 
@@ -71,14 +71,14 @@ class BaseController
         return $this->render('form-tool::form.index', $data);
     }
 
-    public function update(Request $request, $id)
+    public function update(Request $request, $id = null)
     {
         $this->setup();
 
         return $this->crud->update($id);
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id = null)
     {
         $this->setup();
 
