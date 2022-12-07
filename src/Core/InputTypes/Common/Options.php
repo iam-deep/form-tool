@@ -114,7 +114,7 @@ trait Options
     }
     //endregion
 
-    protected function createOptions()
+    protected function createOptions($skipDepend = false)
     {
         if ($this->options) {
             return;
@@ -129,7 +129,9 @@ trait Options
                 foreach ($optionData as $type => $options) {
                     if ('db' == $type) {
                         $where = [];
-                        if ($this->dependField) {
+                        // We are skipping depend value at the time of table listing to get all the values at once
+                        // Otherwise we need to create option every time for each dependent value
+                        if ($this->dependField && ! $skipDepend) {
                             if (! $this->dependValue) {
                                 $this->dependValue = $this->bluePrint->getInputTypeByDbField($this->dependField)->getValue();
                             }
@@ -137,6 +139,10 @@ trait Options
                                 continue;
                             }
                             $where[] = [$this->dependColumn => $this->dependValue];
+
+                            //Let's reset the dependValue, so that we can fetch the new value on table listing
+                            //Not for use now as $skipDepend added
+                            //$this->dependValue = null;
                         }
 
                         if (isset($options->dbPatternFields[0])) {
@@ -256,7 +262,7 @@ trait Options
         }
 
         $this->withoutTrash(false);
-        $this->createOptions();
+        $this->createOptions(true);
 
         if ($this->isMultiple) {
             $values = [];

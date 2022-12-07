@@ -282,5 +282,15 @@ class Crud
         return $this->name;
     }
 
+    public function getField(string $column)
+    {
+        $input = $this->bluePrint->getInputTypeByDbField($column);
+        if (! $input) {
+            throw new \Exception(\sprintf('Field "%s" not found in the BluePrint!', $column));
+        }
+
+        return $input;
+    }
+
     //endregion
 }
