@@ -170,6 +170,11 @@ class CellDefinition
 
     // Getter
 
+    public function getInputType()
+    {
+        return $this->inputType ?? null;
+    }
+
     public function getLabel()
     {
         if ($this->label) {

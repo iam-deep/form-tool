@@ -12,6 +12,7 @@ class DataModel
     protected ?string $primaryId = null;
     protected ?string $token = null;
     protected ?string $foreignKey = null;
+    protected ?string $alias = null;
 
     protected ?string $primaryCol = null;
 
@@ -42,6 +43,7 @@ class DataModel
             $this->primaryId = $this->model::$primaryId;
             $this->token = $this->model::$token;
             $this->foreignKey = $this->model::$foreignKey;
+            $this->alias = $this->model::$alias ?: $this->tableName;
             $this->primaryCol = $this->model::$primaryCol;
             $this->orderByCol = $this->model::$orderByCol;
             $this->orderByDirection = $this->model::$orderByDirection;
@@ -108,18 +110,25 @@ class DataModel
         return $this;
     }
 
+    public function alias(string $alias)
+    {
+        $this->alias = \trim($alias);
+
+        return $this;
+    }
+
     //endregion
 
     //region GettersAndSetters
 
     public function getTableName()
     {
-        return $this->tableName ?: $this->model::$tableName;
+        return $this->tableName;
     }
 
     public function getPrimaryId()
     {
-        return $this->primaryId ?: $this->model::$primaryId;
+        return $this->primaryId;
     }
 
     public function isToken()
@@ -129,7 +138,7 @@ class DataModel
 
     public function getTokenCol()
     {
-        return $this->token ?: $this->model::$token;
+        return $this->token;
     }
 
     public function getLastToken()
@@ -139,12 +148,17 @@ class DataModel
 
     public function getOrderBy()
     {
-        return $this->orderByCol ?: $this->model::$orderByCol;
+        return $this->orderByCol ?: $this->primaryId;
     }
 
     public function getForeignKey()
     {
-        return $this->foreignKey ?: $this->model::$foreignKey;
+        return $this->foreignKey;
+    }
+
+    public function getAlias()
+    {
+        return $this->alias;
     }
 
     public function softDelete(bool $enable = true)
@@ -272,6 +286,7 @@ class DataModel
         $this->model::$primaryId = $this->primaryId;
         $this->model::$token = $this->token;
         $this->model::$foreignKey = $this->foreignKey;
+        $this->model::$alias = $this->alias;
 
         $this->model::$primaryCol = $this->primaryCol;
 

@@ -148,7 +148,8 @@ class DateTimeType extends BaseFilterType
     {
         if ($this->value !== null) {
             $this->value = DTConverter::toDb($this->value, $this->dbFormat, $this->isConvertToLocal);
-            $query->where($this->dbField, $operator, $this->value);
+
+            $query->where($this->getAlias().'.'.$this->dbField, $operator, $this->value);
         }
     }
 

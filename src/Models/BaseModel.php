@@ -14,6 +14,7 @@ class BaseModel extends Model
     public static $primaryId = 'id';
     public static $token = 'token';
     public static $foreignKey = '';
+    public static $alias = '';
 
     // Don't be confuse with primary id, this would be the title field for an blog post table
     public static $primaryCol = null;
@@ -24,19 +25,18 @@ class BaseModel extends Model
     public static $limit = 20;
 
     // If you dont' want to soft delete for this module then call softDelete(false) on CRUD
-    private static $isSoftDelete = true;
+    protected static $isSoftDelete = true;
 
     public static function getAll($where = null)
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
 
         self::applyWhere($query, $where);
 
-        $request = \request();
         if (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
-            $query->orderBy(static::$primaryId, 'desc');
+            $query->orderBy(self::$alias.'.'.static::$primaryId, 'desc');
         }
 
         return $query->paginate(static::$limit);
@@ -44,18 +44,18 @@ class BaseModel extends Model
 
     public static function getOne($id, $isToken = false)
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
         if (self::$isSoftDelete) {
             $metaColumns = \config('form-tool.table_meta_columns');
-            $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+            $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
-            $query->whereNull($deletedAt);
+            $query->whereNull(self::$alias.'.'.$deletedAt);
         }
 
         if ($isToken) {
-            $query->where(static::$token, $id);
+            $query->where(self::$alias.'.'.static::$token, $id);
         } else {
-            $query->where(static::$primaryId, $id);
+            $query->where(self::$alias.'.'.static::$primaryId, $id);
         }
 
         return $query->first();
@@ -63,7 +63,7 @@ class BaseModel extends Model
 
     public static function search($searchTerm, $fields, $where = null)
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
 
         $searchTerm = array_filter(\explode(' ', $searchTerm));
         foreach ($searchTerm as $term) {
@@ -80,7 +80,7 @@ class BaseModel extends Model
         if (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
-            $query->orderBy(static::$primaryId, 'desc');
+            $query->orderBy(self::$alias.'.'.static::$primaryId, 'desc');
         }
 
         return $query->paginate(static::$limit);
@@ -88,7 +88,7 @@ class BaseModel extends Model
 
     public static function getWhereOne($where = null)
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
         self::applyWhere($query, $where);
 
         return $query->first();
@@ -96,7 +96,7 @@ class BaseModel extends Model
 
     public static function getWhere($where = null, $orderBy = null, $direction = 'asc')
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
         self::applyWhere($query, $where);
 
         if ($orderBy) {
@@ -112,7 +112,7 @@ class BaseModel extends Model
 
     public static function countWhere($where = null)
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
         self::applyWhere($query, $where);
 
         return $query->count();
@@ -156,7 +156,7 @@ class BaseModel extends Model
         $query = DB::table(static::$tableName);
         if (self::$isSoftDelete) {
             $metaColumns = \config('form-tool.table_meta_columns');
-            $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+            $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
             $query->whereNotNull($deletedAt);
         }
@@ -174,7 +174,7 @@ class BaseModel extends Model
 
     public static function destroyWhere($where = null)
     {
-        $query = DB::table(static::$tableName);
+        $query = DB::table(static::$tableName.' as '.self::$alias);
         self::applyWhere($query, $where);
 
         $affected = $query->delete();
@@ -187,7 +187,7 @@ class BaseModel extends Model
         self::$isSoftDelete = $flag;
     }
 
-    protected static function applyWhere($query, $where)
+    protected static function applyWhere($query, $where, $alias = null)
     {
         if ($where instanceof Closure) {
             $where($query, static::class);

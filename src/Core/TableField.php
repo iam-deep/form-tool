@@ -10,15 +10,17 @@ class TableField
     public $actions = [];
 
     private Table $table;
+    private BluePrint $bluePrint;
 
     public function __construct(Table $table)
     {
         $this->table = $table;
+        $this->bluePrint = $this->table->getBluePrint();
     }
 
     public function default(string $dbField, string $label = null): CellDefinition
     {
-        $input = $this->table->getBluePrint()->getInputTypeByDbField($dbField);
+        $input = $this->bluePrint->getInputTypeByDbField($dbField);
         if (! $input) {
             throw new \Exception($dbField.' not found in the BluePrint.');
         }
@@ -41,7 +43,7 @@ class TableField
             throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
         }
 
-        $inputType->init(null, $dbField, $label);
+        $inputType->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($inputType);
         $this->cellList[] = $cell;
@@ -60,7 +62,7 @@ class TableField
     public function text(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\TextType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
@@ -71,7 +73,7 @@ class TableField
     public function select(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\SelectType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
@@ -82,7 +84,7 @@ class TableField
     public function date(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\DateType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
@@ -93,7 +95,7 @@ class TableField
     public function time(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\TimeType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
@@ -104,7 +106,7 @@ class TableField
     public function datetime(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\DateTimeType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
@@ -115,7 +117,7 @@ class TableField
     public function status(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\SelectType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;
@@ -126,7 +128,7 @@ class TableField
     public function image(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\ImageType();
-        $type->init(null, $dbField, $label);
+        $type->init($this->bluePrint, $dbField, $label);
 
         $cell = CellDefinition::Input($type);
         $this->cellList[] = $cell;

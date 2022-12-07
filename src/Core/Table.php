@@ -199,12 +199,24 @@ class Table
         $data['headings'] = $data['tableData'] = [];
         $data['route'] = $this->url;
 
+        // Let's remove the alias from orderBy column
+        $orderBy = $this->orderBy;
+        $pos = \strpos($this->orderBy, '.');
+        if ($pos !== false) {
+            $orderBy = \substr($this->orderBy, $pos + 1);
+        }
+
         foreach ($this->field->cellList as $row) {
             $row->setup();
 
             if ($row->isOrderable()) {
                 $orderColumn = $row->getOrderByColumn();
-                if ($this->orderBy == $orderColumn) {
+                $aliasPos = \strpos($orderColumn, '.');
+                if ($aliasPos !== false) {
+                    $orderColumn = \substr($orderColumn, $aliasPos + 1);
+                }
+
+                if ($orderBy == $orderColumn) {
                     $row->isOrdered = true;
                     $row->direction = $this->request->query('direction', 'desc');
 
@@ -257,7 +269,13 @@ class Table
                         foreach ($concat->dbFields as $con) {
                             $con = \trim($con);
                             if (\property_exists($value, $con)) {
-                                $values[] = $value->{$con};
+                                $inputType = $this->bluePrint->getInputTypeByDbField($con);
+                                if ($inputType) {
+                                    $inputType->setValue($value->{$con});
+                                    $values[] = $inputType->getNiceValue($inputType->getValue());
+                                } else {
+                                    $values[] = $value->{$con};
+                                }
                             } else {
                                 $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
                             }
@@ -435,17 +453,17 @@ class Table
             $this->isFromTrash = true;
 
             $where[] = function ($query) use ($deletedAt) {
-                $query->whereNotNull($deletedAt);
+                $query->whereNotNull($this->model->getAlias().'.'.$deletedAt);
             };
         } else {
             $where[] = function ($query) use ($deletedAt) {
-                $query->whereNull($deletedAt);
+                $query->whereNull($this->model->getAlias().'.'.$deletedAt);
             };
         }
 
         if ($this->request->query('id')) {
             $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
-            $where[] = [$primaryId => $this->request->query('id')];
+            $where[] = [$this->model->getAlias().'.'.$primaryId => $this->request->query('id')];
 
             return $where;
         }
@@ -462,15 +480,29 @@ class Table
         $requestOrderBy = $this->request->query('orderby');
         if ($requestOrderBy) {
             foreach ($this->field->cellList as $field) {
-                if ($field->isOrderable() && $field->getOrderByColumn() == $requestOrderBy) {
-                    $this->orderBy = $field->getOrderByColumn();
+                $orderColumn = $field->getOrderByColumn();
+                $aliasPos = \strpos($orderColumn, '.');
+                if ($aliasPos !== false) {
+                    $orderColumn = \substr($orderColumn, $aliasPos + 1);
+                }
+                if ($field->isOrderable() && $orderColumn == $requestOrderBy) {
+                    if ($aliasPos !== false) {
+                        $this->orderBy = $field->getOrderByColumn();
+                    } else {
+                        $inputType = $field->getInputType();
+                        if ($inputType) {
+                            $this->orderBy = $inputType->getAlias().'.'.$field->getOrderByColumn();
+                        } else {
+                            $this->orderBy = $field->getOrderByColumn();
+                        }
+                    }
                     break;
                 }
             }
         } elseif ($this->isFromTrash && ! $this->orderBy) {
-            $this->orderBy = $deletedAt;
+            $this->orderBy = $this->model->getAlias().'.'.$deletedAt;
         } else {
-            $this->orderBy = $this->model->getOrderBy();
+            $this->orderBy = $this->model->getAlias().'.'.$this->model->getOrderBy();
         }
 
         return $where;

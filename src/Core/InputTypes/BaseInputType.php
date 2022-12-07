@@ -34,6 +34,10 @@ class BaseInputType
     protected bool $isError = false;
     protected string $error = '';
 
+    // For mulitle table alias
+    protected ?string $tableName = null;
+    protected ?string $alias = null;
+
     // CSS
     protected $classes = ['form-control'];
     protected $inlineCSS = '';
@@ -143,6 +147,12 @@ class BaseInputType
         return $this;
     }
 
+    public function table($tableName, $alias = null)
+    {
+        $this->tableName = trim($tableName);
+        $this->alias = trim($alias) ?: $this->tableName;
+    }
+
     public function readonly(): BaseInputType
     {
         $this->raw('readonly');
@@ -250,6 +260,16 @@ class BaseInputType
         }
 
         return $messages;
+    }
+
+    public function getTableName()
+    {
+        return $this->tableName;
+    }
+
+    public function getAlias()
+    {
+        return $this->alias ?: $this->bluePrint->getForm()->getModel()->getAlias();
     }
 
     final public function getType()
