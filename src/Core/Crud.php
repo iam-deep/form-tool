@@ -3,9 +3,9 @@
 namespace Biswadeep\FormTool\Core;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
-use Illuminate\Support\Arr;
 
 class Crud
 {

@@ -72,7 +72,9 @@ class Form
         $method = $this->request->method();
 
         if ($except) {
-            $except = array_map(function ($val) { return \strtoupper($val); }, $except);
+            $except = array_map(function ($val) {
+                return \strtoupper($val);
+            }, $except);
         }
 
         if ('POST' == $method && \strtoupper($this->request->post('method')) == 'CREATE' && (! $except || ! in_array('STORE', $except))) {
