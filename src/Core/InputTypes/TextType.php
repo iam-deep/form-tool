@@ -67,7 +67,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         $validations = parent::getValidations($type);
 
         if ($this->isUnique) {
-            $model = $this->bluePrint->form->getModel();
+            $model = $this->bluePrint->getForm()->getModel();
 
             if ($type == 'store') {
                 $validations[] = \sprintf(
@@ -80,7 +80,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
                     'unique:%s,%s,%s,%s',
                     $model->getTableName(),
                     $this->dbField,
-                    $this->bluePrint->form->getId(),
+                    $this->bluePrint->getForm()->getId(),
                     ($model->isToken() ? $model->getTokenCol() : $model->getPrimaryId())
                 );
             }
@@ -105,10 +105,9 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->value;
+        $value = $oldValue ?? $this->value;
 
         $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
 

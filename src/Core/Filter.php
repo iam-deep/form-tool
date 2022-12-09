@@ -90,11 +90,11 @@ class Filter
             }
         }
 
-        $html[] = '<button class="btn btn-primary btn-sm btn-flat" href="'.url($this->bluePrint->form->getUrl()).'" style="margin-top:25px;">Filter</button>';
+        $html[] = '<button class="btn btn-primary btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).'" style="margin-top:25px;">Filter</button>';
 
         $queries = $request->except('page');
         if ($queries) {
-            $html[] = '<a class="btn btn-default btn-sm btn-flat" href="'.url($this->bluePrint->form->getUrl()).'" style="margin-top:25px;"><i class="fa fa-times"></i> Clear All</a>';
+            $html[] = '<a class="btn btn-default btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).'" style="margin-top:25px;"><i class="fa fa-times"></i> Clear All</a>';
         }
 
         return $html;

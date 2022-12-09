@@ -5,6 +5,7 @@ namespace Biswadeep\FormTool\Core;
 use Closure;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Arr;
 
 class Crud
 {
@@ -33,7 +34,6 @@ class Crud
         $this->model->setCrud($this);
 
         $this->bluePrint = new BluePrint();
-        $callback($this->bluePrint);
 
         $this->form = new Form($this->resource, $this->bluePrint, $this->model);
         $this->form->setCrud($this);
@@ -42,6 +42,10 @@ class Crud
         $this->table->setCrud($this);
 
         $this->softDelete(\config('form-tool.isSoftDelete', true));
+
+        // Set form and call the callback after all the initialization
+        $this->bluePrint->setForm($this->form);
+        $callback($this->bluePrint);
 
         return $this;
     }
@@ -71,9 +75,9 @@ class Crud
         return $this;
     }
 
-    public function run()
+    public function run($except = null)
     {
-        $response = $this->form->init();
+        $response = $this->form->init(Arr::wrap($except));
 
         if ($response instanceof \Illuminate\Http\RedirectResponse) {
             return $response->send();
@@ -212,15 +216,28 @@ class Crud
         $field = trim($request->post('field'));
         if (! $parentId || ! $field) {
             $data['isSuccess'] = false;
-            $data['error'] = 'Parameter field or id is missing!';
+            $data['error'] = 'Parameter "field" or "id" is missing!';
 
             return \response()->json($data);
         }
 
-        $input = $this->bluePrint->getInputTypeByDbField($field);
+        $bluePrint = $this->bluePrint;
+
+        $multipleKey = trim($request->post('multipleKey'));
+        if ($multipleKey) {
+            $bluePrint = $this->bluePrint->getInputTypeByDbField($multipleKey);
+            if (! $bluePrint) {
+                $data['isSuccess'] = false;
+                $data['error'] = 'Multiple Field "'.$multipleKey.'" not found in the BluePrint!';
+
+                return \response()->json($data);
+            }
+        }
+
+        $input = $bluePrint->getInputTypeByDbField($field);
         if (! $input) {
             $data['isSuccess'] = false;
-            $data['error'] = 'Field not found in the BluePrint!';
+            $data['error'] = 'Field "'.$field.'" not found in the BluePrint!';
 
             return \response()->json($data);
         }

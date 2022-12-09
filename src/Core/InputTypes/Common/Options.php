@@ -116,7 +116,8 @@ trait Options
 
     protected function createOptions($skipDepend = false)
     {
-        if ($this->options) {
+        // We need to fetch for every row if we have some depended field in multiple table
+        if ($this->options && (! $this->bluePrint->isMultiple || ! $this->dependField)) {
             return;
         }
 
@@ -133,16 +134,22 @@ trait Options
                         // Otherwise we need to create option every time for each dependent value
                         if ($this->dependField && ! $skipDepend) {
                             if (! $this->dependValue) {
-                                $this->dependValue = $this->bluePrint->getInputTypeByDbField($this->dependField)->getValue();
-                            }
-                            if (! $this->dependValue) {
-                                continue;
+                                $dependInput = $this->bluePrint->getInputTypeByDbField($this->dependField);
+                                $this->dependValue = $dependInput->getValue();
+                                if (! $this->dependValue) {
+                                    if (! isset($this->firstOption)) {
+                                        $this->firstOption = new \stdClass();
+                                        $this->firstOption->text = '(select '.\strtolower($dependInput->getLabel()).' first)';
+                                        $this->firstOption->value = '';
+                                    }
+
+                                    continue;
+                                }
                             }
                             $where[] = [$this->dependColumn => $this->dependValue];
 
-                            //Let's reset the dependValue, so that we can fetch the new value on table listing
-                            //Not for use now as $skipDepend added
-                            //$this->dependValue = null;
+                            //Let's reset the dependValue, so that we can fetch the new options for depended field in multiple table
+                            $this->dependValue = null;
                         }
 
                         if (isset($options->dbPatternFields[0])) {
@@ -172,6 +179,15 @@ trait Options
 
                         $model = (new DataModel())->db($options->table);
                         $result = $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
+                        if ($result && $result->count() > 0) {
+                            if (! isset($result[0]->{$options->valueCol})) {
+                                throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->valueCol, $options->table));
+                            }
+                            if (! isset($result[0]->{$options->textCol})) {
+                                throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->textCol, $options->table));
+                            }
+                        }
+
                         foreach ($result as $row) {
                             $text = '';
                             if ($options->dbPatternFields) {
@@ -229,9 +245,42 @@ trait Options
         $input->isChosen = $this->currentPlugin == 'chosen';
         $input->route = $this->bluePrint->getForm()->getResource()->route;
 
+        if (! isset($this->firstOption)) {
+            $dependInput = $this->bluePrint->getInputTypeByDbField($this->dependField);
+
+            $input->firstOptionText = '(select '.\strtolower($dependInput->getLabel()).' first)';
+            $input->firstOptionValue = '';
+        } else {
+            $input->firstOptionValue = $this->firstOption->value;
+            $input->firstOptionText = $this->firstOption->text;
+        }
+
+        $key = $this->dbField;
+        $scriptFilename = 'select_depend';
+
+        if ($this->bluePrint->isMultiple) {
+            $input->multipleKey = $this->bluePrint->getKey();
+
+            $key = $input->multipleKey.'-'.$this->dbField;
+            $scriptFilename = 'select_depend_multiple';
+
+            $input->selectorChildCount = $input->fieldChildCount = 0;
+            $count = 1;
+            foreach ($this->bluePrint->getList() as $field) {
+                $column = $field->getDbField();
+                if ($column == $input->field) {
+                    $input->fieldChildCount = $count;
+                } elseif ($column == $input->dependField) {
+                    $input->selectorChildCount = $count;
+                }
+
+                $count++;
+            }
+        }
+
         $data['input'] = $input;
 
-        Doc::addJs(\view('form-tool::form.scripts.select_depend', $data), 'depend-'.$this->dbField);
+        Doc::addJs(\view('form-tool::form.scripts.'.$scriptFilename, $data), 'depend-'.$key);
     }
 
     public function getChildOptions($parentId)

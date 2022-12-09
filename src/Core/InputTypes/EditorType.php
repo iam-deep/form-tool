@@ -140,7 +140,7 @@ class EditorType extends BaseInputType implements ISearchable
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
         $this->setDependencies();
 
@@ -155,8 +155,7 @@ class EditorType extends BaseInputType implements ISearchable
             ", $selectorId);
         }
 
-        $value = old($key.'.'.$this->dbField);
-        $value = $this->decodeHTML($value[$index] ?? $this->value);
+        $value = $this->decodeHTML($oldValue ?? $this->value);
 
         $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$selectorId.'" name="'.$key.'['.$index.']['.$this->dbField.']" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
 

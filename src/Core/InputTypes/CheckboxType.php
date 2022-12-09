@@ -118,12 +118,10 @@ class CheckboxType extends BaseInputType
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
         // TODO: Multiple not yet done
-
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->value;
+        $value = $oldValue ?? $this->value;
 
         $input = '<input type="checkbox" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
 

@@ -26,10 +26,9 @@ class HiddenType extends BaseInputType implements IEncryptable, ISearchable
         return $input;
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->value;
+        $value = $oldValue ?? $this->value;
 
         $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.' />';
 

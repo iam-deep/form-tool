@@ -12,7 +12,7 @@ class BluePrint
 
     private $heroDbField = null;
 
-    public $form = null;
+    private $form = null;
 
     public bool $isMultiple = false;
     public $label = '';
@@ -33,11 +33,6 @@ class BluePrint
         $this->key = $key;
         $this->isMultiple = $isMultiple;
         $this->parentBluePrint = $parentBluePrint;
-    }
-
-    public function getList(): array
-    {
-        return $this->dataTypeList;
     }
 
     public function text(string $dbField, string $label = null): InputTypes\TextType
@@ -221,10 +216,14 @@ class BluePrint
         }
     }
 
-    public function getInputTypeByDbField(string $dbField)
+    public function getInputTypeByDbField(string $column)
     {
         foreach ($this->dataTypeList as $input) {
-            if (! $input instanceof BluePrint && $input->getDbField() == $dbField) {
+            if ($input instanceof BluePrint) {
+                if ($input->getKey() == $column) {
+                    return $input;
+                }
+            } elseif ($input->getDbField() == $column) {
                 return $input;
             }
         }
@@ -255,6 +254,7 @@ class BluePrint
         $dbField = \trim($dbField);
 
         $subBluePrint[$dbField] = new BluePrint($dbField, true, $this);
+        $subBluePrint[$dbField]->setForm($this->form);
         $subBluePrint[$dbField]->label = $label ?? $label ?: \ucfirst($dbField);
 
         $field($subBluePrint[$dbField]);
@@ -365,9 +365,21 @@ class BluePrint
 
     //endregion
 
+    //region GetterAndSetter
+
+    public function setForm($form)
+    {
+        $this->form = $form;
+    }
+
     public function getForm()
     {
         return $this->form;
+    }
+
+    public function getList(): array
+    {
+        return $this->dataTypeList;
     }
 
     public function getKey()
@@ -409,7 +421,7 @@ class BluePrint
         }
 
         foreach ($this->dataTypeList as $input) {
-            if ($input->type == InputTypes\Common\InputType::Text && ! $input->isEncrypted()) {
+            if (isset($input->type) && $input->type == InputTypes\Common\InputType::Text && ! $input->isEncrypted()) {
                 return $input->getDbField();
             }
         }
@@ -458,6 +470,8 @@ class BluePrint
 
         return $data;
     }
+
+    //endregion
 
     public function toObj($type)
     {

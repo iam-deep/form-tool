@@ -21,10 +21,9 @@ class TextareaType extends BaseInputType implements IEncryptable, ISearchable
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->value;
+        $value = $oldValue ?? $this->value;
 
         $input = '<textarea class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>'.$value.'</textarea>';
 

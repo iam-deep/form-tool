@@ -30,10 +30,13 @@ class SelectType extends BaseFilterType
         return $this;
     }
 
-    public function first(string $firstOption)
+    public function first(string $firstOption, $firstValue = '')
     {
         $this->isFirstOption = true;
-        $this->firstOption = \trim($firstOption);
+
+        $this->firstOption = new \stdClass();
+        $this->firstOption->text = $firstOption;
+        $this->firstOption->value = $firstValue;
 
         return $this;
     }
@@ -62,8 +65,14 @@ class SelectType extends BaseFilterType
         }
 
         $this->currentPlugin = $plugin;
-        $this->isFirstOption = true;
-        $this->firstOption = '';
+
+        if ($this->firstOption == null) {
+            $this->isFirstOption = true;
+
+            $this->firstOption = new \stdClass();
+            $this->firstOption->text = '';
+            $this->firstOption->value = '';
+        }
 
         return $this;
     }
@@ -137,7 +146,7 @@ class SelectType extends BaseFilterType
             if ($this->firstOption === null) {
                 $input .= '<option value="">(select '.\strtolower($this->label).')</option>';
             } else {
-                $input .= '<option value="">'.$this->firstOption.'</option>';
+                $input .= '<option value="'.$this->firstOption->value.'">'.$this->firstOption->text.'</option>';
             }
         }
 
@@ -169,13 +178,12 @@ class SelectType extends BaseFilterType
         return $this->htmlParentDiv($this->getInput($value));
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
         $this->setPlugin(true);
         $this->addScript();
 
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->value;
+        $value = $oldValue ?? $this->value;
 
         $input = '<select class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
         $input .= $this->getOptions($value);

@@ -90,10 +90,9 @@ class PasswordType extends BaseInputType
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? '';
+        $value = $oldValue ?? '';
 
         $id = $key.'-'.$this->dbField.'-'.$index;
 

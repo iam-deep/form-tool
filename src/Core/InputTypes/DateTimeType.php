@@ -102,12 +102,11 @@ class DateTimeType extends BaseFilterType
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
         $this->setDependencies();
 
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->modifyFormat($this->value);
+        $value = $oldValue ?? $this->modifyFormat($this->value);
 
         $input = '<div class="input-group">
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>

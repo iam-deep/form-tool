@@ -229,10 +229,9 @@ class FileType extends BaseInputType
         return $this->htmlParentDiv($input);
     }
 
-    public function getHTMLMultiple($key, $index)
+    public function getHTMLMultiple($key, $index, $oldValue)
     {
-        $value = old($key.'.'.$this->dbField);
-        $value = $value[$index] ?? $this->value;
+        $value = $oldValue ?? $this->value;
 
         $groupId = $key.'-group-'.$this->dbField.'-'.$index;
         $inputId = $key.'-'.$this->dbField.'-'.$index;

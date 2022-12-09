@@ -41,6 +41,8 @@ class Form
 
     private bool $isLogAction = true;
 
+    private $callbackValidation = null;
+
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
         'updatedAt' => 'updatedAt',
@@ -56,7 +58,6 @@ class Form
         $this->bluePrint = $bluePrint;
         $this->model = $model;
 
-        $this->bluePrint->form = $this;
         $this->options = new \stdClass();
 
         $this->request = request();
@@ -66,15 +67,19 @@ class Form
         $this->isLogAction = \config('form-tool.isLogActions');
     }
 
-    public function init()
+    public function init($except = null)
     {
         $method = $this->request->method();
 
-        if ('POST' == $method && \strtoupper($this->request->post('method')) == 'CREATE') {
+        if ($except) {
+            $except = array_map(function ($val) { return \strtoupper($val); }, $except);
+        }
+
+        if ('POST' == $method && \strtoupper($this->request->post('method')) == 'CREATE' && (! $except || ! in_array('STORE', $except))) {
             return $this->store();
-        } elseif ('PUT' == $method) {
+        } elseif ('PUT' == $method && (! $except || ! in_array('UPDATE', $except))) {
             return $this->update();
-        } elseif ('DELETE' == $method) {
+        } elseif ('DELETE' == $method && (! $except || ! in_array('DESTROY', $except))) {
             return $this->delete();
         }
     }
@@ -115,6 +120,13 @@ class Form
     public function heroField(string $field): Crud
     {
         $this->bluePrint->setHeroField($field);
+
+        return $this->crud;
+    }
+
+    public function callbackValidation(\Closure $callbackValidation)
+    {
+        $this->callbackValidation = $callbackValidation;
 
         return $this->crud;
     }
@@ -308,13 +320,16 @@ class Form
             if ($field instanceof BluePrint) {
                 $rowData->columns .= '<td>'.$this->getMultipleTable($field).'</td>';
             } else {
+                // Check if there is any value in the session
+                $oldValue = old($key.'.'.$index.'.'.$field->getDbField());
+
                 // Let's modify value before if needed like for decryption
                 $field->setValue($field->getValue());
 
                 if ($field->getType() == InputType::Hidden) {
-                    $rowData->hidden .= $field->getHTMLMultiple($key, $index);
+                    $rowData->hidden .= $field->getHTMLMultiple($key, $index, $oldValue);
                 } else {
-                    $rowData->columns .= '<td>'.$field->getHTMLMultiple($key, $index).'</td>';
+                    $rowData->columns .= '<td>'.$field->getHTMLMultiple($key, $index, $oldValue).'</td>';
                 }
             }
         }
@@ -642,6 +657,20 @@ class Form
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
+        }
+
+        if ($this->callbackValidation) {
+            $callbackValidation = $this->callbackValidation;
+            $response = $callbackValidation($this->request, $validationType);
+            if ($response !== true) {
+                if (\is_string($response)) {
+                    return back()->with('error', $response)->withInput();
+                } elseif ($response instanceof \Illuminate\Http\RedirectResponse) {
+                    return $response->send();
+                } else {
+                    return back()->with('error', 'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION')->withInput();
+                }
+            }
         }
 
         $this->postData = $validator->validated();
