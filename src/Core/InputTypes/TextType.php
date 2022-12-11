@@ -47,7 +47,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
 
     public function getValue()
     {
-        if (! $this->value && $this->forceNullIfEmpty) {
+        if ($this->value === null && $this->forceNullIfEmpty) {
             return null;
         }
 

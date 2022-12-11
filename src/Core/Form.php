@@ -1055,6 +1055,11 @@ class Form
 
     //region GetterSetter
 
+    public function isUpdate()
+    {
+        return $this->formStatus == FormStatus::Update;
+    }
+
     public function getPostData($id = null)
     {
         if ($this->postData) {

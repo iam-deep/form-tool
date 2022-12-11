@@ -20,7 +20,7 @@ class PasswordType extends BaseInputType
 
     public function getNiceValue($value)
     {
-        if ($this->value) {
+        if ($this->value !== null) {
             return '*****';
         }
 
@@ -53,7 +53,7 @@ class PasswordType extends BaseInputType
             return '';
         }
 
-        return $this->value ? ['type' => $this->typeInString, 'data' => $this->getNiceValue($this->value)] : '';
+        return $this->value !== null ? ['type' => $this->typeInString, 'data' => $this->getNiceValue($this->value)] : '';
     }
 
     public function beforeStore(object $newData)

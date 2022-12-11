@@ -245,6 +245,7 @@ trait Options
         $input->isChosen = $this->currentPlugin == 'chosen';
         $input->route = $this->bluePrint->getForm()->getResource()->route;
 
+        $input->isFirstOption = $this->isFirstOption;
         if (! isset($this->firstOption)) {
             $dependInput = $this->bluePrint->getInputTypeByDbField($this->dependField);
 

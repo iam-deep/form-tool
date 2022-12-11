@@ -179,14 +179,14 @@ class FileType extends BaseInputType
             if ($oldValue != $newValue) {
                 return [
                     'type' => $this->typeInString,
-                    'data' => [$oldValue ?: '', $newValue ?: ''],
+                    'data' => [$oldValue ?? '', $newValue ?? ''],
                 ];
             }
 
             return '';
         }
 
-        return $newValue ? ['type' => $this->typeInString, 'data' => $newValue] : '';
+        return $newValue !== null ? ['type' => $this->typeInString, 'data' => $newValue] : '';
     }
 
     public function getHTML()

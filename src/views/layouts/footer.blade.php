@@ -22,6 +22,14 @@
 $(document).ready(function() {
     $("body").tooltip({ selector: '[data-toggle=tooltip]' });
 });
+
+// To make dropdown visible over the table
+$('.table-responsive').on('show.bs.dropdown', function () {
+     $('.table-responsive').css( "overflow", "inherit" );
+});
+$('.table-responsive').on('hide.bs.dropdown', function () {
+     $('.table-responsive').css( "overflow", "auto" );
+})
 </script>
 </body>
 </html>

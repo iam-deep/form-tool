@@ -339,7 +339,7 @@ class BaseInputType
                 if ($oldValue != $newValue) {
                     return [
                         'type' => 'text',
-                        'data' => [$oldValue ?: '', $newValue ?: ''],
+                        'data' => [$oldValue ?? '', $newValue ?? ''],
                     ];
                 }
 
