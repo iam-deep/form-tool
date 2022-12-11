@@ -47,7 +47,16 @@ return [
     'pickerFormatDate' => 'DD-MM-YYYY',
     'pickerFormatTime' => 'hh:mm A',
 
+    // Enable FormTool's User Auth/Login/Logout/Forgot Password/Remember Me
+    // If you disable, these will not work properly or you have to implement on your own:
+    //      1. AdminAuth middlewares, you need to create your own middleware for the auth if you have different logic or db and
+    //         also remove the AdminAuth::class from the middleware in web.php under routes
+    //      2. CrudRoute::authRoute() you may remove this from web.php under routes
+    //      3. Guard will not work properly if you have not impleted the session and DB permission in the same structure
+    'isAuth' => true,
+
     // Enable User Permission for View, Create, Edit and Delete
+    // If you disabled "isAuth" then you need to follow the same DB structure for permission system to work properly
     'isGuarded' => true,
 
     // You can set your own default model for CRUD operations (Methods should be similar to BaseModel)
@@ -66,11 +75,11 @@ return [
 
     // Table meta columns
     'table_meta_columns' => [
-        'updatedBy' => 'updatedBy', // Default NULL
-        'updatedAt' => 'updatedAt', // Default NULL
-        'createdBy' => 'createdBy', // Default NULL
+        'updatedBy' => 'updatedBy', // Default value must be NULL in MySQL
+        'updatedAt' => 'updatedAt', // Default value must be NULL in MySQL
+        'createdBy' => 'createdBy', // Default value must be NULL in MySQL
         'createdAt' => 'createdAt',
-        'deletedBy' => 'deletedBy', // Default NULL
-        'deletedAt' => 'deletedAt', // Default NULL
+        'deletedBy' => 'deletedBy', // Default value must be NULL in MySQL
+        'deletedAt' => 'deletedAt', // Default value must be NULL in MySQL
     ],
 ];

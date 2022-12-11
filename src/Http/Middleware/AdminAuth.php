@@ -20,6 +20,10 @@ class AdminAuth
      */
     public function handle(Request $request, Closure $next)
     {
+        if (! config('form-tool.isAuth')) {
+            return $next($request);
+        }
+
         $msg = 'Please login to continue!';
 
         if (Session::has('user')) {
