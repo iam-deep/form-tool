@@ -87,7 +87,7 @@ class BulkAction
         $data = [];
         $data[$metaColumns['updatedBy'] ?? 'updatedBy'] = null;
         $data[$metaColumns['updatedAt'] ?? 'updatedAt'] = null;
-        $data[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::user()->userId;
+        $data[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::id();
         $data[$metaColumns['createdAt'] ?? 'createdAt'] = \date('Y-m-d H:i:s');
 
         $callback = $this->callback;

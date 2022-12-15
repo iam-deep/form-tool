@@ -222,65 +222,56 @@ class Guard
 
         $this->getLaravelRoute();
 
-        if (Session::has('user')) {
-            $sessionUser = Session::get('user');
+        $user = Auth::user();
 
-            if ($sessionUser) {
-                $group = DB::table('user_groups')->where('groupId', $sessionUser->groupId)->first();
-                if (! isset($group->permission)) {
-                    $this->abort();
-                }
-
-                $this->permissions = \json_decode($group->permission);
-
-                // Check first if we have view permission
-                if (isset($this->permissions->{$this->route}->view)) {
-                    $this->hasView = true;
-                } else {
-                    $this->abort();
-                }
-
-                $this->hasCreate = isset($this->permissions->{$this->route}->create) ? true : false;
-                $this->hasEdit = isset($this->permissions->{$this->route}->edit) ? true : false;
-                $this->hasDelete = isset($this->permissions->{$this->route}->delete) ? true : false;
-                $this->hasDestroy = isset($this->permissions->{$this->route}->destroy) ? true : false;
-
-                // Check permissions as per request action
-                switch ($this->action) {
-                    case 'create':
-                    case 'store':
-                    case 'add':
-                        if (! $this->hasCreate) {
-                            $this->abort();
-                        }
-
-                        break;
-
-                    case 'edit':
-                    case 'update':
-                        if (! $this->hasEdit) {
-                            $this->abort();
-                        }
-
-                        break;
-
-                    case 'destroy':
-                    case 'delete':
-                        if (! $this->hasDelete) {
-                            $this->abort();
-                        }
-
-                        break;
-                }
-
-                return $next($request);
-            }
+        $group = DB::table('user_groups')->where('groupId', $user->groupId)->first();
+        if (! isset($group->permission)) {
+            $this->abort();
         }
 
-        // If we have any issues then just logout the user
-        Session::pull('user');
+        $this->permissions = \json_decode($group->permission);
 
-        return redirect(config('form-tool.adminURL').'/login')->with('error', 'Something went wrong! Please login again.');
+        // Check first if we have view permission
+        if (isset($this->permissions->{$this->route}->view)) {
+            $this->hasView = true;
+        } else {
+            $this->abort();
+        }
+
+        $this->hasCreate = isset($this->permissions->{$this->route}->create) ? true : false;
+        $this->hasEdit = isset($this->permissions->{$this->route}->edit) ? true : false;
+        $this->hasDelete = isset($this->permissions->{$this->route}->delete) ? true : false;
+        $this->hasDestroy = isset($this->permissions->{$this->route}->destroy) ? true : false;
+
+        // Check permissions as per request action
+        switch ($this->action) {
+            case 'create':
+            case 'store':
+            case 'add':
+                if (! $this->hasCreate) {
+                    $this->abort();
+                }
+
+                break;
+
+            case 'edit':
+            case 'update':
+                if (! $this->hasEdit) {
+                    $this->abort();
+                }
+
+                break;
+
+            case 'destroy':
+            case 'delete':
+                if (! $this->hasDelete) {
+                    $this->abort();
+                }
+
+                break;
+        }
+
+        return $next($request);
     }
 
     public static function abort()

@@ -104,13 +104,6 @@ if (! function_exists('imageThumb')) {
     }
 }
 
-if (! function_exists('ftAuth')) {
-    function ftAuth()
-    {
-        return Auth::class;
-    }
-}
-
 if (! function_exists('isSuccess')) {
     function isSuccess($response)
     {

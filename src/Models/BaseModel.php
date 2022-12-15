@@ -187,7 +187,7 @@ class BaseModel extends Model
         self::$isSoftDelete = $flag;
     }
 
-    protected static function applyWhere($query, $where, $alias = null)
+    protected static function applyWhere($query, $where)
     {
         if ($where instanceof Closure) {
             $where($query, static::class);

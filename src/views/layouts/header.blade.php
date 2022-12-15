@@ -83,7 +83,7 @@ input[type=checkbox], input[type=radio] {
               <!-- The user image in the navbar-->
               <?php /*<img src="/assets/{{ ADMIN_DIR }}/dist/img/avatar.png" class="user-image" alt="User Image"> */ ?>
               <!-- hidden-xs hides the username on small devices so only the image appears. -->
-              <span class="hidden-xs">{{ request()->session()->get('user')->name }}</span>
+              <span class="hidden-xs">{{ auth()->user()->name ?? null }}</span>
               &nbsp; <i class="fa fa-caret-down"></i>
             </a>
             <ul class="dropdown-menu">
@@ -92,7 +92,7 @@ input[type=checkbox], input[type=radio] {
                 <img src="{{ URL::asset('assets/form-tool/dist/img/avatar.png') }}" class="img-circle" alt="User Image">
 
                 <p>
-                  {{ request()->session()->get('user')->name }}
+                  {{ auth()->user()->name ?? null }}
                 </p>
               </li>
               <li class="user-footer">
@@ -100,7 +100,13 @@ input[type=checkbox], input[type=radio] {
                   <a href="{{ URL::to(config('form-tool.adminURL') . '/change-password') }}" class="btn btn-default btn-flat">Password</a>
                 </div>
                 <div class="pull-right">
-                  <a href="{{ URL::to(config('form-tool.adminURL') . '/logout') }}" class="btn btn-default btn-flat">Sign out</a>
+                  <!-- <a href="{{ URL::to(config('form-tool.adminURL') . '/logout') }}" class="btn btn-default btn-flat">Sign out</a>-->
+                    <form method="POST" action="{{ route('logout') }}">
+                        @csrf
+                        <a href="route('logout')" onclick="event.preventDefault();this.closest('form').submit();" class="btn btn-default btn-flat">
+                            {{ __('Log Out') }}
+                        </a>
+                    </form>
                 </div>
               </li>
             </ul>

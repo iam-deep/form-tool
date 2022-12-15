@@ -31,9 +31,9 @@ class DataModel
     {
         if ($model) {
             $this->model = $model;
-            if (! \is_subclass_of($this->model, BaseModel::class)) {
+            /*if (! \is_subclass_of($this->model, BaseModel::class)) {
                 throw new \Exception($this->model.' should extend '.BaseModel::class);
-            }
+            }*/
             if (! isset($this->model::$tableName) || ! $this->model::$tableName) {
                 throw new \Exception('$tableName not set or not declared as public at ['.$this->model.']');
             }
@@ -214,7 +214,7 @@ class DataModel
         $createdBy = ($metaColumns['createdBy'] ?? 'createdBy') ?: 'createdBy';
         $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
 
-        $data[$createdBy] = Auth::user() ? Auth::user()->userId : 0;
+        $data[$createdBy] = Auth::id();
         $data[$createdAt] = \date('Y-m-d H:i:s');
 
         return $this->setup()::add($data);
@@ -232,7 +232,7 @@ class DataModel
         $updatedAt = ($metaColumns['updatedAt'] ?? 'updatedAt') ?: 'updatedAt';
 
         if ($this->crud->isDefaultFormat()) {
-            $data[$updatedBy] = Auth::user() ? Auth::user()->userId : 0;
+            $data[$updatedBy] = Auth::id();
             $data[$updatedAt] = \date('Y-m-d H:i:s');
         }
 
@@ -246,7 +246,7 @@ class DataModel
         $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
         $data = [];
-        $data[$deletedBy] = Auth::user() ? Auth::user()->userId : 0;
+        $data[$deletedBy] = Auth::id();
         $data[$deletedAt] = \date('Y-m-d H:i:s');
 
         return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);

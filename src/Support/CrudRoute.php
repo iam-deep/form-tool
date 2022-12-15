@@ -32,25 +32,4 @@ class CrudRoute
         Route::get($route, [$class, 'index'])->name($route);
         Route::destroy($route.$id, [$class, 'destroy'])->name($route.'.destroy');
     }
-
-    public static function authRoute()
-    {
-        if (! config('form-tool.isAuth')) {
-            return;
-        }
-
-        Route::group(['prefix' => config('form-tool.adminURL'), 'middleware' => ['web', AdminCheckLoggedIn::class, 'throttle:login']], function () {
-            Route::post('login', [\Biswadeep\FormTool\Http\Controllers\AuthController::class, 'loginPost']);
-        });
-
-        Route::group(['prefix' => config('form-tool.adminURL'), 'middleware' => ['web', AdminCheckLoggedIn::class]], function () {
-            Route::get('/', [\Biswadeep\FormTool\Http\Controllers\AuthController::class, 'index']);
-
-            $prefix = trim(config('form-tool.adminURL'), '/');
-            $prefix && $prefix = $prefix.'.';
-
-            Route::get('login', [\Biswadeep\FormTool\Http\Controllers\AuthController::class, 'login'])->name($prefix.'login');
-            Route::get('logout', [\Biswadeep\FormTool\Http\Controllers\AuthController::class, 'logout'])->withoutMiddleware([AdminCheckLoggedIn::class]);
-        });
-    }
 }

@@ -47,17 +47,15 @@ return [
     'pickerFormatDate' => 'DD-MM-YYYY',
     'pickerFormatTime' => 'hh:mm A',
 
-    // Enable FormTool's User Auth/Login/Logout/Forgot Password/Remember Me
-    // If you disable, these will not work properly or you have to implement on your own:
-    //      1. AdminAuth middlewares, you need to create your own middleware for the auth if you have different logic or db and
-    //         also remove the AdminAuth::class from the middleware in web.php under routes
-    //      2. CrudRoute::authRoute() you may remove this from web.php under routes
-    //      3. Guard will not work properly if you have not impleted the session and DB permission in the same structure
-    'isAuth' => true,
-
     // Enable User Permission for View, Create, Edit and Delete
-    // If you disabled "isAuth" then you need to follow the same DB structure for permission system to work properly
     'isGuarded' => true,
+
+    // If you are using your own custom auth (Not Laravel Auth) then you need to give the user model class
+    // that have a static user() method to get user detail
+    'auth' => [
+        'isCustomAuth' => false,
+        'userModel' => \App\Models\User::class,
+    ],
 
     // You can set your own default model for CRUD operations (Methods should be similar to BaseModel)
     'defaultModel' => null,

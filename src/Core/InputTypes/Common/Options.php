@@ -183,7 +183,7 @@ trait Options
                             if (! isset($result[0]->{$options->valueCol})) {
                                 throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->valueCol, $options->table));
                             }
-                            if (! isset($result[0]->{$options->textCol})) {
+                            if (! $options->dbPatternFields && ! isset($result[0]->{$options->textCol})) {
                                 throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->textCol, $options->table));
                             }
                         }
