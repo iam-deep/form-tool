@@ -56,6 +56,7 @@ class Auth
 
         if (! $config['isCustomAuth']) {
             self::$user = \auth()->user();
+
             return;
         }
 
