@@ -174,7 +174,7 @@ class BaseModel extends Model
 
     public static function destroyWhere($where = null)
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
+        $query = DB::table(static::$tableName);
         self::applyWhere($query, $where);
 
         $affected = $query->delete();

@@ -291,6 +291,12 @@ class Guard
             $currentRoute = request()->path();
             $this->route = \substr($currentRoute, \strlen(\config('form-tool.adminURL')));
 
+            // Let's remove the action if we have any
+            $pos = \strrpos($this->route, '/');
+            if ($pos !== false) {
+                $this->route = \substr($this->route, 0, $pos);
+            }
+
             $currentAction = Route::currentRouteAction();
             $this->action = \substr($currentAction, \strpos($currentAction, '@') + 1);
         }

@@ -4,9 +4,6 @@ return [
     // Do not put any slash in the end
     'adminURL' => '/admin',
 
-    // Set route to redirect after login
-    'loginRedirect' => '/dashboard',
-
     // Set root upload directory inside public folder
     // Let's assume we named it 'storage'
     'uploadPath' => 'storage',

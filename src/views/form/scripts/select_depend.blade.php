@@ -31,8 +31,12 @@ $("#{{ $input->dependField }}").on("change", function() {
             previousHelpText = helpBlock.html();
             helpBlock.html("<i class='fa fa-spinner fa-pulse'></i>");
         },
-        error: function() {
-            alert("Something went wrong! Please refresh the page.");
+        error: function(json) {
+            if (json.responseJSON.message) {
+                alert(json.responseJSON.message);
+            } else {
+                alert("Something went wrong! Please refresh the page.");
+            }
         },
         complete: function() {
             field.attr("disabled", false);
@@ -43,8 +47,8 @@ $("#{{ $input->dependField }}").on("change", function() {
         success: function(json) {
             if (json.isSuccess) {
                 field.html(json.data);
-            } else if (json.error) {
-                alert(json.error);
+            } else if (json.message) {
+                alert(json.message);
             }
         }
     });

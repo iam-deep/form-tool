@@ -93,14 +93,18 @@ const search = ($input) => {
             $("#loadingSearch").html("<i class=\"fa fa-refresh fa-spin\"></i>");
             $("#loadingSearch").show();
         },
-        error: function() {
-            $("#loadingSearch").html("<span style=\"color:#f00;\">Something goes wrong, Please refresh the page</span>");
+        error: function(json) {
+            let msg = 'Something went wrong! Please refresh the page.';
+            if (json.responseJSON.message) {
+                msg = json.responseJSON.message;
+            }
+            $("#loadingSearch").html("<span style=\"color:#f00;\">"+ msg +"</span>");
             $("#loadingSearch").show();
             $('.loader').hide();
         },
         success: function(json) {
             if (! json.isSuccess) {
-                $("#loadingSearch").html("<span style=\"color:#f00;\">"+json["error"]+"</span>");
+                $("#loadingSearch").html("<span style=\"color:#f00;\">"+json["message"]+"</span>");
             }
             else {
                 $("#loadingSearch").hide();
