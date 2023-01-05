@@ -52,7 +52,7 @@ return [
     'auth' => [
         'isCustomAuth' => false,
         'userModel' => \App\Models\User::class,
-        'middleware' => 'auth'
+        'middleware' => 'auth',
     ],
 
     // You can set your own default model for CRUD operations (Methods should be similar to BaseModel)
