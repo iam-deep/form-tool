@@ -27,7 +27,7 @@ $("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->s
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif
         },
         error: function(json) {
-            if (json.responseJSON.message) {
+            if (json.responseJSON?.message) {
                 alert(json.responseJSON.message);
             } else {
                 alert("Something went wrong! Please refresh the page.");

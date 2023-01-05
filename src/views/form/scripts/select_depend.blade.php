@@ -32,7 +32,7 @@ $("#{{ $input->dependField }}").on("change", function() {
             helpBlock.html("<i class='fa fa-spinner fa-pulse'></i>");
         },
         error: function(json) {
-            if (json.responseJSON.message) {
+            if (json.responseJSON?.message) {
                 alert(json.responseJSON.message);
             } else {
                 alert("Something went wrong! Please refresh the page.");

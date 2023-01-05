@@ -95,7 +95,7 @@ const search = ($input) => {
         },
         error: function(json) {
             let msg = 'Something went wrong! Please refresh the page.';
-            if (json.responseJSON.message) {
+            if (json.responseJSON?.message) {
                 msg = json.responseJSON.message;
             }
             $("#loadingSearch").html("<span style=\"color:#f00;\">"+ msg +"</span>");
