@@ -191,15 +191,18 @@ class BaseModel extends Model
     {
         if ($where instanceof Closure) {
             $where($query, static::class);
-        } elseif ($where && \is_string($where[array_key_first($where)])) {
-            $query->where($where);
         } elseif ($where) {
-            foreach ($where as $expression) {
-                if ($expression instanceof Closure) {
-                    $expression($query, static::class);
-                } elseif ($expression) {
-                    $query->where($expression);
+            $firstValue = $where[array_key_first($where)];
+            if (\is_array($firstValue) || $firstValue instanceof Closure) {
+                foreach ($where as $expression) {
+                    if ($expression instanceof Closure) {
+                        $expression($query, static::class);
+                    } elseif ($expression) {
+                        $query->where($expression);
+                    }
                 }
+            } else {
+                $query->where($where);
             }
         }
     }
