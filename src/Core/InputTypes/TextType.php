@@ -47,16 +47,6 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
 
     public function getValue()
     {
-        if ($this->value === null && $this->forceNullIfEmpty) {
-            return null;
-        }
-
-        // If the field is Number type and is optional and there is no value then put default value as 0
-        // As the default value of a number should be 0
-        if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
-            return 0;
-        }
-
         $this->getDecryptedValue();
 
         return $this->value;
@@ -96,6 +86,36 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         }
 
         return null;
+    }
+
+    public function beforeStore(object $newData)
+    {
+        if ($this->value === null && $this->forceNullIfEmpty) {
+            return null;
+        }
+
+        // If the field is Number type and is optional and there is no value then put default value as 0
+        // As the default value of a number should be 0
+        if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
+            return 0;
+        }
+
+        return $this->value;
+    }
+
+    public function beforeUpdate(object $oldData, object $newData)
+    {
+        if ($this->value === null && $this->forceNullIfEmpty) {
+            return null;
+        }
+
+        // If the field is Number type and is optional and there is no value then put default value as 0
+        // As the default value of a number should be 0
+        if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
+            return 0;
+        }
+
+        return $this->value;
     }
 
     public function getHTML()
