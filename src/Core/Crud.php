@@ -217,7 +217,7 @@ class Crud
         if (! $values || ! $field) {
             $data['message'] = 'Parameter "field" or "values" is missing!';
 
-            return \response()->json($data, 422);
+            return \response()->json($data, 400);
         }
 
         $bluePrint = $this->bluePrint;
@@ -228,7 +228,7 @@ class Crud
             if (! $bluePrint) {
                 $data['message'] = 'Multiple Field "'.$multipleKey.'" not found in the BluePrint!';
 
-                return \response()->json($data, 422);
+                return \response()->json($data, 400);
             }
         }
 
@@ -236,13 +236,13 @@ class Crud
         if (! $input) {
             $data['message'] = 'Field "'.$field.'" not found in the BluePrint!';
 
-            return \response()->json($data, 422);
+            return \response()->json($data, 400);
         }
 
         if (! $input instanceof \Biswadeep\FormTool\Core\InputTypes\SelectType) {
             $data['message'] = 'Field "'.$field.'" is not a Select Type!';
 
-            return \response()->json($data, 422);
+            return \response()->json($data, 400);
         }
 
         $result = $input->getChildOptions($values);
