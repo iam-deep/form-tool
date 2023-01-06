@@ -28,7 +28,7 @@ class CellDefinition
     // Styles
     private string $width = '';
     private string $align = '';
-    private string $styleCSS = '';
+    private string $styleCss = '';
     private $styleClass = [];
     public $raw = '';
 
@@ -121,6 +121,13 @@ class CellDefinition
         return $this;
     }
 
+    public function css($css)
+    {
+        $this->styleCss .= $css;
+
+        return $this;
+    }
+
     public function label($label): CellDefinition
     {
         $this->label = \trim($label);
@@ -146,17 +153,21 @@ class CellDefinition
 
     public function setup(): void
     {
-        $this->styleCSS = '';
+        $styleCss = '';
         if ($this->align) {
-            $this->styleCSS .= $this->align;
+            $styleCss .= $this->align;
         }
 
         if ($this->width) {
-            $this->styleCSS .= 'width:'.$this->width.';';
+            $styleCss .= 'width:'.$this->width.';';
         }
 
-        if ($this->styleCSS) {
-            $this->styleCSS = 'style="'.$this->styleCSS.'"';
+        if ($this->styleCss) {
+            $styleCss .= $this->styleCss;
+        }
+
+        if ($styleCss) {
+            $styleCss = 'style="'.$styleCss.'"';
         }
 
         $this->styleClass = \implode(' ', $this->styleClass);
@@ -164,7 +175,7 @@ class CellDefinition
             $this->styleClass = 'class="'.$this->styleClass.'"';
         }
 
-        $this->raw($this->styleCSS);
+        $this->raw($styleCss);
         $this->raw($this->styleClass);
     }
 

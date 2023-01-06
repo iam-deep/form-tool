@@ -154,7 +154,7 @@ class TableField
             }
         }
 
-        $cell = CellDefinition::Other('action', '', 'Actions')->width('100px')->right()->orderable(false);
+        $cell = CellDefinition::Other('action', '', 'Actions')->css('min-width:100px')->right()->orderable(false);
         if (\count($this->actions)) {
             $this->cellList['actions'] = $cell;
         }
