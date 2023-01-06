@@ -23,15 +23,13 @@ trait Options
 
     protected bool $isRemoveTrash = true;
 
-    protected ?string $dependField = null;
-    protected ?string $dependColumn = null;
-    protected ?string $dependValue = null;
+    protected $depend = [];
 
     //region Setter
     public function options($options, ...$patternDbFields)
     {
         if (\is_string($options)) {
-            $db = \explode('.', $options);
+            $db = array_values(\explode('.', $options));
 
             $tableInfo = new \stdClass();
             if (\count($db) >= 3) {
@@ -42,7 +40,7 @@ trait Options
                 $tableInfo->orderByDirection = \trim($db[4] ?? 'asc');
                 $tableInfo->dbPatternFields = $patternDbFields;
             } else {
-                throw new \Exception('Wrong format! It should be tableName.valueColumn.textColumn[.orderByColumn[.orderDirection]]');
+                throw new \Exception('Wrong format! It should be "tableName.valueColumn.textColumn[.orderByColumn[.orderDirection]]"');
             }
 
             $this->optionData[] = ['db' => $tableInfo];
@@ -51,6 +49,29 @@ trait Options
         } else {
             throw new \Exception('You need to pass an array or string with table info');
         }
+
+        return $this;
+    }
+
+    public function closure(Closure $closure, $columns = null, ...$patternDbFields)
+    {
+        $info = new \stdClass();
+        $info->closure = $closure;
+        $info->valueCol = 'value';
+        $info->textCol = 'text';
+        $info->dbPatternFields = $patternDbFields;
+
+        if ($columns !== null) {
+            $cols = array_values(\explode('.', $columns));
+            if (count($cols) >= 2) {
+                $info->valueCol = $cols[0];
+                $info->textCol = $cols[1];
+            } else {
+                throw new \Exception('Wrong format! It should be "valueColumn.textColumn"');
+            }
+        }
+
+        $this->optionData[] = ['closure' => $info];
 
         return $this;
     }
@@ -103,12 +124,16 @@ trait Options
 
     public function depend($field, $foreignKey = null)
     {
-        $this->dependField = trim($field);
-        $this->dependColumn = trim($foreignKey);
-
-        if (! $foreignKey) {
-            $this->dependColumn = $this->dependField;
+        $field = \trim($field);
+        if (isset($this->depend[$field])) {
+            throw new \Exception(\sprintf('Depend field "%s" is already exists!', $field));
         }
+
+        $this->depend[$field] = (object) [
+            'field' => $field,
+            'column' => trim($foreignKey) ?: $field,
+            'value' => null,
+        ];
 
         return $this;
     }
@@ -117,7 +142,7 @@ trait Options
     protected function createOptions($skipDepend = false)
     {
         // We need to fetch for every row if we have some depended field in multiple table
-        if ($this->options && (! $this->bluePrint->isMultiple || ! $this->dependField)) {
+        if ($this->options && (! $this->bluePrint->isMultiple || ! $this->depend)) {
             return;
         }
 
@@ -128,31 +153,44 @@ trait Options
         if ($this->optionData) {
             foreach ($this->optionData as $optionData) {
                 foreach ($optionData as $type => $options) {
-                    if ('db' == $type) {
+                    if ('db' == $type || 'closure' == $type) {
                         $where = [];
                         // We are skipping depend value at the time of table listing to get all the values at once
                         // Otherwise we need to create option every time for each dependent value
-                        if ($this->dependField && ! $skipDepend) {
-                            if (! $this->dependValue) {
-                                $dependInput = $this->bluePrint->getInputTypeByDbField($this->dependField);
-                                $this->dependValue = $dependInput->getValue();
-                                if (! $this->dependValue) {
-                                    if (! isset($this->firstOption)) {
-                                        $this->firstOption = new \stdClass();
-                                        $this->firstOption->text = '(select '.\strtolower($dependInput->getLabel()).' first)';
-                                        $this->firstOption->value = '';
+                        if ($this->depend && ! $skipDepend) {
+                            $flagHaveDependValue = false;
+                            foreach ($this->depend as &$depend) {
+                                if (isNullOrEmpty($depend->value)) {
+                                    $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+                                    $depend->value = $dependInput->getValue();
+
+                                    if (isNullOrEmpty($depend->value)) {
+                                        continue;
                                     }
-
-                                    continue;
                                 }
-                            }
-                            $where[] = [$this->dependColumn => $this->dependValue];
 
-                            //Let's reset the dependValue, so that we can fetch the new options for depended field in multiple table
-                            $this->dependValue = null;
+                                if (! $flagHaveDependValue) {
+                                    $flagHaveDependValue = true;
+                                }
+
+                                $where[] = [$depend->column => $depend->value];
+
+                                //Let's reset the dependValue, so that we can fetch the new options for depended field in multiple table
+                                $depend->value = null;
+                            }
+
+                            if (! $flagHaveDependValue) {
+                                if (! isset($this->firstOption)) {
+                                    $this->firstOption = new \stdClass();
+                                    $this->firstOption->text = '(select '.\strtolower($dependInput->getLabel()).' first)';
+                                    $this->firstOption->value = '';
+                                }
+
+                                continue;
+                            }
                         }
 
-                        if (isset($options->dbPatternFields[0])) {
+                        if (isset($options->dbPatternFields[0]) && ! \is_string($options->dbPatternFields[0])) {
                             $flag = false;
                             $condition = $options->dbPatternFields[0];
                             if ($condition instanceof Closure) {
@@ -172,19 +210,50 @@ trait Options
                         }
 
                         if ($this->isRemoveTrash) {
-                            $where[] = function ($query) use ($deletedAt) {
+                            // This was converted to array from closure to make it simple for closure as option
+                            $where[] = [$deletedAt => null];
+                            /*$where[] = function ($query) use ($deletedAt) {
                                 $query->whereNull($deletedAt);
-                            };
+                            };*/
                         }
 
-                        $model = (new DataModel())->db($options->table);
-                        $result = $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
+                        $result = null;
+                        if ('closure' == $type) {
+                            // Let's convert multi-d array to associative array for closure where simplicity
+                            $temp = $where;
+                            $where = [];
+                            foreach ($temp as $w) {
+                                foreach ($w as $col => $colValue) {
+                                    if (\is_string($col)) {
+                                        $where[$col] = $colValue;
+                                    }
+                                }
+                            }
+
+                            $closure = $options->closure;
+                            $result = $closure($where);
+                            if (! $result instanceof \Illuminate\Support\Collection) {
+                                throw new \Exception(\sprintf('Return value of the %s\'s closure must be %s', $this->dbField, \Illuminate\Support\Collection::class));
+                            }
+                        } else {
+                            $model = (new DataModel())->db($options->table);
+                            $result = $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
+                        }
+
                         if ($result && $result->count() > 0) {
                             if (! isset($result[0]->{$options->valueCol})) {
-                                throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->valueCol, $options->table));
+                                if ('db' == $type) {
+                                    throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->valueCol, $options->table));
+                                } else {
+                                    throw new \Exception(\sprintf('Column "%s" not found in closure\'s response of "%s"', $options->valueCol, $this->dbField));
+                                }
                             }
                             if (! $options->dbPatternFields && ! isset($result[0]->{$options->textCol})) {
-                                throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->textCol, $options->table));
+                                if ('db' == $type) {
+                                    throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->textCol, $options->table));
+                                } else {
+                                    throw new \Exception(\sprintf('Column "%s" not found in closure\'s response of "%s"', $options->textCol, $this->dbField));
+                                }
                             }
                         }
 
@@ -235,58 +304,86 @@ trait Options
 
     protected function addScript()
     {
-        if (! $this->dependField) {
+        if (! $this->depend) {
             return;
         }
 
-        $input = new \stdClass();
-        $input->field = $this->dbField;
-        $input->dependField = $this->dependField;
-        $input->isChosen = $this->currentPlugin == 'chosen';
-        $input->route = $this->bluePrint->getForm()->getResource()->route;
-
-        $input->isFirstOption = $this->isFirstOption;
-        if (! isset($this->firstOption)) {
-            $dependInput = $this->bluePrint->getInputTypeByDbField($this->dependField);
-
-            $input->firstOptionText = '(select '.\strtolower($dependInput->getLabel()).' first)';
-            $input->firstOptionValue = '';
+        $allDependFields = [];
+        if (! $this->bluePrint->isMultiple) {
+            foreach ($this->depend as $value) {
+                $allDependFields[] = $value->field;
+            }
         } else {
-            $input->firstOptionValue = $this->firstOption->value;
-            $input->firstOptionText = $this->firstOption->text;
-        }
+            foreach ($this->depend as $value) {
+                $count = 1;
+                foreach ($this->bluePrint->getList() as $field) {
+                    if ($field->getDbField() == $value->field) {
+                        break;
+                    }
 
-        $key = $this->dbField;
-        $scriptFilename = 'select_depend';
-
-        if ($this->bluePrint->isMultiple) {
-            $input->multipleKey = $this->bluePrint->getKey();
-
-            $key = $input->multipleKey.'-'.$this->dbField;
-            $scriptFilename = 'select_depend_multiple';
-
-            $input->selectorChildCount = $input->fieldChildCount = 0;
-            $count = 1;
-            foreach ($this->bluePrint->getList() as $field) {
-                $column = $field->getDbField();
-                if ($column == $input->field) {
-                    $input->fieldChildCount = $count;
-                } elseif ($column == $input->dependField) {
-                    $input->selectorChildCount = $count;
+                    $count++;
                 }
 
-                $count++;
+                $allDependFields[] = (object)[
+                    'field' => $value->field,
+                    'selectorChildCount' => $count
+                ];
             }
         }
 
-        $data['input'] = $input;
+        foreach ($this->depend as $depend) {
+            $input = new \stdClass();
+            $input->field = $this->dbField;
+            $input->dependField = $depend->field;
+            $input->isChosen = $this->currentPlugin == 'chosen';
+            $input->route = $this->bluePrint->getForm()->getResource()->route;
+            $input->allDependFields = $allDependFields;
 
-        Doc::addJs(\view('form-tool::form.scripts.'.$scriptFilename, $data), 'depend-'.$key);
+            $input->isFirstOption = $this->isFirstOption;
+            if (! isset($this->firstOption)) {
+                $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+
+                $input->firstOptionText = '(select '.\strtolower($dependInput->getLabel()).' first)';
+                $input->firstOptionValue = '';
+            } else {
+                $input->firstOptionValue = $this->firstOption->value;
+                $input->firstOptionText = $this->firstOption->text;
+            }
+
+            $key = $input->field.'-'.$input->dependField;
+            $scriptFilename = 'select_depend';
+
+            if ($this->bluePrint->isMultiple) {
+                $input->multipleKey = $this->bluePrint->getKey();
+
+                $key = $input->multipleKey.'-'.$key;
+                $scriptFilename = 'select_depend_multiple';
+
+                $input->selectorChildCount = $input->fieldChildCount = 0;
+                $count = 1;
+                foreach ($this->bluePrint->getList() as $field) {
+                    $column = $field->getDbField();
+                    if ($column == $input->field) {
+                        $input->fieldChildCount = $count;
+                    } elseif ($column == $input->dependField) {
+                        $input->selectorChildCount = $count;
+                    }
+
+                    $count++;
+                }
+            }
+
+            $data['input'] = $input;
+
+            Doc::addJs(\view('form-tool::form.scripts.'.$scriptFilename, $data), 'depend-'.$key);
+        }
     }
 
-    public function getChildOptions($parentId)
+    public function getChildOptions($values)
     {
-        $this->dependValue = $parentId;
+        foreach ($this->depend as $depend) {
+            $depend->value = $values[$depend->field] ?? null;
+        }
 
         $options = $this->getDependOptions();
 
@@ -338,7 +435,12 @@ trait Options
                 return $value == $this->valueYes ? $this->captionYes : $this->captionNo;
             }
 
-            return $this->options->{$value} ?? null;
+            if (isset($this->options->{$value})) {
+                return $this->options->{$value};
+            }
+
+            // Check if we have some first value and if that matches with the current value
+            return $this->isFirstOption && $value == $this->firstOption->value ? $this->firstOption->text : null;
         }
     }
 

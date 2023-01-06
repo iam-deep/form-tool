@@ -212,13 +212,12 @@ class Crud
     public function getOptionsByParentId()
     {
         $request = \request();
-        $parentId = trim($request->post('id'));
+        $values = $request->post('values');
         $field = trim($request->post('field'));
-        if (! $parentId || ! $field) {
-            $data['isSuccess'] = false;
-            $data['error'] = 'Parameter "field" or "id" is missing!';
+        if (! $values || ! $field) {
+            $data['message'] = 'Parameter "field" or "values" is missing!';
 
-            return \response()->json($data);
+            return \response()->json($data, 422);
         }
 
         $bluePrint = $this->bluePrint;
@@ -227,31 +226,27 @@ class Crud
         if ($multipleKey) {
             $bluePrint = $this->bluePrint->getInputTypeByDbField($multipleKey);
             if (! $bluePrint) {
-                $data['isSuccess'] = false;
-                $data['error'] = 'Multiple Field "'.$multipleKey.'" not found in the BluePrint!';
+                $data['message'] = 'Multiple Field "'.$multipleKey.'" not found in the BluePrint!';
 
-                return \response()->json($data);
+                return \response()->json($data, 422);
             }
         }
 
         $input = $bluePrint->getInputTypeByDbField($field);
         if (! $input) {
-            $data['isSuccess'] = false;
-            $data['error'] = 'Field "'.$field.'" not found in the BluePrint!';
+            $data['message'] = 'Field "'.$field.'" not found in the BluePrint!';
 
-            return \response()->json($data);
+            return \response()->json($data, 422);
         }
 
         if (! $input instanceof \Biswadeep\FormTool\Core\InputTypes\SelectType) {
-            $data['isSuccess'] = false;
-            $data['error'] = 'Field "'.$field.'" is not a Select Type!';
+            $data['message'] = 'Field "'.$field.'" is not a Select Type!';
 
-            return \response()->json($data);
+            return \response()->json($data, 422);
         }
 
-        $result = $input->getChildOptions($parentId);
+        $result = $input->getChildOptions($values);
 
-        $data['isSuccess'] = true;
         $data['data'] = $result;
 
         return \response()->json($data);

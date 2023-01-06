@@ -5,7 +5,12 @@ $("#{{ $input->dependField }}").on("change", function() {
     var helpBlock = field.parent().next();
     var val = $(this).val();
 
-    if (! val || val == 0) {
+    var vals = {};
+    @foreach ($input->allDependFields as $field)
+        vals.{{ $field }} = $("#{{ $field }}").val();
+    @endforeach
+
+    if (! val) {
         @if ($input->isFirstOption)
             field.html('<option value="{{ $input->firstOptionValue }}">{{ $input->firstOptionText }}</option>');
         @else
@@ -23,7 +28,7 @@ $("#{{ $input->dependField }}").on("change", function() {
         url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
         type: "post",
         dataType:"json",
-        data: { _token: csrf_token, id: val, field: "{{ $input->field }}" },
+        data: { _token: csrf_token, values: vals, field: "{{ $input->field }}" },
         beforeSend:function() {
             field.attr("disabled", true);
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif
@@ -45,11 +50,7 @@ $("#{{ $input->dependField }}").on("change", function() {
             helpBlock.html(previousHelpText);
         },
         success: function(json) {
-            if (json.isSuccess) {
-                field.html(json.data);
-            } else if (json.message) {
-                alert(json.message);
-            }
+            field.html(json.data);
         }
     });
 });

@@ -1,9 +1,15 @@
 $("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->selectorChildCount }})>select', function() {
     var csrf_token = $('meta[name="csrf-token"]').attr('content');
-    var field = $(this).parent().parent().find('td:nth-child({{ $input->fieldChildCount }})>select');
+    var parent = $(this).parent().parent();
+    var field = parent.find('td:nth-child({{ $input->fieldChildCount }})>select');
     var val = $(this).val();
 
-    if (! val || val == 0) {
+    var vals = {};
+    @foreach ($input->allDependFields as $field)
+        vals.{{ $field->field }} = parent.find('td:nth-child({{ $input->selectorChildCount }})>select').val();
+    @endforeach
+
+    if (! val) {
         @if ($input->isFirstOption)
             field.html('<option value="{{ $input->firstOptionValue }}">{{ $input->firstOptionText }}</option>');
         @else
@@ -21,7 +27,7 @@ $("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->s
         url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
         type: "post",
         dataType:"json",
-        data: { _token: csrf_token, id: val, field: "{{ $input->field }}", multipleKey: '{{ $input->multipleKey }}' },
+        data: { _token: csrf_token, values: vals, field: "{{ $input->field }}", multipleKey: '{{ $input->multipleKey }}' },
         beforeSend:function() {
             field.attr("disabled", true);
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif
@@ -38,11 +44,7 @@ $("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->s
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif
         },
         success: function(json) {
-            if (json.isSuccess) {
-                field.html(json.data);
-            } else if (json.message) {
-                alert(json.message);
-            }
+            field.html(json.data);
         }
     });
 });

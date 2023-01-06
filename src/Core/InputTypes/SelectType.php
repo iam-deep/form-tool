@@ -22,6 +22,11 @@ class SelectType extends BaseFilterType
     protected $plugins = ['default', 'chosen'];
     protected string $currentPlugin = '';
 
+    public function __construct()
+    {
+        $this->isRemoveTrash = \config('isSoftDelete', true);
+    }
+
     //region Options
     public function noFirst()
     {
@@ -173,6 +178,7 @@ class SelectType extends BaseFilterType
             }
         }
 
+        // This is needed for depend value
         $this->value = $value;
 
         return $this->htmlParentDiv($this->getInput($value));
@@ -184,6 +190,9 @@ class SelectType extends BaseFilterType
         $this->addScript();
 
         $value = $oldValue ?? $this->value;
+
+        // This is needed for depend value
+        $this->value = $value;
 
         $input = '<select class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
         $input .= $this->getOptions($value);

@@ -23,6 +23,8 @@ class CheckboxType extends BaseInputType
     {
         $this->classes = [];
         $this->optionType = InputType::Checkbox;
+
+        $this->isRemoveTrash = \config('isSoftDelete', true);
     }
 
     //region Setter
