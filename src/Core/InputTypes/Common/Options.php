@@ -324,9 +324,9 @@ trait Options
                     $count++;
                 }
 
-                $allDependFields[] = (object)[
+                $allDependFields[] = (object) [
                     'field' => $value->field,
-                    'selectorChildCount' => $count
+                    'selectorChildCount' => $count,
                 ];
             }
         }
