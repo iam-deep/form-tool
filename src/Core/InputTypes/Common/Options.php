@@ -440,7 +440,7 @@ trait Options
             }
 
             // Check if we have some first value and if that matches with the current value
-            return $this->isFirstOption && $value == $this->firstOption->value ? $this->firstOption->text : null;
+            return $this->isFirstOption && $this->firstOption && $value == $this->firstOption->value ? $this->firstOption->text : null;
         }
     }
 

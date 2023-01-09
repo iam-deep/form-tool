@@ -210,8 +210,6 @@ class DTConverter
         foreach ($continents as $name => $mask) {
             $timezones = DateTimeZone::listIdentifiers($mask);
 
-            //$tzlist[$name] = [];
-
             foreach ($timezones as $timezone) {
                 $tzlist[$timezone] = '(GMT/UTC '.self::getOffset($timezone).') &#160; - &#160; '.$timezone;
             }

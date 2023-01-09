@@ -42,6 +42,7 @@ class Form
     private bool $isLogAction = true;
 
     private $callbackValidation = null;
+    private $uniqueColumns = null;
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -129,6 +130,21 @@ class Form
     public function callbackValidation(\Closure $callbackValidation)
     {
         $this->callbackValidation = $callbackValidation;
+
+        return $this->crud;
+    }
+
+    public function unique(array $columns)
+    {
+        $this->uniqueColumns = [];
+        $columns = array_values($columns);
+        foreach ($columns as $col) {
+            if (! $this->bluePrint->getInputTypeByDbField($col)) {
+                throw new \Exception(sprintf('Field "%s" not found for unique validation', $col));
+            }
+        }
+
+        $this->uniqueColumns = $columns;
 
         return $this->crud;
     }
@@ -659,6 +675,29 @@ class Form
 
         if ($validator->fails()) {
             return back()->withErrors($validator)->withInput();
+        }
+
+        if ($this->uniqueColumns) {
+            $where = [];
+            $combination = [];
+            foreach ($this->uniqueColumns as $column) {
+                $input = $this->bluePrint->getInputTypeByDbField($column);
+                $value = $this->request->post($column) ?? $input->getDefaultValue();
+
+                $where[] = [$column => $value];
+                $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
+            }
+
+            if ($this->formStatus == FormStatus::Update) {
+                $where[] = function ($query) {
+                    $query->where($this->model->getPrimaryId(), '!=', $this->editId);
+                };
+            }
+
+            $count = $this->model->countWhere($where);
+            if ($count) {
+                return back()->with('error', \sprintf('The combination of "%s" is already exist!', \implode(', ', array_values($combination))))->withInput();
+            }
         }
 
         if ($this->callbackValidation) {
