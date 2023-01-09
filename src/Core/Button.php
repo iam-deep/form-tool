@@ -5,7 +5,7 @@ namespace Biswadeep\FormTool\Core;
 class Button
 {
     /**
-     * $type desired values are (link, html, divider)
+     * $type desired values are (link, html, divider).
      */
     private string $type = 'link';
     private ?string $name = null;
@@ -103,12 +103,14 @@ class Button
     public function link(string $link): Button
     {
         $this->link = trim($link);
+
         return $this;
     }
 
     public function blank(): Button
     {
         $this->raw .= 'target="_blank" ';
+
         return $this;
     }
 
@@ -119,12 +121,14 @@ class Button
         }
 
         $this->guard = strtolower($guard);
+
         return $this;
     }
 
     public function divider(): Button
     {
         $this->type = 'divider';
+
         return $this;
     }
 

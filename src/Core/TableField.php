@@ -138,11 +138,12 @@ class TableField
     }
 
     /**
-     * Create action buttons for table list
+     * Create action buttons for table list.
      *
      * @param array[string|\Biswadeep\FormTool\Core\Button] $buttons
-     * @param string $primaryButtonName "name" of the primary dropdown button (Default is: _first_button except delete)
+     * @param  string  $primaryButtonName  "name" of the primary dropdown button (Default is: _first_button except delete)
      * @return CellDefinition
+     *
      * @throws \Exception
      **/
     public function actions($buttons = ['edit', 'delete'], ?string $primaryButtonName = '_first_button'): CellDefinition
