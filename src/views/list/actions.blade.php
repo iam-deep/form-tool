@@ -1,6 +1,10 @@
 <div class="btn-group">
     @if ($primary)
-        <a href="{{ $primary->link }}" class="btn btn-default btn-sm btn-flat"><i class="fa fa-pencil"></i> {{ $primary->text }}</a>
+        @if ($primary->getType() == 'link')
+            <a href="{{ $primary->getFullLink() }}" class="btn btn-default btn-sm btn-flat">{!! $primary->getIcon() !!} {!! $primary->getName() !!}</a>
+        @elseif ($primary->getType() == 'html')
+            {!! $primary->getHtml('btn btn-default btn-sm btn-flat') !!}
+        @endif
     @endif
 
     @if ($secondaries)
@@ -10,15 +14,14 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-right" role="menu">
             @foreach ($secondaries as $button)
-                @if ($button->type == 'divider')
-                    <li class="divider"></li>
-                @elseif ($button->type == 'link')
-                    <li><a href="{{ $button->link }}" @if($button->blank) target="_blank" @endif>{{ $button->text }}</a></li>
-                @elseif ($button->type == 'html')
-                    <li>{!! $button->html !!}</li>
+                @if ($button->getType() == 'divider')
+                    <li class="divider" {!! $button->getHtml() !!}></li>
+                @elseif ($button->getType() == 'link')
+                    <li><a href="{{ $button->getFullLink() }}" {!! $button->getHtml() !!}>{!! $button->getIcon() !!} {!! $button->getName() !!}</a></li>
+                @elseif ($button->getType() == 'html')
+                    <li>{!! $button->getHtml() !!}</li>
                 @endif
             @endforeach
         </ul>
     @endif
 </div>
-

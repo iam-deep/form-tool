@@ -314,29 +314,21 @@ class Table
                         continue;
                     }
 
-                    $actionData['primary'] = null;
-                    $actionData['secondaries'] = [];
-                    foreach ($this->field->actions as $action) {
-                        if ('edit' == $action->action) {
-                            $actionData['primary'] = new \stdClass();
-                            $actionData['primary']->link = $this->url.'/'.$value->{$primaryId}.'/edit?'.$this->request->getQueryString();
-                            $actionData['primary']->text = 'Edit';
-                        } elseif ('delete' == $action->action) {
-                            $deleteSelectorId = $crudName.'_delete_'.$value->{$primaryId};
+                    $search = ['{id}', '{crud_name}', '{crud_url}', '{query_string}'];
+                    $replace = [$value->{$primaryId}, $crudName, $this->url, $this->request->getQueryString()];
 
-                            $button = new \stdClass();
-                            $button->type = 'html';
-                            $button->html = '<a href="javascript:;" onClick="$(\'#'.$deleteSelectorId.'\').submit()"><i class="fa fa-trash"></i> Delete</a>
-                            <form id="'.$deleteSelectorId.'" action="'.$this->url.'/'.$value->{$primaryId}.'?'.$this->request->getQueryString().'" method="POST" onsubmit="return confirm(\'Are you sure you want to delete?\')" style="display:none">
-                                '.csrf_field().'
-                                '.method_field('DELETE').'
-                            </form>';
-
-                            $actionData['secondaries'][] = $button;
-                        }
+                    $buttonData = $this->field->getActionButtons();
+                    if ($buttonData['primary']) {
+                        $buttonData['primary'] = clone $buttonData['primary'];
+                        $buttonData['primary']->process($search, $replace);
                     }
 
-                    $viewData->data = \view('form-tool::list.actions', $actionData);
+                    foreach ($buttonData['secondaries'] as $key => $button) {
+                        $buttonData['secondaries'][$key] = clone $button;
+                        $buttonData['secondaries'][$key]->process($search, $replace);
+                    }
+
+                    $viewData->data = \view('form-tool::list.actions', $buttonData);
                 } else {
                     $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
                 }

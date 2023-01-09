@@ -21,6 +21,8 @@ class Guard
     protected bool $hasDelete = false;
     protected bool $hasDestroy = false;
 
+    protected $guardTypes = ['view', 'create', 'edit', 'delete', 'destroy'];
+
     public static $instance = null;
     private static bool $isEnable = false;
 
@@ -214,6 +216,14 @@ class Guard
         self::abort();
     }
 
+    public static function can(string $guardType, string $route = '')
+    {
+        $guardType = self::validateGuardType($guardType);
+        $method = 'has'.\ucfirst($guardType);
+
+        return self::$method($route);
+    }
+
     public function doCheck(Request $request, Closure $next)
     {
         if (! self::$isEnable) {
@@ -262,13 +272,17 @@ class Guard
 
                 break;
 
-            case 'destroy':
             case 'delete':
                 if (! $this->hasDelete) {
                     $this->abort();
                 }
 
                 break;
+
+            case 'destroy':
+                if (! $this->hasDestroy) {
+                    $this->abort();
+                }
         }
 
         return $next($request);
@@ -277,6 +291,16 @@ class Guard
     public static function abort()
     {
         abort(403, "You don't have enough permission to perform this action!");
+    }
+
+    public static function validateGuardType(string $type)
+    {
+        $type = strtolower(\trim($type));
+        if (! in_array($type, self::$instance->guardTypes)) {
+            throw new \Exception(\sprintf('Guard type "%s" is not valid. Valid Types are: (%s)', $type, \implode(', ', self::$instance->guardTypes)));
+        }
+
+        return $type;
     }
 
     private function getLaravelRoute()

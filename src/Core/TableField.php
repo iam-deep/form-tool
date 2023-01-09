@@ -7,7 +7,8 @@ use Illuminate\Support\Arr;
 class TableField
 {
     public $cellList = [];
-    public $actions = [];
+    private $actionButtons = [];
+    public $primaryButtonName = null;
 
     private Table $table;
     private BluePrint $bluePrint;
@@ -136,26 +137,47 @@ class TableField
         return $cell;
     }
 
-    public function actions($actions = ['edit', 'delete']): CellDefinition
+    /**
+     * Create action buttons for table list
+     *
+     * @param array[string|\Biswadeep\FormTool\Core\Button] $buttons
+     * @param string $primaryButtonName "name" of the primary dropdown button (Default is: _first_button except delete)
+     * @return CellDefinition
+     * @throws \Exception
+     **/
+    public function actions($buttons = ['edit', 'delete'], ?string $primaryButtonName = '_first_button'): CellDefinition
     {
-        $actions = Arr::wrap($actions);
+        $buttons = Arr::wrap($buttons);
+        $this->primaryButtonName = $primaryButtonName;
 
-        foreach ($actions as $action) {
-            if ($action == 'edit') {
-                if (Guard::hasEdit()) {
-                    $this->actions[] = new TableAction($action);
+        $this->actionButtons = [];
+        foreach ($buttons as $button) {
+            if ($button == 'edit') {
+                $newButton = Button::makeEdit();
+                if ($newButton->isActive()) {
+                    $this->actionButtons[] = $newButton;
                 }
-            } elseif ($action == 'delete') {
-                if (Guard::hasDelete()) {
-                    $this->actions[] = new TableAction($action);
+            } elseif ($button == 'delete') {
+                $newButton = Button::makeDelete();
+                if ($newButton->isActive()) {
+                    $this->actionButtons[] = $newButton;
+                }
+            } elseif ($button == 'divider') {
+                $newButton = Button::makeDivider();
+                if ($newButton->isActive()) {
+                    $this->actionButtons[] = $newButton;
+                }
+            } elseif ($button instanceof Button) {
+                if ($button->isActive()) {
+                    $this->actionButtons[] = $button;
                 }
             } else {
-                $this->actions[] = new TableAction($action);
+                throw new \Exception(\sprintf('Button can be "edit", "delete", "divider" or an instance of "%s"', Button::class));
             }
         }
 
         $cell = CellDefinition::Other('action', '', 'Actions')->css('min-width:100px')->right()->orderable(false);
-        if (\count($this->actions)) {
+        if ($this->actionButtons) {
             $this->cellList['actions'] = $cell;
         }
 
@@ -190,5 +212,26 @@ class TableField
     public function create(): array
     {
         return $this->columns;
+    }
+
+    public function getActionButtons()
+    {
+        $primary = null;
+        $secondaries = [];
+        foreach ($this->actionButtons as $button) {
+            if (! $primary && ! $button->isDivider()) {
+                if ($this->primaryButtonName == '_first_button' && $button->getGuard() != 'delete') {
+                    $primary = $button;
+                    continue;
+                } elseif ($this->primaryButtonName == $button->getName()) {
+                    $primary = $button;
+                    continue;
+                }
+            }
+
+            $secondaries[] = $button;
+        }
+
+        return ['primary' => $primary, 'secondaries' => $secondaries];
     }
 }

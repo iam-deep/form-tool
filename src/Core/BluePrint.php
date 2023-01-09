@@ -8,7 +8,6 @@ use Illuminate\Support\Arr;
 class BluePrint
 {
     private $dataTypeList = [];
-    public $actions = [];
 
     private $heroDbField = null;
 
@@ -230,20 +229,6 @@ class BluePrint
 
         return null;
     }
-
-    /*public function actions($actions) : DataType
-    {
-        if (!is_array($actions))
-            throw new \Exception("Actions columns should be in an array! Like: ['edit', 'delete']");
-
-        $dataType = new DataType('action', '', 'Actions');
-        $this->cellList[] = $dataType->width('85px');
-
-        foreach ($actions as $action)
-            $this->actions[] = new TableAction($action);
-
-        return $dataType;
-    }*/
 
     //endregion
 

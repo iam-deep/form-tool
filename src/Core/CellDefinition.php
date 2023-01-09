@@ -250,13 +250,3 @@ class CellDefinition
         return $this;
     }
 }
-
-class TableAction
-{
-    public string $action = '';
-
-    public function __construct($action)
-    {
-        $this->action = $action;
-    }
-}
