@@ -114,7 +114,7 @@ class Button
         return $this;
     }
 
-    public function guard(string $guard): Button
+    public function guard(?string $guard): Button
     {
         if ($guard && ! Guard::can($guard)) {
             $this->active = false;

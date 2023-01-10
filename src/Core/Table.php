@@ -41,6 +41,12 @@ class Table
     public $bulkAction = null;
     public $filter = null;
 
+    private $isButtonInit = false;
+    private $crudButtons = [];
+    private $primaryButtonName = null;
+    private $moreButtonName = '';
+    private bool $showMoreButtonAlways = false;
+
     public function __construct($resource, BluePrint $bluePrint, DataModel $model)
     {
         $this->resource = $resource;
@@ -81,6 +87,46 @@ class Table
 
     //region Options
 
+    /**
+     * Create buttons for crud.
+     *
+     * @param array[string|\Biswadeep\FormTool\Core\Button] $buttons
+     * @param  string  $primaryButtonName  "name" of the primary dropdown button (Default is: _first_button)
+     * @return CellDefinition
+     *
+     * @throws \Exception
+     **/
+    public function buttons($buttons = ['create'], ?string $primaryButtonName = '_first_button'): Table
+    {
+        $this->isButtonInit = true;
+
+        $buttons = Arr::wrap($buttons);
+        $this->primaryButtonName = $primaryButtonName;
+
+        $this->crudButtons = [];
+        foreach ($buttons as $button) {
+            if ($button == 'create') {
+                $this->crudButtons[] = Button::make('Add New', '/create', 'create')->icon('<i class="fa fa-plus"></i>');
+            } elseif ($button == 'divider') {
+                $this->crudButtons[] = Button::makeDivider();
+            } elseif ($button instanceof Button) {
+                $this->crudButtons[] = $button;
+            } else {
+                throw new \Exception(\sprintf('Button can be "create", "divider" or an instance of "%s"', Button::class));
+            }
+        }
+
+        return $this;
+    }
+
+    public function moreButton($name, $showMoreButtonAlways = false)
+    {
+        $this->moreButtonName = $name;
+        $this->showMoreButtonAlways = $showMoreButtonAlways;
+
+        return $this;
+    }
+
     public function searchIn($fields): Table
     {
         $this->searchFields = Arr::wrap($fields);
@@ -106,6 +152,45 @@ class Table
     }
 
     //endregion
+
+    public function getCrudButtons()
+    {
+        if (! $this->isButtonInit) {
+            $this->buttons();
+        }
+
+        $crudName = $this->crud->getName();
+        $queryString = $this->request->getQueryString();
+
+        $primary = null;
+        $secondaries = [];
+        foreach ($this->crudButtons as $button) {
+            if (! $button->isActive()) {
+                continue;
+            }
+
+            $search = ['{crud_name}', '{crud_url}', '{query_string}'];
+            $replace = [$crudName, $this->url, $queryString];
+            $button->process($search, $replace);
+
+            if (! $primary && ! $button->isDivider()) {
+                if ($this->primaryButtonName == '_first_button') {
+                    $primary = $button;
+                    continue;
+                } elseif ($this->primaryButtonName == $button->getName()) {
+                    $primary = $button;
+                    continue;
+                }
+            }
+
+            $secondaries[] = $button;
+        }
+
+        return (object) ['primary' => $primary, 'secondaries' => $secondaries, 'more' => (object) [
+            'name' => $this->moreButtonName,
+            'isActive' => $this->moreButtonName && ($this->showMoreButtonAlways || ! $primary)
+        ]];
+    }
 
     public function search()
     {
@@ -230,6 +315,7 @@ class Table
         }
 
         $crudName = $this->crud->getName();
+        $queryString = $this->request->getQueryString();
 
         $perPage = $this->dataResult->perPage();
         $page = (int) $this->request->query('page');
@@ -315,19 +401,19 @@ class Table
                     }
 
                     $search = ['{id}', '{crud_name}', '{crud_url}', '{query_string}'];
-                    $replace = [$value->{$primaryId}, $crudName, $this->url, $this->request->getQueryString()];
-
-                    $buttonData = $this->field->getActionButtons();
-                    if ($buttonData['primary']) {
-                        $buttonData['primary'] = clone $buttonData['primary'];
-                        $buttonData['primary']->process($search, $replace);
+                    $replace = [$value->{$primaryId}, $crudName, $this->url, $queryString];
+                    $buttons = $this->field->getActionButtons();
+                    if ($buttons->primary) {
+                        $buttons->primary = clone $buttons->primary;
+                        $buttons->primary->process($search, $replace);
                     }
 
-                    foreach ($buttonData['secondaries'] as $key => $button) {
-                        $buttonData['secondaries'][$key] = clone $button;
-                        $buttonData['secondaries'][$key]->process($search, $replace);
+                    foreach ($buttons->secondaries as $key => $button) {
+                        $buttons->secondaries[$key] = clone $button;
+                        $buttons->secondaries[$key]->process($search, $replace);
                     }
 
+                    $buttonData['buttons'] = $buttons;
                     $viewData->data = \view('form-tool::list.actions', $buttonData);
                 } else {
                     $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';

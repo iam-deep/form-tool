@@ -151,8 +151,7 @@ class Crud
 
         $page = new \stdClass();
 
-        $page->hasCreate = Guard::hasCreate();
-        $page->createLink = $currentUrl.'/create';
+        $page->buttons = $this->table->getCrudButtons();
 
         $page->filter = $this->table->getFilter();
         $page->searchQuery = $request->query('search');

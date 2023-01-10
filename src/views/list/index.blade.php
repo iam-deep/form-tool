@@ -32,10 +32,37 @@ ul.pagination {
 
         {{ $page->filter }}
 
-        @if ($page->hasCreate)
-            <a href="{{ $page->createLink }}" class="btn btn-success btn-sm btn-flat pull-right" style="margin-left:15px;"><i class="fa fa-plus"></i> &nbsp;Add</a>
-        @endif
-        
+        <div class="btn-group pull-right">
+            @if ($page->buttons->primary)
+                @if ($page->buttons->primary->isLink())
+                    <a href="{{ $page->buttons->primary->getFullLink() }}" class="btn btn-success btn-sm btn-flat">{!! $page->buttons->primary->getIcon() !!} {!! $page->buttons->primary->getName() !!}</a>
+                @elseif ($page->buttons->primary->isHtml())
+                    {!! $page->buttons->primary->getHtml('btn btn-default btn-sm btn-flat') !!}
+                @endif
+            @endif
+
+            @if ($page->buttons->secondaries)
+                <button type="button" class="btn btn-success btn-sm btn-flat dropdown-toggle" data-toggle="dropdown">
+                    @if ($page->buttons->more->isActive)
+                        {!! $page->buttons->more->name !!}
+                    @endif
+                    <span class="caret"></span>
+                    <span class="sr-only">Toggle Dropdown</span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right" role="menu">
+                    @foreach ($page->buttons->secondaries as $button)
+                        @if ($button->isDivider())
+                            <li class="divider" {!! $button->getHtml() !!}></li>
+                        @elseif ($button->isLink())
+                            <li><a href="{{ $button->getFullLink() }}" {!! $button->getHtml() !!}>{!! $button->getIcon() !!} {!! $button->getName() !!}</a></li>
+                        @elseif ($button->isHtml())
+                            <li>{!! $button->getHtml() !!}</li>
+                        @endif
+                    @endforeach
+                </ul>
+            @endif
+        </div>
+
         <div class="clearfix"></div>
 
         <div class="box box-primary">

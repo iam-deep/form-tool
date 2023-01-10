@@ -7,6 +7,7 @@ use Closure;
 
 class CellDefinition
 {
+    private TableField $tableField;
     private BaseInputType $inputType;
 
     public string $fieldType;
@@ -37,9 +38,10 @@ class CellDefinition
     {
     }
 
-    public static function Input(BaseInputType $inputType): CellDefinition
+    public static function Input(TableField $tableField, BaseInputType $inputType): CellDefinition
     {
         $cell = new CellDefinition();
+        $cell->tableField = $tableField;
 
         $cell->fieldType = '_input';
         $cell->inputType = $inputType;
@@ -47,9 +49,10 @@ class CellDefinition
         return $cell;
     }
 
-    public static function Other(string $fieldType, string $dbField, string $label = null): CellDefinition
+    public static function Other(TableField $tableField, string $fieldType, string $dbField, string $label = null): CellDefinition
     {
         $cell = new CellDefinition();
+        $cell->tableField = $tableField;
 
         $cell->fieldType = $fieldType;
         $cell->dbField = $dbField;
@@ -58,9 +61,10 @@ class CellDefinition
         return $cell;
     }
 
-    public static function Any($pattern, $dbFields): CellDefinition
+    public static function Any(TableField $tableField, $pattern, $dbFields): CellDefinition
     {
         $cell = new CellDefinition();
+        $cell->tableField = $tableField;
 
         $cell->fieldType = '_any';
         $cell->concat = new \stdClass();
@@ -70,6 +74,11 @@ class CellDefinition
         $cell->orderable = false;
 
         return $cell;
+    }
+
+    public function setTableField(TableField $tableField)
+    {
+        $this->tableField = $tableField;
     }
 
     public function typeOptions(Closure $options): CellDefinition
@@ -147,6 +156,16 @@ class CellDefinition
     public function raw(string $rawAttributes): CellDefinition
     {
         $this->raw .= $rawAttributes.' ';
+
+        return $this;
+    }
+
+    /**
+     * Only for actions method
+     */
+    public function moreButton($name, $showMoreButtonAlways = false)
+    {
+        $this->tableField->moreButton($name, $showMoreButtonAlways);
 
         return $this;
     }

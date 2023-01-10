@@ -7,8 +7,11 @@ use Illuminate\Support\Arr;
 class TableField
 {
     public $cellList = [];
+
     private $actionButtons = [];
-    public $primaryButtonName = null;
+    private $primaryButtonName = null;
+    private $moreButtonName = '';
+    private bool $showMoreButtonAlways = false;
 
     private Table $table;
     private BluePrint $bluePrint;
@@ -26,7 +29,7 @@ class TableField
             throw new \Exception($dbField.' not found in the BluePrint.');
         }
 
-        $cell = CellDefinition::Input($input)->label($label);
+        $cell = CellDefinition::Input($this, $input)->label($label);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -46,7 +49,7 @@ class TableField
 
         $inputType->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($inputType);
+        $cell = CellDefinition::Input($this, $inputType);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -54,7 +57,7 @@ class TableField
 
     public function any($closureOrPattern, ...$dbFields): CellDefinition
     {
-        $cell = CellDefinition::Any($closureOrPattern, $dbFields);
+        $cell = CellDefinition::Any($this, $closureOrPattern, $dbFields);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -65,7 +68,7 @@ class TableField
         $type = new InputTypes\TextType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -76,7 +79,7 @@ class TableField
         $type = new InputTypes\SelectType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -87,7 +90,7 @@ class TableField
         $type = new InputTypes\DateType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -98,7 +101,7 @@ class TableField
         $type = new InputTypes\TimeType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -109,7 +112,7 @@ class TableField
         $type = new InputTypes\DateTimeType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -120,7 +123,7 @@ class TableField
         $type = new InputTypes\SelectType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -131,7 +134,7 @@ class TableField
         $type = new InputTypes\ImageType();
         $type->init($this->bluePrint, $dbField, $label);
 
-        $cell = CellDefinition::Input($type);
+        $cell = CellDefinition::Input($this, $type);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -154,35 +157,32 @@ class TableField
         $this->actionButtons = [];
         foreach ($buttons as $button) {
             if ($button == 'edit') {
-                $newButton = Button::makeEdit();
-                if ($newButton->isActive()) {
-                    $this->actionButtons[] = $newButton;
-                }
+                $this->actionButtons[] = Button::makeEdit();
             } elseif ($button == 'delete') {
-                $newButton = Button::makeDelete();
-                if ($newButton->isActive()) {
-                    $this->actionButtons[] = $newButton;
-                }
+                $this->actionButtons[] = Button::makeDelete();
             } elseif ($button == 'divider') {
-                $newButton = Button::makeDivider();
-                if ($newButton->isActive()) {
-                    $this->actionButtons[] = $newButton;
-                }
+                $this->actionButtons[] = Button::makeDivider();
             } elseif ($button instanceof Button) {
-                if ($button->isActive()) {
-                    $this->actionButtons[] = $button;
-                }
+                $this->actionButtons[] = $button;
             } else {
                 throw new \Exception(\sprintf('Button can be "edit", "delete", "divider" or an instance of "%s"', Button::class));
             }
         }
 
-        $cell = CellDefinition::Other('action', '', 'Actions')->css('min-width:100px')->right()->orderable(false);
+        $cell = CellDefinition::Other($this, 'action', '', 'Actions')->css('min-width:100px')->right()->orderable(false);
         if ($this->actionButtons) {
             $this->cellList['actions'] = $cell;
         }
 
         return $cell;
+    }
+
+    public function moreButton($name, $showMoreButtonAlways = false)
+    {
+        $this->moreButtonName = $name;
+        $this->showMoreButtonAlways = $showMoreButtonAlways;
+
+        return $this;
     }
 
     public function removeActions()
@@ -196,7 +196,7 @@ class TableField
 
     public function bulkActionCheckbox(): CellDefinition
     {
-        $cell = CellDefinition::Other('_bulk', '<input type="checkbox" class="selectAll">')->width('25px')->orderable(false);
+        $cell = CellDefinition::Other($this, '_bulk', '<input type="checkbox" class="selectAll">')->width('25px')->orderable(false);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -204,7 +204,7 @@ class TableField
 
     public function slNo(string $label = null): CellDefinition
     {
-        $cell = CellDefinition::Other('_slno', $label ?? '#', '')->width('50px')->orderable(false);
+        $cell = CellDefinition::Other($this, '_slno', $label ?? '#', '')->width('50px')->orderable(false);
         $this->cellList[] = $cell;
 
         return $cell;
@@ -220,6 +220,10 @@ class TableField
         $primary = null;
         $secondaries = [];
         foreach ($this->actionButtons as $button) {
+            if (! $button->isActive()) {
+                continue;
+            }
+
             if (! $primary && ! $button->isDivider()) {
                 if ($this->primaryButtonName == '_first_button' && $button->getGuard() != 'delete') {
                     $primary = $button;
@@ -233,6 +237,19 @@ class TableField
             $secondaries[] = $button;
         }
 
-        return ['primary' => $primary, 'secondaries' => $secondaries];
+        return (object) ['primary' => $primary, 'secondaries' => $secondaries, 'more' => (object) [
+            'name' => $this->moreButtonName,
+            'isActive' => $this->moreButtonName && ($this->showMoreButtonAlways || ! $primary)
+        ]];
+    }
+
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    public function getBlueprint()
+    {
+        return $this->bluePrint;
     }
 }
