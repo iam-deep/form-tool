@@ -188,7 +188,7 @@ class Table
 
         return (object) ['primary' => $primary, 'secondaries' => $secondaries, 'more' => (object) [
             'name' => $this->moreButtonName,
-            'isActive' => $this->moreButtonName && ($this->showMoreButtonAlways || ! $primary)
+            'isActive' => $this->moreButtonName && ($this->showMoreButtonAlways || ! $primary),
         ]];
     }
 

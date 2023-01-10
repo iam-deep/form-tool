@@ -161,7 +161,7 @@ class CellDefinition
     }
 
     /**
-     * Only for actions method
+     * Only for actions method.
      */
     public function moreButton($name, $showMoreButtonAlways = false)
     {
