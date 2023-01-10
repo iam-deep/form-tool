@@ -253,7 +253,7 @@ class Table
         $tableField->slNo();
         foreach ($this->bluePrint->getList() as $input) {
             if (! $input instanceof BluePrint) {
-                $tableField->cellList[] = $input->getTableCell();
+                $tableField->cellList[] = $input->getTableCell($tableField);
             }
         }
 

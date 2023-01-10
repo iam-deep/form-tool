@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Core\InputTypes;
 
 use Biswadeep\FormTool\Core\CellDefinition;
+use Biswadeep\FormTool\Core\TableField;
 use Biswadeep\FormTool\Core\InputTypes\Common\ICustomType;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\Session;
@@ -383,9 +384,9 @@ class BaseInputType
         return $this->inlineCSS;
     }
 
-    final public function getTableCell()
+    final public function getTableCell(TableField $tableField)
     {
-        return CellDefinition::Input($this);
+        return CellDefinition::Input($tableField, $this);
     }
 
     protected function htmlParentDiv($input): string
