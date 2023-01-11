@@ -680,17 +680,18 @@ class Form
         if ($this->uniqueColumns) {
             $where = [];
             $combination = [];
+            $alias = $this->model->getAlias().'.';
             foreach ($this->uniqueColumns as $column) {
                 $input = $this->bluePrint->getInputTypeByDbField($column);
                 $value = $this->request->post($column) ?? $input->getDefaultValue();
 
-                $where[] = [$column => $value];
+                $where[] = [$alias.$column => $value];
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
             }
 
             if ($this->formStatus == FormStatus::Update) {
-                $where[] = function ($query) {
-                    $query->where($this->model->getPrimaryId(), '!=', $this->editId);
+                $where[] = function ($query) use ($alias) {
+                    $query->where($alias.$this->model->getPrimaryId(), '!=', $this->editId);
                 };
             }
 

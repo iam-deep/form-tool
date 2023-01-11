@@ -237,6 +237,11 @@ trait Options
                             }
                         } else {
                             $model = (new DataModel())->db($options->table);
+
+                            // Applying order by default with the text column, if the text column is not pattern
+                            if (! $options->orderByCol && ! $options->dbPatternFields) {
+                                $options->orderByCol = $options->textCol;
+                            }
                             $result = $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
                         }
 
