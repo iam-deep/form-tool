@@ -6,9 +6,9 @@ use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
 use Biswadeep\FormTool\Core\InputTypes\Common\IEncryptable;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
+use Closure;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
-use Closure;
 
 class TextType extends BaseInputType implements IEncryptable, ISearchable
 {
