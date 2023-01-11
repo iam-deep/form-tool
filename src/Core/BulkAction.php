@@ -29,6 +29,15 @@ class BulkAction
             ],
         ];
 
+        if ('normal' == $group) {
+            if (! \config('form-tool.isDuplicate', true)) {
+                unset($actions['normal']['duplicate']);
+            }
+            if (! Guard::hasDelete()) {
+                unset($actions['normal']['delete']);
+            }
+        }
+
         if (isset($actions[$group])) {
             return $actions[$group];
         }

@@ -13,7 +13,7 @@ class CreateCrudsTable extends Migration
      */
     public function up()
     {
-        if (! \config('form-tool.isPreventForeignKeyDelete')) {
+        if (! \config('form-tool.isPreventForeignKeyDelete', true)) {
             return;
         }
 

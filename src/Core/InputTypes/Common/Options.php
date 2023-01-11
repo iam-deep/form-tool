@@ -246,14 +246,14 @@ trait Options
                         }
 
                         if ($result && $result->count() > 0) {
-                            if (! isset($result[0]->{$options->valueCol})) {
+                            if (! property_exists($result[0], $options->valueCol)) {
                                 if ('db' == $type) {
                                     throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->valueCol, $options->table));
                                 } else {
                                     throw new \Exception(\sprintf('Column "%s" not found in closure\'s response of "%s"', $options->valueCol, $this->dbField));
                                 }
                             }
-                            if (! $options->dbPatternFields && ! isset($result[0]->{$options->textCol})) {
+                            if (! $options->dbPatternFields && ! property_exists($result[0], $options->textCol)) {
                                 if ('db' == $type) {
                                     throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->textCol, $options->table));
                                 } else {

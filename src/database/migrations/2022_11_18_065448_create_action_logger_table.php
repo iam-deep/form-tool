@@ -13,7 +13,7 @@ class CreateActionLoggerTable extends Migration
      */
     public function up()
     {
-        if (! \config('form-tool.isLogActions')) {
+        if (! \config('form-tool.isLogActions', true)) {
             return;
         }
 

@@ -48,7 +48,7 @@ class DataModel
             $this->orderByCol = $this->model::$orderByCol;
             $this->orderByDirection = $this->model::$orderByDirection;
         } else {
-            $defaultModelClass = \config('form-tool.defaultModel');
+            $defaultModelClass = \config('form-tool.defaultModel', BaseModel::class);
             if ($defaultModelClass) {
                 $this->model = $defaultModelClass;
             } else {

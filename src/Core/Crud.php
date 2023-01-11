@@ -108,7 +108,7 @@ class Crud
 
     private function save()
     {
-        if (! \config('form-tool.isPreventForeignKeyDelete')) {
+        if (! \config('form-tool.isPreventForeignKeyDelete', true)) {
             return;
         }
 

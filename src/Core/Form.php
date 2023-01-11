@@ -65,7 +65,7 @@ class Form
         $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
         $this->queryString = '?'.$this->request->getQueryString();
 
-        $this->isLogAction = \config('form-tool.isLogActions');
+        $this->isLogAction = \config('form-tool.isLogActions', true);
     }
 
     public function init($except = null)
@@ -963,7 +963,7 @@ class Form
 
     private function checkForeignKeyRestriction($id, $dataToDelete)
     {
-        if (! \config('form-tool.isPreventForeignKeyDelete')) {
+        if (! \config('form-tool.isPreventForeignKeyDelete', true)) {
             return true;
         }
 
