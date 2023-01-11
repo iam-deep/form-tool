@@ -7,6 +7,8 @@ use Biswadeep\FormTool\Core\InputTypes\Common\IEncryptable;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Closure;
 
 class TextType extends BaseInputType implements IEncryptable, ISearchable
 {
@@ -20,12 +22,15 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
     public string $inputType = 'text';
 
     public bool $isUnique = false;
+    public $uniqueClosure = null;
+
     private bool $isSlug = false;
     private bool $forceNullIfEmpty = false;
 
-    public function unique()
+    public function unique(Closure $uniqueCondition = null)
     {
         $this->isUnique = true;
+        $this->uniqueClosure = $uniqueCondition;
 
         return $this;
     }
@@ -60,19 +65,23 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
             $model = $this->bluePrint->getForm()->getModel();
 
             if ($type == 'store') {
-                $validations[] = \sprintf(
-                    'unique:%s,%s',
-                    $model->getTableName(),
-                    $this->dbField
-                );
+                $rule = Rule::unique($model->getTableName(), $this->dbField);
+                if ($this->uniqueClosure) {
+                    $uniqueClosure = $this->uniqueClosure;
+                    $rule->where($uniqueClosure);
+                }
+
+                $validations[] = $rule;
             } else {
-                $validations[] = \sprintf(
-                    'unique:%s,%s,%s,%s',
-                    $model->getTableName(),
-                    $this->dbField,
-                    $this->bluePrint->getForm()->getId(),
-                    ($model->isToken() ? $model->getTokenCol() : $model->getPrimaryId())
-                );
+                $rule = Rule::unique($model->getTableName(), $this->dbField)
+                    ->ignore($this->bluePrint->getForm()->getId(), $model->isToken() ? $model->getTokenCol() : $model->getPrimaryId());
+
+                if ($this->uniqueClosure) {
+                    $uniqueClosure = $this->uniqueClosure;
+                    $rule->where($uniqueClosure);
+                }
+
+                $validations[] = $rule;
             }
         }
 

@@ -19,13 +19,13 @@ class Doc
     {
     }
 
-    public static function create(object $resource, $model, Closure $callback, string $name = null)
+    public static function create(object $controller, $model, Closure $blueprint, string $name = null)
     {
-        if (! isset($resource->title)) {
-            throw new \Exception('$title not set or not declared as public at ['.\get_class($resource).']');
+        if (! isset($controller->title)) {
+            throw new \Exception(\sprintf('$title not set or not declared as public at [%s]'), \get_class($controller));
         }
-        if (! isset($resource->route)) {
-            throw new \Exception('$route not set or not declared as public at ['.\get_class($resource).']!');
+        if (! isset($controller->route)) {
+            throw new \Exception(\sprintf('$route not set or not declared as public at [%s]'), \get_class($controller));
         }
 
         if (! self::$crudList) {
@@ -37,12 +37,12 @@ class Doc
         $crud = new Crud();
         self::$crudList->{$name} = $crud;
 
-        $crud->make($resource, $model, $callback, $name);
+        $crud->make($controller, $model, $blueprint, $name);
 
         return $crud;
     }
 
-    public static function modify(Closure $callback, string $name = null)
+    public static function modify(Closure $blueprint, string $name = null)
     {
         $name = $name ?: self::$defaultCrudName;
         if (! isset(self::$crudList->{$name})) {
@@ -50,7 +50,7 @@ class Doc
         }
 
         $crud = self::$crudList->{$name};
-        $crud->modify($callback);
+        $crud->modify($blueprint);
 
         return $crud;
     }
