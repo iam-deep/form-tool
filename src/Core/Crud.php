@@ -121,11 +121,6 @@ class Crud
 
         $commons = \config('form-tool.commonDeleteRestricted', []);
         foreach ($commons as $key => &$common) {
-            if ($common['table'] == $this->model->getTableName()) {
-                unset($commons[$key]);
-                continue;
-            }
-
             $common = (object) $common;
         }
 
@@ -168,7 +163,7 @@ class Crud
         return $this;
     }
 
-    public function deleteRestrict(string $foreignTable, string $column, ?string $label): Crud
+    public function deleteRestrict(string $foreignTable, string $column, ?string $label = null): Crud
     {
         // TODO: Validate if table and column is exists or need to create user test script
         $this->deleteRestrict[] = (object) ['table' => $foreignTable, 'column' => $column, 'label' => $label];

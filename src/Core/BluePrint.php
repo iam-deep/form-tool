@@ -431,7 +431,9 @@ class BluePrint
     {
         $selects = [];
         foreach ($this->dataTypeList as $input) {
-            if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT) {
+            if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT ||
+                // table name should be same as crud table, otherwise skip
+                ($input->getTableName() && $input->getTableName() != $this->form->getModel()->getTableName())) {
                 continue;
             }
 

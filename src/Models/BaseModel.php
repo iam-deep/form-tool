@@ -76,7 +76,6 @@ class BaseModel extends Model
 
         self::applyWhere($query, $where);
 
-        $request = \request();
         if (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
@@ -120,9 +119,7 @@ class BaseModel extends Model
 
     public static function add($data)
     {
-        $id = DB::table(static::$tableName)->insertGetId($data);
-
-        return $id;
+        return DB::table(static::$tableName)->insertGetId($data);
     }
 
     public static function addMany($data)
@@ -144,9 +141,7 @@ class BaseModel extends Model
             $query->where(static::$primaryId, $id);
         }
 
-        $affected = $query->update($data);
-
-        return $affected;
+        return $query->update($data);
     }
 
     public static function deleteOne($id, $isToken = false)
@@ -167,9 +162,7 @@ class BaseModel extends Model
             $query->where(static::$primaryId, $id);
         }
 
-        $affected = $query->delete();
-
-        return $affected;
+        return $query->delete();
     }
 
     public static function destroyWhere($where = null)
@@ -177,9 +170,7 @@ class BaseModel extends Model
         $query = DB::table(static::$tableName);
         self::applyWhere($query, $where);
 
-        $affected = $query->delete();
-
-        return $affected;
+        return $query->delete();
     }
 
     public static function setSoftDelete(bool $flag)

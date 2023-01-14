@@ -372,7 +372,7 @@ class Form
                 $url = $this->request->getRequestUri();
 
                 $matches = [];
-                $t = \preg_match('/'.$this->resource->route.'\/([^\/]*)\/edit/', $url, $matches);
+                \preg_match('/'.$this->resource->route.'\/([^\/]*)\/edit/', $url, $matches);
                 if (\count($matches) > 1) {
                     $id = $matches[1];
                 } else {
@@ -446,7 +446,6 @@ class Form
             return $validate;
         }
 
-        $token = null;
         if ($this->crud->isDefaultFormat()) {
             if (! $this->oldData) {
                 $this->oldData = $this->model->getOne($this->editId);
@@ -706,10 +705,13 @@ class Form
 
             $count = $this->model->countWhere($where);
             if ($count) {
-                return back()->with('error', \sprintf(
-                    'The combination of "%s" is already exist!',
-                    \implode(', ', array_values($combination))
-                ))->withInput();
+                return back()->with(
+                    'error',
+                    \sprintf(
+                        'The combination of "%s" is already exist!',
+                        \implode(', ', array_values($combination))
+                    )
+                )->withInput();
             }
         }
 
@@ -816,7 +818,7 @@ class Form
         $url = $this->request->getRequestUri();
 
         $matches = [];
-        $t = \preg_match('/'.$this->resource->route.'\/([^\/\?$]*)/', $url, $matches);
+        \preg_match('/'.$this->resource->route.'\/([^\/\?$]*)/', $url, $matches);
         if (\count($matches) > 1) {
             $this->editId = $matches[1];
 
@@ -858,7 +860,7 @@ class Form
             return $response;
         }
 
-        $affected = $this->model->updateDelete($id);
+        $this->model->updateDelete($id);
 
         ActionLogger::delete($this->bluePrint, $pId, $result);
 
@@ -988,7 +990,7 @@ class Form
         $totalReferencesToFetch = 100;
 
         $result = DB::table('cruds')->get();
-        if (\count($result) > 0) {
+        if ($result->count()) {
             foreach ($result as $row) {
                 $data = \json_decode($row->data);
                 if (! isset($data->foreignKey)) {
@@ -997,8 +999,13 @@ class Form
 
                 foreach ($data->foreignKey as $option) {
                     if ($option->table == $this->model->getTableName()) {
-                        $resultData = DB::table($data->main->table)->where($option->column, $id)
-                            ->limit($totalReferencesToFetch)->get();
+                        $query = DB::table($data->main->table)->where($option->column, $id);
+
+                        // If we are checking the same table then ignore the id we want to delete
+                        if ($data->main->table == $option->table) {
+                            $query->where($option->column, '!=', $id);
+                        }
+                        $resultData = $query->limit($totalReferencesToFetch)->get();
 
                         $count = \count($resultData);
                         if ($count > 0) {
@@ -1117,7 +1124,7 @@ class Form
                 }
                 $msg .= '</ul>';
 
-                if ($i >= $totalReferencesToDisplay) {
+                if ($i >= $totalReferencesToDisplay && $totalCount > $totalReferencesToDisplay) {
                     if ($totalCount == $totalReferencesToFetch) {
                         $msg .= '<li><i>More than '.$totalReferencesToFetch.'+ items...</i></li>';
                     } else {

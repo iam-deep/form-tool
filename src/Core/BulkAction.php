@@ -102,7 +102,7 @@ class BulkAction
         $callback = $this->callback;
         $filtered = [];
         foreach ($ids as $id) {
-            if (! $callback || false !== $callback($id, 'duplicate')) {
+            if (! $callback || true === $callback($id, 'duplicate')) {
                 $filtered[] = $id;
                 $this->doDuplicate($id, $data);
             }
@@ -193,7 +193,7 @@ class BulkAction
         $callback = $this->callback;
         $filtered = [];
         foreach ($ids as $id) {
-            if (! $callback || false !== $callback($id, 'delete')) {
+            if (! $callback || true === $callback($id, 'delete')) {
                 $filtered[] = $id;
                 $this->table->crud->getForm()->delete($id);
             }
@@ -211,7 +211,7 @@ class BulkAction
         $callback = $this->callback;
         $filtered = [];
         foreach ($ids as $id) {
-            if (! $callback || false !== $callback($id, 'restore')) {
+            if (! $callback || true === $callback($id, 'restore')) {
                 $filtered[] = $id;
                 $affected = $this->table->getModel()->restore($id);
 
@@ -241,7 +241,7 @@ class BulkAction
         $callback = $this->callback;
         $filtered = [];
         foreach ($ids as $id) {
-            if (! $callback || false !== $callback($id, 'destroy')) {
+            if (! $callback || true === $callback($id, 'destroy')) {
                 $filtered[] = $id;
                 $this->table->crud->getForm()->destroy($id);
             }

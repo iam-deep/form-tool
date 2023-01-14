@@ -18,7 +18,7 @@ class Directory
             \mkdir($path, 0777, true);
             self::restrictDirectoryAccess($path);
         } catch (\Exception $e) {
-            throw new \Exception('Failed to create directory: '.$path.'. '.$e->getMessage());
+            throw new \Exception(\sprintf('Failed to create directory: %s. %s', $path, $e->getMessage()));
         }
     }
 

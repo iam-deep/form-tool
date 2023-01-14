@@ -23,8 +23,16 @@ class DTConverter
         self::$appTimezone = \config('app.timezone', 'UTC');
         self::$timezone = \trim(Settings::get('timezone', self::$appTimezone));
 
-        self::$niceFormatDate = \trim(Settings::get('dateFormat', \config('form-tool.formatDate') ?: self::$niceFormatDate));
-        self::$niceFormatTime = \trim(Settings::get('timeFormat', \config('form-tool.formatTime') ?: self::$niceFormatTime));
+        self::$niceFormatDate = \trim(Settings::get(
+            'dateFormat',
+            \config('form-tool.formatDate') ?: self::$niceFormatDate
+        ));
+
+        self::$niceFormatTime = \trim(Settings::get(
+            'timeFormat',
+            \config('form-tool.formatTime') ?: self::$niceFormatTime
+        ));
+
         self::$niceFormatDateTime = self::$niceFormatDate.' '.self::$niceFormatTime;
     }
 
@@ -64,8 +72,11 @@ class DTConverter
         return $dt->format($format ?: self::$niceFormatTime);
     }
 
-    public static function niceDateTime(?string $dateTime, bool $isConvertToLocal = false, ?string $format = null): ?string
-    {
+    public static function niceDateTime(
+        ?string $dateTime,
+        bool $isConvertToLocal = false,
+        ?string $format = null
+    ): ?string {
         if (! $dateTime) {
             return null;
         }

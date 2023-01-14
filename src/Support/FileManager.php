@@ -8,7 +8,9 @@ class FileManager
 {
     protected static string $uploadPath = 'storage';
     protected static string $uploadSubDirFormat = 'm-Y';
-    protected static string $allowedTypes = 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,pptx,webm,mkv,flv,vob,avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz,zipx';
+    protected static string $allowedTypes = 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,'.
+        'pptx,webm,mkv,flv,vob,avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz'.
+        ',zipx';
     protected static string $imageTypes = 'jpg,jpeg,png,webp,gif,svg,bmp,tif';
 
     public static function getAllowedTypes()
