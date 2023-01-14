@@ -126,7 +126,7 @@ class Crud
                 continue;
             }
 
-            $common = (object)$common;
+            $common = (object) $common;
         }
 
         $selects = $commons;

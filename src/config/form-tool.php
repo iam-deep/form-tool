@@ -74,7 +74,7 @@ return [
             'table' => 'users',
             'column' => 'createdBy',
             'label' => 'Created By',
-        ]
+        ],
     ],
 
     // This will log actions for create, edit, duplicate, delete, restore, destroy
