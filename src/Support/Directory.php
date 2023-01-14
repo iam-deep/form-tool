@@ -8,7 +8,7 @@ class Directory
     {
         if (\file_exists($path)) {
             if (! \is_writable($path)) {
-                throw new \Exception('"'.$path.'" is not writable!');
+                throw new \InvalidArgumentException('"'.$path.'" is not writable!');
             }
 
             return;

@@ -142,7 +142,7 @@ class TableField
      * @param  string  $primaryButtonName  "name" of the primary dropdown button (Default is: _first_button except delete)
      * @return CellDefinition
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      **/
     public function actions($buttons = ['edit', 'delete'], ?string $primaryButtonName = '_first_button'): CellDefinition
     {

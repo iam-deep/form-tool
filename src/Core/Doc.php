@@ -23,10 +23,16 @@ class Doc
     public static function create(object $controller, $model, Closure $blueprint, string $name = null)
     {
         if (! isset($controller->title)) {
-            throw new \Exception(\sprintf('$title not set or not declared as public at [%s]'), \get_class($controller));
+            throw new \InvalidArgumentException(\sprintf(
+                '$title not set or not declared as public at [%s]',
+                \get_class($controller)
+            ));
         }
         if (! isset($controller->route)) {
-            throw new \Exception(\sprintf('$route not set or not declared as public at [%s]'), \get_class($controller));
+            throw new \InvalidArgumentException(\sprintf(
+                '$route not set or not declared as public at [%s]',
+                \get_class($controller)
+            ));
         }
 
         if (! self::$crudList) {
@@ -47,7 +53,7 @@ class Doc
     {
         $name = $name ?: self::$defaultCrudName;
         if (! isset(self::$crudList->{$name})) {
-            throw new \Exception('Crud not found! You need to create it before modify.');
+            throw new \InvalidArgumentException('Crud not found! You need to create it before modify.');
         }
 
         $crud = self::$crudList->{$name};

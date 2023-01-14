@@ -178,11 +178,17 @@ class BluePrint
         $inputType = new $class();
 
         if (! $inputType instanceof InputTypes\BaseInputType) {
-            throw new \Exception($class.' should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType');
+            throw new \InvalidArgumentException(\sprintf(
+                '%s should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType',
+                $class
+            ));
         }
 
         if (! $inputType instanceof InputTypes\Common\ICustomType) {
-            throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\Common\ICustomType');
+            throw new \InvalidArgumentException(\sprintf(
+                '%s should implements Biswadeep\FormTool\Core\InputTypes\Common\ICustomType',
+                $class
+            ));
         }
 
         $this->dataTypeList[] = $inputType;
@@ -290,13 +296,13 @@ class BluePrint
             ];
         } else {
             if (class_exists($model)) {
-                throw new \Exception('Class not found. Class: '.$model);
+                throw new \InvalidArgumentException('Class not found. Class: '.$model);
             }
 
             $this->multipleModel = $model;
 
             if ($model && ! isset($model::$foreignKey)) {
-                throw new \Exception('$foreignKey property not defined at '.$model);
+                throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
             }
         }
 
@@ -306,11 +312,15 @@ class BluePrint
     public function keepId()
     {
         if (! $this->multipleModel && ! $this->multipleTable) {
-            throw new \Exception('keepId only works with db table, Please assign the table first. And keepId must called at last.');
+            throw new \InvalidArgumentException(
+                'keepId only works with db table, Please assign the table first. And keepId must called at last.'
+            );
         }
 
         if ($this->isMultipleOrderable && ! $this->multipleOrderColumn) {
-            throw new \Exception('You must pass a dbField in orderable to make work with keepId. And keepId must called at last.');
+            throw new \InvalidArgumentException(
+                'You must pass a dbField in orderable to make work with keepId. And keepId must called at last.'
+            );
         }
 
         if ($this->multipleModel) {

@@ -302,7 +302,7 @@ class Crud
     {
         $input = $this->bluePrint->getInputTypeByDbField($column);
         if (! $input) {
-            throw new \Exception(\sprintf('Field "%s" not found in the BluePrint!', $column));
+            throw new \InvalidArgumentException(\sprintf('Field "%s" not found in the BluePrint!', $column));
         }
 
         return $input;
