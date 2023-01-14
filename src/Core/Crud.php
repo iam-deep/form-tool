@@ -21,6 +21,8 @@ class Crud
     protected string $groupName = 'default';
     protected bool $isSoftDelete = true;
 
+    private $deleteRestrict = [];
+
     public function make(object $resource, $model, Closure $callback, string $name = 'default'): Crud
     {
         $this->resource = $resource;
@@ -117,18 +119,39 @@ class Crud
             return;
         }
 
-        $selects = $this->bluePrint->getSelectDbOptions();
+        $commons = \config('form-tool.commonDeleteRestricted', []);
+        foreach ($commons as $key => &$common) {
+            if ($common['table'] == $this->model->getTableName()) {
+                unset($commons[$key]);
+                continue;
+            }
 
+            $common = (object)$common;
+        }
+
+        $selects = $commons;
+        $selects = array_merge($selects, $this->bluePrint->getSelectDbOptions());
+        $selects = array_merge($selects, $this->deleteRestrict);
         if (! $selects) {
             return;
         }
 
-        $count = DB::table('cruds')->where('route', $this->resource->route)->count();
+        $data = new \stdClass();
+        $data->foreignKey = $selects;
+
+        $model = $this->model;
+        $data->main = (object) [
+            'title' => $this->resource->title,
+            'table' => $model->getTableName(),
+            'id' => $model->isToken() ? $model->getTokenCol() : $model->getPrimaryId(),
+        ];
 
         $crudData = [
             'route' => $this->resource->route,
-            'data' => \json_encode($selects),
+            'data' => \json_encode($data),
         ];
+
+        $count = DB::table('cruds')->where('route', $this->resource->route)->count();
         if ($count > 0) {
             DB::table('cruds')->where('route', $this->resource->route)->update($crudData);
         } else {
@@ -138,9 +161,17 @@ class Crud
 
     //region TableOptions
 
-    public function searchIn($fields)
+    public function searchIn($fields): Crud
     {
         $this->table->searchIn($fields);
+
+        return $this;
+    }
+
+    public function deleteRestrict(string $foreignTable, string $column, ?string $label): Crud
+    {
+        // TODO: Validate if table and column is exists or need to create user test script
+        $this->deleteRestrict[] = (object) ['table' => $foreignTable, 'column' => $column, 'label' => $label];
 
         return $this;
     }

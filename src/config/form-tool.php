@@ -16,12 +16,13 @@ return [
     'uploadSubDirFormat' => 'm-Y',
 
     // Allowed types for file upload
-    'allowedTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,pptx,webm,mkv,flv,vob,avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz,zipx',
+    'allowedTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,pptx,webm,mkv,flv,vob,'.
+        'avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz,zipx',
 
     // Allowed types for image upload
     'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif',
 
-    // Memory Limit is used for resizing or generating cache images (needed for of high resolution or larger size images)
+    // Memory Limit is used for resizing or generating cache images (needed for of high resolution or larger size)
     // If you see any white screen or half text screen after image upload then try to increase the memoryLimit
     // Default keep it 512M (M = MB), no worries will only use at the time of image caching
     // Make sure your server have more than 512MB of RAM
@@ -68,6 +69,13 @@ return [
     // This will prevent deletion of any data that have been used as foreign key in other tables
     // You need first delete all the data linked with the foreign key id
     'isPreventForeignKeyDelete' => true,
+    'commonDeleteRestricted' => [
+        [
+            'table' => 'users',
+            'column' => 'createdBy',
+            'label' => 'Created By',
+        ]
+    ],
 
     // This will log actions for create, edit, duplicate, delete, restore, destroy
     'isLogActions' => true,

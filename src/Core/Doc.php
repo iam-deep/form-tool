@@ -20,7 +20,7 @@ class Doc
         // The construct must remain private
     }
 
-    public static function create(object $controller, $model, Closure $blueprint, string $name = null)
+    public static function create(object $controller, $model, Closure $blueprint, string $name = null): Crud
     {
         if (! isset($controller->title)) {
             throw new \InvalidArgumentException(\sprintf(
@@ -49,7 +49,7 @@ class Doc
         return $crud;
     }
 
-    public static function modify(Closure $blueprint, string $name = null)
+    public static function modify(Closure $blueprint, string $name = null): Crud
     {
         $name = $name ?: self::$defaultCrudName;
         if (! isset(self::$crudList->{$name})) {
@@ -62,7 +62,7 @@ class Doc
         return $crud;
     }
 
-    public static function getCrud()
+    public static function getCrud(): ?Crud
     {
         return self::$crudList->{self::$defaultCrudName} ?? null;
     }

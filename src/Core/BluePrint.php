@@ -247,15 +247,15 @@ class BluePrint
     {
         $dbField = \trim($dbField);
 
-        $subBluePrint[$dbField] = new BluePrint($dbField, true, $this);
-        $subBluePrint[$dbField]->setForm($this->form);
-        $subBluePrint[$dbField]->label = $label ?: \ucfirst($dbField);
+        $this->subBluePrint[$dbField] = new BluePrint($dbField, true, $this);
+        $this->subBluePrint[$dbField]->setForm($this->form);
+        $this->subBluePrint[$dbField]->label = $label ?: \ucfirst($dbField);
 
-        $field($subBluePrint[$dbField]);
+        $field($this->subBluePrint[$dbField]);
 
-        $this->dataTypeList[] = $subBluePrint[$dbField];
+        $this->dataTypeList[] = $this->subBluePrint[$dbField];
 
-        return $subBluePrint[$dbField];
+        return $this->subBluePrint[$dbField];
     }
 
     public function required($noOfItems = 1)
@@ -431,42 +431,24 @@ class BluePrint
     {
         $selects = [];
         foreach ($this->dataTypeList as $input) {
-            if (! $input instanceof BluePrint && $input->type == InputTypes\Common\InputType::SELECT) {
-                foreach ($input->getOptionData() as $options) {
-                    foreach ($options as $type => $optionData) {
-                        if ($type == 'db') {
-                            $selects[] = (object) [
-                                'table' => $optionData->table,
-                                'column' => $input->getDbField(),
-                                'label' => $input->getLabel(),
-                            ];
-                        }
+            if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT) {
+                continue;
+            }
+
+            foreach ($input->getOptionData() as $options) {
+                foreach ($options as $type => $optionData) {
+                    if ($type == 'db') {
+                        $selects[] = (object) [
+                            'table' => $optionData->table,
+                            'column' => $input->getDbField(),
+                            'label' => $input->getLabel(),
+                        ];
                     }
                 }
             }
         }
 
-        $data = new \stdClass();
-
-        $temp = (object) [
-            'table' => 'users',
-            'column' => 'createdBy',
-            'label' => 'Created By',
-        ];
-        $selects[] = $temp;
-
-        if ($selects) {
-            $data->foreignKey = $selects;
-
-            $model = $this->form->getModel();
-            $data->main = (object) [
-                'title' => $this->form->getResource()->title,
-                'table' => $model->getTableName(),
-                'id' => $model->isToken() ? $model->getTokenCol() : $model->getPrimaryId(),
-            ];
-        }
-
-        return $data;
+        return $selects;
     }
 
     //endregion

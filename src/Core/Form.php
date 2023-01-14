@@ -1041,7 +1041,10 @@ class Form
                 $msg .= '<b>ID: '.$displayId.'</b> ';
             }
 
-            $msg .= 'is linked with <b>'.$totalCount.'</b> data. You need to destroy all the linked data first to delete this item. ';
+            $msg .= \sprintf(
+                'is linked with <b>%s</b> data. You need to destroy all the linked data first to delete this item. ',
+                $totalCount
+            );
 
             if ($totalCount > 10) {
                 $msg .= 'Below are some of the data which are linked to this item:';
@@ -1055,12 +1058,20 @@ class Form
             $msg .= '<br /><ul>';
             $i = 0;
             foreach ($dataCount as $result) {
-                $msg .= \sprintf(
-                    '<li>%s data of <b>%s</b> in field "%s"</li>',
-                    $result['count'],
-                    $result['title'],
-                    $result['label']
-                );
+                if ($result['label']) {
+                    $msg .= \sprintf(
+                        '<li>%s data of <b>%s</b> in field "%s"</li>',
+                        $result['count'],
+                        $result['title'],
+                        $result['label']
+                    );
+                } else {
+                    $msg .= \sprintf(
+                        '<li>%s data of <b>%s</b></li>',
+                        $result['count'],
+                        $result['title']
+                    );
+                }
 
                 $url = URL::to(\config('form-tool.adminURL').'/'.$result['route']);
                 $hasEditPermission = Guard::hasEdit($result['route']);
@@ -1076,10 +1087,22 @@ class Form
                         $isDeleted = $row->{$deletedAt} ?? null;
                         if ($isDeleted) {
                             if ($hasDestroyPermission) {
-                                $newMsg = '<li>ID: <a href="'.$url.'?id='.$id.'&quick_status=trash" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                                $newMsg = \sprintf(
+                                    '<li>ID: <a href="%s?id=%s&quick_status=trash" target="_blank">%s &nbsp
+                                        <i class="fa fa-external-link"></i></a></li>',
+                                    $url,
+                                    $id,
+                                    $id
+                                );
                             }
                         } elseif ($hasEditPermission) {
-                            $newMsg = '<li>ID: <a href="'.$url.'?id='.$id.'" target="_blank">'.$id.' &nbsp <i class="fa fa-external-link"></i></a></li>';
+                            $newMsg = \sprintf(
+                                '<li>ID: <a href="%s?id=%s" target="_blank">%s &nbsp <i class="fa fa-external-link">
+                                    </i></a></li>',
+                                $url,
+                                $id,
+                                $id
+                            );
                         }
 
                         $msg .= $newMsg;
@@ -1120,7 +1143,7 @@ class Form
         return $this->formStatus == FormStatus::Update;
     }
 
-    public function getPostData($id = null)
+    public function getPostData()
     {
         if ($this->postData) {
             return $this->postData;
