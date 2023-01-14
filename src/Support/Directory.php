@@ -36,7 +36,8 @@ class Directory
                 try {
                     $handle = \fopen($indexFile, 'w');
 
-                    $fileData = '<!DOCTYPE html><html><head><title>403 Forbidden</title></head><body><p>Directory access is forbidden.</p></body></html>';
+                    $fileData = '<!DOCTYPE html><html><head><title>403 Forbidden</title></head>
+                        <body><p>Directory access is forbidden.</p></body></html>';
                     \fwrite($handle, $fileData);
                     \fclose($handle);
                 } catch (\Exception $e) {

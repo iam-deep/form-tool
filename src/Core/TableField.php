@@ -26,7 +26,7 @@ class TableField
     {
         $input = $this->bluePrint->getInputTypeByDbField($dbField);
         if (! $input) {
-            throw new \Exception($dbField.' not found in the BluePrint.');
+            throw new \InvalidArgumentException($dbField.' not found in the BluePrint.');
         }
 
         $cell = CellDefinition::Input($this, $input)->label($label);
@@ -40,11 +40,17 @@ class TableField
         $inputType = new $class();
 
         if (! $inputType instanceof InputTypes\BaseInputType) {
-            throw new \Exception($class.' should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType');
+            throw new \InvalidArgumentException(\sprintf(
+                '%s should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType',
+                $class
+            ));
         }
 
         if (! $inputType instanceof InputTypes\ICustomType) {
-            throw new \Exception($class.' should implements Biswadeep\FormTool\Core\InputTypes\ICustomType');
+            throw new \InvalidArgumentException(\sprintf(
+                '%s should implements Biswadeep\FormTool\Core\InputTypes\ICustomType',
+                $class
+            ));
         }
 
         $inputType->init($this->bluePrint, $dbField, $label);
@@ -118,17 +124,6 @@ class TableField
         return $cell;
     }
 
-    public function status(string $dbField, string $label = null): CellDefinition
-    {
-        $type = new InputTypes\SelectType();
-        $type->init($this->bluePrint, $dbField, $label);
-
-        $cell = CellDefinition::Input($this, $type);
-        $this->cellList[] = $cell;
-
-        return $cell;
-    }
-
     public function image(string $dbField, string $label = null): CellDefinition
     {
         $type = new InputTypes\ImageType();
@@ -165,11 +160,15 @@ class TableField
             } elseif ($button instanceof Button) {
                 $this->actionButtons[] = $button;
             } else {
-                throw new \Exception(\sprintf('Button can be "edit", "delete", "divider" or an instance of "%s"', Button::class));
+                throw new \InvalidArgumentException(\sprintf(
+                    'Button can be "edit", "delete", "divider" or an instance of "%s"',
+                    Button::class
+                ));
             }
         }
 
-        $cell = CellDefinition::Other($this, 'action', '', 'Actions')->css('min-width:100px')->right()->orderable(false);
+        $cell = CellDefinition::Other($this, 'action', '', 'Actions')->css('min-width:100px')
+            ->right()->orderable(false);
         if ($this->actionButtons) {
             $this->cellList['actions'] = $cell;
         }
@@ -196,7 +195,8 @@ class TableField
 
     public function bulkActionCheckbox(): CellDefinition
     {
-        $cell = CellDefinition::Other($this, '_bulk', '<input type="checkbox" class="selectAll">')->width('25px')->orderable(false);
+        $cell = CellDefinition::Other($this, '_bulk', '<input type="checkbox" class="selectAll">')
+            ->width('25px')->orderable(false);
         $this->cellList[] = $cell;
 
         return $cell;

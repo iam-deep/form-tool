@@ -11,11 +11,6 @@ use Illuminate\Support\ServiceProvider;
 
 class FormToolServiceProvider extends ServiceProvider
 {
-    public function register()
-    {
-        //
-    }
-
     public function boot()
     {
         $this->mergeConfigFrom(__DIR__.'/config/form-tool.php', 'form-tool');

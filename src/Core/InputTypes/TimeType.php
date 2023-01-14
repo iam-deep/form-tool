@@ -7,7 +7,7 @@ use Biswadeep\FormTool\Support\DTConverter;
 
 class TimeType extends DateTimeType
 {
-    public int $type = InputType::Time;
+    public int $type = InputType::TIME;
     public string $typeInString = 'time';
 
     protected $pickerFormatTime = 'hh:mm A';

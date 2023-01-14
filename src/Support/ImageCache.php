@@ -3,6 +3,7 @@
 namespace Biswadeep\FormTool\Support;
 
 use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Log;
 
 class ImageCache
 {
@@ -65,7 +66,8 @@ class ImageCache
             // save image in desired format
             $img->save($cacheImagePath);
         } catch (\Exception $e) {
-            throw new \Exception($e->getMessage());
+            Log::error($e->getMessage());
+            throw $e;
         }
 
         return $cacheImagePath;

@@ -149,7 +149,7 @@ class BulkAction
                 $foreignKey = $model->foreignKey;
             } else {
                 if (! isset($model::$foreignKey)) {
-                    throw new \Exception('$foreignKey property not defined at '.$model);
+                    throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
                 }
 
                 $foreignKey = $model::$foreignKey;

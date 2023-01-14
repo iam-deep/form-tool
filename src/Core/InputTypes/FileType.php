@@ -8,7 +8,7 @@ use Biswadeep\FormTool\Support\ImageCache;
 
 class FileType extends BaseInputType
 {
-    public int $type = InputType::File;
+    public int $type = InputType::FILE;
     public string $typeInString = 'file';
 
     private string $path = '';
@@ -165,7 +165,8 @@ class FileType extends BaseInputType
     public function getNiceValue($value)
     {
         if ($value) {
-            return '<a href="'.asset($value).'" target="_blank"><i class="fa '.FileManager::getFileIcon($value).' fa-2x"></i></a>';
+            return '<a href="'.asset($value).'" target="_blank"><i class="fa '.
+                FileManager::getFileIcon($value).' fa-2x"></i></a>';
         }
 
         return null;
@@ -201,7 +202,8 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
+                    $this->dbField.'" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
             </div>';
 
         if ($this->value) {
@@ -217,10 +219,11 @@ class FileType extends BaseInputType
                 $file = '<i class="fa '.FileManager::getFileIcon($this->value).' fa-5x"></i>';
             }
 
-            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp; 
+            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp;
                 <a href="'.asset($value).'" target="_blank">'.$file.'</a>
                 <input type="hidden" name="'.$this->dbField.'" value="'.$this->value.'">
-                <button class="close pull-left" aria-hidden="true" type="button" onclick="'.$script.'"><i class="fa fa-times"></i></button>
+                <button class="close pull-left" aria-hidden="true" type="button" onclick="'.$script.
+                    '"><i class="fa fa-times"></i></button>
             </div>';
         }
 
@@ -247,7 +250,8 @@ class FileType extends BaseInputType
 
         $input = '<div class="row">
             <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$inputId.'" name="'.$name.'" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
+                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$inputId.'" name="'.$name.
+                    '" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
             </div>';
 
         if ($value) {
@@ -263,10 +267,11 @@ class FileType extends BaseInputType
                 $file = '<i class="fa '.FileManager::getFileIcon($value).' fa-5x"></i>';
             }
 
-            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp; 
+            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp;
                 <a href="'.asset($value).'" target="_blank">'.$file.'</a>
                 <input type="hidden" name="'.$name.'" value="'.$value.'">
-                <button class="close pull-right" aria-hidden="true" type="button" onclick="'.$script.'"><i class="fa fa-times"></i></button>
+                <button class="close pull-right" aria-hidden="true" type="button" onclick="'.$script.
+                    '"><i class="fa fa-times"></i></button>
             </div>';
         }
 

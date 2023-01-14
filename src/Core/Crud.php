@@ -86,7 +86,13 @@ class Crud
         return $this;
     }
 
-    public function db(string $tableName, ?string $primaryId = '', ?string $token = '', ?string $orderBy = '', ?string $foreignKey = ''): Crud
+    public function db(
+        string $tableName,
+        ?string $primaryId = '',
+        ?string $token = '',
+        ?string $orderBy = '',
+        ?string $foreignKey = ''
+    ): Crud
     {
         $this->model->db($tableName, $primaryId, $token, $orderBy, $foreignKey);
 

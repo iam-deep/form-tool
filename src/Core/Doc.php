@@ -17,6 +17,7 @@ class Doc
 
     private function __construct()
     {
+        // The construct must remain private
     }
 
     public static function create(object $controller, $model, Closure $blueprint, string $name = null)

@@ -31,11 +31,11 @@ class DataModel
     {
         if ($model) {
             $this->model = $model;
-            /*if (! \is_subclass_of($this->model, BaseModel::class)) {
-                throw new \Exception($this->model.' should extend '.BaseModel::class);
-            }*/
             if (! isset($this->model::$tableName) || ! $this->model::$tableName) {
-                throw new \Exception('$tableName not set or not declared as public at ['.$this->model.']');
+                throw new \InvalidArgumentException(sprintf(
+                    '$tableName not set or not declared as public at [%s]',
+                    $this->model
+                ));
             }
 
             // Let's copy the configs
@@ -99,6 +99,7 @@ class DataModel
     public function orderBy(string $column, string $direction = 'desc')
     {
         $this->orderByCol = \trim($column);
+        $this->orderByDirection = \trim($direction);
 
         return $this;
     }

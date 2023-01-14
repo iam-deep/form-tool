@@ -23,6 +23,7 @@ class Menu
 
     private function __construct()
     {
+        // The construct must remain private
         $this->baseURL = config('form-tool.adminURL', '');
     }
 
@@ -161,6 +162,6 @@ class Menu
             return \view($view, $data);
         }
 
-        throw new \Exception('Menu name not found in menu bag: '.$menuName);
+        throw new \InvalidArgumentException('Menu name not found in menu bag: '.$menuName);
     }
 }

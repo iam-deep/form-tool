@@ -11,7 +11,7 @@ class HiddenType extends BaseInputType implements IEncryptable, ISearchable
 {
     use Encryption;
 
-    public int $type = InputType::Hidden;
+    public int $type = InputType::HIDDEN;
     public string $typeInString = 'hidden';
 
     public function __construct()
@@ -21,17 +21,16 @@ class HiddenType extends BaseInputType implements IEncryptable, ISearchable
 
     public function getHTML()
     {
-        $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.' />';
-
-        return $input;
+        return '<input type="hidden" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" '.
+            'name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.' />';
     }
 
     public function getHTMLMultiple($key, $index, $oldValue)
     {
         $value = $oldValue ?? $this->value;
 
-        $input = '<input type="hidden" class="'.\implode(' ', $this->classes).'" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.' />';
-
-        return $input;
+        return '<input type="hidden" class="'.\implode(' ', $this->classes).'" '.
+            'id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.
+            'value="'.$value.'" '.$this->raw.' />';
     }
 }

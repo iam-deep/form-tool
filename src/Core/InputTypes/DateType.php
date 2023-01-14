@@ -7,7 +7,7 @@ use Biswadeep\FormTool\Support\DTConverter;
 
 class DateType extends DateTimeType
 {
-    public int $type = InputType::Date;
+    public int $type = InputType::DATE;
     public string $typeInString = 'date';
 
     protected $pickerFormatDate = 'DD-MM-YYYY';

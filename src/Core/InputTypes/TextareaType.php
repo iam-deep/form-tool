@@ -11,12 +11,13 @@ class TextareaType extends BaseInputType implements IEncryptable, ISearchable
 {
     use Encryption;
 
-    public int $type = InputType::Textarea;
+    public int $type = InputType::TEXTAREA;
     public string $typeInString = 'textarea';
 
     public function getHTML()
     {
-        $input = '<textarea class="'.implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" '.$this->raw.$this->inlineCSS.'>'.old($this->dbField, $this->value).'</textarea>';
+        $input = '<textarea class="'.implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.
+            '" '.$this->raw.$this->inlineCSS.'>'.old($this->dbField, $this->value).'</textarea>';
 
         return $this->htmlParentDiv($input);
     }
@@ -25,8 +26,8 @@ class TextareaType extends BaseInputType implements IEncryptable, ISearchable
     {
         $value = $oldValue ?? $this->value;
 
-        $input = '<textarea class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>'.$value.'</textarea>';
-
-        return $input;
+        return '<textarea class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.
+            $index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>'.$value.
+            '</textarea>';
     }
 }

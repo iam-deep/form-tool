@@ -25,7 +25,10 @@ class CreateActionLoggerTable extends Migration
             $table->string('refId')->nullable()->index();
             $table->string('token')->nullable()->index();
             $table->string('description')->nullable();
-            $table->mediumText('data')->nullable();         // MediumText or higher is recommended as there may be multiple EditorType data
+
+            // MediumText or higher is recommended as there may be multiple EditorType data
+            $table->mediumText('data')->nullable();
+
             $table->integer('createdBy')->nullable();
             $table->string('createdByName')->nullable();
             $table->dateTime('createdAt')->nullable();

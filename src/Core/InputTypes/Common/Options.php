@@ -14,7 +14,7 @@ trait Options
     protected $optionData = [];
     protected bool $isMultiple = false;
 
-    // Desired values: InputType::Select, InputType::Checkbox, InputType::Radio
+    // Desired values: InputType::SELECT, InputType::CHECKBOX, InputType::RADIO
     protected int $optionType = -1;
     protected $options = null;
 
@@ -40,14 +40,16 @@ trait Options
                 $tableInfo->orderByDirection = \trim($db[4] ?? 'asc');
                 $tableInfo->dbPatternFields = $patternDbFields;
             } else {
-                throw new \Exception('Wrong format! It should be "tableName.valueColumn.textColumn[.orderByColumn[.orderDirection]]"');
+                throw new \InvalidArgumentException(
+                    'Wrong format! It should be "tableName.valueColumn.textColumn[.orderByColumn[.orderDirection]]"'
+                );
             }
 
             $this->optionData[] = ['db' => $tableInfo];
         } elseif (\is_array($options)) {
             $this->optionData[] = ['array' => $options];
         } else {
-            throw new \Exception('You need to pass an array or string with table info');
+            throw new \InvalidArgumentException('You need to pass an array or string with table info');
         }
 
         return $this;
@@ -67,7 +69,7 @@ trait Options
                 $info->valueCol = $cols[0];
                 $info->textCol = $cols[1];
             } else {
-                throw new \Exception('Wrong format! It should be "valueColumn.textColumn"');
+                throw new \InvalidArgumentException('Wrong format! It should be "valueColumn.textColumn"');
             }
         }
 
@@ -100,7 +102,7 @@ trait Options
                 $this->validationMessages['min'] = sprintf('The %s must be at least %s items.', $this->label, $min);
             }
         } else {
-            throw new \Exception('min value must be greater than 0 for field: '.$this->dbField);
+            throw new \InvalidArgumentException('min value must be greater than 0 for field: '.$this->dbField);
         }
 
         return $this;
@@ -113,10 +115,14 @@ trait Options
             $this->limitMax = $max;
 
             if (! isset($this->validationMessages['max'])) {
-                $this->validationMessages['max'] = sprintf('The %s must not be greater than %s items.', $this->label, $max);
+                $this->validationMessages['max'] = sprintf(
+                    'The %s must not be greater than %s items.',
+                    $this->label,
+                    $max
+                );
             }
         } else {
-            throw new \Exception('max value must be greater than 0 for field: '.$this->dbField);
+            throw new \InvalidArgumentException('max value must be greater than 0 for field: '.$this->dbField);
         }
 
         return $this;
@@ -126,7 +132,7 @@ trait Options
     {
         $field = \trim($field);
         if (isset($this->depend[$field])) {
-            throw new \Exception(\sprintf('Depend field "%s" is already exists!', $field));
+            throw new \InvalidArgumentException(\sprintf('Depend field "%s" is already exists!', $field));
         }
 
         $this->depend[$field] = (object) [
@@ -175,14 +181,16 @@ trait Options
 
                                 $where[] = [$depend->column => $depend->value];
 
-                                //Let's reset the dependValue, so that we can fetch the new options for depended field in multiple table
+                                // Let's reset the dependValue, so that we can fetch the new options for
+                                // depended field in multiple table
                                 $depend->value = null;
                             }
 
                             if (! $flagHaveDependValue) {
                                 if (! isset($this->firstOption)) {
                                     $this->firstOption = new \stdClass();
-                                    $this->firstOption->text = '(select '.\strtolower($dependInput->getLabel()).' first)';
+                                    $this->firstOption->text = '(select '.\strtolower($dependInput->getLabel())
+                                        .' first)';
                                     $this->firstOption->value = '';
                                 }
 
@@ -193,10 +201,8 @@ trait Options
                         if (isset($options->dbPatternFields[0]) && ! \is_string($options->dbPatternFields[0])) {
                             $flag = false;
                             $condition = $options->dbPatternFields[0];
-                            if ($condition instanceof Closure) {
-                                $where[] = $condition;
-                                $flag = true;
-                            } elseif ($condition && \is_string($condition[array_key_first($condition)])) {
+                            if ($condition instanceof Closure ||
+                                $condition && \is_string($condition[array_key_first($condition)])) {
                                 $where[] = $condition;
                                 $flag = true;
                             } elseif ($condition) {
@@ -233,7 +239,11 @@ trait Options
                             $closure = $options->closure;
                             $result = $closure($where);
                             if (! $result instanceof \Illuminate\Support\Collection) {
-                                throw new \Exception(\sprintf('Return value of the %s\'s closure must be %s', $this->dbField, \Illuminate\Support\Collection::class));
+                                throw new \Exception(\sprintf(
+                                    'Return value of the %s\'s closure must be %s',
+                                    $this->dbField,
+                                    \Illuminate\Support\Collection::class
+                                ));
                             }
                         } else {
                             $model = (new DataModel())->db($options->table);
@@ -248,16 +258,32 @@ trait Options
                         if ($result && $result->count() > 0) {
                             if (! property_exists($result[0], $options->valueCol)) {
                                 if ('db' == $type) {
-                                    throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->valueCol, $options->table));
+                                    throw new \InvalidArgumentException(\sprintf(
+                                        'Column "%s" not found in "%s" table',
+                                        $options->valueCol,
+                                        $options->table
+                                    ));
                                 } else {
-                                    throw new \Exception(\sprintf('Column "%s" not found in closure\'s response of "%s"', $options->valueCol, $this->dbField));
+                                    throw new \InvalidArgumentException(\sprintf(
+                                        'Column "%s" not found in closure\'s response of "%s"',
+                                        $options->valueCol,
+                                        $this->dbField
+                                    ));
                                 }
                             }
                             if (! $options->dbPatternFields && ! property_exists($result[0], $options->textCol)) {
                                 if ('db' == $type) {
-                                    throw new \Exception(\sprintf('Column "%s" not found in "%s" table', $options->textCol, $options->table));
+                                    throw new \InvalidArgumentException(\sprintf(
+                                        'Column "%s" not found in "%s" table',
+                                        $options->textCol,
+                                        $options->table
+                                    ));
                                 } else {
-                                    throw new \Exception(\sprintf('Column "%s" not found in closure\'s response of "%s"', $options->textCol, $this->dbField));
+                                    throw new \InvalidArgumentException(\sprintf(
+                                        'Column "%s" not found in closure\'s response of "%s"',
+                                        $options->textCol,
+                                        $this->dbField
+                                    ));
                                 }
                             }
                         }
@@ -292,7 +318,7 @@ trait Options
             }
         }
 
-        if ($this->optionType == InputType::Checkbox) {
+        if ($this->optionType == InputType::CHECKBOX) {
             $totalOptions = \count((array) $this->options);
             if ($totalOptions <= 1) {
                 if ($totalOptions == 0) {
@@ -409,7 +435,7 @@ trait Options
 
     public function getNiceValue($value)
     {
-        if ($value === null && $this->optionType != InputType::Checkbox) {
+        if ($value === null && $this->optionType != InputType::CHECKBOX) {
             return null;
         }
 
@@ -436,7 +462,7 @@ trait Options
 
             return implode(', ', $values).(\count($rawValues) > 3 ? '...' : '');
         } else {
-            if ($this->optionType == InputType::Checkbox && $this->singleOptions) {
+            if ($this->optionType == InputType::CHECKBOX && $this->singleOptions) {
                 return $value == $this->valueYes ? $this->captionYes : $this->captionNo;
             }
 
@@ -445,7 +471,8 @@ trait Options
             }
 
             // Check if we have some first value and if that matches with the current value
-            return $this->isFirstOption && $this->firstOption && $value == $this->firstOption->value ? $this->firstOption->text : null;
+            return $this->isFirstOption && $this->firstOption && $value == $this->firstOption->value ?
+                $this->firstOption->text : null;
         }
     }
 

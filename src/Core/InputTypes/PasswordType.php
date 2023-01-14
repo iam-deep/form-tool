@@ -8,15 +8,8 @@ use Illuminate\Support\Facades\Hash;
 
 class PasswordType extends BaseInputType
 {
-    public int $type = InputType::Password;
+    public int $type = InputType::PASSWORD;
     public string $typeInString = 'password';
-
-    public function getValidations($type)
-    {
-        $validations = parent::getValidations($type);
-
-        return $validations;
-    }
 
     public function getNiceValue($value)
     {
@@ -53,7 +46,8 @@ class PasswordType extends BaseInputType
             return '';
         }
 
-        return $this->value !== null ? ['type' => $this->typeInString, 'data' => $this->getNiceValue($this->value)] : '';
+        return $this->value !== null ? ['type' => $this->typeInString,
+            'data' => $this->getNiceValue($this->value)] : '';
     }
 
     public function beforeStore(object $newData)
@@ -81,9 +75,11 @@ class PasswordType extends BaseInputType
 
         // We will only display password on validation errors
         $input = '<div class="input-group">
-            <input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />
+            <input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
+                $this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />
             <span class="input-group-btn">
-                <button class="btn btn-default toggle-password" data-id="'.$this->dbField.'" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-default toggle-password" data-id="'.$this->dbField.
+                    '" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
             </span>
         </div>';
 
@@ -92,18 +88,16 @@ class PasswordType extends BaseInputType
 
     public function getHTMLMultiple($key, $index, $oldValue)
     {
-        $value = $oldValue ?? '';
-
         $id = $key.'-'.$this->dbField.'-'.$index;
 
-        $input = '<div class="input-group">
-            <input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$id.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="" '.$this->raw.$this->inlineCSS.' />
+        return '<div class="input-group">
+            <input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$id.'" name="'.
+                $key.'['.$index.']['.$this->dbField.']" value="" '.$this->raw.$this->inlineCSS.' />
             <span class="input-group-btn">
-                <button class="btn btn-default toggle-password btn-sm" data-id="'.$id.'" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-default toggle-password btn-sm" data-id="'.$id.
+                '" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
             </span>
         </div>';
-
-        return $input;
     }
 
     private function addScript()

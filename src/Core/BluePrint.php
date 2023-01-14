@@ -48,7 +48,7 @@ class BluePrint
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
 
-        $inputType->type = InputTypes\Common\InputType::Number;
+        $inputType->type = InputTypes\Common\InputType::NUMBER;
         $inputType->typeInString = 'number';
 
         $inputType->validations(['numeric' => 'numeric']);
@@ -63,7 +63,7 @@ class BluePrint
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
 
-        $inputType->type = InputTypes\Common\InputType::Email;
+        $inputType->type = InputTypes\Common\InputType::EMAIL;
         $inputType->typeInString = 'email';
         $inputType->inputType = 'email';
 
@@ -195,7 +195,10 @@ class BluePrint
     {
         $field = $this->getInputTypeByDbField($dbField);
         if (! $field) {
-            throw new \Exception('Modify field not found. Field should be in the "create" method: '.$dbField);
+            throw new \InvalidArgumentException(\sprintf(
+                'Modify field not found. Field should be in the "create" method: %s',
+                $dbField
+            ));
         }
 
         return $field;
@@ -240,7 +243,7 @@ class BluePrint
 
         $subBluePrint[$dbField] = new BluePrint($dbField, true, $this);
         $subBluePrint[$dbField]->setForm($this->form);
-        $subBluePrint[$dbField]->label = $label ?? $label ?: \ucfirst($dbField);
+        $subBluePrint[$dbField]->label = $label ?: \ucfirst($dbField);
 
         $field($subBluePrint[$dbField]);
 
@@ -406,7 +409,7 @@ class BluePrint
         }
 
         foreach ($this->dataTypeList as $input) {
-            if (isset($input->type) && $input->type == InputTypes\Common\InputType::Text && ! $input->isEncrypted()) {
+            if (isset($input->type) && $input->type == InputTypes\Common\InputType::TEXT && ! $input->isEncrypted()) {
                 return $input->getDbField();
             }
         }
@@ -418,7 +421,7 @@ class BluePrint
     {
         $selects = [];
         foreach ($this->dataTypeList as $input) {
-            if (! $input instanceof BluePrint && $input->type == InputTypes\Common\InputType::Select) {
+            if (! $input instanceof BluePrint && $input->type == InputTypes\Common\InputType::SELECT) {
                 foreach ($input->getOptionData() as $options) {
                     foreach ($options as $type => $optionData) {
                         if ($type == 'db') {

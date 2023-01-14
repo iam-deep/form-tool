@@ -94,7 +94,7 @@ class Table
      * @param  string  $primaryButtonName  "name" of the primary dropdown button (Default is: _first_button)
      * @return CellDefinition
      *
-     * @throws \Exception
+     * @throws \InvalidArgumentException
      **/
     public function buttons($buttons = ['create'], ?string $primaryButtonName = '_first_button'): Table
     {
@@ -112,7 +112,10 @@ class Table
             } elseif ($button instanceof Button) {
                 $this->crudButtons[] = $button;
             } else {
-                throw new \Exception(\sprintf('Button can be "create", "divider" or an instance of "%s"', Button::class));
+                throw new \InvalidArgumentException(\sprintf(
+                    'Button can be "create", "divider" or an instance of "%s"',
+                    Button::class
+                ));
             }
         }
 
@@ -174,10 +177,7 @@ class Table
             $button->process($search, $replace);
 
             if (! $primary && ! $button->isDivider()) {
-                if ($this->primaryButtonName == '_first_button') {
-                    $primary = $button;
-                    continue;
-                } elseif ($this->primaryButtonName == $button->getName()) {
+                if ($this->primaryButtonName == '_first_button' || $this->primaryButtonName == $button->getName()) {
                     $primary = $button;
                     continue;
                 }
@@ -230,7 +230,13 @@ class Table
         }
 
         $searchTerm = $this->request->query->get('search');
-        $this->dataResult = $this->model->search($searchTerm, $fieldsToSearch, $where, $this->orderBy, $this->request->query('direction') == 'asc' ? 'asc' : 'desc');
+        $this->dataResult = $this->model->search(
+            $searchTerm,
+            $fieldsToSearch,
+            $where,
+            $this->orderBy,
+            $this->request->query('direction') == 'asc' ? 'asc' : 'desc'
+        );
     }
 
     public function listAll()
@@ -239,7 +245,11 @@ class Table
         if ($this->request->query('search')) {
             $this->doSearch($where);
         } else {
-            $this->dataResult = $this->model->getAll($where, $this->orderBy, $this->request->query('direction') == 'asc' ? 'asc' : 'desc');
+            $this->dataResult = $this->model->getAll(
+                $where,
+                $this->orderBy,
+                $this->request->query('direction') == 'asc' ? 'asc' : 'desc'
+            );
         }
 
         return $this->createList();
@@ -305,7 +315,8 @@ class Table
                     $row->isOrdered = true;
                     $row->direction = $this->request->query('direction', 'desc');
 
-                    $row->orderUrl = '?orderby='.$orderColumn.'&direction='.($row->direction == 'asc' ? 'desc' : 'asc').'&'.$orderUrlQueryString;
+                    $row->orderUrl = '?orderby='.$orderColumn.'&direction='.($row->direction == 'asc' ? 'desc' : 'asc').
+                        '&'.$orderUrlQueryString;
                 } else {
                     $row->orderUrl = '?orderby='.$orderColumn.'&direction=desc&'.$orderUrlQueryString;
                 }
@@ -332,7 +343,8 @@ class Table
                     $viewRow->columns[] = $viewData;
                     continue;
                 } elseif ($cell->fieldType == '_bulk') {
-                    $viewData->data = '<input type="checkbox" class="bulk" name="bulk[]" value="'.($value->{$primaryId} ?? '').'">';
+                    $viewData->data = '<input type="checkbox" class="bulk" name="bulk[]" value="'.
+                        ($value->{$primaryId} ?? '').'">';
                     $viewRow->columns[] = $viewData;
                     continue;
                 } elseif ($cell->fieldType == '_any') {
@@ -495,7 +507,6 @@ class Table
             if ($this->request->query('quick_status') == $key) {
                 $row['active'] = true;
                 $isAllActive = false;
-                $url = $row['href'];
 
                 if (isset($data['filterInputs'])) {
                     $data['filterInputs'][] = '<input type="hidden" name="quick_status" value="'.$key.'">';

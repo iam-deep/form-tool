@@ -12,7 +12,6 @@ class Button
     private ?string $icon = null;
     private ?string $link = null;
 
-    private ?string $target = null;
     private string $raw = '';
 
     private ?string $guard = null;

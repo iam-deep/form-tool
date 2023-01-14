@@ -7,7 +7,7 @@
                         @if ($header->isOrderable())
                             @if ($header->isOrdered)
                                 <a href="{{ $route.$header->orderUrl }}">
-                                    {!! $header->getLabel() !!} 
+                                    {!! $header->getLabel() !!}
                                     @if ($header->direction == 'desc')
                                         <i class="fa fa-caret-down"></i>
                                     @else
@@ -109,7 +109,8 @@ function beforeBulkSubmit()
 
     let action = $('select[name="bulkAction"]').val();
     if (action == 'destroy') {
-        return confirm('Are you sure you want to DELETE the selected rows PERMANENTLY?\n\nThis action CANNOT be UNDONE!');
+        return confirm('Are you sure you want to DELETE the selected rows PERMANENTLY?\n\n'+
+            'This action CANNOT be UNDONE!');
     }
 
     return true;

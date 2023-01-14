@@ -7,8 +7,6 @@ use Biswadeep\FormTool\Core\InputTypes\BaseInputType;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
 
-//use Biswadeep\FormTool\Core\BluePrint;
-
 // Select, Checkbox
 // Single, Multiple, Manual & Db
 // Date (From, To, Range)
@@ -49,15 +47,18 @@ class Filter
 
                     $html[] = $field->getFilterHTML();
                 } elseif ($field) {
-                    throw new \Exception('"'.$option.'" is not a Filter Type.');
+                    throw new \InvalidArgumentException('"'.$option.'" is not a Filter Type.');
                 } else {
-                    throw new \Exception('"'.$option.'" not found in the BluePrint.');
+                    throw new \InvalidArgumentException('"'.$option.'" not found in the BluePrint.');
                 }
             } else {
                 $field = $this->bluePrint->getInputTypeByDbField($key);
                 if ($field instanceof BaseFilterType) {
                     if (! in_array($option, $field->getFilterOptions())) {
-                        throw new \Exception('"'.$option.'" option is not available for this field type.');
+                        throw new \InvalidArgumentException(\sprintf(
+                            '"%s" option is not available for this field type.',
+                            $option
+                        ));
                     }
 
                     $label = $field->getLabel();
@@ -83,18 +84,20 @@ class Filter
 
                     $html[] = $option->getFilterHTML();
                 } elseif ($field || $option instanceof BaseInputType) {
-                    throw new \Exception('"'.$key.'" is not a Filter Type.');
+                    throw new \InvalidArgumentException('"'.$key.'" is not a Filter Type.');
                 } else {
-                    throw new \Exception('"'.$key.'" not found in the BluePrint.');
+                    throw new \InvalidArgumentException('"'.$key.'" not found in the BluePrint.');
                 }
             }
         }
 
-        $html[] = '<button class="btn btn-primary btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).'" style="margin-top:25px;">Filter</button>';
+        $html[] = '<button class="btn btn-primary btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).
+            '" style="margin-top:25px;">Filter</button>';
 
         $queries = $request->except('page');
         if ($queries) {
-            $html[] = '<a class="btn btn-default btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).'" style="margin-top:25px;"><i class="fa fa-times"></i> Clear All</a>';
+            $html[] = '<a class="btn btn-default btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).
+                '" style="margin-top:25px;"><i class="fa fa-times"></i> Clear All</a>';
         }
 
         return $html;
@@ -102,7 +105,7 @@ class Filter
 
     public function apply()
     {
-        $where = function ($query) {
+        return function ($query) {
             $request = request();
             foreach ($this->fieldsToFilter as $key => $option) {
                 if (\is_integer($key)) {
@@ -126,8 +129,6 @@ class Filter
                 }
             }
         };
-
-        return $where;
     }
 
     private function setDefaultFilter()

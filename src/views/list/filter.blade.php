@@ -43,6 +43,10 @@
 
 <ul class="quick-filter">
     @foreach ($quickFilters as $key => $row)
-        <li><a href="{{ $row['href'] }}" @if($row['active']) class="active" @endif>{{ $row['label'] }} <span class="count">({{ $row['count'] }})</span> @if($row['separator']) | @endif</a></li>
+        <li>
+            <a href="{{ $row['href'] }}" @if($row['active']) class="active" @endif>
+                {{ $row['label'] }} <span class="count">({{ $row['count'] }})</span> @if($row['separator']) | @endif
+            </a>
+        </li>
     @endforeach
 </ul>

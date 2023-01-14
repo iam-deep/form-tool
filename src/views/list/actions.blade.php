@@ -1,7 +1,9 @@
 <div class="btn-group">
     @if ($buttons->primary)
         @if ($buttons->primary->isLink())
-            <a href="{{ $buttons->primary->getFullLink() }}" class="btn btn-default btn-sm btn-flat">{!! $buttons->primary->getIcon() !!} {!! $buttons->primary->getName() !!}</a>
+            <a href="{{ $buttons->primary->getFullLink() }}" class="btn btn-default btn-sm btn-flat">
+                {!! $buttons->primary->getIcon() !!} {!! $buttons->primary->getName() !!}
+            </a>
         @elseif ($buttons->primary->isHtml())
             {!! $buttons->primary->getHtml('btn btn-default btn-sm btn-flat') !!}
         @endif
@@ -20,7 +22,9 @@
                 @if ($button->isDivider())
                     <li class="divider" {!! $button->getHtml() !!}></li>
                 @elseif ($button->isLink())
-                    <li><a href="{{ $button->getFullLink() }}" {!! $button->getHtml() !!}>{!! $button->getIcon() !!} {!! $button->getName() !!}</a></li>
+                    <li><a href="{{ $button->getFullLink() }}" {!! $button->getHtml() !!}>
+                        {!! $button->getIcon() !!} {!! $button->getName() !!}
+                    </a></li>
                 @elseif ($button->isHtml())
                     <li>{!! $button->getHtml() !!}</li>
                 @endif

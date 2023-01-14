@@ -107,10 +107,8 @@ if (! function_exists('imageThumb')) {
 if (! function_exists('isSuccess')) {
     function isSuccess($response)
     {
-        if ($response instanceof \Illuminate\Http\RedirectResponse) {
-            if (session()->has('success')) {
-                return true;
-            }
+        if ($response instanceof \Illuminate\Http\RedirectResponse && session()->has('success')) {
+            return true;
         }
 
         return false;

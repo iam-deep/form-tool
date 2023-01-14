@@ -8,7 +8,7 @@ use Biswadeep\FormTool\Support\DTConverter;
 
 class DateTimeType extends BaseFilterType
 {
-    public int $type = InputType::DateTime;
+    public int $type = InputType::DATE_TIME;
     public string $typeInString = 'datetime';
 
     protected $dbFormat = '';
@@ -83,11 +83,7 @@ class DateTimeType extends BaseFilterType
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-        $val = \trim($newData->{$this->dbField});
-
-        $this->value = DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
-
-        return $this->value;
+        return $this->beforeStore($newData);
     }
 
     public function getHTML()
@@ -96,7 +92,9 @@ class DateTimeType extends BaseFilterType
 
         $input = '<div class="input-group">
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->modifyFormat($this->value)).'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />
+            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
+                $this->dbField.'" value="'.old($this->dbField, $this->modifyFormat($this->value)).'" '.
+                $this->raw.$this->inlineCSS.' autocomplete="off" />
         </div>';
 
         return $this->htmlParentDiv($input);
@@ -108,12 +106,12 @@ class DateTimeType extends BaseFilterType
 
         $value = $oldValue ?? $this->modifyFormat($this->value);
 
-        $input = '<div class="input-group">
+        return '<div class="input-group">
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-            <input type="text" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />
+            <input type="text" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.
+                $index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.
+                $this->raw.$this->inlineCSS.' autocomplete="off" />
         </div>';
-
-        return $input;
     }
 
     private function modifyFormat($value)
@@ -126,7 +124,9 @@ class DateTimeType extends BaseFilterType
         Doc::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
 
         Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
-        Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js');
+        Doc::addJsLink(
+            'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/js/bootstrap-datetimepicker.min.js'
+        );
 
         $this->pickerFormatDateTime = \trim(config('form-tool.pickerFormatDateTime', $this->pickerFormatDateTime));
         $this->pickerFormatDate = \trim(config('form-tool.pickerFormatDate', $this->pickerFormatDate));
@@ -158,7 +158,9 @@ class DateTimeType extends BaseFilterType
 
         $input = '<div class="input-group">
             <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.$this->inlineCSS.' autocomplete="off" />
+            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
+                $this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.$this->inlineCSS.
+                ' autocomplete="off" />
         </div>';
 
         return $this->htmlParentDivFilter($input);

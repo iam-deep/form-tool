@@ -3,7 +3,8 @@
         <span>{{ $table->label }}</span>
     </label>
     <div class="col-sm-10">
-        <table class="table table-multiple table-bordered {{ $table->classes }}" id="{{ $table->id }}" data-required="{{ $table->required }}">
+        <table class="table table-multiple table-bordered {{ $table->classes }}" id="{{ $table->id }}"
+            data-required="{{ $table->required }}">
             <thead>
                 <tr class="active">
                     @foreach ($table->header as $header)

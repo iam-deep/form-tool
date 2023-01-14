@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -23,7 +23,8 @@
   <![endif]-->
 
   <!-- Google Font -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
 
 <!-- jQuery 3 -->
 <script src="{{ URL::asset('/assets/form-tool/plugins/jquery/dist/jquery.min.js') }}"></script>
@@ -73,7 +74,11 @@ input[type=checkbox], input[type=radio] {
         <ul class="nav navbar-nav">
 
             @if ('website' == env('APP_TYPE'))
-				<li><a href="{{ URL::to('/') }}" target="_blank" title="View Website" data-toggle="tooltip"><i class="fa fa-globe"></a></i></li>
+				<li>
+                    <a href="{{ URL::to('/') }}" target="_blank" title="View Website" data-toggle="tooltip">
+                        <i class="fa fa-globe"></i>
+                    </a>
+                </li>
 			@endif
 
           <!-- User Account Menu -->
@@ -97,13 +102,16 @@ input[type=checkbox], input[type=radio] {
               </li>
               <li class="user-footer">
                 <div class="pull-left">
-                  <a href="{{ URL::to(config('form-tool.adminURL') . '/change-password') }}" class="btn btn-default btn-flat">Password</a>
+                  <a href="{{ URL::to(config('form-tool.adminURL') . '/change-password') }}"
+                    class="btn btn-default btn-flat">Password</a>
                 </div>
                 <div class="pull-right">
-                  <!-- <a href="{{ URL::to(config('form-tool.adminURL') . '/logout') }}" class="btn btn-default btn-flat">Sign out</a>-->
+                  <!-- <a href="{{ URL::to(config('form-tool.adminURL') . '/logout') }}"
+                    class="btn btn-default btn-flat">Sign out</a>-->
                     <form method="POST" action="{{ route('logout') }}">
                         @csrf
-                        <a href="route('logout')" onclick="event.preventDefault();this.closest('form').submit();" class="btn btn-default btn-flat">
+                        <a href="route('logout')" onclick="event.preventDefault();this.closest('form').submit();"
+                            class="btn btn-default btn-flat">
                             {{ __('Log Out') }}
                         </a>
                     </form>

@@ -16,7 +16,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         getValue as protected getDecryptedValue;
     }
 
-    public int $type = InputType::Text;
+    public int $type = InputType::TEXT;
     public string $typeInString = 'text';
 
     public string $inputType = 'text';
@@ -74,7 +74,10 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
                 $validations[] = $rule;
             } else {
                 $rule = Rule::unique($model->getTableName(), $this->dbField)
-                    ->ignore($this->bluePrint->getForm()->getId(), $model->isToken() ? $model->getTokenCol() : $model->getPrimaryId());
+                    ->ignore(
+                        $this->bluePrint->getForm()->getId(),
+                        $model->isToken() ? $model->getTokenCol() : $model->getPrimaryId()
+                    );
 
                 if ($this->uniqueClosure) {
                     $uniqueClosure = $this->uniqueClosure;
@@ -105,7 +108,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
 
         // If the field is Number type and is optional and there is no value then put default value as 0
         // As the default value of a number should be 0
-        if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
+        if ($this->type == InputType::NUMBER && ! $this->isRequired && ! $this->value) {
             return 0;
         }
 
@@ -114,22 +117,14 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-        if ($this->value === null && $this->forceNullIfEmpty) {
-            return null;
-        }
-
-        // If the field is Number type and is optional and there is no value then put default value as 0
-        // As the default value of a number should be 0
-        if ($this->type == InputType::Number && ! $this->isRequired && ! $this->value) {
-            return 0;
-        }
-
-        return $this->value;
+        return $this->beforeStore($newData);
     }
 
     public function getHTML()
     {
-        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.$this->inlineCSS.' />';
+        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.
+            '" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.
+            $this->raw.$this->inlineCSS.' />';
 
         return $this->htmlParentDiv($input);
     }
@@ -138,8 +133,8 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
     {
         $value = $oldValue ?? $this->value;
 
-        $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.$this->raw.$this->inlineCSS.' />';
-
-        return $input;
+        return '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).' input-sm" id="'
+            .$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.
+            '" '.$this->raw.$this->inlineCSS.' />';
     }
 }

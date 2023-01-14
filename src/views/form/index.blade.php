@@ -29,7 +29,8 @@ let template = [];
                 <h3 class="box-title">{{ $title ?? '' }}</h3>
             </div>
 
-            <form action="{{ $page->form->action }}" method="POST" enctype="multipart/form-data" class="form-horizontal">
+            <form action="{{ $page->form->action }}" method="POST" enctype="multipart/form-data"
+                class="form-horizontal">
                 <div class="box-body">
                     @csrf
 

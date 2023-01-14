@@ -47,7 +47,7 @@ class Auth
         $config = self::$config = \config('form-tool.auth', ['isCustomAuth' => false]);
 
         if (! isset($config['userModel'])) {
-            throw new \Exception('$auth[\'userModel\'] is not defined in form-tool config');
+            throw new \InvalidArgumentException('$auth[\'userModel\'] is not defined in form-tool config');
         }
 
         if (! \is_subclass_of($config['userModel'], Model::class)) {
@@ -61,7 +61,11 @@ class Auth
         }
 
         if (! \method_exists($config['userModel'], 'user')) {
-            throw new \Exception(\sprintf('static "%s()" method not found in %s', 'user', $config['userModel']));
+            throw new \BadMethodCallException(\sprintf(
+                'static "%s()" method not found in %s',
+                'user',
+                $config['userModel']
+            ));
         }
 
         self::$user = $config['userModel']::user();

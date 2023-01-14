@@ -78,7 +78,8 @@ class Form
             }, $except);
         }
 
-        if ('POST' == $method && \strtoupper($this->request->post('method')) == 'CREATE' && (! $except || ! in_array('STORE', $except))) {
+        if ('POST' == $method && \strtoupper($this->request->post('method')) == 'CREATE'
+            && (! $except || ! in_array('STORE', $except))) {
             return $this->store();
         } elseif ('PUT' == $method && (! $except || ! in_array('UPDATE', $except))) {
             return $this->update();
@@ -140,7 +141,7 @@ class Form
         $columns = array_values($columns);
         foreach ($columns as $col) {
             if (! $this->bluePrint->getInputTypeByDbField($col)) {
-                throw new \Exception(sprintf('Field "%s" not found for unique validation', $col));
+                throw new \InvalidArgumentException(sprintf('Field "%s" not found for unique validation', $col));
             }
         }
 
@@ -179,7 +180,9 @@ class Form
         $data->action = $data->cancel = $url.$this->queryString;
 
         if ($data->isEdit) {
-            $editId = $this->model->isToken() ? $this->resultData->{$this->model->getTokenCol()} : ($this->resultData->{$this->model->getPrimaryId()} ?? null);
+            $editId = $this->model->isToken() ?
+                $this->resultData->{$this->model->getTokenCol()} :
+                ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
             if ($editId) {
                 $data->action = $url.'/'.$editId.$this->queryString;
@@ -222,7 +225,7 @@ class Form
         $totalCols = 0;
         foreach ($model->getList() as $field) {
             if (! $field instanceof BluePrint) {
-                if ($field->getType() != InputType::Hidden) {
+                if ($field->getType() != InputType::HIDDEN) {
                     $tableData->header[] = $field->getLabel();
                     $totalCols++;
                 }
@@ -344,7 +347,7 @@ class Form
                 // Let's modify value before if needed like for decryption
                 $field->setValue($field->getValue());
 
-                if ($field->getType() == InputType::Hidden) {
+                if ($field->getType() == InputType::HIDDEN) {
                     $rowData->hidden .= $field->getHTMLMultiple($key, $index, $oldValue);
                 } else {
                     $rowData->columns .= '<td>'.$field->getHTMLMultiple($key, $index, $oldValue).'</td>';
@@ -373,7 +376,7 @@ class Form
                 if (\count($matches) > 1) {
                     $id = $matches[1];
                 } else {
-                    throw new \Exception('Could not fetch "id"! Pass $id manually as parameter.');
+                    throw new \InvalidArgumentException('Could not fetch "id"! Pass $id manually as parameter.');
                 }
             }
 
@@ -450,7 +453,10 @@ class Form
             }
 
             if (! $this->oldData) {
-                return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
+                return redirect($this->url.$this->queryString)->with(
+                    'error',
+                    'Something went wrong! Data not found, please try again!'
+                );
             }
 
             $this->editId = $this->oldData->{$this->model->getPrimaryId()};
@@ -482,7 +488,7 @@ class Form
                 }
             }
 
-            $affected = $this->model->updateOne($this->editId, $this->postData, false);
+            $this->model->updateOne($this->editId, $this->postData, false);
         } else {
             $this->model->destroyWhere(['groupName' => $this->crud->getGroupName()]);
 
@@ -532,9 +538,9 @@ class Form
             }
 
             if ($this->formStatus == FormStatus::Store) {
-                $response = $input->afterStore($result);
+                $input->afterStore($result);
             } else {
-                $response = $input->afterUpdate($this->oldData, $result);
+                $input->afterUpdate($this->oldData, $result);
             }
         }
 
@@ -556,7 +562,7 @@ class Form
                     $foreignKey = $model->foreignKey;
                 } else {
                     if (! isset($model::$foreignKey)) {
-                        throw new \Exception('$foreignKey property not defined at '.$model);
+                        throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
                     }
 
                     $foreignKey = $model::$foreignKey;
@@ -573,7 +579,10 @@ class Form
                 foreach ($input->getList() as $field) {
                     if ($this->request->file($input->getKey())) {
                         if ($postData) {
-                            $postData = array_merge($postData, array_fill(0, \count($this->request->file($input->getKey())), null));
+                            $postData = array_merge(
+                                $postData,
+                                array_fill(0, \count($this->request->file($input->getKey())), null)
+                            );
                         } else {
                             $postData = array_fill(0, \count($this->request->file($input->getKey())), null);
                         }
@@ -697,7 +706,10 @@ class Form
 
             $count = $this->model->countWhere($where);
             if ($count) {
-                return back()->with('error', \sprintf('The combination of "%s" is already exist!', \implode(', ', array_values($combination))))->withInput();
+                return back()->with('error', \sprintf(
+                    'The combination of "%s" is already exist!',
+                    \implode(', ', array_values($combination))
+                ))->withInput();
             }
         }
 
@@ -710,7 +722,10 @@ class Form
                 } elseif ($response instanceof \Illuminate\Http\RedirectResponse) {
                     return $response->send();
                 } else {
-                    return back()->with('error', 'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION')->withInput();
+                    return back()->with(
+                        'error',
+                        'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION'
+                    )->withInput();
                 }
             }
         }
@@ -735,20 +750,6 @@ class Form
 
         // I think we should not remove the meta data like dates and updatedby
         // Remove if there is any extra fields that are not needed
-        /*foreach ($this->postData as $key => $val) {
-            if (isset($this->options->doNotSave) && $this->options->doNotSave) {
-                if (\in_array($key, $this->options->doNotSave)) {
-                    unset($this->postData[$key]);
-                    continue;
-                }
-            }
-            if (isset($this->options->saveOnly) && $this->options->saveOnly) {
-                if (! \in_array($key, $this->options->saveOnly)) {
-                    unset($this->postData[$key]);
-                    continue;
-                }
-            }
-        }*/
 
         foreach ($this->bluePrint->getList() as $input) {
             $dbField = $input instanceof BluePrint ? $input->getKey() : $input->getDbField();
@@ -822,7 +823,7 @@ class Form
             return $this->editId;
         }
 
-        throw new \Exception('Could not fetch "id"! Pass $id manually as parameter.');
+        throw new \InvalidArgumentException('Could not fetch "id"! Pass $id manually as parameter.');
     }
 
     //endregion
@@ -841,7 +842,10 @@ class Form
 
         $result = $this->model->getOne($id);
         if (! $result) {
-            return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
+            return redirect($this->url.$this->queryString)->with(
+                'error',
+                'Something went wrong! Data not found, please try again!'
+            );
         }
 
         $pId = $id;
@@ -879,7 +883,10 @@ class Form
         $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
         $result = $this->model->getWhereOne([$idCol => $id]);
         if (! $result) {
-            return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not found, please try again!');
+            return redirect($this->url.$this->queryString)->with(
+                'error',
+                'Something went wrong! Data not found, please try again!'
+            );
         }
 
         $pId = $id;
@@ -898,7 +905,11 @@ class Form
             }
 
             if ($result->{$deletedAt} === null) {
-                return redirect($this->url.$this->queryString)->with('error', 'Soft delete is enabled for this module. You need to mark as delete first then only you can delete it permanently!');
+                return redirect($this->url.$this->queryString)->with(
+                    'error',
+                    'Soft delete is enabled for this module. You need to mark as delete first
+                        then only you can delete it permanently!'
+                );
             }
         }
 
@@ -925,7 +936,7 @@ class Form
                             $foreignKey = $model->foreignKey;
                         } else {
                             if (! isset($model::$foreignKey)) {
-                                throw new \Exception('$foreignKey property not defined at '.$model);
+                                throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
                             }
 
                             $foreignKey = $model::$foreignKey;
@@ -958,7 +969,10 @@ class Form
             return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
         }
 
-        return redirect($this->url.$this->queryString)->with('error', 'Something went wrong! Data not deleted fully, please contact Support Administartor.');
+        return redirect($this->url.$this->queryString)->with(
+            'error',
+            'Something went wrong! Data not deleted fully, please contact Support Administartor.'
+        );
     }
 
     private function checkForeignKeyRestriction($id, $dataToDelete)
@@ -983,7 +997,8 @@ class Form
 
                 foreach ($data->foreignKey as $option) {
                     if ($option->table == $this->model->getTableName()) {
-                        $resultData = DB::table($data->main->table)->where($option->column, $id)->limit($totalReferencesToFetch)->get();
+                        $resultData = DB::table($data->main->table)->where($option->column, $id)
+                            ->limit($totalReferencesToFetch)->get();
 
                         $count = \count($resultData);
                         if ($count > 0) {
@@ -1040,7 +1055,12 @@ class Form
             $msg .= '<br /><ul>';
             $i = 0;
             foreach ($dataCount as $result) {
-                $msg .= \sprintf('<li>%s data of <b>%s</b> in field "%s"</li>', $result['count'], $result['title'], $result['label']);
+                $msg .= \sprintf(
+                    '<li>%s data of <b>%s</b> in field "%s"</li>',
+                    $result['count'],
+                    $result['title'],
+                    $result['label']
+                );
 
                 $url = URL::to(\config('form-tool.adminURL').'/'.$result['route']);
                 $hasEditPermission = Guard::hasEdit($result['route']);

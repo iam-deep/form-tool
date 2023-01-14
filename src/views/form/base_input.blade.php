@@ -1,6 +1,7 @@
 <div class="form-group @if ($field->error) has-error @endif">
-    @if ($field->type == 'editor')        
-        <label for="{{ $field->dbField }}" class="col-sm-2 control-label" data-toggle="tooltip" data-placement="right" title="{{ $field->help }}">
+    @if ($field->type == 'editor')
+        <label for="{{ $field->dbField }}" class="col-sm-2 control-label" data-toggle="tooltip" data-placement="right"
+            title="{{ $field->help }}">
             <span class="@if ($field->help) has-help @endif">{{ $field->label }}</span>
             @if ($field->isRequired)
                 <span class="text-danger">*</span>
@@ -15,7 +16,8 @@
             @endif
         </div>
     @else
-        <label for="{{ $field->dbField }}" class="col-sm-2 control-label" data-toggle="tooltip" data-placement="right" title="{{ $field->help }}">
+        <label for="{{ $field->dbField }}" class="col-sm-2 control-label" data-toggle="tooltip" data-placement="right"
+            title="{{ $field->help }}">
             <span class="@if ($field->help) has-help @endif">{{ $field->label }}</span>
             @if ($field->isRequired)
                 <span class="text-danger">*</span>

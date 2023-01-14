@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\URL;
 
 class EditorType extends BaseInputType implements ISearchable
 {
-    public int $type = InputType::Editor;
+    public int $type = InputType::EDITOR;
     public string $typeInString = 'editor';
 
     private string $uploadPath = '';
@@ -78,9 +78,7 @@ class EditorType extends BaseInputType implements ISearchable
 
     public function beforeUpdate(object $oldData, object $newData)
     {
-        $this->value = $this->encodeHTML($newData->{$this->dbField});
-
-        return $this->value;
+        return $this->beforeStore($newData);
     }
 
     public function uploadImage(Request $request)
@@ -135,7 +133,9 @@ class EditorType extends BaseInputType implements ISearchable
         createCkEditor(selector, csrf_token, uploadPath);
         ", 'editor-'.$this->dbField);
 
-        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.'" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.old($this->dbField, $this->decodeHTML($this->value)).'</textarea>';
+        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.
+            $this->dbField.'" name="'.$this->dbField.'" placeholder="Type the content here!" placeholder="'.
+            $this->placeholder.'">'.old($this->dbField, $this->decodeHTML($this->value)).'</textarea>';
 
         return $this->htmlParentDiv($input);
     }
@@ -157,9 +157,9 @@ class EditorType extends BaseInputType implements ISearchable
 
         $value = $this->decodeHTML($oldValue ?? $this->value);
 
-        $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.$selectorId.'" name="'.$key.'['.$index.']['.$this->dbField.']" placeholder="Type the content here!" placeholder="'.$this->placeholder.'">'.$value.'</textarea>';
-
-        return $input;
+        return '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'
+            .$selectorId.'" name="'.$key.'['.$index.']['.$this->dbField.']" placeholder="'.$this->placeholder.'">'.
+            $value.'</textarea>';
     }
 
     public function getMultipleScript()

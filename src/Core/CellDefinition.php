@@ -33,9 +33,9 @@ class CellDefinition
     private $styleClass = [];
     public $raw = '';
 
-    // Private is important
     private function __construct()
     {
+        // The construct must remain private
     }
 
     public static function Input(TableField $tableField, BaseInputType $inputType): CellDefinition

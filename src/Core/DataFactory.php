@@ -51,10 +51,10 @@ class DataFactory
 
         Storage::put($segment->path, \json_encode($data));
 
-        self::get($bluePrint);
+        self::get();
     }
 
-    public static function get($bluePrint)
+    public static function get()
     {
         $segment = self::getSegments();
 

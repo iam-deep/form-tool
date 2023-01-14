@@ -40,6 +40,7 @@ class Guard
     // Private is to prevent direct instantiation of this class
     private function __construct()
     {
+        // The construct must remain private
         self::$isEnable = config('form-tool.isGuarded', true);
     }
 
@@ -283,6 +284,10 @@ class Guard
                 if (! $this->hasDestroy) {
                     $this->abort();
                 }
+
+                break;
+
+            default:
         }
 
         return $next($request);
@@ -297,7 +302,11 @@ class Guard
     {
         $type = strtolower(\trim($type));
         if (! in_array($type, self::$instance->guardTypes)) {
-            throw new \Exception(\sprintf('Guard type "%s" is not valid. Valid Types are: (%s)', $type, \implode(', ', self::$instance->guardTypes)));
+            throw new \InvalidArgumentException(\sprintf(
+                'Guard type "%s" is not valid. Valid Types are: (%s)',
+                $type,
+                \implode(', ', self::$instance->guardTypes)
+            ));
         }
 
         return $type;

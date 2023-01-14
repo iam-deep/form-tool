@@ -35,7 +35,8 @@ ul.pagination {
         <div class="btn-group pull-right">
             @if ($page->buttons->primary)
                 @if ($page->buttons->primary->isLink())
-                    <a href="{{ $page->buttons->primary->getFullLink() }}" class="btn btn-success btn-sm btn-flat">{!! $page->buttons->primary->getIcon() !!} {!! $page->buttons->primary->getName() !!}</a>
+                    <a href="{{ $page->buttons->primary->getFullLink() }}" class="btn btn-success btn-sm btn-flat">
+                        {!! $page->buttons->primary->getIcon() !!} {!! $page->buttons->primary->getName() !!}</a>
                 @elseif ($page->buttons->primary->isHtml())
                     {!! $page->buttons->primary->getHtml('btn btn-default btn-sm btn-flat') !!}
                 @endif
@@ -54,7 +55,8 @@ ul.pagination {
                         @if ($button->isDivider())
                             <li class="divider" {!! $button->getHtml() !!}></li>
                         @elseif ($button->isLink())
-                            <li><a href="{{ $button->getFullLink() }}" {!! $button->getHtml() !!}>{!! $button->getIcon() !!} {!! $button->getName() !!}</a></li>
+                            <li><a href="{{ $button->getFullLink() }}" {!! $button->getHtml() !!}>
+                                {!! $button->getIcon() !!} {!! $button->getName() !!}</a></li>
                         @elseif ($button->isHtml())
                             <li>{!! $button->getHtml() !!}</li>
                         @endif
@@ -70,7 +72,8 @@ ul.pagination {
                 {{ $page->bulkAction }}
 
                 <div class="box-tools pull-right">
-                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left" style="width: 200px;" value="{{ $page->searchQuery }}" placeholder="Search" autocomplete="off">
+                    <input type="text" name="search" id="tableSearch" class="form-control input-sm pull-left"
+                        style="width: 200px;" value="{{ $page->searchQuery }}" placeholder="Search" autocomplete="off">
                 </div>
             </div>
             <div class="box-body">

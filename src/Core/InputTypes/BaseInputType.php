@@ -12,7 +12,7 @@ class BaseInputType
 {
     protected $bluePrint = null;
 
-    protected int $type = InputType::Text;
+    protected int $type = InputType::TEXT;
 
     protected string $dbField = '';
     protected string $label = '';
@@ -354,6 +354,8 @@ class BaseInputType
                 return $this->getNiceValue($this->value) ?? '';
 
                 break;
+
+            default:
         }
 
         return '';

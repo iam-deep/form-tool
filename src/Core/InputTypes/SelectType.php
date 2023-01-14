@@ -11,11 +11,9 @@ class SelectType extends BaseFilterType
 {
     use Options;
 
-    public int $type = InputType::Select;
+    public int $type = InputType::SELECT;
     public string $typeInString = 'select';
 
-    //protected $options = [];
-    //protected $result = null;
     protected bool $isFirstOption = true;
     protected $firstOption = null;
 
@@ -66,7 +64,7 @@ class SelectType extends BaseFilterType
     public function plugin($plugin = 'default')
     {
         if (! \in_array($plugin, $this->plugins)) {
-            throw new \Exception('Plugin not found: '.$plugin);
+            throw new \InvalidArgumentException('Plugin not found: '.$plugin);
         }
 
         $this->currentPlugin = $plugin;
@@ -157,7 +155,8 @@ class SelectType extends BaseFilterType
 
         if ($this->isMultiple) {
             foreach ($this->options as $val => $text) {
-                $input .= '<option value="'.$val.'" '.(\is_array($value) && \in_array($val, $value) ? 'selected' : '').'>'.$text.'</option>';
+                $input .= '<option value="'.$val.'" '.(\is_array($value) && \in_array($val, $value) ? 'selected' : '')
+                    .'>'.$text.'</option>';
             }
         } else {
             foreach ($this->options as $val => $text) {
@@ -194,7 +193,8 @@ class SelectType extends BaseFilterType
         // This is needed for depend value
         $this->value = $value;
 
-        $input = '<select class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
+        $input = '<select class="'.\implode(' ', $this->classes).' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.
+            '" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
         $input .= $this->getOptions($value);
         $input .= '</select>';
 
@@ -225,17 +225,13 @@ class SelectType extends BaseFilterType
         return $this->htmlParentDivFilter($this->getInput($this->value));
     }
 
-    private function getDependOptions()
-    {
-        return $this->getOptions($this->value);
-    }
-
     private function getInput($value)
     {
         $this->setPlugin();
         $this->addScript();
 
-        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.$this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
+        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
+            $this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
         $input .= $this->getOptions($value);
         $input .= '</select>';
 
