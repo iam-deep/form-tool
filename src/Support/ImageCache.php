@@ -2,8 +2,8 @@
 
 namespace Biswadeep\FormTool\Support;
 
-use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Log;
+use Intervention\Image\Facades\Image;
 
 class ImageCache
 {

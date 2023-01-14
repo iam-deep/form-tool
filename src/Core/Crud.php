@@ -92,8 +92,7 @@ class Crud
         ?string $token = '',
         ?string $orderBy = '',
         ?string $foreignKey = ''
-    ): Crud
-    {
+    ): Crud {
         $this->model->db($tableName, $primaryId, $token, $orderBy, $foreignKey);
 
         return $this;
