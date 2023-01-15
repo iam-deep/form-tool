@@ -190,7 +190,7 @@ class Crud
             'primaryKey' => $foreignPrimaryCol,
             'module' => $moduleName,
             'route' => trim($route),
-            'label' => $foreignKeyLabel
+            'label' => $foreignKeyLabel,
         ];
 
         return $this;

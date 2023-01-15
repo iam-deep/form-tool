@@ -226,7 +226,7 @@ class SelectType extends BaseFilterType
     }
 
     /**
-     * This method is called by Options trait
+     * This method is called by Options trait.
      */
     private function getDependOptions()
     {
