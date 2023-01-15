@@ -225,6 +225,14 @@ class SelectType extends BaseFilterType
         return $this->htmlParentDivFilter($this->getInput($this->value));
     }
 
+    /**
+     * This method is called by Options trait
+     */
+    private function getDependOptions()
+    {
+        return $this->getOptions($this->value);
+    }
+
     private function getInput($value)
     {
         $this->setPlugin();

@@ -21,7 +21,8 @@ class Crud
     protected string $groupName = 'default';
     protected bool $isSoftDelete = true;
 
-    private $deleteRestrict = [];
+    private $deleteRestrictForOthers = [];
+    private $deleteRestrictForMe = [];
 
     public function make(object $resource, $model, Closure $callback, string $name = 'default'): Crud
     {
@@ -120,19 +121,22 @@ class Crud
         }
 
         $commons = \config('form-tool.commonDeleteRestricted', []);
-        foreach ($commons as $key => &$common) {
+        foreach ($commons as &$common) {
             $common = (object) $common;
         }
 
-        $selects = $commons;
-        $selects = array_merge($selects, $this->bluePrint->getSelectDbOptions());
-        $selects = array_merge($selects, $this->deleteRestrict);
-        if (! $selects) {
+        $foreignKey = $commons;
+        $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions());
+        $foreignKey = array_merge($foreignKey, $this->deleteRestrictForOthers);
+
+        $foreignModules = $this->deleteRestrictForMe;
+        if (! $foreignKey && ! $foreignModules) {
             return;
         }
 
         $data = new \stdClass();
-        $data->foreignKey = $selects;
+        $data->foreignKey = $foreignKey;
+        $data->foreignModules = $foreignModules;
 
         $model = $this->model;
         $data->main = (object) [
@@ -163,10 +167,31 @@ class Crud
         return $this;
     }
 
-    public function deleteRestrict(string $foreignTable, string $column, ?string $label = null): Crud
+    public function deleteRestrictForOthers(string $foreignTable, string $column, ?string $label = null): Crud
     {
         // TODO: Validate if table and column is exists or need to create user test script
-        $this->deleteRestrict[] = (object) ['table' => $foreignTable, 'column' => $column, 'label' => $label];
+        $this->deleteRestrictForOthers[] = (object) ['table' => $foreignTable, 'column' => $column, 'label' => $label];
+
+        return $this;
+    }
+
+    public function deleteRestrictForMe(
+        string $foreignTable,
+        string $foreignKeyColumn,
+        string $foreignPrimaryCol,
+        ?string $moduleName,
+        ?string $route = null,
+        ?string $foreignKeyLabel = null
+    ): Crud {
+        // TODO: Validate if table and column is exists or need to create user test script
+        $this->deleteRestrictForMe[] = (object) [
+            'table' => $foreignTable,
+            'column' => $foreignKeyColumn,
+            'primaryKey' => $foreignPrimaryCol,
+            'module' => $moduleName,
+            'route' => trim($route),
+            'label' => $foreignKeyLabel
+        ];
 
         return $this;
     }

@@ -986,7 +986,6 @@ class Form
         $dataCount = [];
         $totalCount = 0;
 
-        $totalReferencesToDisplay = 10;
         $totalReferencesToFetch = 100;
 
         $result = DB::table('cruds')->get();
@@ -1021,124 +1020,160 @@ class Form
 
                             // Let's break, we will not fetch more than $totalReferencesToFetch items
                             if ($totalCount >= $totalReferencesToFetch) {
-                                break;
+                                break 2;
                             }
                         }
                     }
                 }
 
-                // Let's break, we will not fetch more than $totalReferencesToFetch items
-                if ($totalCount >= $totalReferencesToFetch) {
-                    break;
+                // foreignModules will be checked only for the same route
+                if ($row->route != $this->resource->route) {
+                    continue;
+                }
+
+                foreach ($data->foreignModules as $option) {
+                    $query = DB::table($option->table)->where($option->column, $id);
+
+                    // If we are checking the same table then ignore the id we want to delete
+                    if ($data->main->table == $this->model->getTableName()) {
+                        $query->where($option->column, '!=', $id);
+                    }
+                    $resultData = $query->limit($totalReferencesToFetch)->get();
+
+                    $count = \count($resultData);
+                    if ($count > 0) {
+                        $dataCount[] = [
+                            'count' => $count,
+                            'title' => $option->module,
+                            'route' => $option->route,
+                            'label' => $option->label,
+                            'id' => $option->primaryKey,
+                            'result' => $resultData,
+                        ];
+                        $totalCount += $count;
+
+                        // Let's break, we will not fetch more than $totalReferencesToFetch items
+                        if ($totalCount >= $totalReferencesToFetch) {
+                            break 2;
+                        }
+                    }
                 }
             }
         }
 
         if ($dataCount) {
-            $displayId = $id;
-            if ($this->model->isToken()) {
-                $displayId = $dataToDelete->{$this->model->getTokenCol()} ?? null;
-            }
-
-            $msg = '';
-            $heroField = $this->bluePrint->getHeroField();
-            if ($heroField && isset($dataToDelete->{$heroField}) && $dataToDelete->{$heroField}) {
-                $msg .= 'Data: <b>"'.$dataToDelete->{$heroField}.'" (ID: '.$displayId.')</b> ';
-            } else {
-                $msg .= '<b>ID: '.$displayId.'</b> ';
-            }
-
-            $msg .= \sprintf(
-                'is linked with <b>%s</b> data. You need to destroy all the linked data first to delete this item. ',
-                $totalCount
-            );
-
-            if ($totalCount > 10) {
-                $msg .= 'Below are some of the data which are linked to this item:';
-            } else {
-                $msg .= 'Below data are linked to this item:';
-            }
-
-            $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
-            $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
-
-            $msg .= '<br /><ul>';
-            $i = 0;
-            foreach ($dataCount as $result) {
-                if ($result['label']) {
-                    $msg .= \sprintf(
-                        '<li>%s data of <b>%s</b> in field "%s"</li>',
-                        $result['count'],
-                        $result['title'],
-                        $result['label']
-                    );
-                } else {
-                    $msg .= \sprintf(
-                        '<li>%s data of <b>%s</b></li>',
-                        $result['count'],
-                        $result['title']
-                    );
-                }
-
-                $url = URL::to(\config('form-tool.adminURL').'/'.$result['route']);
-                $hasEditPermission = Guard::hasEdit($result['route']);
-                $hasDestroyPermission = Guard::hasDestroy($result['route']);
-
-                $msg .= '<ul>';
-                foreach ($result['result'] as $row) {
-                    $id = $row->{$result['id']} ?? null;
-
-                    if ($id) {
-                        $newMsg = '<li>ID: '.$id.'</li>';
-
-                        $isDeleted = $row->{$deletedAt} ?? null;
-                        if ($isDeleted) {
-                            if ($hasDestroyPermission) {
-                                $newMsg = \sprintf(
-                                    '<li>ID: <a href="%s?id=%s&quick_status=trash" target="_blank">%s &nbsp
-                                        <i class="fa fa-external-link"></i></a></li>',
-                                    $url,
-                                    $id,
-                                    $id
-                                );
-                            }
-                        } elseif ($hasEditPermission) {
-                            $newMsg = \sprintf(
-                                '<li>ID: <a href="%s?id=%s" target="_blank">%s &nbsp <i class="fa fa-external-link">
-                                    </i></a></li>',
-                                $url,
-                                $id,
-                                $id
-                            );
-                        }
-
-                        $msg .= $newMsg;
-                    } else {
-                        $msg .= "<li>ID: <i>{$result['id']} column not found</i></li>";
-                    }
-
-                    $i++;
-                    if ($i >= $totalReferencesToDisplay) {
-                        break;
-                    }
-                }
-                $msg .= '</ul>';
-
-                if ($i >= $totalReferencesToDisplay && $totalCount > $totalReferencesToDisplay) {
-                    if ($totalCount == $totalReferencesToFetch) {
-                        $msg .= '<li><i>More than '.$totalReferencesToFetch.'+ items...</i></li>';
-                    } else {
-                        $msg .= '<li><i>+'.($totalCount - $totalReferencesToDisplay).' more item(s)...</i></li>';
-                    }
-                    break;
-                }
-            }
-            $msg .= '</ul>';
+            $msg = $this->createMessage($id, $dataToDelete, $dataCount, $totalCount, $totalReferencesToFetch);
 
             return redirect($this->url.$this->queryString)->with('error', $msg);
         }
 
         return true;
+    }
+
+    private function createMessage($displayId, $dataToDelete, $dataCount, $totalCount, $totalReferencesToFetch)
+    {
+        $totalReferencesToDisplay = 10;
+
+        if ($this->model->isToken()) {
+            $displayId = $dataToDelete->{$this->model->getTokenCol()} ?? null;
+        }
+
+        $msg = '';
+        $heroField = $this->bluePrint->getHeroField();
+        if ($heroField && isset($dataToDelete->{$heroField}) && $dataToDelete->{$heroField}) {
+            $msg .= 'Data: <b>"'.$dataToDelete->{$heroField}.'" (ID: '.$displayId.')</b> ';
+        } else {
+            $msg .= '<b>ID: '.$displayId.'</b> ';
+        }
+
+        $msg .= \sprintf(
+            'is linked with <b>%s</b> data. You need to destroy all the linked data first to delete this item. ',
+            $totalCount
+        );
+
+        if ($totalCount > 10) {
+            $msg .= 'Below are some of the data which are linked to this item:';
+        } else {
+            $msg .= 'Below data are linked to this item:';
+        }
+
+        $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
+        $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
+
+        $msg .= '<br /><ul>';
+        $i = 0;
+        foreach ($dataCount as $result) {
+            if ($result['label']) {
+                $msg .= \sprintf(
+                    '<li>%s data of <b>%s</b> in field "%s"</li>',
+                    $result['count'],
+                    $result['title'],
+                    $result['label']
+                );
+            } else {
+                $msg .= \sprintf(
+                    '<li>%s data of <b>%s</b></li>',
+                    $result['count'],
+                    $result['title']
+                );
+            }
+
+            $url = $result['route'] ? URL::to(\config('form-tool.adminURL').'/'.$result['route']) : null;
+            $hasEditPermission = $result['route'] ? Guard::hasEdit($result['route']) : false;
+            $hasDestroyPermission = $result['route'] ? Guard::hasDestroy($result['route']) : false;
+
+            $msg .= '<ul>';
+            foreach ($result['result'] as $row) {
+                $id = $row->{$result['id']} ?? null;
+
+                if ($id) {
+                    $newMsg = '<li>ID: '.$id.'</li>';
+
+                    $isDeleted = $row->{$deletedAt} ?? null;
+                    if ($isDeleted) {
+                        if ($hasDestroyPermission) {
+                            $newMsg = \sprintf(
+                                '<li>ID: <a href="%s?id=%s&quick_status=trash" target="_blank">%s &nbsp
+                                    <i class="fa fa-external-link"></i></a></li>',
+                                $url,
+                                $id,
+                                $id
+                            );
+                        }
+                    } elseif ($hasEditPermission) {
+                        $newMsg = \sprintf(
+                            '<li>ID: <a href="%s?id=%s" target="_blank">%s &nbsp <i class="fa fa-external-link">
+                                </i></a></li>',
+                            $url,
+                            $id,
+                            $id
+                        );
+                    }
+
+                    $msg .= $newMsg;
+                } else {
+                    $msg .= "<li>ID: <i>{$result['id']} column not found</i></li>";
+                }
+
+                $i++;
+                if ($i >= $totalReferencesToDisplay) {
+                    break;
+                }
+            }
+            $msg .= '</ul>';
+
+            if ($i >= $totalReferencesToDisplay && $totalCount > $totalReferencesToDisplay) {
+                if ($totalCount == $totalReferencesToFetch) {
+                    $msg .= '<li><i>More than '.$totalReferencesToFetch.'+ items...</i></li>';
+                } else {
+                    $msg .= '<li><i>+'.($totalCount - $totalReferencesToDisplay).' more item(s)...</i></li>';
+                }
+                break;
+            }
+        }
+        $msg .= '</ul>';
+
+        return $msg;
     }
 
     //endregion
