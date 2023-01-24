@@ -38,14 +38,16 @@ class Filter
 
         $request = request();
 
-        $html = [];
+        $data = new \stdClass();
+
+        $data->inputs = [];
         foreach ($this->fieldsToFilter as $key => $option) {
             if (\is_integer($key)) {
                 $field = $this->bluePrint->getInputTypeByDbField($option);
                 if ($field instanceof BaseFilterType) {
                     $field->setValue($request->query($field->getDbField()));
 
-                    $html[] = $field->getFilterHTML();
+                    $data->inputs[] = $field->getFilterHTML();
                 } elseif ($field) {
                     throw new \InvalidArgumentException('"'.$option.'" is not a Filter Type.');
                 } else {
@@ -70,8 +72,8 @@ class Filter
                     $fromField->setValue($request->query($dbField.'From'));
                     $toField->setValue($request->query($dbField.'To'));
 
-                    $html[] = $fromField->setDbField($dbField.'From')->label($label.' From')->getFilterHTML();
-                    $html[] = $toField->setDbField($dbField.'To')->label($label.' To')->getFilterHTML();
+                    $data->inputs[] = $fromField->setDbField($dbField.'From')->label($label.' From')->getFilterHTML();
+                    $data->inputs[] = $toField->setDbField($dbField.'To')->label($label.' To')->getFilterHTML();
 
                     $this->dateRangeFields[$dbField]['From'] = $fromField;
                     $this->dateRangeFields[$dbField]['To'] = $toField;
@@ -82,7 +84,7 @@ class Filter
 
                     $option->setValue($request->query($option->getDbField()));
 
-                    $html[] = $option->getFilterHTML();
+                    $data->inputs[] = $option->getFilterHTML();
                 } elseif ($field || $option instanceof BaseInputType) {
                     throw new \InvalidArgumentException('"'.$key.'" is not a Filter Type.');
                 } else {
@@ -91,16 +93,11 @@ class Filter
             }
         }
 
-        $html[] = '<button class="btn btn-primary btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).
-            '" style="margin-top:25px;">Filter</button>';
+        $queries = array_filter($request->except('page'));
+        $data->showClearButton = ! empty($queries);
+        $data->clearUrl = url($this->bluePrint->getForm()->getUrl());
 
-        $queries = $request->except('page');
-        if ($queries) {
-            $html[] = '<a class="btn btn-default btn-sm btn-flat" href="'.url($this->bluePrint->getForm()->getUrl()).
-                '" style="margin-top:25px;"><i class="fa fa-times"></i> Clear All</a>';
-        }
-
-        return $html;
+        return $data;
     }
 
     public function apply()

@@ -209,7 +209,10 @@ class Crud
 
         $page->buttons = $this->table->getCrudButtons();
 
-        $page->filter = $this->table->getFilter();
+        $filter = $this->table->getFilter();
+        $page->filter = $filter->filter;
+        $page->quickFilter = $filter->quickFilter;
+
         $page->searchQuery = $request->query('search');
         $page->searchLink = $currentUrl.'/search?'.\http_build_query($request->except(['search', 'page']));
 

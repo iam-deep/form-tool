@@ -461,7 +461,7 @@ class Table
     protected function createFilter()
     {
         if ($this->filter) {
-            $data['filterInputs'] = $this->filter->create();
+            $data['filterData'] = $this->filter->create();
         }
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
@@ -508,8 +508,8 @@ class Table
                 $row['active'] = true;
                 $isAllActive = false;
 
-                if (isset($data['filterInputs'])) {
-                    $data['filterInputs'][] = '<input type="hidden" name="quick_status" value="'.$key.'">';
+                if (isset($data['filterData'])) {
+                    $data['filterData']->inputs[] = '<input type="hidden" name="quick_status" value="'.$key.'">';
                 }
             }
 
@@ -524,7 +524,10 @@ class Table
 
         $data['quickFilters'] = $quickFilters;
 
-        return \view('form-tool::list.filter', $data);
+        return (object) [
+            'filter' => \view('form-tool::list.filter', $data),
+            'quickFilter' => \view('form-tool::list.quick_filter', $data),
+        ];
     }
 
     protected function setupTable()

@@ -61,11 +61,13 @@ class Button
             $button->active = false;
         }
 
-        $button->html('<a href="javascript:;" onClick="$(\'#{crud_name}_delete_{id}\').submit()" class="{class}"><i class="fa fa-trash"></i> '.$name.'</a>
-        <form id="{crud_name}_delete_{id}" action="{crud_url}'.$link.'?{query_string}" method="POST" onsubmit="return confirm(\'Are you sure you want to delete?\')" style="display:none">
-            '.csrf_field().'
-            '.method_field('DELETE').'
-        </form>');
+        $data['button'] = (object) [
+            'id' => '{crud_name}_delete_{id}',
+            'action' => '{crud_url}'.$link.'?{query_string}',
+            'name' => $name
+        ];
+
+        $button->html(\view('form-tool::list.button_delete', $data)->render());
 
         return $button;
     }

@@ -31,6 +31,7 @@ ul.pagination {
     <div class="col-md-12">
 
         {{ $page->filter }}
+        {{ $page->quickFilter }}
 
         <div class="btn-group pull-right">
             @if ($page->buttons->primary)
