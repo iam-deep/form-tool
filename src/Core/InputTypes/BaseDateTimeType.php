@@ -83,7 +83,7 @@ class BaseDateTimeType extends BaseFilterType
             'rawValue' => $this->value,
             'value' => $this->modifyFormat($this->value),
             'classes' => \implode(' ', $this->classes),
-            'raw' => $this->raw.$this->inlineCSS
+            'raw' => $this->raw.$this->inlineCSS,
         ];
 
         return $this->htmlParentDiv(\view('form-tool::form.input_types.datetime', $data)->render());
@@ -109,7 +109,7 @@ class BaseDateTimeType extends BaseFilterType
             'id' => $id,
             'name' => $name,
             'classes' => \implode(' ', $this->classes),
-            'raw' => $this->raw.$this->inlineCSS
+            'raw' => $this->raw.$this->inlineCSS,
         ];
 
         return \view('form-tool::form.input_types.datetime', $data)->render();

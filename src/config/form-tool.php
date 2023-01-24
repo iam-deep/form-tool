@@ -103,5 +103,5 @@ return [
         'text-left' => 'text-left',
         'text-center' => 'text-center',
         'text-right' => 'text-right',
-    ]
+    ],
 ];

@@ -77,7 +77,7 @@ class PasswordType extends BaseInputType
             'rawValue' => $this->value,
             'value' => $this->value,
             'classes' => \implode(' ', $this->classes),
-            'raw' => $this->raw.$this->inlineCSS
+            'raw' => $this->raw.$this->inlineCSS,
         ];
 
         return $this->htmlParentDiv(\view('form-tool::form.input_types.password', $data)->render());
@@ -98,7 +98,7 @@ class PasswordType extends BaseInputType
             'id' => $id,
             'name' => $name,
             'classes' => \implode(' ', $this->classes),
-            'raw' => $this->raw.$this->inlineCSS
+            'raw' => $this->raw.$this->inlineCSS,
         ];
 
         return \view('form-tool::form.input_types.password', $data)->render();
