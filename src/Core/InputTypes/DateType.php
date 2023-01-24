@@ -5,7 +5,7 @@ namespace Biswadeep\FormTool\Core\InputTypes;
 use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
 use Biswadeep\FormTool\Support\DTConverter;
 
-class DateType extends DateTimeType
+class DateType extends BaseDateTimeType
 {
     public int $type = InputType::DATE;
     public string $typeInString = 'date';
@@ -14,15 +14,14 @@ class DateType extends DateTimeType
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->dbFormat = DTConverter::$dbFormatDate;
         $this->niceFormat = DTConverter::$niceFormatDate;
 
         $this->classes[] = 'date-picker';
         $this->placeholder('Click to select date');
         $this->setFilterOptions(['range']);
-
-        // This style is specific to this date picker plugin for the multiple table dates to work properly
-        $this->inlineCSS = 'style="position:relative"';
 
         $this->isConvertToLocal = false;
     }

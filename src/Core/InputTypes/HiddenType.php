@@ -16,6 +16,8 @@ class HiddenType extends BaseInputType implements IEncryptable, ISearchable
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->classes = [];
     }
 

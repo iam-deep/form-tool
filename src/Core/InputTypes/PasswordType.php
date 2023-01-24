@@ -71,51 +71,36 @@ class PasswordType extends BaseInputType
 
     public function getHTML()
     {
-        $this->addScript();
+        $data['input'] = (object) [
+            'type' => 'single',
+            'column' => $this->dbField,
+            'rawValue' => $this->value,
+            'value' => $this->value,
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS
+        ];
 
-        // We will only display password on validation errors
-        $input = '<div class="input-group">
-            <input type="password" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
-                $this->dbField.'" value="'.old($this->dbField).'" '.$this->raw.$this->inlineCSS.' />
-            <span class="input-group-btn">
-                <button class="btn btn-default toggle-password" data-id="'.$this->dbField.
-                    '" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
-            </span>
-        </div>';
-
-        return $this->htmlParentDiv($input);
+        return $this->htmlParentDiv(\view('form-tool::form.input_types.password', $data)->render());
     }
 
     public function getHTMLMultiple($key, $index, $oldValue)
     {
         $id = $key.'-'.$this->dbField.'-'.$index;
+        $name = $key.'['.$index.']['.$this->dbField.']';
 
-        return '<div class="input-group">
-            <input type="password" class="'.\implode(' ', $this->classes).' input-sm" id="'.$id.'" name="'.
-                $key.'['.$index.']['.$this->dbField.']" value="" '.$this->raw.$this->inlineCSS.' />
-            <span class="input-group-btn">
-                <button class="btn btn-default toggle-password btn-sm" data-id="'.$id.
-                '" type="button" title="Show Password"><i class="fa fa-eye"></i></button>
-            </span>
-        </div>';
-    }
+        $data['input'] = (object) [
+            'type' => 'multiple',
+            'key' => $key,
+            'index' => $index,
+            'column' => $this->dbField,
+            'value' => $this->value,
+            'oldValue' => $oldValue,
+            'id' => $id,
+            'name' => $name,
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS
+        ];
 
-    private function addScript()
-    {
-        Doc::addJs('
-        $(document).on("click", ".toggle-password", function() {
-            let field = $("#" + $(this).attr("data-id"));
-            let type = field.attr("type") == "password" ? "text" : "password";
-            field.attr("type", type);
-
-            if (type == "password") {
-                $(this).attr("title", "Show Password");
-                $(this).find("i").removeClass("fa-eye-slash").addClass("fa-eye");
-            } else {
-                $(this).attr("title", "Hide Password");
-                $(this).find("i").removeClass("fa-eye").addClass("fa-eye-slash");
-            }
-        });
-        ', 'password-toggle');
+        return \view('form-tool::form.input_types.password', $data)->render();
     }
 }

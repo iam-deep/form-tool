@@ -22,6 +22,8 @@ class SelectType extends BaseFilterType
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->isRemoveTrash = \config('isSoftDelete', true);
     }
 

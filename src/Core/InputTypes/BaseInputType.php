@@ -40,8 +40,13 @@ class BaseInputType
     protected ?string $alias = null;
 
     // CSS
-    protected $classes = ['form-control'];
+    protected $classes = [];
     protected $inlineCSS = '';
+
+    public function __construct()
+    {
+        $this->classes = [\config('form-tool.styleClass.input-field')];
+    }
 
     public function init($bluePrint, string $dbField, string $label = null)
     {

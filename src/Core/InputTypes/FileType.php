@@ -17,6 +17,8 @@ class FileType extends BaseInputType
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->classes = [];
     }
 

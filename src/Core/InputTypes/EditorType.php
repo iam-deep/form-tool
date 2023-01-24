@@ -19,6 +19,8 @@ class EditorType extends BaseInputType implements ISearchable
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->classes[] = 'editor';
     }
 

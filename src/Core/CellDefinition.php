@@ -49,8 +49,12 @@ class CellDefinition
         return $cell;
     }
 
-    public static function Other(TableField $tableField, string $fieldType, string $dbField, string $label = null): CellDefinition
-    {
+    public static function Other(
+        TableField $tableField,
+        string $fieldType,
+        string $dbField,
+        string $label = null
+    ): CellDefinition {
         $cell = new CellDefinition();
         $cell->tableField = $tableField;
 
@@ -104,21 +108,21 @@ class CellDefinition
 
     public function right(): CellDefinition
     {
-        $this->styleClass[] = 'text-right';
+        $this->styleClass[] = \config('form-tool.styleClass.text-right', 'text-right');
 
         return $this;
     }
 
     public function left(): CellDefinition
     {
-        $this->styleClass[] = 'text-left';
+        $this->styleClass[] = \config('form-tool.styleClass.text-left', 'text-left');
 
         return $this;
     }
 
     public function center(): CellDefinition
     {
-        $this->styleClass[] = 'text-center';
+        $this->styleClass[] = \config('form-tool.styleClass.text-center', 'text-center');
 
         return $this;
     }

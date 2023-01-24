@@ -30,8 +30,9 @@ class BaseFilterType extends BaseInputType
 
     public function htmlParentDivFilter($input)
     {
-        return '<div class="form-group">
-            <label for="'.$this->dbField.'">'.$this->label.'</label><br />
+        return '<div class="'.config('form-tool.styleClass.filter-form-group').'">
+            <label for="'.$this->dbField.'" class="'.config('form-tool.styleClass.filter-label').'">'.
+                $this->label.'</label><br />
             '.$input.'
         </div>';
     }

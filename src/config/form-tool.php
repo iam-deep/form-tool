@@ -89,4 +89,19 @@ return [
         'deletedBy' => 'deletedBy', // Default value must be NULL in MySQL
         'deletedAt' => 'deletedAt', // Default value must be NULL in MySQL
     ],
+
+    // Styles classes
+    'styleClass' => [
+        // Global class for most of the input fields
+        'input-field' => 'form-control',
+
+        // Filter
+        'filter-form-group' => 'form-group',
+        'filter-label' => '',
+
+        // Alignments
+        'text-left' => 'text-left',
+        'text-center' => 'text-center',
+        'text-right' => 'text-right',
+    ]
 ];

@@ -21,6 +21,8 @@ class CheckboxType extends BaseInputType
 
     public function __construct()
     {
+        parent::__construct();
+
         $this->classes = [];
         $this->optionType = InputType::CHECKBOX;
 
