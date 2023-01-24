@@ -64,7 +64,7 @@ class Button
         $data['button'] = (object) [
             'id' => '{crud_name}_delete_{id}',
             'action' => '{crud_url}'.$link.'?{query_string}',
-            'name' => $name
+            'name' => $name,
         ];
 
         $button->html(\view('form-tool::list.button_delete', $data)->render());
