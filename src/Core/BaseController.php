@@ -4,7 +4,7 @@ namespace Biswadeep\FormTool\Core;
 
 use Illuminate\Http\Request;
 
-class BaseController
+trait BaseController
 {
     protected $crud = null;
 

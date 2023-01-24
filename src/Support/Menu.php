@@ -58,7 +58,7 @@ class Menu
      **/
     public function add(string $route, string $label, string $icon = '', $guardAction = 'view')
     {
-        if ($guardAction && Guard::{'has'.$guardAction}($route)) {
+        if (! $guardAction || Guard::{'has'.$guardAction}($route)) {
             $this->list[] = (object) [
                 'href' => URL::to($this->baseURL.'/'.$route),
                 'route' => $route,
@@ -99,10 +99,13 @@ class Menu
         $url = str_replace(url(\config('form-tool.adminURL')).'/', '', url()->current());
         $this->activeLink = $url;
 
-        // Let's check if we have opened edit/create
+        // Let's check if we have opened edit/create/show
+        // We don't have anything that can select for show() with token
         if (false !== \strpos($url, '/edit')) {
             $this->activeLink = \substr($url, 0, \strrpos($url, '/', -6));
         } elseif (\preg_match('/(.*)\/create/', $url, $matches) !== false && $matches) {
+            $this->activeLink = $matches[1] ?? null;
+        } elseif (\preg_match('/(.*)\/[0-9]*?/', $url, $matches) !== false && $matches) {
             $this->activeLink = $matches[1] ?? null;
         }
 

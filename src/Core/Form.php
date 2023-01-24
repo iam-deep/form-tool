@@ -1035,7 +1035,7 @@ class Form
                     $query = DB::table($option->table)->where($option->column, $id);
 
                     // If we are checking the same table then ignore the id we want to delete
-                    if ($data->main->table == $this->model->getTableName()) {
+                    if ($option->table == $this->model->getTableName()) {
                         $query->where($option->column, '!=', $id);
                     }
                     $resultData = $query->limit($totalReferencesToFetch)->get();
@@ -1151,8 +1151,12 @@ class Form
                     }
 
                     $msg .= $newMsg;
-                } else {
-                    $msg .= "<li>ID: <i>{$result['id']} column not found</i></li>";
+                } elseif (app()->isLocal()) {
+                    if (! property_exists($row, $result['id'])) {
+                        $msg .= "<li>ID: <i>{$result['id']} column not found</i></li>";
+                    } else {
+                        $msg .= "<li>ID: <i>{$result['id']} is blank</i></li>";
+                    }
                 }
 
                 $i++;

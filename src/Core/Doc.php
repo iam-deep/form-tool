@@ -2,6 +2,8 @@
 
 namespace Biswadeep\FormTool\Core;
 
+use Biswadeep\FormTool\Support\DTConverter;
+use Biswadeep\FormTool\Support\Settings;
 use Closure;
 use Illuminate\Support\Facades\URL;
 
@@ -34,6 +36,9 @@ class Doc
                 \get_class($controller)
             ));
         }
+
+        Settings::init();
+        DTConverter::init();
 
         if (! self::$crudList) {
             self::$crudList = new \stdClass();
