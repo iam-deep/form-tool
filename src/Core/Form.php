@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 

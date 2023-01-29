@@ -1,11 +1,11 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\Encryption;
-use Biswadeep\FormTool\Core\InputTypes\Common\IEncryptable;
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Core\InputTypes\Common\Encryption;
+use Deep\FormTool\Core\InputTypes\Common\IEncryptable;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 
 class TextareaType extends BaseInputType implements IEncryptable, ISearchable
 {

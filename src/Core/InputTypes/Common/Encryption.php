@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes\Common;
+namespace Deep\FormTool\Core\InputTypes\Common;
 
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;

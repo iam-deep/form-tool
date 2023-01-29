@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Http\Middleware;
+namespace Deep\FormTool\Http\Middleware;
 
-use Biswadeep\FormTool\Core\Guard;
+use Deep\FormTool\Core\Guard;
 use Closure;
 use Illuminate\Http\Request;
 

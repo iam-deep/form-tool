@@ -1,9 +1,9 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
-use Biswadeep\FormTool\Support\DTConverter;
-use Biswadeep\FormTool\Support\Settings;
+use Deep\FormTool\Support\DTConverter;
+use Deep\FormTool\Support\Settings;
 use Closure;
 use Illuminate\Support\Facades\URL;
 

@@ -1,11 +1,11 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\CellDefinition;
-use Biswadeep\FormTool\Core\InputTypes\Common\ICustomType;
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Core\TableField;
+use Deep\FormTool\Core\CellDefinition;
+use Deep\FormTool\Core\InputTypes\Common\ICustomType;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\TableField;
 use Illuminate\Support\Facades\Session;
 
 class BaseInputType

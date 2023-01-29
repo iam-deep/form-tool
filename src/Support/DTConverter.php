@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Support;
+namespace Deep\FormTool\Support;
 
 use DateTime;
 use DateTimeZone;

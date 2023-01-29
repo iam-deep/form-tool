@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Models;
+namespace Deep\FormTool\Models;
 
 use Closure;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

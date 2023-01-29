@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
 use Closure;
 use Illuminate\Support\Arr;
@@ -64,7 +64,7 @@ class Crud
      * Format of the CRUD. It can de default or store data as key value pair.
      *
      * @param  string  $var  Desired values: (default, keyValue)
-     * @return \Biswadeep\FormTool\Core\Crud
+     * @return \Deep\FormTool\Core\Crud
      **/
     public function format(string $format = 'default', string $groupName = 'default'): Crud
     {
@@ -297,7 +297,7 @@ class Crud
             return \response()->json($data, 400);
         }
 
-        if (! $input instanceof \Biswadeep\FormTool\Core\InputTypes\SelectType) {
+        if (! $input instanceof \Deep\FormTool\Core\InputTypes\SelectType) {
             $data['message'] = 'Field "'.$field.'" is not a Select Type!';
 
             return \response()->json($data, 400);

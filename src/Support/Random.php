@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Support;
+namespace Deep\FormTool\Support;
 
-use Biswadeep\FormTool\Core\DataModel;
+use Deep\FormTool\Core\DataModel;
 
 class Random
 {

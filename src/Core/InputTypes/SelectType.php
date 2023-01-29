@@ -1,10 +1,10 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\Doc;
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Core\InputTypes\Common\Options;
+use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\Options;
 use Illuminate\Support\Facades\DB;
 
 class SelectType extends BaseFilterType

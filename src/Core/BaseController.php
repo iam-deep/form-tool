@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
 use Illuminate\Http\Request;
 

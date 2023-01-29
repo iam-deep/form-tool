@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Support;
+namespace Deep\FormTool\Support;
 
 use Illuminate\Support\Facades\Log;
 use Intervention\Image\Facades\Image;

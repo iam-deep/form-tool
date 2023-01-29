@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
 class BaseFilterType extends BaseInputType
 {

@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes\Common;
+namespace Deep\FormTool\Core\InputTypes\Common;
 
 abstract class InputType
 {

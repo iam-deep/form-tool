@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Support;
+namespace Deep\FormTool\Support;
 
-use Biswadeep\FormTool\Core\Guard;
+use Deep\FormTool\Core\Guard;
 use Closure;
 use Illuminate\Support\Facades\URL;
 use Request;

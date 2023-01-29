@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
 use Illuminate\Support\Arr;
 
@@ -41,14 +41,14 @@ class TableField
 
         if (! $inputType instanceof InputTypes\BaseInputType) {
             throw new \InvalidArgumentException(\sprintf(
-                '%s should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType',
+                '%s should extends Deep\FormTool\Core\InputTypes\BaseInputType',
                 $class
             ));
         }
 
         if (! $inputType instanceof InputTypes\ICustomType) {
             throw new \InvalidArgumentException(\sprintf(
-                '%s should implements Biswadeep\FormTool\Core\InputTypes\ICustomType',
+                '%s should implements Deep\FormTool\Core\InputTypes\ICustomType',
                 $class
             ));
         }
@@ -138,7 +138,7 @@ class TableField
     /**
      * Create action buttons for table list.
      *
-     * @param array[string|\Biswadeep\FormTool\Core\Button] $buttons
+     * @param array[string|\Deep\FormTool\Core\Button] $buttons
      * @param  string  $primaryButtonName  "name" of the primary dropdown button (Default is: _first_button except delete)
      * @return CellDefinition
      *

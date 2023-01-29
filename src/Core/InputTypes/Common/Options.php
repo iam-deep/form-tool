@@ -1,10 +1,10 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes\Common;
+namespace Deep\FormTool\Core\InputTypes\Common;
 
-use Biswadeep\FormTool\Core\DataModel;
-use Biswadeep\FormTool\Core\Doc;
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\DataModel;
+use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Closure;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;

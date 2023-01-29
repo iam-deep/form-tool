@@ -1,8 +1,8 @@
 <?php
 
-namespace Biswadeep\FormTool\Support;
+namespace Deep\FormTool\Support;
 
-use Biswadeep\FormTool\Http\Middleware\AdminCheckLoggedIn;
+use Deep\FormTool\Http\Middleware\AdminCheckLoggedIn;
 use Illuminate\Support\Facades\Route;
 
 class CrudRoute

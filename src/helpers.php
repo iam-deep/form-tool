@@ -1,8 +1,8 @@
 <?php
 
-use Biswadeep\FormTool\Core\Auth;
-use Biswadeep\FormTool\Core\Doc;
-use Biswadeep\FormTool\Core\Guard;
+use Deep\FormTool\Core\Auth;
+use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\Guard;
 
 if (! function_exists('addCssLink')) {
     function addCssLink($link)
@@ -79,28 +79,28 @@ if (! function_exists('getFormJs')) {
 if (! function_exists('decodeHTML')) {
     function decodeHTML($data)
     {
-        return (new Biswadeep\FormTool\Core\InputTypes\EditorType())->decodeHTML($data);
+        return (new Deep\FormTool\Core\InputTypes\EditorType())->decodeHTML($data);
     }
 }
 
 if (! function_exists('encryptText')) {
     function encryptText($value)
     {
-        return (new Biswadeep\FormTool\Core\InputTypes\TextType())->encrypt()->doEncrypt($value);
+        return (new Deep\FormTool\Core\InputTypes\TextType())->encrypt()->doEncrypt($value);
     }
 }
 
 if (! function_exists('decryptText')) {
     function decryptText($value)
     {
-        return (new Biswadeep\FormTool\Core\InputTypes\TextType())->encrypt()->doDecrypt($value);
+        return (new Deep\FormTool\Core\InputTypes\TextType())->encrypt()->doDecrypt($value);
     }
 }
 
 if (! function_exists('imageThumb')) {
     function imageThumb($value)
     {
-        return (new Biswadeep\FormTool\Core\InputTypes\ImageType())->getNiceValue($value);
+        return (new Deep\FormTool\Core\InputTypes\ImageType())->getNiceValue($value);
     }
 }
 
@@ -118,7 +118,7 @@ if (! function_exists('isSuccess')) {
 if (! function_exists('getSidemenu')) {
     function getSidemenu()
     {
-        return \Biswadeep\FormTool\Support\Menu::generate();
+        return \Deep\FormTool\Support\Menu::generate();
     }
 }
 
@@ -146,20 +146,20 @@ if (! function_exists('isNullOrEmpty')) {
 if (! function_exists('niceDateTime')) {
     function niceDateTime($dateTime)
     {
-        return \Biswadeep\FormTool\Support\DTConverter::niceDateTime($dateTime, true);
+        return \Deep\FormTool\Support\DTConverter::niceDateTime($dateTime, true);
     }
 }
 
 if (! function_exists('niceDate')) {
     function niceDate($date)
     {
-        return \Biswadeep\FormTool\Support\DTConverter::niceDate($date, true);
+        return \Deep\FormTool\Support\DTConverter::niceDate($date, true);
     }
 }
 
 if (! function_exists('niceTime')) {
     function niceTime($dateTime)
     {
-        return \Biswadeep\FormTool\Support\DTConverter::niceTime($dateTime, true);
+        return \Deep\FormTool\Support\DTConverter::niceTime($dateTime, true);
     }
 }

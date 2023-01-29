@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool;
+namespace Deep\FormTool;
 
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;

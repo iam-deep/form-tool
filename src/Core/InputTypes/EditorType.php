@@ -1,11 +1,11 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\Doc;
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
-use Biswadeep\FormTool\Support\FileManager;
+use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
 

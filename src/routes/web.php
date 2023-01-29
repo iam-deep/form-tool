@@ -6,6 +6,6 @@ Route::group(
         'middleware' => config('form-tool.auth.middleware', ['web', 'auth']),
     ],
     function () {
-        Route::post('form-tool/editor-upload', [Biswadeep\FormTool\Core\InputTypes\EditorType::class, 'uploadImage']);
+        Route::post('form-tool/editor-upload', [Deep\FormTool\Core\InputTypes\EditorType::class, 'uploadImage']);
     }
 );

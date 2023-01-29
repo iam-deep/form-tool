@@ -1,10 +1,10 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Support\FileManager;
-use Biswadeep\FormTool\Support\ImageCache;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Support\FileManager;
+use Deep\FormTool\Support\ImageCache;
 use Illuminate\Validation\Rule;
 
 class ImageType extends FileType

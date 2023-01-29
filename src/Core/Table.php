@@ -1,9 +1,9 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
-use Biswadeep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
@@ -90,7 +90,7 @@ class Table
     /**
      * Create buttons for crud.
      *
-     * @param array[string|\Biswadeep\FormTool\Core\Button] $buttons
+     * @param array[string|\Deep\FormTool\Core\Button] $buttons
      * @param  string  $primaryButtonName  "name" of the primary dropdown button (Default is: _first_button)
      * @return CellDefinition
      *

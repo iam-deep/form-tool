@@ -1,9 +1,9 @@
 <?php
 
-namespace Biswadeep\FormTool\Core\InputTypes;
+namespace Deep\FormTool\Core\InputTypes;
 
-use Biswadeep\FormTool\Core\Doc;
-use Biswadeep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\Hash;
 
 class PasswordType extends BaseInputType

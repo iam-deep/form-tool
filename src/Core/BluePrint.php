@@ -1,6 +1,6 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
 use Closure;
 use Illuminate\Support\Arr;
@@ -179,14 +179,14 @@ class BluePrint
 
         if (! $inputType instanceof InputTypes\BaseInputType) {
             throw new \InvalidArgumentException(\sprintf(
-                '%s should extends Biswadeep\FormTool\Core\InputTypes\BaseInputType',
+                '%s should extends Deep\FormTool\Core\InputTypes\BaseInputType',
                 $class
             ));
         }
 
         if (! $inputType instanceof InputTypes\Common\ICustomType) {
             throw new \InvalidArgumentException(\sprintf(
-                '%s should implements Biswadeep\FormTool\Core\InputTypes\Common\ICustomType',
+                '%s should implements Deep\FormTool\Core\InputTypes\Common\ICustomType',
                 $class
             ));
         }

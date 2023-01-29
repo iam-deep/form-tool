@@ -1,9 +1,9 @@
 <?php
 
-namespace Biswadeep\FormTool\Core;
+namespace Deep\FormTool\Core;
 
-use Biswadeep\FormTool\Models\BaseModel;
-use Biswadeep\FormTool\Support\Random;
+use Deep\FormTool\Models\BaseModel;
+use Deep\FormTool\Support\Random;
 use Closure;
 
 class DataModel
