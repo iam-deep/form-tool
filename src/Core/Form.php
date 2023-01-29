@@ -1215,7 +1215,7 @@ class Form
 
     public function getId()
     {
-        if (! $this->editId) {
+        if (! $this->editId && $this->formStatus != FormStatus::Create && $this->formStatus != FormStatus::Store) {
             $this->parseEditId();
         }
 

@@ -5,7 +5,7 @@ if ($input->type == 'single') { ?>
 
     <div class="input-group">
         <input type="password" class="<?php echo $input->classes; ?>" id="<?php echo $input->column; ?>"
-            name="<?php echo $input->column; ?>" value="<?php old($input->column); ?>" <?php echo $input->raw; ?> />
+            name="<?php echo $input->column; ?>" value="<?php echo old($input->column); ?>" <?php echo $input->raw; ?> />
         <span class="input-group-btn">
             <button class="btn btn-default toggle-password" data-id="<?php echo $input->column; ?>" type="button"
                 title="Show Password"><i class="fa fa-eye"></i></button>

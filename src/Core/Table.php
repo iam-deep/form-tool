@@ -495,12 +495,12 @@ class Table
             if ($key == 'all') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
                     if ($this->crud->isSoftDelete()) {
-                        $query->whereNull($deletedAt);
+                        $query->whereNull($this->model->getAlias().'.'.$deletedAt);
                     }
                 });
             } elseif ($key == 'trash') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
-                    $query->whereNotNull($deletedAt);
+                    $query->whereNotNull($this->model->getAlias().'.'.$deletedAt);
                 });
             }
 
