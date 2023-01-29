@@ -6,7 +6,7 @@
     "version": "1.0.0",
     "autoload": {
         "psr-4": {
-            "Biswadeep\\FormTool\\": "src/"
+            "Deep\\FormTool\\": "src/"
         },
         "files": [
           "src/helpers.php"
