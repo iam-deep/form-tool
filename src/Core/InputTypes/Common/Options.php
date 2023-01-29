@@ -2,10 +2,10 @@
 
 namespace Deep\FormTool\Core\InputTypes\Common;
 
+use Closure;
 use Deep\FormTool\Core\DataModel;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Closure;
 use Illuminate\Container\Container;
 use Illuminate\Support\Facades\DB;
 

@@ -2,8 +2,8 @@
 
 namespace Deep\FormTool\Http\Middleware;
 
-use Deep\FormTool\Core\Guard;
 use Closure;
+use Deep\FormTool\Core\Guard;
 use Illuminate\Http\Request;
 
 class GuardRequest

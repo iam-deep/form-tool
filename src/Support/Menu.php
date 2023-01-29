@@ -2,8 +2,8 @@
 
 namespace Deep\FormTool\Support;
 
-use Deep\FormTool\Core\Guard;
 use Closure;
+use Deep\FormTool\Core\Guard;
 use Illuminate\Support\Facades\URL;
 use Request;
 

@@ -2,9 +2,9 @@
 
 namespace Deep\FormTool\Core;
 
+use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
-use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;

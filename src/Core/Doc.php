@@ -2,9 +2,9 @@
 
 namespace Deep\FormTool\Core;
 
+use Closure;
 use Deep\FormTool\Support\DTConverter;
 use Deep\FormTool\Support\Settings;
-use Closure;
 use Illuminate\Support\Facades\URL;
 
 class Doc

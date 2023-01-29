@@ -2,8 +2,8 @@
 
 namespace Deep\FormTool\Core;
 
-use Deep\FormTool\Core\InputTypes\BaseInputType;
 use Closure;
+use Deep\FormTool\Core\InputTypes\BaseInputType;
 
 class CellDefinition
 {
