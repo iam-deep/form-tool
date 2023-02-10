@@ -1,18 +1,24 @@
-@foreach ($sidebar as $menu)
-    @if ($menu->isParent)
-        <li class="treeview @if ($menu->active) active @endif">
-            <a href="#"><i class="{{ $menu->icon }}"></i> <span>{{ $menu->label }}</span>
-                <span class="pull-right-container">
-                    <i class="fa fa-angle-left pull-right"></i>
-                </span>
-            </a>
-            <ul class="treeview-menu">
-                @foreach ($menu->childs as $subMenu)
-                    <li @if ($subMenu->active) class="active" @endif><a href="{{ $subMenu->href }}"> <span>{{ $subMenu->label }}</span></a></li>
-                @endforeach
-            </ul>
-        </li>
-    @else
-        <li @if ($menu->active) class="active" @endif><a href="{{ $menu->href }}"><i class="{{ $menu->icon }}"></i> <span>{{ $menu->label }}</span></a></li>
-    @endif
-@endforeach
+<aside class="main-sidebar">
+    <!-- sidebar: style can be found in sidebar.less -->
+    <section class="sidebar">
+        <!-- Sidebar Menu -->
+        <ul class="sidebar-menu" data-widget="tree">
+            <li class="header">MAIN NAVIGATION</li>
+            
+            @foreach ($sidebar as $menu)
+                @if ($menu->isParent)
+                    @include('form-tool::layouts.sub_menu', ['menu' => $menu])
+                @else
+                    <li @if ($menu->active) class="active" @endif>
+                        <a href="{{ $menu->href }}">
+                            <i class="{{ $menu->icon }}"></i> <span>{{ $menu->label }}</span>
+                        </a>
+                    </li>
+                @endif
+            @endforeach
+            
+        </ul>
+        <!-- /.sidebar-menu -->
+    </section>
+    <!-- /.sidebar -->
+</aside>
