@@ -409,6 +409,7 @@ class BaseInputType
         $field->dbField = $this->dbField;
         $field->input = $input;
         $field->label = $this->label;
+        $field->controller = $this->bluePrint->getForm()->getResource();
 
         $data['field'] = $field;
 

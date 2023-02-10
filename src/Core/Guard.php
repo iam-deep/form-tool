@@ -21,7 +21,7 @@ class Guard
     protected bool $hasDelete = false;
     protected bool $hasDestroy = false;
 
-    protected $guardTypes = ['view', 'create', 'edit', 'delete', 'destroy'];
+    protected static $guardTypes = ['view', 'create', 'edit', 'delete', 'destroy'];
 
     public static $instance = null;
     private static bool $isEnable = false;
@@ -301,11 +301,11 @@ class Guard
     public static function validateGuardType(string $type)
     {
         $type = strtolower(\trim($type));
-        if (! in_array($type, self::$instance->guardTypes)) {
+        if (! in_array($type, self::$guardTypes)) {
             throw new \InvalidArgumentException(\sprintf(
                 'Guard type "%s" is not valid. Valid Types are: (%s)',
                 $type,
-                \implode(', ', self::$instance->guardTypes)
+                \implode(', ', self::$guardTypes)
             ));
         }
 

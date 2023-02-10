@@ -799,7 +799,7 @@ class Form
                 $this->postData[$dbField] = $response;
             }
 
-            if (! $this->postData[$dbField] && $input->getDefaultValue() !== null) {
+            if ($this->postData[$dbField] === null && $input->getDefaultValue() !== null) {
                 $this->postData[$dbField] = $input->getDefaultValue();
             }
         }
