@@ -250,7 +250,7 @@ class DataModel
         $data[$deletedBy] = Auth::id();
         $data[$deletedAt] = \date('Y-m-d H:i:s');
 
-        return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
+        return $this->setup()::updateOne($id, $data);
     }
 
     public function restore($id)
@@ -263,7 +263,7 @@ class DataModel
         $data[$deletedBy] = null;
         $data[$deletedAt] = null;
 
-        return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
+        return $this->setup()::updateOne($id, $data);
     }
 
     public function deleteOne($id, $isToken = null)

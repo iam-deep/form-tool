@@ -213,7 +213,7 @@ class BulkAction
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'restore')) {
                 $filtered[] = $id;
-                $affected = $this->table->getModel()->restore($id);
+                $this->table->getModel()->restore($id);
 
                 $result = $this->table->getModel()->getOne($id);
 

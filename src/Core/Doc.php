@@ -167,7 +167,7 @@ class Doc
 
     //endregion
 
-    private function getCurdByName(string $name = null)
+    protected function getCurdByName(string $name = null)
     {
         $name = $name ?: self::$defaultCrudName;
 

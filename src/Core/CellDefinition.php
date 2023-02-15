@@ -23,8 +23,6 @@ class CellDefinition
     public ?string $orderUrl = null;
 
     private $concat = null;
-    private $anyPattern = null;
-    private $anyDbFields = null;
 
     // Styles
     private string $width = '';

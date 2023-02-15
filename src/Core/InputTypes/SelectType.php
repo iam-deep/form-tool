@@ -230,7 +230,7 @@ class SelectType extends BaseFilterType
     /**
      * This method is called by Options trait.
      */
-    private function getDependOptions()
+    protected function getDependOptions()
     {
         return $this->getOptions($this->value);
     }

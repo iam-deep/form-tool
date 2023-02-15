@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\URL;
 
 abstract class FormStatus
 {
-    public const Create = 1;
-    public const Store = 2;
-    public const Edit = 3;
-    public const Update = 4;
-    public const Delete = 5;
-    public const Destroy = 6;
+    public const CREATE = 1;
+    public const STORE = 2;
+    public const EDIT = 3;
+    public const UPDATE = 4;
+    public const DELETE = 5;
+    public const DESTROY = 6;
 }
 
 class Form
@@ -166,7 +166,7 @@ class Form
             } else {
                 // Let's modify value before if needed like for decryption
                 // We wil not modify anything on create as default values must be set as it is
-                if ($this->formStatus == FormStatus::Edit) {
+                if ($this->formStatus == FormStatus::EDIT) {
                     $input->setValue($input->getValue());
                 }
 
@@ -174,7 +174,7 @@ class Form
             }
         }
 
-        $data->isEdit = $this->formStatus == FormStatus::Edit;
+        $data->isEdit = $this->formStatus == FormStatus::EDIT;
 
         $url = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
         $data->action = $data->cancel = $url.$this->queryString;
@@ -200,7 +200,7 @@ class Form
         $keyName = \str_replace(['[', ']'], '-', $key);
 
         // Getting the template at the beginning will make sure that it will not contain any values of the field
-        $template = $this->getTableRow($model, $key, $keyName);
+        $template = $this->getTableRow($model, $key);
 
         $tableData = new \stdClass();
         $tableData->label = $model->label;
@@ -252,7 +252,7 @@ class Form
         $totalRowsInEdit = 0;
 
         // TODO: Need to check if validation failed without $totalDataInSession
-        if (! $totalDataInSession && $this->formStatus == FormStatus::Edit) {
+        if (! $totalDataInSession && $this->formStatus == FormStatus::EDIT) {
             $dbModel = $model->getModel();
             if ($dbModel) {
                 if ($dbModel instanceof \stdClass) {
@@ -291,7 +291,7 @@ class Form
                         $field->setValue($row->{$field->getDbField()} ?? null);
                     }
 
-                    $tableData->rows .= $this->getTableRow($model, $key, $keyName, $i++);
+                    $tableData->rows .= $this->getTableRow($model, $key, $i++);
                 }
             }
         }
@@ -301,7 +301,7 @@ class Form
             // Check if the required items is greater than the items already saved
             if ($result) {
                 $appendCount = $model->getRequired() - $totalRowsInEdit;
-            } elseif (! $result || $this->formStatus == FormStatus::Create) {
+            } elseif (! $result || $this->formStatus == FormStatus::CREATE) {
                 $appendCount = $model->getRequired();
             }
         }
@@ -312,7 +312,7 @@ class Form
 
         for ($i = 0; $i < $appendCount; $i++) {
             // Sending index will get the field value if there any in the session
-            $tableData->rows .= $this->getTableRow($model, $key, $keyName, $i + $totalRowsInEdit);
+            $tableData->rows .= $this->getTableRow($model, $key, $i + $totalRowsInEdit);
         }
 
         $tableData->totalColumns = ++$totalCols;
@@ -324,7 +324,7 @@ class Form
         return \view('form-tool::form.multiple_table', $data)->render();
     }
 
-    private function getTableRow($model, $key, $keyName, $index = -1)
+    private function getTableRow($model, $key, $index = -1)
     {
         // If $index is -1 means we just need the template
         if ($index == -1) {
@@ -364,7 +364,7 @@ class Form
 
     public function edit($id = null)
     {
-        $this->formStatus = FormStatus::Edit;
+        $this->formStatus = FormStatus::EDIT;
 
         $this->resultData = null;
         if ($this->crud->isDefaultFormat()) {
@@ -408,7 +408,7 @@ class Form
 
     public function store()
     {
-        $this->formStatus = FormStatus::Store;
+        $this->formStatus = FormStatus::STORE;
 
         $validate = $this->validate();
         if ($validate !== true) {
@@ -435,7 +435,7 @@ class Form
 
     public function update($id = null, callable $callbackBeforeUpdate = null)
     {
-        $this->formStatus = FormStatus::Update;
+        $this->formStatus = FormStatus::UPDATE;
 
         if ($this->crud->isDefaultFormat()) {
             $id = $this->parseEditId($id);
@@ -536,7 +536,7 @@ class Form
                 continue;
             }
 
-            if ($this->formStatus == FormStatus::Store) {
+            if ($this->formStatus == FormStatus::STORE) {
                 $input->afterStore($result);
             } else {
                 $input->afterUpdate($this->oldData, $result);
@@ -605,7 +605,7 @@ class Form
                         $field->setValue($dataRow[$dbField]);
 
                         $response = null;
-                        if ($this->formStatus == FormStatus::Store) {
+                        if ($this->formStatus == FormStatus::STORE) {
                             $response = $field->beforeStore((object) $row);
                         } else {
                             $response = $field->beforeUpdate((object) $row, (object) $row);
@@ -619,7 +619,7 @@ class Form
                             $dataRow[$dbField] = $field->getDefaultValue();
                         }
 
-                        if ($this->formStatus == FormStatus::Store) {
+                        if ($this->formStatus == FormStatus::STORE) {
                             $field->afterStore((object) $dataRow);
                         } else {
                             $field->afterUpdate((object) $row, (object) $dataRow);
@@ -655,7 +655,7 @@ class Form
 
     private function validate()
     {
-        $validationType = $this->formStatus == FormStatus::Store ? 'store' : 'update';
+        $validationType = $this->formStatus == FormStatus::STORE ? 'store' : 'update';
 
         $rules = $messages = $labels = $merge = [];
         foreach ($this->bluePrint->getList() as $input) {
@@ -697,7 +697,7 @@ class Form
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
             }
 
-            if ($this->formStatus == FormStatus::Update) {
+            if ($this->formStatus == FormStatus::UPDATE) {
                 $where[] = function ($query) use ($alias) {
                     $query->where($alias.$this->model->getPrimaryId(), '!=', $this->editId);
                 };
@@ -742,7 +742,7 @@ class Form
         $postData = $this->postData;
         $this->postData = [];
 
-        if ($this->formStatus == FormStatus::Update) {
+        if ($this->formStatus == FormStatus::UPDATE) {
             $id = $this->parseEditId($id);
 
             if (! $this->oldData) {
@@ -789,7 +789,7 @@ class Form
             $input->setValue($this->postData[$dbField]);
 
             $response = null;
-            if ($this->formStatus == FormStatus::Store) {
+            if ($this->formStatus == FormStatus::STORE) {
                 $response = $input->beforeStore((object) $this->postData);
             } else {
                 $response = $input->beforeUpdate($this->oldData, (object) $this->postData);
@@ -801,6 +801,7 @@ class Form
 
             if ($this->postData[$dbField] === null && $input->getDefaultValue() !== null) {
                 $this->postData[$dbField] = $input->getDefaultValue();
+                $input->setValue($this->postData[$dbField]);
             }
         }
 
@@ -838,7 +839,7 @@ class Form
             return $this->destroy($id);
         }
 
-        $this->formStatus = FormStatus::Delete;
+        $this->formStatus = FormStatus::DELETE;
 
         $id = $this->parseEditId($id);
 
@@ -869,7 +870,7 @@ class Form
 
     public function destroy($id = null)
     {
-        $this->formStatus = FormStatus::Destroy;
+        $this->formStatus = FormStatus::DESTROY;
 
         $id = $this->parseEditId($id);
 
@@ -1186,7 +1187,7 @@ class Form
 
     public function isUpdate()
     {
-        return $this->formStatus == FormStatus::Update;
+        return $this->formStatus == FormStatus::UPDATE;
     }
 
     public function getPostData()
@@ -1215,7 +1216,7 @@ class Form
 
     public function getId()
     {
-        if (! $this->editId && $this->formStatus != FormStatus::Create && $this->formStatus != FormStatus::Store) {
+        if (! $this->editId && $this->formStatus != FormStatus::CREATE && $this->formStatus != FormStatus::STORE) {
             $this->parseEditId();
         }
 
