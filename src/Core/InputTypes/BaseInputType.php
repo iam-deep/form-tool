@@ -39,6 +39,9 @@ class BaseInputType
     protected ?string $tableName = null;
     protected ?string $alias = null;
 
+    // Enable this column logging in action logger
+    protected bool $isLogColumn = true;
+
     // CSS
     protected $classes = [];
     protected $inlineCSS = '';
@@ -169,6 +172,13 @@ class BaseInputType
     public function disabled(): BaseInputType
     {
         $this->raw('disabled');
+
+        return $this;
+    }
+
+    public function logColumn(bool $flag)
+    {
+        $this->isLogColumn = $flag;
 
         return $this;
     }
@@ -334,6 +344,11 @@ class BaseInputType
     public function getNiceValue($value)
     {
         return $value;
+    }
+
+    public function isLogColumn()
+    {
+        return $this->isLogColumn;
     }
 
     public function getLoggerValue(string $action, $oldValue = null)

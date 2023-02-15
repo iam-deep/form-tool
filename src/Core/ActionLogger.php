@@ -21,7 +21,7 @@ class ActionLogger
 
         $data = [];
         foreach ($bluePrint->getList() as $input) {
-            if ($input instanceof BluePrint) {
+            if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
 
@@ -58,7 +58,7 @@ class ActionLogger
 
         $data = [];
         foreach ($bluePrint->getList() as $input) {
-            if ($input instanceof BluePrint) {
+            if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
 
@@ -103,7 +103,7 @@ class ActionLogger
 
         $data = [];
         foreach ($bluePrint->getList() as $input) {
-            if ($input instanceof BluePrint) {
+            if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
 
@@ -175,7 +175,7 @@ class ActionLogger
 
         $data = [];
         foreach ($bluePrint->getList() as $input) {
-            if ($input instanceof BluePrint) {
+            if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
 
