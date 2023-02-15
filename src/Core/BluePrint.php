@@ -3,8 +3,8 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use Illuminate\Support\Arr;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Illuminate\Support\Arr;
 
 class BluePrint
 {
