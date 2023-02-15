@@ -375,7 +375,7 @@ class Table
                                     $values[] = $value->{$con};
                                 }
                             } else {
-                                $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
+                                $values[] = '<b class="text-danger">DB FIELD "'.$con.'" NOT FOUND</b>';
                             }
                         }
                     }
@@ -399,7 +399,7 @@ class Table
                                 if (\property_exists($value, $con)) {
                                     $values[] = $value->{$con};
                                 } else {
-                                    $values[] = '<b class="text-red">DB FIELD "'.$con.'" NOT FOUND</b>';
+                                    $values[] = '<b class="text-danger">DB FIELD "'.$con.'" NOT FOUND</b>';
                                 }
                             }
                         }
@@ -407,7 +407,7 @@ class Table
                     }
                 } elseif ($cell->fieldType == 'action') {
                     if (! isset($value->{$primaryId})) {
-                        $viewData->data = '<b class="text-red">PRIMARY ID is NULL</b>';
+                        $viewData->data = '<b class="text-danger">PRIMARY ID is NULL</b>';
                         $viewRow->columns[] = $viewData;
                         continue;
                     }
@@ -428,7 +428,7 @@ class Table
                     $buttonData['buttons'] = $buttons;
                     $viewData->data = \view('form-tool::list.actions', $buttonData);
                 } else {
-                    $viewData->data = '<b class="text-red">DB FIELD NOT FOUND</b>';
+                    $viewData->data = '<b class="text-danger">DB FIELD NOT FOUND</b>';
                 }
 
                 $viewRow->columns[] = $viewData;
