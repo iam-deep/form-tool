@@ -130,7 +130,7 @@ class Filter
 
     private function setDefaultFilter()
     {
-        foreach ($this->bluePrint->getList() as $field) {
+        foreach ($this->bluePrint->getInputList() as $field) {
             if ($field instanceof BaseFilterType) {
                 $this->fieldsToFilter[] = $field->getDbField();
             }

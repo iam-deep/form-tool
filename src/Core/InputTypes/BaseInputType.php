@@ -51,7 +51,7 @@ class BaseInputType
         $this->classes = [\config('form-tool.styleClass.input-field')];
     }
 
-    public function init($bluePrint, string $dbField, string $label = null)
+    public function init($bluePrint, ?string $dbField, string $label = null)
     {
         $this->bluePrint = $bluePrint;
         $this->dbField = \trim($dbField);

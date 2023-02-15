@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Illuminate\Support\Arr;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
 
 class BluePrint
 {
@@ -197,6 +198,15 @@ class BluePrint
         return $inputType;
     }
 
+    public function html(string $html, string $dbField = null): InputTypes\HtmlType
+    {
+        $inputType = new InputTypes\HtmlType();
+        $inputType->init($this, $dbField, $html);
+        $this->dataTypeList[] = $inputType;
+
+        return $inputType;
+    }
+
     public function modify(string $dbField)
     {
         $field = $this->getInputTypeByDbField($dbField);
@@ -378,6 +388,18 @@ class BluePrint
     public function getList(): array
     {
         return $this->dataTypeList;
+    }
+
+    public function getInputList(): array
+    {
+        $list = [];
+        foreach ($this->dataTypeList as $input) {
+            if ($input->type != InputType::HTML) {
+                $list[] = $input;
+            }
+        }
+
+        return $list;
     }
 
     public function getKey()

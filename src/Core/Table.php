@@ -210,7 +210,7 @@ class Table
     {
         $fieldsToSearch = $this->searchFields;
         if (! $fieldsToSearch) {
-            foreach ($this->bluePrint->getList() as $input) {
+            foreach ($this->bluePrint->getInputList() as $input) {
                 if ($input instanceof ISearchable) {
                     $fieldsToSearch[] = $input->getDbField();
                 }
@@ -261,7 +261,7 @@ class Table
 
         $tableField->bulkActionCheckbox();
         $tableField->slNo();
-        foreach ($this->bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getInputList() as $input) {
             if (! $input instanceof BluePrint) {
                 $tableField->cellList[] = $input->getTableCell($tableField);
             }

@@ -33,4 +33,7 @@ abstract class InputType
 
     // Custom
     public const CUSTOM = 99;
+
+    // HTML tags
+    public const HTML = 200;
 }

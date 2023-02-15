@@ -347,7 +347,7 @@ trait Options
         } else {
             foreach ($this->depend as $value) {
                 $count = 1;
-                foreach ($this->bluePrint->getList() as $field) {
+                foreach ($this->bluePrint->getInputList() as $field) {
                     if ($field->getDbField() == $value->field) {
                         break;
                     }
@@ -392,7 +392,7 @@ trait Options
 
                 $input->selectorChildCount = $input->fieldChildCount = 0;
                 $count = 1;
-                foreach ($this->bluePrint->getList() as $field) {
+                foreach ($this->bluePrint->getInputList() as $field) {
                     $column = $field->getDbField();
                     if ($column == $input->field) {
                         $input->fieldChildCount = $count;

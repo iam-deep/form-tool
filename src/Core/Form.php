@@ -160,6 +160,7 @@ class Form
 
         $data->fields = new \stdClass();
 
+        $n = 0;
         foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
                 $data->fields->{$input->getKey()} = $this->getMultipleTable($input);
@@ -170,7 +171,7 @@ class Form
                     $input->setValue($input->getValue());
                 }
 
-                $data->fields->{$input->getDbField()} = $input->getHTML();
+                $data->fields->{($input->getDbField() ?: $n++)} = $input->getHTML();
             }
         }
 
@@ -397,7 +398,7 @@ class Form
             }
         }
 
-        foreach ($this->bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getInputList() as $input) {
             if (! $input instanceof BluePrint) {
                 $input->setValue($this->resultData->{$input->getDbField()} ?? null);
             }
@@ -531,7 +532,7 @@ class Form
             }
         }
 
-        foreach ($this->bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
             }
@@ -548,7 +549,7 @@ class Form
 
     private function saveMultipleFields()
     {
-        foreach ($this->bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getInputList() as $input) {
             if (! $input instanceof BluePrint) {
                 continue;
             }
@@ -658,9 +659,13 @@ class Form
         $validationType = $this->formStatus == FormStatus::STORE ? 'store' : 'update';
 
         $rules = $messages = $labels = $merge = [];
-        foreach ($this->bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
+            }
+
+            if (is_numeric($input)) {
+                dd($input);
             }
 
             $newValue = $input->beforeValidation($this->request->post($input->getDbField()));
@@ -753,7 +758,7 @@ class Form
         // I think we should not remove the meta data like dates and updatedby
         // Remove if there is any extra fields that are not needed
 
-        foreach ($this->bluePrint->getList() as $input) {
+        foreach ($this->bluePrint->getInputList() as $input) {
             $dbField = $input instanceof BluePrint ? $input->getKey() : $input->getDbField();
 
             // Check if we don't want to save or only save to prevent further process of the field
@@ -916,7 +921,7 @@ class Form
             }
         }
 
-        foreach ($this->bluePrint->getList() as $field) {
+        foreach ($this->bluePrint->getInputList() as $field) {
             if ($field instanceof BluePrint) {
                 // TODO: Still now not needed
             } else {
@@ -927,7 +932,7 @@ class Form
         $affected = $this->model->deleteOne($id);
 
         if ($affected > 0) {
-            foreach ($this->bluePrint->getList() as $input) {
+            foreach ($this->bluePrint->getInputList() as $input) {
                 if ($input instanceof BluePrint) {
                     // Let's delete the file and image of sub tables, and data
                     $childResult = [];

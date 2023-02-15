@@ -20,7 +20,7 @@ class ActionLogger
         $action = 'create';
 
         $data = [];
-        foreach ($bluePrint->getList() as $input) {
+        foreach ($bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
@@ -57,7 +57,7 @@ class ActionLogger
         $action = 'duplicate';
 
         $data = [];
-        foreach ($bluePrint->getList() as $input) {
+        foreach ($bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
@@ -102,7 +102,7 @@ class ActionLogger
         $newData = (object) $newData;
 
         $data = [];
-        foreach ($bluePrint->getList() as $input) {
+        foreach ($bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
@@ -174,7 +174,7 @@ class ActionLogger
         $action = 'destroy';
 
         $data = [];
-        foreach ($bluePrint->getList() as $input) {
+        foreach ($bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
             }
