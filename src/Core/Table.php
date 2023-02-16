@@ -69,7 +69,6 @@ class Table
     {
         if ($callback) {
             $tableField = new TableField($this);
-            $tableField->bulkActionCheckbox();
 
             $callback($tableField);
             $this->setTableField($tableField);

@@ -135,6 +135,25 @@ class TableField
         return $cell;
     }
 
+    public function all(bool $checkbox = true, bool $slNo = true, $actions = null)
+    {
+        if ($checkbox) {
+            $this->bulkActionCheckbox();
+        }
+
+        if ($slNo) {
+            $this->slNo();
+        }
+
+        foreach ($this->bluePrint->getInputList() as $input) {
+            $this->default($input->getDbField());
+        }
+
+        if ($actions) {
+            $this->actions($actions);
+        }
+    }
+
     /**
      * Create action buttons for table list.
      *

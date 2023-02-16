@@ -394,7 +394,7 @@ class BluePrint
     {
         $list = [];
         foreach ($this->dataTypeList as $input) {
-            if ($input->type != InputType::HTML) {
+            if (! isset($input->type) || $input->type != InputType::HTML) {
                 $list[] = $input;
             }
         }
