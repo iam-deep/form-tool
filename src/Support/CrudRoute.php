@@ -7,29 +7,38 @@ use Illuminate\Support\Facades\Route;
 
 class CrudRoute
 {
-    public static function resource($route, $class)
+    public static function resource($route, $class, array $options = [])
     {
-        Route::get($route.'/search', [$class, 'search'])->name($route.'.search');
-        Route::post($route.'/bulk-action', [$class, 'bulkAction'])->name($route.'.bulk-action');
-        Route::post($route.'/get-options', [$class, 'getOptions'])->name($route.'.get-options');
-        Route::resource($route, $class)->parameters([$route => 'id']);
+        $name = str_replace('/', '.', $route);
+
+        Route::get($route.'/search', [$class, 'search'])->name($name.'.search');
+        Route::post($route.'/bulk-action', [$class, 'bulkAction'])->name($name.'.bulk-action');
+        Route::post($route.'/get-options', [$class, 'getOptions'])->name($name.'.get-options');
+
+        return Route::resource($route, $class, $options)->parameters([$route => 'id']);
     }
 
     public static function indexAndStore($route, $class)
     {
-        Route::get($route, [$class, 'index'])->name($route);
-        Route::post($route.'/create', [$class, 'store'])->name($route.'.store');
+        $name = str_replace('/', '.', $route);
+
+        Route::get($route, [$class, 'index'])->name($name);
+        Route::post($route.'/create', [$class, 'store'])->name($name.'.store');
     }
 
     public static function indexAndUpdate($route, $class, $id = null)
     {
-        Route::get($route, [$class, 'index'])->name($route);
-        Route::put($route.$id, [$class, 'update'])->name($route.'.update');
+        $name = str_replace('/', '.', $route);
+
+        Route::get($route, [$class, 'index'])->name($name);
+        Route::put($route.$id, [$class, 'update'])->name($name.'.update');
     }
 
     public static function indexAndDestroy($route, $class, $id = null)
     {
-        Route::get($route, [$class, 'index'])->name($route);
-        Route::destroy($route.$id, [$class, 'destroy'])->name($route.'.destroy');
+        $name = str_replace('/', '.', $route);
+
+        Route::get($route, [$class, 'index'])->name($name);
+        Route::destroy($route.$id, [$class, 'destroy'])->name($name.'.destroy');
     }
 }

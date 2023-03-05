@@ -53,12 +53,13 @@ class Menu
      * @param  string  $route  Provide link/route of the anchor tag
      * @param  string  $label  Provide label/text of the anchor tag
      * @param  string  $icon  Provide icon class
-     * @param $guardAction optionally you can specify action to guard (Values: null, view, create, edit, delete)
+     * @param  string  $guardUrl  Provide guarded route/key if different from route
+     * @param $guardAction optionally you can specify action to guard (Values: null, view, create, edit, delete, destroy)
      * @return null
      **/
-    public function add(string $route, string $label, string $icon = '', $guardAction = 'view')
+    public function add(string $route, string $label, ?string $icon = '', ?string $guardUrl = null, $guardAction = 'view')
     {
-        if (! $guardAction || Guard::{'has'.$guardAction}($route)) {
+        if (! $guardAction || Guard::{'has'.$guardAction}($guardUrl ?: $route)) {
             $this->list[] = (object) [
                 'href' => URL::to($this->baseURL.'/'.$route),
                 'route' => $route,

@@ -23,6 +23,11 @@ $("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->s
         return;
     }
 
+    field.html('<option value="">Loading...</option>');
+    @if ($input->isChosen)
+        field.trigger("chosen:updated");
+    @endif
+
     $.ajax({
         url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
         type: "post",

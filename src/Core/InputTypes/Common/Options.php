@@ -168,6 +168,10 @@ trait Options
                             foreach ($this->depend as &$depend) {
                                 if (isNullOrEmpty($depend->value)) {
                                     $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+                                    if (! $dependInput) {
+                                        throw new \Exception(sprintf('Depended field not found: %s', $depend->field));
+                                    }
+
                                     $depend->value = $dependInput->getValue();
 
                                     if (isNullOrEmpty($depend->value)) {
@@ -239,10 +243,12 @@ trait Options
                             $closure = $options->closure;
                             $result = $closure($where);
                             if (! $result instanceof \Illuminate\Support\Collection) {
+                                $type = gettype($result);
                                 throw new \Exception(\sprintf(
-                                    'Return value of the %s\'s closure must be %s',
+                                    'Return value of the %s\'s closure must be %s. Currently returned: %s',
                                     $this->dbField,
-                                    \Illuminate\Support\Collection::class
+                                    \Illuminate\Support\Collection::class,
+                                    $type == 'object' ? get_class($result) : $type
                                 ));
                             }
                         } else {

@@ -318,8 +318,13 @@ class Guard
         $currentRoute = Route::currentRouteName();
         if ($currentRoute) {
             $segments = \explode('.', $currentRoute);
-            $this->route = $segments[0] ?? null;
-            $this->action = $segments[1] ?? null;
+            $count = count($segments);
+            if ($count > 1) {
+                $this->route = implode('/', array_slice($segments, 0, $count - 1));
+                $this->action = end($segments);
+            } else {
+                $this->route = $segments[0] ?? null;
+            }
         } else {
             $currentRoute = request()->path();
             $this->route = \substr($currentRoute, \strlen(\config('form-tool.adminURL')));
