@@ -11,24 +11,24 @@ $(function() {
 
         if (items <= requiredItems) {
             table.find('.d_remove').hide();
-        }
-        else {
+        } else {
             table.find('.d_remove').show();
         }
 
-        if (items > 1)
+        if (items > 1) {
             table.find('.handle').show();
-        else
+        } else {
             table.find('.handle').hide();
+        }
 
         let i = 1;
-        table.find('.order-value').each(function(){
+        table.find('.order-value').each(function() {
             table.val(i++);
         });
     });
 
     // Add row into the multiple table
-	$('body').on('click', '.d_add', function(e){
+	$('body').on('click', '.d_add', function(e) {
         e.preventDefault();
 
 		let table = $(this).closest('.table');
@@ -42,19 +42,27 @@ $(function() {
         let totalItems = table.find('.d_block').length || 0;
         let requiredItems = parseInt(table.attr('data-required')) || 0;
 
-        if (totalItems > requiredItems)
+        if (totalItems > requiredItems) {
             table.find('.d_remove').show();
+        }
 
         table.find('.handle').show();
 
+        multipleAfterAdd();
+
         let i = 1;
-        table.find('.order-value').each(function(){
+        table.find('.order-value').each(function() {
             $(this).val(i++);
         });
 	});
 
+    function multipleAfterAdd()
+    {
+        <?php echo getJsGroup('multiple_after_add'); ?>
+    }
+
     // Remove row from the multiple table
-	$('body').on('click', '.d_remove', function(e){
+	$('body').on('click', '.d_remove', function(e) {
         e.preventDefault();
 
         let table = $(this).closest('.table');
@@ -63,8 +71,9 @@ $(function() {
 
         let flag = false;
 
-        if (! requiredItems  || totalItems > requiredItems)
+        if (! requiredItems  || totalItems > requiredItems) {
             flag = true;
+        }
 
         if (flag && (! table.hasClass('confirm-delete') || confirm('Are you sure you want to delete?'))) {
             $(this).closest('.d_block').remove();
@@ -79,13 +88,13 @@ $(function() {
             }
 
             let i = 1;
-            table.find('.order-value').each(function(){
+            table.find('.order-value').each(function() {
                 $(this).val(i++);
             });
         }
 	});
 
-    $('form').on('submit', function(){
+    $('form').on('submit', function() {
         $('.submit').html('<i class="fa fa-spinner fa-pulse"></i> ' + $('.submit').text()).prop('disabled', true);
     });
     
@@ -104,7 +113,7 @@ $(function() {
         update  : function(event, ui)
         {
             let i = 1;
-            ui.item.closest('.table-orderable').find('.order-value').each(function(){
+            ui.item.closest('.table-orderable').find('.order-value').each(function() {
                 $(this).val(i++);
             });
         }

@@ -60,6 +60,13 @@ if (! function_exists('getJs')) {
     }
 }
 
+if (! function_exists('getJsGroup')) {
+    function getJsGroup($group)
+    {
+        return Doc::getJsGroup($group);
+    }
+}
+
 // TODO: Need to change this function name as per Package name
 if (! function_exists('getFormCss')) {
     function getFormCss()

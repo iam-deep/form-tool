@@ -135,10 +135,9 @@ class SelectType extends BaseFilterType
 
         Doc::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen');
 
-        /* TODO:
         if ($isMultiple) {
-            Doc::addJs('$(".chosen").trigger("chosen:updated");', 'chosen-update');
-        }*/
+            Doc::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen-create', 'multiple_after_add');
+        }
     }
 
     private function getOptions($value)

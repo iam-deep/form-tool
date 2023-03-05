@@ -16,6 +16,7 @@ class Doc
     private static $jsLink = [];
     private static $css = [];
     private static $js = [];
+    private static $jsGroup = [];
 
     private function __construct()
     {
@@ -106,8 +107,18 @@ class Doc
     }
 
     // Pass a unique key for each script so that we don't add duplicate $scripts
-    public static function addJs($script, $key = '')
+    public static function addJs($script, $key = '', $group = null)
     {
+        if ($group) {
+            if ($key) {
+                self::$jsGroup[$group][$key] = $script;
+            } else {
+                self::$jsGroup[$group][] = $script;
+            }
+
+            return;
+        }
+
         if ($key) {
             self::$js[$key] = $script;
         } else {
@@ -163,6 +174,11 @@ class Doc
         }
 
         return '<script>'.\implode("\n", self::$js).'</script>';
+    }
+
+    public static function getJsGroup($group)
+    {
+        return isset(self::$jsGroup[$group]) ? implode("\n", self::$jsGroup[$group]) : '';
     }
 
     //endregion
