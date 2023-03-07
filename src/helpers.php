@@ -170,3 +170,16 @@ if (! function_exists('niceTime')) {
         return \Deep\FormTool\Support\DTConverter::niceTime($dateTime, true);
     }
 }
+
+function getDependencies($plugin)
+{
+    switch ($plugin) {
+        case 'date_time':
+            (new Deep\FormTool\Core\InputTypes\BaseDateTimeType())->setDependencies();
+            break;
+
+        default:
+            throw new \Exception(sprintf('Plugin not found: %s', $plugin));
+            break;
+    }
+}

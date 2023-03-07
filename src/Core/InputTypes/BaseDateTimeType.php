@@ -120,7 +120,7 @@ class BaseDateTimeType extends BaseFilterType
         return DTConverter::toNice($value, $this->niceFormat, $this->isConvertToLocal);
     }
 
-    private function setDependencies()
+    public function setDependencies()
     {
         Doc::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
 
