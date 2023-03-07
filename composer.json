@@ -3,7 +3,6 @@
     "description": "A lightweight Laravel form tool to create your admin panel or web app easily!",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.1",
     "autoload": {
         "psr-4": {
             "Deep\\FormTool\\": "src/"
