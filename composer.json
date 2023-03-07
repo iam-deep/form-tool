@@ -19,7 +19,6 @@
     ],
     "minimum-stability": "dev",
     "require": {
-        "php": "^7.4",
         "intervention/image" : "^2.7.2"
     },
     "extra": {
