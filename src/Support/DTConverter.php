@@ -229,7 +229,7 @@ class DTConverter
         return $tzlist;
     }
 
-    protected function getOffset($timezone)
+    protected static function getOffset($timezone)
     {
         $time = new DateTime('', new DateTimeZone($timezone));
 
