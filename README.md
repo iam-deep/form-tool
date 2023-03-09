@@ -1,4 +1,4 @@
-# Form Tool Package for Laravel 8
+# Form Tool Package for Laravel 10
 
 ![StyleCI](https://github.styleci.io/repos/510375806/shield?branch=main) ![GitHub](https://img.shields.io/github/license/biswadeep-sarkar/form-tool)
 
