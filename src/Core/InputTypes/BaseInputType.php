@@ -160,6 +160,8 @@ class BaseInputType
     {
         $this->tableName = trim($tableName);
         $this->alias = trim($alias) ?: $this->tableName;
+
+        return $this;
     }
 
     public function readonly(): BaseInputType

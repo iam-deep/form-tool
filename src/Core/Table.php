@@ -143,6 +143,8 @@ class Table
         $this->filter = new Filter($fields);
         $this->filter->setBluePrint($this->bluePrint);
 
+        $this->filter->initialize();
+
         return $this;
     }
 
