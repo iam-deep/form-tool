@@ -25,6 +25,13 @@ class Filter
         $this->fieldsToFilter = $fields;
     }
 
+    public function initialize()
+    {
+        if (! $this->fieldsToFilter) {
+            $this->setDefaultFilter();
+        }
+    }
+
     public function setBluePrint(BluePrint $bluePrint)
     {
         $this->bluePrint = $bluePrint;
@@ -32,10 +39,6 @@ class Filter
 
     public function create()
     {
-        if (! $this->fieldsToFilter) {
-            $this->setDefaultFilter();
-        }
-
         $request = request();
 
         $data = new \stdClass();
