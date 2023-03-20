@@ -103,7 +103,7 @@ class BaseModel extends Model
         } elseif (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
-            $query->orderByRaw(2, 'asc');
+            $query->orderByRaw('2 asc');
         }
 
         return $query->get();
