@@ -171,7 +171,7 @@ class Form
                     $input->setValue($input->getValue());
                 }
 
-                $data->fields->{($input->getDbField() ?: $n++)} = $input->getHTML();
+                $data->fields->{$input->getDbField() ?: $n++} = $input->getHTML();
             }
         }
 

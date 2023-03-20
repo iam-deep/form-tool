@@ -30,7 +30,7 @@ class Random
 
         $random = '';
         for ($i = 0; $i < $length; $i++) {
-            $random .= $characters[(\mt_rand(0, \strlen($characters) - 1))];
+            $random .= $characters[\mt_rand(0, \strlen($characters) - 1)];
         }
 
         return $random;
