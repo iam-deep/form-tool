@@ -1222,7 +1222,7 @@ class Form
     public function getId()
     {
         if (! $this->editId && $this->formStatus != FormStatus::CREATE && $this->formStatus != FormStatus::STORE) {
-            $this->parseEditId();
+            $this->parseEditId(null);
         }
 
         return $this->editId;
