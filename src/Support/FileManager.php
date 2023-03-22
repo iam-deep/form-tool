@@ -57,7 +57,7 @@ class FileManager
         return null;
     }
 
-    private function doUpload($file, $destinationPath, $filename, $flagCheck = true)
+    private static function doUpload($file, $destinationPath, $filename, $flagCheck = true)
     {
         $mainFilename = $filename;
 
@@ -211,7 +211,7 @@ class FileManager
         }
     }
 
-    private function filterFilename($value)
+    private static function filterFilename($value)
     {
         do {
             $value = \str_replace([' ', '--'], '-', $value);
