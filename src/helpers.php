@@ -111,6 +111,13 @@ if (! function_exists('imageThumb')) {
     }
 }
 
+if (! function_exists('imageResize')) {
+    function imageResize($value, $width = null, $height = null)
+    {
+        return (new Deep\FormTool\Support\ImageCache())->resize($value, $width, $height);
+    }
+}
+
 if (! function_exists('isSuccess')) {
     function isSuccess($response)
     {

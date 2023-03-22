@@ -23,7 +23,7 @@ class ImageCache
         self::$memoryLimit = \config('form-tool.memoryLimit', self::$memoryLimit) ?: self::$memoryLimit;
     }
 
-    public static function resize($imagePath)
+    public static function resize($imagePath, $width = null, $height = null)
     {
         if (! FileManager::isImage($imagePath) || ! \file_exists($imagePath)) {
             return $imagePath;
@@ -31,13 +31,16 @@ class ImageCache
 
         self::getConfigs();
 
+        $width = $width ?: self::$width;
+        $height = $height ?: self::$height;
+
         $pathinfo = \pathinfo($imagePath);
 
         // Create the cache path
         $path = self::$cachePath.'/'.$pathinfo['dirname'];
 
         // Create the cache filename
-        $filename = $pathinfo['filename'].'-'.self::$width.'x'.self::$height.'.'.$pathinfo['extension'];
+        $filename = $pathinfo['filename'].'-'.$width.'x'.$height.'.'.$pathinfo['extension'];
 
         // Full path of the cache image
         $cacheImagePath = $path.'/'.$filename;
@@ -56,7 +59,7 @@ class ImageCache
             $img = Image::make($imagePath);
 
             // resize image instance
-            $img->resize(self::$width, self::$height, function ($constraint) {
+            $img->resize($width, $height, function ($constraint) {
                 $constraint->aspectRatio();
             });
 
