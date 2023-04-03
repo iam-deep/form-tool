@@ -5,6 +5,7 @@ namespace Deep\FormTool\Core;
 use Closure;
 use Deep\FormTool\Support\DTConverter;
 use Deep\FormTool\Support\Settings;
+use Deep\FormTool\Core\InputTypes\Common\CrudState;
 use Illuminate\Support\Facades\URL;
 
 class Doc
@@ -17,6 +18,8 @@ class Doc
     private static $css = [];
     private static $js = [];
     private static $jsGroup = [];
+
+    private static CrudState $manualState = CrudState::NONE;
 
     private function __construct()
     {
@@ -76,6 +79,16 @@ class Doc
     public static function getCruds()
     {
         return self::$crudList;
+    }
+
+    public static function setState(CrudState $state)
+    {
+        self::$manualState = $state;
+    }
+
+    public static function getState(): CrudState
+    {
+        return self::$manualState;
     }
 
     //region Css&Js

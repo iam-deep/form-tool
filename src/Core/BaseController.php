@@ -3,6 +3,8 @@
 namespace Deep\FormTool\Core;
 
 use Illuminate\Http\Request;
+use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\InputTypes\Common\CrudState;
 
 trait BaseController
 {
@@ -95,6 +97,11 @@ trait BaseController
 
     public function getOptions(Request $request)
     {
+        $state = CrudState::tryFrom($request->post('state'));
+        if ($state) {
+            Doc::setState($state);
+        }
+
         $this->setup();
 
         return $this->crud->getOptionsByParentId();

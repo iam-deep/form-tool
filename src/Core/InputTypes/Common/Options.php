@@ -410,6 +410,7 @@ trait Options
                 }
             }
 
+            $data['state'] = $this->bluePrint->getForm()->getCrud()->getCurrentState();
             $data['input'] = $input;
 
             Doc::addJs(\view('form-tool::form.scripts.'.$scriptFilename, $data), 'depend-'.$key);

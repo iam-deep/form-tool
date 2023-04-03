@@ -3,9 +3,11 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Core\InputTypes\Common\CrudState;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Route;
 
 class Crud
 {
@@ -23,6 +25,8 @@ class Crud
 
     private $deleteRestrictForOthers = [];
     private $deleteRestrictForMe = [];
+
+    private CrudState $currentState = CrudState::NONE;
 
     public function make(object $resource, $model, Closure $callback, string $name = 'default'): Crud
     {
@@ -46,9 +50,11 @@ class Crud
 
         $this->softDelete(\config('form-tool.isSoftDelete', true));
 
+        $this->tryGetCurrentState();
+
         // Set form and call the callback after all the initialization
         $this->bluePrint->setForm($this->form);
-        $callback($this->bluePrint);
+        $callback($this->bluePrint, $this->currentState);
 
         return $this;
     }
@@ -308,6 +314,39 @@ class Crud
         $data['data'] = $result;
 
         return \response()->json($data);
+    }
+
+    public function getCurrentState()
+    {
+        return $this->currentState;
+    }
+
+    private function tryGetCurrentState(): void
+    {
+        $manualState = Doc::getState();
+        if ($manualState != CrudState::NONE) {
+            $this->currentState = $manualState;
+
+            return;
+        }
+
+        $action = null;
+        $currentRoute = Route::currentRouteName();
+        if ($currentRoute) {
+            $segments = \explode('.', $currentRoute);
+            $count = count($segments);
+            if ($count > 1) {
+                $route = implode('/', array_slice($segments, 0, $count - 1));
+                $action = end($segments);
+            } else {
+                $route = $segments[0] ?? null;
+            }
+        }
+
+        $state = CrudState::tryFrom($action);
+        if ($state !== null) {
+            $this->currentState = $state;
+        }
     }
 
     //region Getter

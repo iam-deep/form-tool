@@ -33,7 +33,7 @@ $("#{{ $input->dependField }}").on("change", function() {
         url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
         type: "post",
         dataType:"json",
-        data: { _token: csrf_token, values: vals, field: "{{ $input->field }}" },
+        data: { _token: csrf_token, values: vals, field: "{{ $input->field }}", state: "{{ $state }}" },
         beforeSend:function() {
             field.attr("disabled", true);
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif

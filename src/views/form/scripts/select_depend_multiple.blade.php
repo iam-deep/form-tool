@@ -32,7 +32,7 @@ $("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->s
         url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
         type: "post",
         dataType:"json",
-        data: { _token: csrf_token, values: vals, field: "{{ $input->field }}", multipleKey: '{{ $input->multipleKey }}' },
+        data: { _token: csrf_token, values: vals, field: "{{ $input->field }}", multipleKey: '{{ $input->multipleKey }}', state: "{{ $state }}" },
         beforeSend:function() {
             field.attr("disabled", true);
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif
