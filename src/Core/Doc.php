@@ -3,9 +3,9 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Core\InputTypes\Common\CrudState;
 use Deep\FormTool\Support\DTConverter;
 use Deep\FormTool\Support\Settings;
-use Deep\FormTool\Core\InputTypes\Common\CrudState;
 use Illuminate\Support\Facades\URL;
 
 class Doc

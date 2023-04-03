@@ -2,9 +2,9 @@
 
 namespace Deep\FormTool\Core;
 
-use Illuminate\Http\Request;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\CrudState;
+use Illuminate\Http\Request;
 
 trait BaseController
 {

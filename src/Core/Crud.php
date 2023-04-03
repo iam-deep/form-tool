@@ -6,8 +6,8 @@ use Closure;
 use Deep\FormTool\Core\InputTypes\Common\CrudState;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\URL;
 
 class Crud
 {
