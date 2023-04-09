@@ -260,6 +260,10 @@ class Form
                     $where = [$dbModel->foreignKey => $this->editId];
 
                     $query = DB::table($dbModel->table)->where($where);
+                    if ($dbModel->where) {
+                        $closure = $dbModel->where;
+                        $closure($query);
+                    }
                     if ($dbModel->orderBy) {
                         $query->orderBy($dbModel->orderBy, 'asc');
                     } elseif ($model->getOrderByColumn()) {
@@ -638,7 +642,12 @@ class Form
             if ($model) {
                 $where = [$foreignKey => $this->editId];
                 if ($model instanceof \stdClass) {
-                    DB::table($model->table)->where($where)->delete();
+                    $query = DB::table($model->table);
+                    if ($model->where) {
+                        $closure = $model->where;
+                        $closure($query);
+                    }
+                    $query->where($where)->delete();
                     if (\count($data)) {
                         DB::table($model->table)->insert($data);
                     }

@@ -174,7 +174,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function custom($class, string $dbField, string $label = null)
+    public function custom($class, string $dbField = null, string $label = null)
     {
         $inputType = new $class();
 
@@ -295,7 +295,8 @@ class BluePrint
         return $this;
     }
 
-    public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null)
+    // TODO: Create Interface saveable
+    public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null, Closure $where = null)
     {
         if ($idCol && $foreignKeyCol) {
             $this->multipleTable = (object) [
@@ -303,6 +304,7 @@ class BluePrint
                 'id' => \trim($idCol),
                 'foreignKey' => \trim($foreignKeyCol),
                 'orderBy' => \trim($orderBy),
+                'where' => $where
             ];
         } else {
             if (class_exists($model)) {
@@ -394,7 +396,7 @@ class BluePrint
     {
         $list = [];
         foreach ($this->dataTypeList as $input) {
-            if (! isset($input->type) || $input->type != InputType::HTML) {
+            if (! $input instanceof InputTypes\HtmlType) {
                 $list[] = $input;
             }
         }
