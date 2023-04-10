@@ -15,4 +15,9 @@ class HtmlType extends BaseInputType
     {
         return $this->label;
     }
+
+    public function getHTMLMultiple()
+    {
+        return $this->label;
+    }
 }

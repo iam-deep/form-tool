@@ -224,15 +224,23 @@ class Form
         }
 
         $totalCols = 0;
-        foreach ($model->getList() as $field) {
-            if (! $field instanceof BluePrint) {
-                if ($field->getType() != InputType::HIDDEN) {
-                    $tableData->header[] = $field->getLabel();
+        foreach ($model->getGroups() as $groupName => $group) {
+            if (is_string($groupName)) {
+                $tableData->header[] = $groupName;
+                $totalCols++;
+                continue;
+            }
+
+            foreach ($group as $field) {
+                if (! $field instanceof BluePrint) {
+                    if ($field->getType() != InputType::HIDDEN) {
+                        $tableData->header[] = $field->getLabel();
+                        $totalCols++;
+                    }
+                } else {
+                    $tableData->header[] = '';
                     $totalCols++;
                 }
-            } else {
-                $tableData->header[] = '';
-                $totalCols++;
             }
         }
         $tableData->header[] = '';
@@ -240,8 +248,8 @@ class Form
         // TODO: Need to work for only one file field
         // Check if any session data exists
         $totalDataInSession = 0;
-        if (count($model->getList()) > 0) {
-            $field = $model->getList()[0]->getDbField();
+        if (count($model->getInputList()) > 0) {
+            $field = $model->getInputList()[0]->getDbField();
             $val = old($key);
             if ($val && \is_array($val)) {
                 $totalDataInSession = \count($val);
@@ -290,7 +298,7 @@ class Form
 
                 $i = 0;
                 foreach ($result as $row) {
-                    foreach ($model->getList() as $field) {
+                    foreach ($model->getInputList() as $field) {
                         $field->setIndex($model->getKey(), $i);
 
                         $field->setValue($row->{$field->getDbField()} ?? null);
@@ -342,21 +350,36 @@ class Form
         $rowData->hidden = '';
         $rowData->columns = '';
 
-        foreach ($model->getList() as $field) {
-            if ($field instanceof BluePrint) {
-                $rowData->columns .= '<td>'.$this->getMultipleTable($field).'</td>';
-            } else {
-                // Check if there is any value in the session
-                $oldValue = old($key.'.'.$index.'.'.$field->getDbField());
-
-                // Let's modify value before if needed like for decryption
-                $field->setValue($field->getValue());
-
-                if ($field->getType() == InputType::HIDDEN) {
-                    $rowData->hidden .= $field->getHTMLMultiple($key, $index, $oldValue);
+        foreach ($model->getGroups() as $groupName => $group) {
+            $columns = [];
+            foreach ($group as $field) {
+                if ($field instanceof BluePrint) {
+                    $rowData->columns .= '<td>'.$this->getMultipleTable($field).'</td>';
                 } else {
-                    $rowData->columns .= '<td>'.$field->getHTMLMultiple($key, $index, $oldValue).'</td>';
+                    // Check if there is any value in the session
+                    $oldValue = old($key.'.'.$index.'.'.$field->getDbField());
+
+                    // Let's modify value before if needed like for decryption
+                    $field->setValue($field->getValue());
+
+                    if ($field->getType() == InputType::HIDDEN) {
+                        $rowData->hidden .= $field->getHTMLMultiple($key, $index, $oldValue);
+                    } else {
+                        $columns[] = $field->getHTMLMultiple($key, $index, $oldValue);
+                    }
                 }
+            }
+
+            if (is_numeric($groupName)) {
+                foreach ($columns as $column) {
+                    $rowData->columns .= '<td>'.$column.'</td>';
+                }
+            } else {
+                $rowData->columns .= '<td>';
+                foreach ($columns as $column) {
+                    $rowData->columns .= '<div class="mb-2">'.$column.'</div>';
+                }
+                $rowData->columns .= '</td>';
             }
         }
 
@@ -579,8 +602,8 @@ class Form
             // And it's a buggy if we only have only file field in multiple
             // So let's create an array of null if have any data in our file field
             // count() help to determine on edit with some data in post and some new upload
-            if ($postData == null || count($input->getList()) == 1) {
-                foreach ($input->getList() as $field) {
+            if ($postData == null || count($input->getInputList()) == 1) {
+                foreach ($input->getInputList() as $field) {
                     if ($this->request->file($input->getKey())) {
                         if ($postData) {
                             $postData = array_merge(
@@ -599,7 +622,7 @@ class Form
             if ($postData && \is_array($postData)) {
                 foreach ($postData as $index => $row) {
                     $dataRow = [];
-                    foreach ($input->getList() as $field) {
+                    foreach ($input->getInputList() as $field) {
                         $field->setIndex($input->getKey(), $index);
 
                         $dbField = $field->getDbField();
@@ -671,10 +694,6 @@ class Form
         foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
-            }
-
-            if (is_numeric($input)) {
-                dd($input);
             }
 
             $newValue = $input->beforeValidation($this->request->post($input->getDbField()));
@@ -972,7 +991,7 @@ class Form
                     }
 
                     foreach ($childResult as $row) {
-                        foreach ($input->getList() as $childInput) {
+                        foreach ($input->getInputList() as $childInput) {
                             $childInput->afterDestroy($row);
                         }
                     }

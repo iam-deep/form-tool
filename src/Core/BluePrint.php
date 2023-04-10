@@ -9,6 +9,9 @@ use Illuminate\Support\Arr;
 class BluePrint
 {
     private $dataTypeList = [];
+    private $groups = [];
+    private int $groupIndex = 0;
+    private string $groupName = '';
 
     private $heroDbField = null;
 
@@ -33,13 +36,16 @@ class BluePrint
         $this->key = $key;
         $this->isMultiple = $isMultiple;
         $this->parentBluePrint = $parentBluePrint;
+
+        $this->groupName = $this->groupIndex;
+        $this->dataTypeList[$this->groupName] = [];
     }
 
     public function text(string $dbField, string $label = null): InputTypes\TextType
     {
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -54,7 +60,7 @@ class BluePrint
 
         $inputType->validations(['numeric' => 'numeric']);
 
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -70,7 +76,7 @@ class BluePrint
 
         $inputType->validations(['email' => 'email']);
 
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -79,7 +85,7 @@ class BluePrint
     {
         $inputType = new InputTypes\PasswordType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -88,7 +94,7 @@ class BluePrint
     {
         $inputType = new InputTypes\HiddenType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -97,7 +103,7 @@ class BluePrint
     {
         $inputType = new InputTypes\FileType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -106,7 +112,7 @@ class BluePrint
     {
         $inputType = new InputTypes\ImageType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -115,7 +121,7 @@ class BluePrint
     {
         $inputType = new InputTypes\TextareaType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -124,7 +130,7 @@ class BluePrint
     {
         $inputType = new InputTypes\DateType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -133,7 +139,7 @@ class BluePrint
     {
         $inputType = new InputTypes\TimeType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -142,7 +148,7 @@ class BluePrint
     {
         $inputType = new InputTypes\DateTimeType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -151,7 +157,7 @@ class BluePrint
     {
         $inputType = new InputTypes\SelectType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -160,7 +166,7 @@ class BluePrint
     {
         $inputType = new InputTypes\EditorType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -169,7 +175,7 @@ class BluePrint
     {
         $inputType = new InputTypes\CheckboxType();
         $inputType->init($this, $dbField, $label);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -192,7 +198,7 @@ class BluePrint
             ));
         }
 
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
         $inputType->init($this, $dbField, $label);
 
         return $inputType;
@@ -202,7 +208,7 @@ class BluePrint
     {
         $inputType = new InputTypes\HtmlType();
         $inputType->init($this, $dbField, $html);
-        $this->dataTypeList[] = $inputType;
+        $this->dataTypeList[$this->groupName][] = $inputType;
 
         return $inputType;
     }
@@ -225,10 +231,12 @@ class BluePrint
         $fields = Arr::wrap($dbFields);
 
         foreach ($fields as $field) {
-            foreach ($this->dataTypeList as $key => $type) {
-                if ($type->getDbField() == $field) {
-                    unset($this->dataTypeList[$key]);
-                    break;
+            foreach ($this->dataTypeList as $groupName => $group) {
+                foreach ($group as $key => $input) {
+                    if ($input->getDbField() == $field) {
+                        unset($this->dataTypeList[$groupName][$key]);
+                        break;
+                    }
                 }
             }
         }
@@ -236,13 +244,15 @@ class BluePrint
 
     public function getInputTypeByDbField(string $column)
     {
-        foreach ($this->dataTypeList as $input) {
-            if ($input instanceof BluePrint) {
-                if ($input->getKey() == $column) {
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $input) {
+                if ($input instanceof BluePrint) {
+                    if ($input->getKey() == $column) {
+                        return $input;
+                    }
+                } elseif ($input->getDbField() == $column) {
                     return $input;
                 }
-            } elseif ($input->getDbField() == $column) {
-                return $input;
             }
         }
 
@@ -263,9 +273,28 @@ class BluePrint
 
         $field($this->subBluePrint[$dbField]);
 
-        $this->dataTypeList[] = $this->subBluePrint[$dbField];
+        $this->dataTypeList[$this->groupName][] = $this->subBluePrint[$dbField];
 
         return $this->subBluePrint[$dbField];
+    }
+
+    public function group(string $name, Closure $fields)
+    {
+        if (is_numeric($name)) {
+            throw new \Exception('Group name cannot be numeric!');
+        }
+
+        if (in_array($name, $this->groups)) {
+            throw new \Exception('Group name already exists!');
+        }
+
+        $this->groups[] = $name;
+
+        $this->groupName = $name;
+        $fields($this);
+        $this->groupName = ++$this->groupIndex;
+
+        return $this;
     }
 
     public function required($noOfItems = 1)
@@ -304,7 +333,7 @@ class BluePrint
                 'id' => \trim($idCol),
                 'foreignKey' => \trim($foreignKeyCol),
                 'orderBy' => \trim($orderBy),
-                'where' => $where,
+                'where' => $where
             ];
         } else {
             if (class_exists($model)) {
@@ -389,19 +418,33 @@ class BluePrint
 
     public function getList(): array
     {
-        return $this->dataTypeList;
-    }
-
-    public function getInputList(): array
-    {
         $list = [];
-        foreach ($this->dataTypeList as $input) {
-            if (! $input instanceof InputTypes\HtmlType) {
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $input) {
                 $list[] = $input;
             }
         }
 
         return $list;
+    }
+
+    public function getInputList(): array
+    {
+        $list = [];
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $input) {
+                if (! $input instanceof InputTypes\HtmlType) {
+                    $list[] = $input;
+                }
+            }
+        }
+
+        return $list;
+    }
+
+    public function getGroups(): array
+    {
+        return $this->dataTypeList;
     }
 
     public function getKey()
@@ -442,9 +485,12 @@ class BluePrint
             return $this->heroDbField;
         }
 
-        foreach ($this->dataTypeList as $input) {
-            if (isset($input->type) && $input->type == InputTypes\Common\InputType::TEXT && ! $input->isEncrypted()) {
-                return $input->getDbField();
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $input) {
+                if (isset($input->type) && $input->type == InputTypes\Common\InputType::TEXT &&
+                    ! $input->isEncrypted()) {
+                    return $input->getDbField();
+                }
             }
         }
 
@@ -454,21 +500,23 @@ class BluePrint
     public function getSelectDbOptions()
     {
         $selects = [];
-        foreach ($this->dataTypeList as $input) {
-            if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT ||
-                // table name should be same as crud table, otherwise skip
-                ($input->getTableName() && $input->getTableName() != $this->form->getModel()->getTableName())) {
-                continue;
-            }
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $input) {
+                if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT ||
+                    // table name should be same as crud table, otherwise skip
+                    ($input->getTableName() && $input->getTableName() != $this->form->getModel()->getTableName())) {
+                    continue;
+                }
 
-            foreach ($input->getOptionData() as $options) {
-                foreach ($options as $type => $optionData) {
-                    if ($type == 'db') {
-                        $selects[] = (object) [
-                            'table' => $optionData->table,
-                            'column' => $input->getDbField(),
-                            'label' => $input->getLabel(),
-                        ];
+                foreach ($input->getOptionData() as $options) {
+                    foreach ($options as $type => $optionData) {
+                        if ($type == 'db') {
+                            $selects[] = (object) [
+                                'table' => $optionData->table,
+                                'column' => $input->getDbField(),
+                                'label' => $input->getLabel(),
+                            ];
+                        }
                     }
                 }
             }
@@ -482,8 +530,10 @@ class BluePrint
     public function toObj($type)
     {
         $data['fields'] = [];
-        foreach ($this->dataTypeList as $fieldType) {
-            $data['fields'][] = $fieldType->toObj($type);
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $fieldType) {
+                $data['fields'][] = $fieldType->toObj($type);
+            }
         }
 
         return $data['fields'];
