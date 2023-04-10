@@ -333,7 +333,7 @@ class BluePrint
                 'id' => \trim($idCol),
                 'foreignKey' => \trim($foreignKeyCol),
                 'orderBy' => \trim($orderBy),
-                'where' => $where
+                'where' => $where,
             ];
         } else {
             if (class_exists($model)) {
