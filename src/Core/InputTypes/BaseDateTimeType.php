@@ -142,6 +142,17 @@ class BaseDateTimeType extends BaseFilterType
         ',
             'datetime'
         );
+
+        Doc::addJs(
+            '
+        // Date and DateTimePicker
+        $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
+        $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", useCurrent: false});
+        $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", useCurrent: false});
+        ',
+            'datetime',
+            'multiple_after_add'
+        );
     }
 
     public function applyFilter($query, $operator = '=')
