@@ -395,19 +395,6 @@ trait Options
 
                 $key = $input->multipleKey.'-'.$key;
                 $scriptFilename = 'select_depend_multiple';
-
-                $input->selectorChildCount = $input->fieldChildCount = 0;
-                $count = 1;
-                foreach ($this->bluePrint->getInputList() as $field) {
-                    $column = $field->getDbField();
-                    if ($column == $input->field) {
-                        $input->fieldChildCount = $count;
-                    } elseif ($column == $input->dependField) {
-                        $input->selectorChildCount = $count;
-                    }
-
-                    $count++;
-                }
             }
 
             $data['state'] = $this->bluePrint->getForm()->getCrud()->getCurrentState();

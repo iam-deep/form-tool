@@ -1,12 +1,12 @@
-$("#{{ $input->multipleKey }}").on("change", 'tbody>tr>td:nth-child({{ $input->selectorChildCount }})>select', function() {
+$("#{{ $input->multipleKey }}").on("change", '.{{ $input->multipleKey }}-{{ $input->dependField }}', function() {
     var csrf_token = $('meta[name="csrf-token"]').attr('content');
-    var parent = $(this).parent().parent();
-    var field = parent.find('td:nth-child({{ $input->fieldChildCount }})>select');
+    var parent = $(this).closest('tr');
+    var field = parent.find('.{{ $input->multipleKey }}-{{ $input->field }}');
     var val = $(this).val();
 
     var vals = {};
     @foreach ($input->allDependFields as $field)
-        vals.{{ $field->field }} = parent.find('td:nth-child({{ $input->selectorChildCount }})>select').val();
+        vals.{{ $field->field }} = parent.find('.{{ $input->multipleKey }}-{{ $input->dependField }}').val();
     @endforeach
 
     if (! val) {
