@@ -114,9 +114,16 @@ class SelectType extends BaseFilterType
             return;
         }
 
+        $this->setDependencies($isMultiple);
+
+        $this->addClass('chosen');
+        $this->removeRaw('required');
+    }
+
+    public function setDependencies($isMultiple = false)
+    {
         Doc::addCssLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.min.css');
         Doc::addJsLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.jquery.min.js');
-        $this->addClass('chosen');
 
         $config = [
             'width' => '100%',
@@ -130,8 +137,6 @@ class SelectType extends BaseFilterType
         if ($this->limitMax) {
             $config['max_selected_options'] = $this->limitMax;
         }
-
-        $this->removeRaw('required');
 
         Doc::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen');
 
@@ -194,9 +199,8 @@ class SelectType extends BaseFilterType
         // This is needed for depend value
         $this->value = $value;
 
-        $class = $key.'-'.$this->dbField;
-        $input = '<select class="'.\implode(' ', $this->classes).' '.$class.' input-sm" id="'.$class.'-'.$index.
-            '"name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
+        $input = '<select class="'.\implode(' ', $this->classes).' '.$key.'-'.$this->dbField.' input-sm" id="'.$key.'-'.$this->dbField.'-'.$index.
+            '" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.$this->inlineCSS.'>';
         $input .= $this->getOptions($value);
         $input .= '</select>';
 

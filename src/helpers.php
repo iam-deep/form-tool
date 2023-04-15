@@ -3,6 +3,7 @@
 use Deep\FormTool\Core\Auth;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\Guard;
+use Illuminate\Support\Arr;
 
 if (! function_exists('addCssLink')) {
     function addCssLink($link)
@@ -178,15 +179,28 @@ if (! function_exists('niceTime')) {
     }
 }
 
-function getDependencies($plugin)
+function dbDate($date)
 {
-    switch ($plugin) {
-        case 'date_time':
-            (new Deep\FormTool\Core\InputTypes\BaseDateTimeType())->setDependencies();
-            break;
+    return \Deep\FormTool\Support\DTConverter::dbDate($date, false);
+}
 
-        default:
-            throw new \Exception(sprintf('Plugin not found: %s', $plugin));
-            break;
+function getDependencies($plugins)
+{
+    $plugins = Arr::wrap($plugins);
+
+    foreach ($plugins as $plugin) {
+        switch ($plugin) {
+            case 'datetime':
+                (new Deep\FormTool\Core\InputTypes\BaseDateTimeType())->setDependencies();
+                break;
+
+            case 'chosen':
+                (new Deep\FormTool\Core\InputTypes\SelectType())->setDependencies();
+                break;
+
+            default:
+                throw new \Exception(sprintf('Plugin not found: %s', $plugin));
+                break;
+        }
     }
 }
