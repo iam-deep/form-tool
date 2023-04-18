@@ -230,10 +230,12 @@ class BluePrint
     {
         $fields = Arr::wrap($dbFields);
 
+        $i = 0;
         foreach ($fields as $field) {
             foreach ($this->dataTypeList as $groupName => $group) {
                 foreach ($group as $key => $input) {
-                    if ($input->getDbField() == $field) {
+                    if (! $input instanceof InputTypes\HtmlType && ! $input instanceof BluePrint &&
+                        $input->getDbField() == $field) {
                         unset($this->dataTypeList[$groupName][$key]);
                         break;
                     }

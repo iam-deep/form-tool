@@ -247,6 +247,7 @@ class Crud
         $page = new \stdClass();
 
         $page->form = $this->form->create();
+        $page->id = null;
 
         $page->style = Doc::getCssLinks().Doc::getCss();
         $page->script = Doc::getJsLinks().Doc::getJs();
@@ -260,6 +261,7 @@ class Crud
 
         $this->form->edit($id);
         $page->form = $this->form->create();
+        $page->id = $id;
 
         $page->style = Doc::getCssLinks().Doc::getCss();
         $page->script = Doc::getJsLinks().Doc::getJs();

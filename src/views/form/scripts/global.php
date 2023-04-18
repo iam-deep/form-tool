@@ -95,7 +95,8 @@ $(function() {
 	});
 
     $('form').on('submit', function() {
-        $('.submit').html('<i class="fa fa-spinner fa-pulse"></i> ' + $('.submit').text()).prop('disabled', true);
+        let btn = $(this).find('.submit');
+        btn.html('<i class="fa fa-spinner fa-pulse"></i> ' + btn.text()).prop('disabled', true);
     });
     
     // Sort table rows
