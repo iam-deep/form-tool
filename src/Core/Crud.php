@@ -224,6 +224,8 @@ class Crud
 
         $page->bulkAction = $this->table->getBulkAction();
         $page->tableContent = $this->table->getContent();
+        $page->raw = $this->table->getRaw();
+        $page->data = $this->table->getData();
         $page->pagination = $this->table->getPagination();
 
         $page->style = Doc::getCssLinks().Doc::getCss();

@@ -453,6 +453,8 @@ class Table
         $this->dataResult->withPath($this->resource->route);
 
         $this->table = new \stdClass();
+        $this->table->raw = $data;
+        $this->table->data = $this->dataResult;
         $this->table->content = view('form-tool::list.table', $data);
         $this->table->pagination = $this->dataResult->onEachSide(2)->withQueryString()->links();
 
@@ -633,6 +635,16 @@ class Table
         $this->listAll();
 
         return $this->table->content;
+    }
+
+    public function getRaw()
+    {
+        return $this->table->raw;
+    }
+
+    public function getData()
+    {
+        return $this->table->data;
     }
 
     public function getPagination()
