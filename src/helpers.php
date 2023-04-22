@@ -188,7 +188,7 @@ if (! function_exists('toLocal')) {
 }
 
 if (! function_exists('dbDate')) {
-    function dbDate(?string $time, bool $isConvertToUTC = false)
+    function dbDate(?string $date, bool $isConvertToUTC = false)
     {
         return \Deep\FormTool\Support\DTConverter::dbDate($date, $isConvertToUTC);
     }
