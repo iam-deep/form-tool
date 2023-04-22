@@ -4,6 +4,7 @@ use Deep\FormTool\Core\Auth;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\Guard;
 use Illuminate\Support\Arr;
+use Carbon\Carbon;
 
 if (! function_exists('addCssLink')) {
     function addCssLink($link)
@@ -159,48 +160,74 @@ if (! function_exists('isNullOrEmpty')) {
 }
 
 if (! function_exists('niceDateTime')) {
-    function niceDateTime($dateTime)
+    function niceDateTime(?string $datetime, bool $isConvertToLocal = true)
     {
-        return \Deep\FormTool\Support\DTConverter::niceDateTime($dateTime, true);
+        return \Deep\FormTool\Support\DTConverter::niceDateTime($datetime, $isConvertToLocal);
     }
 }
 
 if (! function_exists('niceDate')) {
-    function niceDate($date)
+    function niceDate(?string $date, bool $isConvertToLocal = true)
     {
-        return \Deep\FormTool\Support\DTConverter::niceDate($date, true);
+        return \Deep\FormTool\Support\DTConverter::niceDate($date, $isConvertToLocal);
     }
 }
 
 if (! function_exists('niceTime')) {
-    function niceTime($dateTime)
+    function niceTime(?string $time, bool $isConvertToLocal = true)
     {
-        return \Deep\FormTool\Support\DTConverter::niceTime($dateTime, true);
+        return \Deep\FormTool\Support\DTConverter::niceTime($time, $isConvertToLocal);
     }
 }
 
-function dbDate($date)
-{
-    return \Deep\FormTool\Support\DTConverter::dbDate($date, false);
+if (! function_exists('toLocal')) {
+    function toLocal(?string $datetime, string $format, bool $isConvertToLocal = true)
+    {
+        return \Deep\FormTool\Support\DTConverter::toLocal($datetime, $format, $isConvertToLocal);
+    }
 }
 
-function getDependencies($plugins)
-{
-    $plugins = Arr::wrap($plugins);
+if (! function_exists('dbDate')) {
+    function dbDate(?string $time, bool $isConvertToUTC = false)
+    {
+        return \Deep\FormTool\Support\DTConverter::dbDate($date, $isConvertToUTC);
+    }
+}
 
-    foreach ($plugins as $plugin) {
-        switch ($plugin) {
-            case 'datetime':
-                (new Deep\FormTool\Core\InputTypes\BaseDateTimeType())->setDependencies();
-                break;
+if (! function_exists('dbDateTime')) {
+    function dbDateTime(?string $datetime, bool $isConvertToUTC = false)
+    {
+        return \Deep\FormTool\Support\DTConverter::dbDateTime($datetime, $isConvertToUTC);
+    }
+}
 
-            case 'chosen':
-                (new Deep\FormTool\Core\InputTypes\SelectType())->setDependencies();
-                break;
+if (! function_exists('getDependencies')) {
+    function getDependencies($plugins)
+    {
+        $plugins = Arr::wrap($plugins);
 
-            default:
-                throw new \Exception(sprintf('Plugin not found: %s', $plugin));
-                break;
+        foreach ($plugins as $plugin) {
+            switch ($plugin) {
+                case 'datetime':
+                    (new Deep\FormTool\Core\InputTypes\BaseDateTimeType())->setDependencies();
+                    break;
+
+                case 'chosen':
+                    (new Deep\FormTool\Core\InputTypes\SelectType())->setDependencies();
+                    break;
+
+                default:
+                    throw new \Exception(sprintf('Plugin not found: %s', $plugin));
+                    break;
+            }
         }
+    }
+}
+
+if (! function_exists('dateHumanDiff')) {
+    function dateHumanDiff($datetime)
+    {
+        $dt = Carbon::parse($datetime);
+        return $dt->diffForHumans();
     }
 }

@@ -201,6 +201,30 @@ class DTConverter
         return null;
     }
 
+    public static function toLocal(?string $dateTime, string $format, bool $isConvertToLocal = true): ?string
+    {
+        if (! $dateTime) {
+            return null;
+        }
+
+        try {
+            // create a $dt object with UTC or project's timezone
+            $dt = new DateTime($dateTime, new DateTimeZone(self::$appTimezone));
+
+            if ($isConvertToLocal) {
+                // convert to local timezone
+                $dt->setTimezone(new DateTimeZone(self::$timezone));
+            }
+
+            // format the datetime
+            return $dt->format($format);
+        } catch (\Exception $e) {
+            // Hiding date parsing errors from users
+        }
+
+        return null;
+    }
+
     public static function getTimezones()
     {
         $continents = [
