@@ -1,10 +1,10 @@
 <?php
 
+use Carbon\Carbon;
 use Deep\FormTool\Core\Auth;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\Guard;
 use Illuminate\Support\Arr;
-use Carbon\Carbon;
 
 if (! function_exists('addCssLink')) {
     function addCssLink($link)
@@ -228,6 +228,7 @@ if (! function_exists('dateHumanDiff')) {
     function dateHumanDiff($datetime)
     {
         $dt = Carbon::parse($datetime);
+
         return $dt->diffForHumans();
     }
 }
