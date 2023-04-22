@@ -180,6 +180,13 @@ if (! function_exists('niceTime')) {
     }
 }
 
+if (! function_exists('toNice')) {
+    function toNice(?string $datetime, string $format, bool $isConvertToLocal = false)
+    {
+        return \Deep\FormTool\Support\DTConverter::toNice($datetime, $format, $isConvertToLocal);
+    }
+}
+
 if (! function_exists('toLocal')) {
     function toLocal(?string $datetime, string $format, bool $isConvertToLocal = true)
     {
