@@ -1,10 +1,10 @@
 <?php
 
-use Carbon\Carbon;
 use Deep\FormTool\Core\Auth;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\Guard;
 use Illuminate\Support\Arr;
+use Carbon\Carbon;
 
 if (! function_exists('addCssLink')) {
     function addCssLink($link)
@@ -209,7 +209,7 @@ if (! function_exists('dbDateTime')) {
 }
 
 if (! function_exists('getDependencies')) {
-    function getDependencies($plugins)
+    function getDependencies($plugins, ...$configs)
     {
         $plugins = Arr::wrap($plugins);
 
@@ -221,6 +221,14 @@ if (! function_exists('getDependencies')) {
 
                 case 'chosen':
                     (new Deep\FormTool\Core\InputTypes\SelectType())->setDependencies();
+                    break;
+
+                case 'ckeditor':
+                    $editor = new Deep\FormTool\Core\InputTypes\EditorType();
+                    $editor->setDependencies();
+                    if ($configs) {
+                        $editor->setJs(...$configs);
+                    }
                     break;
 
                 default:
@@ -235,7 +243,6 @@ if (! function_exists('dateHumanDiff')) {
     function dateHumanDiff($datetime)
     {
         $dt = Carbon::parse($datetime);
-
         return $dt->diffForHumans();
     }
 }

@@ -3,11 +3,12 @@
 namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\Doc;
-use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Deep\FormTool\Core\InputTypes\Common\ISearchable;
-use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
+use Deep\FormTool\Support\FileManager;
+use Illuminate\Support\Facades\Validator;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 
 class EditorType extends BaseInputType implements ISearchable
 {
@@ -36,13 +37,6 @@ class EditorType extends BaseInputType implements ISearchable
         $this->uploadPath = \trim($uploadPath);
 
         return $this;
-    }
-
-    public function getValidations($type)
-    {
-        $validations = parent::getValidations($type);
-
-        return $validations;
     }
 
     public function getNiceValue($value)
@@ -93,10 +87,10 @@ class EditorType extends BaseInputType implements ISearchable
         $rules[$fieldName] = (new ImageType())->getValidations('store');
         $labels[$fieldName] = 'Image';
 
-        $validator = \Validator::make($request->all(), $rules, [], $labels);
+        $validator = Validator::make($request->all(), $rules, [], $labels);
 
         if ($validator->fails()) {
-            return \Response::json([
+            return response()->json([
                 'error' => [
                     'message' => $validator->getMessageBag()->first($fieldName),
                 ],
@@ -105,10 +99,10 @@ class EditorType extends BaseInputType implements ISearchable
 
         $path = FileManager::uploadFile($request->file($fieldName), $request->query('path'));
         if ($path != null) {
-            return \Response::json(['url' => URL::asset($path)], 200);
+            return response()->json(['url' => URL::asset($path)], 200);
         }
 
-        return \Response::json([
+        return response()->json([
             'error' => [
                 'message' => 'Something went wrong! Please try again.',
             ],
@@ -127,13 +121,7 @@ class EditorType extends BaseInputType implements ISearchable
     public function getHTML()
     {
         $this->setDependencies();
-
-        Doc::addJs('
-        // CkEditor config for field: '.$this->dbField."
-        var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$this->uploadPath."';
-        var selector = document.querySelector('#".$this->dbField."');
-        createCkEditor(selector, csrf_token, uploadPath);
-        ", 'editor-'.$this->dbField);
+        $this->setJs($this->dbField, $this->uploadPath);
 
         $input = '<textarea data-path="'.$this->uploadPath.'" class="'.\implode(' ', $this->classes).'" id="'.
             $this->dbField.'" name="'.$this->dbField.'" placeholder="Type the content here!" placeholder="'.
@@ -149,12 +137,7 @@ class EditorType extends BaseInputType implements ISearchable
         $selectorId = $key.'-'.$this->dbField.'-'.$index;
 
         if ($index != '{__index}') {
-            Doc::addJs('
-            // CkEditor config for field: '.$selectorId."
-            var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$this->uploadPath."';
-            var selector = document.querySelector('#".$selectorId."');
-            createCkEditor(selector, csrf_token, uploadPath);
-            ", $selectorId);
+            $this->setJs($selectorId, $this->uploadPath);
         }
 
         $value = $this->decodeHTML($oldValue ?? $this->value);
@@ -169,7 +152,7 @@ class EditorType extends BaseInputType implements ISearchable
         // TODO:
     }
 
-    private function setDependencies()
+    public function setDependencies()
     {
         Doc::addJsLink('assets/form-tool/plugins/ckeditor5-35.1.0/build/ckeditor.js');
         Doc::addJs("
@@ -325,6 +308,16 @@ class EditorType extends BaseInputType implements ISearchable
             max-width: 400px;
         }
         ', 'ckeditor');
+    }
+
+    public function setJs(string $selectorId, string $uploadPath = '')
+    {
+        Doc::addJs('
+        // CkEditor config for field: '.$selectorId."
+        var uploadPath = '".URL::to(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$uploadPath."';
+        var selector = document.querySelector('#".$selectorId."');
+        createCkEditor(selector, csrf_token, uploadPath);
+        ", $selectorId);
     }
 
     public function decodeHTML($data)
