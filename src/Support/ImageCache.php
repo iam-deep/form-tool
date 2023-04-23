@@ -29,21 +29,10 @@ class ImageCache
             return $imagePath;
         }
 
-        self::getConfigs();
-
         $width = $width ?: self::$width;
         $height = $height ?: self::$height;
 
-        $pathinfo = \pathinfo($imagePath);
-
-        // Create the cache path
-        $path = self::$cachePath.'/'.$pathinfo['dirname'];
-
-        // Create the cache filename
-        $filename = $pathinfo['filename'].'-'.$width.'x'.$height.'.'.$pathinfo['extension'];
-
-        // Full path of the cache image
-        $cacheImagePath = $path.'/'.$filename;
+        list($path, $cacheImagePath) = self::getPath($imagePath, $width, $height);
 
         // If file exists let's return
         if (\file_exists($cacheImagePath)) {
@@ -74,6 +63,64 @@ class ImageCache
         }
 
         return $cacheImagePath;
+    }
+
+    public static function fit($imagePath, $width = null, $height = null)
+    {
+        if (! FileManager::isImage($imagePath) || ! \file_exists($imagePath)) {
+            return $imagePath;
+        }
+
+        $width = $width ?: self::$width;
+        $height = $height ?: self::$height;
+
+        list($path, $cacheImagePath) = self::getPath($imagePath, $width, $height);
+
+        // If file exists let's return
+        if (\file_exists($cacheImagePath)) {
+            return $cacheImagePath;
+        }
+
+        Directory::create($path);
+
+        try {
+            @\ini_set('memory_limit', self::$memoryLimit);
+
+            // open an image file
+            $img = Image::make($imagePath);
+
+            // resize image instance
+            $img->fit($width, $height);
+
+            // insert a watermark
+            // $img->insert('public/watermark.png');
+
+            // save image in desired format
+            $img->save($cacheImagePath);
+        } catch (\Exception $e) {
+            Log::error($e->getMessage());
+            throw $e;
+        }
+
+        return $cacheImagePath;
+    }
+
+    private static function getPath($imagePath, $width = null, $height = null)
+    {
+        self::getConfigs();
+
+        $pathinfo = \pathinfo($imagePath);
+
+        // Create the cache path
+        $path = self::$cachePath.'/'.$pathinfo['dirname'];
+
+        // Create the cache filename
+        $filename = $pathinfo['filename'].'-'.$width.'x'.$height.'.'.$pathinfo['extension'];
+
+        // Full path of the cache image
+        $cacheImagePath = $path.'/'.$filename;
+
+        return [$path, $cacheImagePath];
     }
 
     public static function clearCache()
