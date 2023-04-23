@@ -3,12 +3,12 @@
 namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\Doc;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
-use Deep\FormTool\Support\FileManager;
-use Illuminate\Support\Facades\Validator;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Support\FileManager;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Validator;
 
 class EditorType extends BaseInputType implements ISearchable
 {
