@@ -32,7 +32,7 @@ class ImageCache
         $width = $width ?: self::$width;
         $height = $height ?: self::$height;
 
-        list($path, $cacheImagePath) = self::getPath($imagePath, $width, $height);
+        [$path, $cacheImagePath] = self::getPath($imagePath, $width, $height);
 
         // If file exists let's return
         if (\file_exists($cacheImagePath)) {
@@ -74,7 +74,7 @@ class ImageCache
         $width = $width ?: self::$width;
         $height = $height ?: self::$height;
 
-        list($path, $cacheImagePath) = self::getPath($imagePath, $width, $height);
+        [$path, $cacheImagePath] = self::getPath($imagePath, $width, $height);
 
         // If file exists let's return
         if (\file_exists($cacheImagePath)) {
