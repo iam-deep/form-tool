@@ -159,56 +159,18 @@ class FileManager
     {
         $ext = \pathinfo($file, PATHINFO_EXTENSION);
 
-        switch ($ext) {
-            case 'pdf':
-                return 'fa-file-pdf-o';
+        $icons = config('form-tool.icons', []);
+        if ($icons && is_array($icons)) {
+            if (isset($icons[$ext])) {
+                return $icons[$ext];
+            }
 
-            case 'zip':
-            case 'rar':
-            case 'tar.gz':
-                return 'fa-file-archive-o';
-
-            case 'php':
-            case 'html':
-            case 'css':
-            case 'js':
-                return 'fa-file-code-o';
-
-            case 'mkv':
-            case 'flv':
-            case 'avi':
-            case '3gp':
-                return 'fa-file-video-o';
-
-            case 'mp3':
-            case 'wv':
-                return 'fa-file-audio-o';
-
-            case 'jpg':
-            case 'jpeg':
-            case 'png':
-            case 'webp':
-            case 'gif':
-            case 'svg':
-            case 'bmp':
-                return 'fa-file-image-o';
-
-            case 'ppt':
-            case 'pptx':
-                return 'fa-file-powerpoint-o';
-
-            case 'csv':
-            case 'xsl':
-            case 'xslx':
-                return 'fa-file-excel-o';
-
-            case 'doc':
-            case 'docx':
-                return 'fa-file-word-o';
-
-            default:
-                return 'fa-file-text';
+            if (isset($icons['*'])) {
+                return $icons['*'];
+            }
         }
+
+        return 'ICON NOT SPECIFIED';
     }
 
     private static function filterFilename($value)

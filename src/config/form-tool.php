@@ -104,4 +104,55 @@ return [
         'text-center' => 'text-center',
         'text-right' => 'text-right',
     ],
+
+    'icons' => [
+        // PDF
+        'pdf' => 'fa fa-file-pdf fa-5x',
+
+        // Archives
+        'zip' => 'fa fa-file-archive fa-5x',
+        'rar' => 'fa fa-file-archive fa-5x',
+        'tar.gz' => 'fa fa-file-archive fa-5x',
+
+        // Codes
+        'php' => 'fa fa-file-code fa-5x',
+        'html' => 'fa fa-file-code fa-5x',
+        'css' => 'fa fa-file-code fa-5x',
+        'js' => 'fa fa-file-code fa-5x',
+
+        // Videos
+        'mkv' => 'fa fa-file-video fa-5x',
+        'flv' => 'fa fa-file-video fa-5x',
+        'avi' => 'fa fa-file-video fa-5x',
+        '3gp' => 'fa fa-file-video fa-5x',
+
+        // Audios
+        'mp3' => 'fa fa-file-audio fa-5x',
+        'wv' => 'fa fa-file-audio fa-5x',
+
+        // Images
+        'jpg' => 'fa fa-file-image fa-5x',
+        'jpeg' => 'fa fa-file-image fa-5x',
+        'png' => 'fa fa-file-image fa-5x',
+        'webp' => 'fa fa-file-image fa-5x',
+        'gif' => 'fa fa-file-image fa-5x',
+        'svg' => 'fa fa-file-image fa-5x',
+        'bmp' => 'fa fa-file-image fa-5x',
+
+        // Power Points
+        'ppt' => 'fa fa-file-powerpoint fa-5x',
+        'pptx' => 'fa fa-file-powerpoint fa-5x',
+
+        // Excels
+        'csv' => 'fa fa-file-excel fa-5x',
+        'xsl' => 'fa fa-file-excel fa-5x',
+        'xslx' => 'fa fa-file-excel fa-5x',
+
+        // Words
+        'doc' => 'fa fa-file-word fa-5x',
+        'docx' => 'fa fa-file-word fa-5x',
+
+        // Others
+        '*' => 'fa fa-file-text fa-5x',
+    ]
 ];

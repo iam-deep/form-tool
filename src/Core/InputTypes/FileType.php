@@ -167,8 +167,12 @@ class FileType extends BaseInputType
     public function getNiceValue($value)
     {
         if ($value) {
-            return '<a href="'.asset($value).'" target="_blank"><i class="fa '.
-                FileManager::getFileIcon($value).' fa-2x"></i></a>';
+            if (FileManager::isImage($this->value)) {
+                $image = ImageCache::resize($this->value);
+                return'<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
+            } else {
+                return'<i class="'.FileManager::getFileIcon($this->value).'"></i>';
+            }
         }
 
         return null;
@@ -218,7 +222,7 @@ class FileType extends BaseInputType
                 $image = ImageCache::resize($this->value);
                 $file = '<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
-                $file = '<i class="fa '.FileManager::getFileIcon($this->value).' fa-5x"></i>';
+                $file = '<i class="'.FileManager::getFileIcon($this->value).'"></i>';
             }
 
             $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp;
@@ -266,7 +270,7 @@ class FileType extends BaseInputType
                 $image = ImageCache::resize($value);
                 $file = '<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
-                $file = '<i class="fa '.FileManager::getFileIcon($value).' fa-5x"></i>';
+                $file = '<i class="'.FileManager::getFileIcon($value).'"></i>';
             }
 
             $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp;
