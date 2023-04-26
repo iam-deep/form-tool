@@ -154,5 +154,5 @@ return [
 
         // Others
         '*' => 'fa fa-file-text fa-5x',
-    ]
+    ],
 ];

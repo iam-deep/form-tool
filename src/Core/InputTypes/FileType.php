@@ -169,6 +169,7 @@ class FileType extends BaseInputType
         if ($value) {
             if (FileManager::isImage($this->value)) {
                 $image = ImageCache::resize($this->value);
+
                 return'<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
             } else {
                 return'<i class="'.FileManager::getFileIcon($this->value).'"></i>';
