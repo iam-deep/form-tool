@@ -130,11 +130,12 @@ if (! function_exists('imageFit')) {
 if (! function_exists('isSuccess')) {
     function isSuccess($response)
     {
-        if ($response instanceof \Illuminate\Http\RedirectResponse && session()->has('success')) {
-            return true;
+        if ($response instanceof \Illuminate\Http\JsonResponse) {
+            $data = $response->getData();
+            return isset($data->status) && $data->status === true;
         }
 
-        return false;
+        return $response instanceof \Illuminate\Http\RedirectResponse && session()->has('success');
     }
 }
 

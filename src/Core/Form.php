@@ -2,9 +2,10 @@
 
 namespace Deep\FormTool\Core;
 
-use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Validator;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
 
 abstract class FormStatus
 {
@@ -443,10 +444,7 @@ class Form
             return $validate;
         }
 
-        $result = $this->createPostData();
-        if ($result !== true) {
-            return $result;
-        }
+        $this->createPostData();
 
         $insertId = $this->model->add($this->postData);
 
@@ -458,7 +456,12 @@ class Form
             ActionLogger::create($this->bluePrint, $insertId);
         }
 
-        return back()->with('success', 'Data added successfully!');
+        $message = 'Data added successfully!';
+        if ($this->request->ajax() || $this->request->wantsJson()) {
+            return response()->json(['status' => true, 'message' => $message]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function update($id = null, callable $callbackBeforeUpdate = null)
@@ -480,10 +483,12 @@ class Form
             }
 
             if (! $this->oldData) {
-                return redirect($this->url.$this->queryString)->with(
-                    'error',
-                    'Something went wrong! Data not found, please try again!'
-                );
+                $message = 'Something went wrong! Data not found, please try again!';
+                if ($this->request->ajax() || $this->request->wantsJson()) {
+                    return response()->json(['status' => false, 'message' => $message], 422);
+                }
+
+                return redirect($this->url.$this->queryString)->with('error', $message);
             }
 
             $this->editId = $this->oldData->{$this->model->getPrimaryId()};
@@ -502,10 +507,7 @@ class Form
         //      permission to update
         //      can update this row
 
-        $result = $this->createPostData($this->editId);
-        if ($result !== true) {
-            return $result;
-        }
+        $this->createPostData($this->editId);
 
         if ($this->crud->isDefaultFormat()) {
             if ($callbackBeforeUpdate) {
@@ -537,6 +539,11 @@ class Form
         $this->afterSave();
 
         ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
+
+        $message = 'Data updated successfully!';
+        if ($this->request->ajax() || $this->request->wantsJson()) {
+            return response()->json(['status' => false, 'message' => $message]);
+        }
 
         return redirect($this->url.$this->queryString)->with('success', 'Data updated successfully!');
     }
@@ -712,9 +719,17 @@ class Form
             $this->request->merge($merge);
         }
 
-        $validator = \Validator::make($this->request->all(), $rules, $messages, $labels);
+        $validator = Validator::make($this->request->all(), $rules, $messages, $labels);
 
         if ($validator->fails()) {
+            if ($this->request->ajax() || $this->request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->getMessageBag()->toArray()
+                ], 422);
+            }
+
             return back()->withErrors($validator)->withInput();
         }
 
@@ -738,13 +753,16 @@ class Form
 
             $count = $this->model->countWhere($where);
             if ($count) {
-                return back()->with(
-                    'error',
-                    \sprintf(
-                        'The combination of "%s" is already exist!',
-                        \implode(', ', array_values($combination))
-                    )
-                )->withInput();
+                $message = \sprintf(
+                    'The combination of "%s" is already exist!',
+                    \implode(', ', array_values($combination))
+                );
+
+                if ($this->request->ajax() || $this->request->wantsJson()) {
+                    return response()->json(['status' => false, 'message' => $message], 422);
+                }
+
+                return back()->with('error', $message)->withInput();
             }
         }
 
@@ -753,14 +771,22 @@ class Form
             $response = $callbackValidation($this->request, $validationType);
             if ($response !== true) {
                 if (\is_string($response)) {
+                    if ($this->request->ajax() || $this->request->wantsJson()) {
+                        return response()->json(['status' => false, 'message' => $response], 422);
+                    }
+
                     return back()->with('error', $response)->withInput();
                 } elseif ($response instanceof \Illuminate\Http\RedirectResponse) {
                     return $response->send();
+                } elseif ($response instanceof \Illuminate\Http\JsonResponse) {
+                    return $response->send();
                 } else {
-                    return back()->with(
-                        'error',
-                        'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION'
-                    )->withInput();
+                    $message = 'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION';
+                    if ($this->request->ajax() || $this->request->wantsJson()) {
+                        return response()->json(['status' => false, 'message' => $message], 422);
+                    }
+
+                    return back()->with('error', $message)->withInput();
                 }
             }
         }
@@ -770,7 +796,7 @@ class Form
         return true;
     }
 
-    private function createPostData($id = null)
+    private function createPostData($id = null): void
     {
         $postData = $this->postData;
         $this->postData = [];
@@ -837,8 +863,6 @@ class Form
                 $input->setValue($this->postData[$dbField]);
             }
         }
-
-        return true;
     }
 
     private function parseEditId($id)
@@ -878,10 +902,12 @@ class Form
 
         $result = $this->model->getOne($id);
         if (! $result) {
-            return redirect($this->url.$this->queryString)->with(
-                'error',
-                'Something went wrong! Data not found, please try again!'
-            );
+            $message = 'Something went wrong! Data not found, please try again!';
+            if ($this->request->ajax() || $this->request->wantsJson()) {
+                return response()->json(['status' => false, 'message' => $message], 422);
+            }
+
+            return redirect($this->url.$this->queryString)->with('error', $message);
         }
 
         $pId = $id;
@@ -898,7 +924,12 @@ class Form
 
         ActionLogger::delete($this->bluePrint, $pId, $result);
 
-        return redirect($this->url.$this->queryString)->with('success', 'Data deleted successfully!');
+        $message = 'Data deleted successfully!';
+        if ($this->request->ajax() || $this->request->wantsJson()) {
+            return response()->json(['status' => true, 'message' => $message]);
+        }
+
+        return redirect($this->url.$this->queryString)->with('success', $message);
     }
 
     public function destroy($id = null)
@@ -919,10 +950,12 @@ class Form
         $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
         $result = $this->model->getWhereOne([$idCol => $id]);
         if (! $result) {
-            return redirect($this->url.$this->queryString)->with(
-                'error',
-                'Something went wrong! Data not found, please try again!'
-            );
+            $message = 'Something went wrong! Data not found, please try again!';
+            if ($this->request->ajax() || $this->request->wantsJson()) {
+                return response()->json(['status' => false, 'message' => $message], 422);
+            }
+
+            return redirect($this->url.$this->queryString)->with('error', $message);
         }
 
         $pId = $id;
@@ -1002,7 +1035,12 @@ class Form
 
             ActionLogger::destroy($this->bluePrint, $pId, $result);
 
-            return redirect($this->url.$this->queryString)->with('success', 'Data permanently deleted successfully!');
+            $message = 'Data permanently deleted successfully!';
+            if ($this->request->ajax() || $this->request->wantsJson()) {
+                return response()->json(['status' => true, 'message' => $message]);
+            }
+
+            return redirect($this->url.$this->queryString)->with('success', $message);
         }
 
         return redirect($this->url.$this->queryString)->with(
@@ -1096,9 +1134,12 @@ class Form
         }
 
         if ($dataCount) {
-            $msg = $this->createMessage($id, $dataToDelete, $dataCount, $totalCount, $totalReferencesToFetch);
+            $message = $this->createMessage($id, $dataToDelete, $dataCount, $totalCount, $totalReferencesToFetch);
+            if ($this->request->ajax() || $this->request->wantsJson()) {
+                return response()->json(['status' => false, 'message' => $message], 422);
+            }
 
-            return redirect($this->url.$this->queryString)->with('error', $msg);
+            return redirect($this->url.$this->queryString)->with('error', $message);
         }
 
         return true;
