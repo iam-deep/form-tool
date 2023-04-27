@@ -2,10 +2,10 @@
 
 namespace Deep\FormTool\Core;
 
+use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-use Deep\FormTool\Core\InputTypes\Common\InputType;
 
 abstract class FormStatus
 {
@@ -726,7 +726,7 @@ class Form
                 return response()->json([
                     'success' => false,
                     'message' => $validator->errors()->first(),
-                    'errors' => $validator->getMessageBag()->toArray()
+                    'errors' => $validator->getMessageBag()->toArray(),
                 ], 422);
             }
 

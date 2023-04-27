@@ -132,6 +132,7 @@ if (! function_exists('isSuccess')) {
     {
         if ($response instanceof \Illuminate\Http\JsonResponse) {
             $data = $response->getData();
+
             return isset($data->status) && $data->status === true;
         }
 
