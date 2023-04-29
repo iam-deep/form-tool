@@ -19,9 +19,8 @@ class FormToolServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
 
         $this->publishes([__DIR__.'/config/form-tool.php' => config_path('form-tool.php')], 'config');
-        $this->publishes([
-            __DIR__.'/views' => resource_path('views/vendor/form-tool/'),
-        ], 'views');
+        $this->publishes([__DIR__.'/views' => resource_path('views/vendor/form-tool/')], 'views');
+        $this->publishes([__DIR__.'/public' => public_path('assets/form-tool')], 'public');
 
         $this->configureRateLimiting();
     }
