@@ -56,9 +56,9 @@ function createTinymce(selector, uploadPath, options = null) {
             'searchreplace', 'wordcount', 'visualblocks', 'visualchars', 'code', 'fullscreen', 'insertdatetime',
             'media', 'table', 'emoticons', 'template', 'help'
         ],
-        toolbar: 'undo redo | styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
-        'bullist numlist outdent indent | link image | print preview media fullscreen | ' +
-        'forecolor backcolor emoticons | help',
+        toolbar: 'styles | bold italic | alignleft aligncenter alignright alignjustify | ' +
+        'bullist numlist outdent indent | forecolor backcolor | link image | print preview media fullscreen' +
+        '| undo redo |  emoticons help',
         menu: {
             //favs: { title: 'My Favorites', items: 'code visualaid | searchreplace | emoticons' }
         },
