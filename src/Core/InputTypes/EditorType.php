@@ -4,8 +4,8 @@ namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Deep\FormTool\Core\InputTypes\Common\IPluginableType;
+use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\URL;
