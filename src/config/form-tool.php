@@ -106,6 +106,12 @@ return [
     ],
 
     'icons' => [
+        // Action Icons
+        'view' => 'fa fa-eye',
+        'edit' => 'fa fa-pencil',
+        'delete' => 'fa fa-trash',
+
+        // File Types Icons
         // PDF
         'pdf' => 'fa fa-file-pdf fa-5x',
 
@@ -152,7 +158,7 @@ return [
         'doc' => 'fa fa-file-word fa-5x',
         'docx' => 'fa fa-file-word fa-5x',
 
-        // Others
+        // Others Files
         '*' => 'fa fa-file-text fa-5x',
     ],
 ];

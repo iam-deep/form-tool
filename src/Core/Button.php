@@ -41,10 +41,22 @@ class Button
         return $button;
     }
 
+    public static function makeView(string $name = 'View', string $link = '/{id}', string $guard = 'view'): Button
+    {
+        $button = self::make($name, $link, strtolower($guard));
+        $button->icon('<i class="'.config('form-tool.icons.view').'"></i>');
+
+        if ($guard && ! Guard::can($guard)) {
+            $button->active = false;
+        }
+
+        return $button;
+    }
+
     public static function makeEdit(string $name = 'Edit', string $link = '/{id}/edit', string $guard = 'edit'): Button
     {
         $button = self::make($name, $link, strtolower($guard));
-        $button->icon('<i class="fa fa-pencil"></i>');
+        $button->icon('<i class="'.config('form-tool.icons.edit').'"></i>');
 
         if ($guard && ! Guard::can($guard)) {
             $button->active = false;

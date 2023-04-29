@@ -170,7 +170,9 @@ class TableField
 
         $this->actionButtons = [];
         foreach ($buttons as $button) {
-            if ($button == 'edit') {
+            if ($button == 'view') {
+                $this->actionButtons[] = Button::makeView();
+            } elseif ($button == 'edit') {
                 $this->actionButtons[] = Button::makeEdit();
             } elseif ($button == 'delete') {
                 $this->actionButtons[] = Button::makeDelete();
@@ -180,7 +182,7 @@ class TableField
                 $this->actionButtons[] = $button;
             } else {
                 throw new \InvalidArgumentException(\sprintf(
-                    'Button can be "edit", "delete", "divider" or an instance of "%s"',
+                    'Button can be "view", "edit", "delete", "divider" or an instance of "%s"',
                     Button::class
                 ));
             }
