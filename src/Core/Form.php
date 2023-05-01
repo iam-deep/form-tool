@@ -461,7 +461,12 @@ class Form
             return response()->json(['status' => true, 'message' => $message]);
         }
 
-        return back()->with('success', $message);
+        $redirect = $this->url.'/create'.$this->queryString;
+        if ($this->request->query('redirect')) {
+            $redirect = urldecode($this->request->query('redirect'));
+        }
+
+        return redirect($redirect)->with('success', $message);
     }
 
     public function update($id = null, callable $callbackBeforeUpdate = null)
@@ -545,7 +550,12 @@ class Form
             return response()->json(['status' => false, 'message' => $message]);
         }
 
-        return redirect($this->url.$this->queryString)->with('success', 'Data updated successfully!');
+        $redirect = $this->url.$this->queryString;
+        if ($this->request->query('redirect')) {
+            $redirect = urldecode($this->request->query('redirect'));
+        }
+
+        return redirect($redirect)->with('success', 'Data updated successfully!');
     }
 
     private function afterSave()
