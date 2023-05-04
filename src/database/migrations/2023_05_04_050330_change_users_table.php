@@ -14,7 +14,7 @@ class ChangeUsersTable extends Migration
     public function up()
     {
         Schema::table('users', function (Blueprint $table) {
-            if (! Schema::hasColumn('userId')) {
+            if (! Schema::hasColumn('users', 'userId')) {
                 $table->renameColumn('id', 'userId');
                 $table->renameColumn('created_at', 'createdAt');
                 $table->renameColumn('updated_at', 'updatedAt');
