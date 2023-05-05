@@ -4,11 +4,11 @@ if ($input->type == 'single') { ?>
     <div class="row">
         <div style="width:80px;float:left;margin-left:15px;" id="preview-<?php echo $input->column; ?>"
             data-isimage="<?php echo $input->isImageField ? 1 : 0; ?>">
-            <a href="<?php echo $input->value; ?>" target="_blank">
+            <a href="<?php echo $input->value; ?>" target="_blank" <?php if (! $input->rawValue) { ?> style="pointer-events:none;" <?php } ?>>
                 <img src="<?php echo $input->imageCache; ?>" id="image-<?php echo $input->column; ?>"
-                    class="img-thumbnail" style="max-height:80px;max-width:80px;<?php if (! $input->isImage) {
+                    class="img-thumbnail" style="max-height:80px;max-width:80px;<?php if (! $input->isImage && $input->rawValue) {
                         ?> display:none; <?php } ?>" alt="Image">
-                <i class="<?php echo $input->icon; ?>" style="color:#4367A5;<?php if (! $input->isImage) {
+                <i class="<?php echo $input->icon; ?>" style="color:#4367A5;<?php if (! $input->isImage && ! $input->rawValue) {
                     ?> display:none; <?php } ?>"></i>
             </a>
         </div>
@@ -68,9 +68,6 @@ if ($input->type == 'single') { ?>
                 }
             <?php } ?>
 
-            let preview = $('#preview-<?php echo $input->column; ?>');
-            preview.find('a').css({'pointer-events': 'none'});
-
             image = URL.createObjectURL(file);
 
             $('#filename-<?php echo $input->column; ?>').text(file.name);
@@ -79,27 +76,24 @@ if ($input->type == 'single') { ?>
             $('#hasFile-<?php echo $input->column; ?>').show();
             $('#noFile-<?php echo $input->column; ?>').hide();
 
+            let preview = $('#preview-<?php echo $input->column; ?>');
+            preview.find('a').css({'pointer-events': 'none'});
+
             if (file['type'].split('/')[0] == 'image') {
                 $('#image-<?php echo $input->column; ?>').show();
                 preview.find('i').hide();
             } else {
                 $('#image-<?php echo $input->column; ?>').hide();
-                preview.find('i').removeClass().addClass('fa fa-upload fa-5x').css({color: '#4367A5'}).show();
+                preview.find('i').removeClass().addClass('fa fa-file fa-5x').show();
             }
         });
 
         $('#remove-<?php echo $input->column; ?>').on('click', function(){
             let preview = $('#preview-<?php echo $input->column; ?>');
-            $('#image-<?php echo $input->column; ?>').attr('src', '<?php echo $input->noImage; ?>');
-            preview.find('i').removeClass().addClass('fa fa-upload fa-5x').css({color: '#76787a'});
+            preview.find('i').hide();
 
-            if (preview.data('isimage') == 1) {
-                $('#image-<?php echo $input->column; ?>').show();
-                preview.find('i').hide();
-            } else {
-                $('#image-<?php echo $input->column; ?>').hide();
-                preview.find('i').show();
-            }
+            $('#image-<?php echo $input->column; ?>').attr('src', '<?php echo $input->noImage; ?>');
+            $('#image-<?php echo $input->column; ?>').show();
 
             $('#<?php echo $input->column; ?>').val('');
             $('#value-<?php echo $input->column; ?>').remove();

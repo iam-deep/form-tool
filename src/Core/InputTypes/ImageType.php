@@ -43,6 +43,13 @@ class ImageType extends FileType
         return $this;
     }
 
+    public function profile(string $imagePath = null)
+    {
+        $this->placeholderImage = $imagePath ?: 'assets/form-tool/images/user.png';
+
+        return $this;
+    }
+
     public function getValidations($type)
     {
         $validations = parent::getValidations($type);

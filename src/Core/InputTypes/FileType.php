@@ -15,6 +15,8 @@ class FileType extends BaseInputType
     private float $maxSizeInKb = 0;
     private $accept = '';
 
+    protected string $placeholderImage = 'assets/form-tool/images/placeholder.png';
+
     public function __construct()
     {
         parent::__construct();
@@ -205,8 +207,7 @@ class FileType extends BaseInputType
 
         $isImageField = InputType::IMAGE == $this->type;
 
-        $imageCache = null;
-        $noImage = asset('assets/form-tool/images/user.png');
+        $noImage = $imageCache = asset($this->placeholderImage);
         $isImage = FileManager::isImage($value);
         if ($isImageField || $isImage) {
             if ($value) {
@@ -285,7 +286,7 @@ class FileType extends BaseInputType
         $isImageField = InputType::IMAGE == $this->type;
 
         $imageCache = null;
-        $noImage = asset('assets/form-tool/images/user.png');
+        $noImage = asset($this->placeholderImage);
         $isImage = FileManager::isImage($value);
         if ($isImageField || $isImage) {
             if ($value) {
