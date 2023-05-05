@@ -22,6 +22,9 @@ return [
     // Allowed types for image upload
     'imageTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif',
 
+    // Max file upload size in KB, Default is 5MB
+    'maxFileUploadSize' => 1024 * 5,
+
     // Memory Limit is used for resizing or generating cache images (needed for of high resolution or larger size)
     // If you see any white screen or half text screen after image upload then try to increase the memoryLimit
     // Default keep it 512M (M = MB), no worries will only use at the time of image caching

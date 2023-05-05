@@ -20,6 +20,8 @@ class FileType extends BaseInputType
         parent::__construct();
 
         $this->classes = [];
+
+        $this->maxSizeInKb = config('form-tool.maxFileUploadSize', 1024 * 5);
     }
 
     // Setter
@@ -201,7 +203,40 @@ class FileType extends BaseInputType
     {
         $value = old($this->dbField, $this->value);
 
-        $groupId = 'group-'.$this->dbField;
+        $isImageField = InputType::IMAGE == $this->type;
+
+        $imageCache = null;
+        $noImage = asset('assets/form-tool/images/user.png');
+        $isImage = FileManager::isImage($value);
+        if ($isImageField || $isImage) {
+            if ($value) {
+                $imageCache = asset(ImageCache::resize($value));
+            } else {
+                $imageCache = $noImage;
+            }
+        }
+
+        $data['input'] = (object) [
+            'type' => 'single',
+            'column' => $this->dbField,
+            'rawValue' => $value,
+            'value' => asset($value),
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS,
+
+            // File Specific
+            'maxSize' => $this->maxSizeInKb,
+            'isImageField' => $isImageField,
+            'accept' => $this->accept,
+            'isImage' => $isImage,
+            'imageCache' => $imageCache,
+            'noImage' => $noImage,
+            'icon' => FileManager::getFileIcon($value),
+        ];
+
+        return $this->htmlParentDiv(\view('form-tool::form.input_types.file', $data)->render());
+
+        /*$groupId = 'group-'.$this->dbField;
 
         if ($this->isRequired && ! $value) {
             $this->raw('required');
@@ -236,12 +271,66 @@ class FileType extends BaseInputType
 
         $input .= '</div>';
 
-        return $this->htmlParentDiv($input);
+        return $this->htmlParentDiv($input);*/
     }
 
     public function getHTMLMultiple($key, $index, $oldValue)
     {
         $value = $oldValue ?? $this->value;
+
+        $groupId = $key.'-group-'.$this->dbField.'-'.$index;
+        $id = $key.'-'.$this->dbField.'-'.$index;
+        $name = $key.'['.$index.']['.$this->dbField.']';
+
+        $isImageField = InputType::IMAGE == $this->type;
+
+        $imageCache = null;
+        $noImage = asset('assets/form-tool/images/user.png');
+        $isImage = FileManager::isImage($value);
+        if ($isImageField || $isImage) {
+            if ($value) {
+                $imageCache = asset(ImageCache::resize($value));
+            } else {
+                $imageCache = $noImage;
+            }
+        }
+
+        if ($this->isRequired) {
+            if (! $value) {
+                $this->raw('required');
+            } else {
+                $this->removeRaw('required');
+            }
+        }
+
+        $data['input'] = (object) [
+            'type' => 'multiple',
+            'key' => $key,
+            'index' => $index,
+            'column' => $this->dbField,
+            'rawValue' => $value,
+            'value' => asset($value),
+            'oldValue' => $oldValue,
+            'id' => $id,
+            'name' => $name,
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS,
+            'isRequired' => $this->isRequired,
+
+            // File Specific
+            'groupId' => $groupId,
+            'maxSize' => $this->maxSizeInKb,
+            'isImageField' => $isImageField,
+            'accept' => $this->accept,
+            'isImage' => $isImage,
+            'imageCache' => $imageCache,
+            'noImage' => $noImage,
+            'icon' => FileManager::getFileIcon($value),
+        ];
+
+        return \view('form-tool::form.input_types.file', $data)->render();
+
+        /*$value = $oldValue ?? $this->value;
 
         $groupId = $key.'-group-'.$this->dbField.'-'.$index;
         $inputId = $key.'-'.$this->dbField.'-'.$index;
@@ -284,6 +373,6 @@ class FileType extends BaseInputType
 
         $input .= '</div>';
 
-        return $input;
+        return $input;*/
     }
 }
