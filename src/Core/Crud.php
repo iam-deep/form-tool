@@ -395,6 +395,11 @@ class Crud
         return $this->name;
     }
 
+    public function getBluePrint()
+    {
+        return $this->bluePrint;
+    }
+
     public function getField(string $column)
     {
         $input = $this->bluePrint->getInputTypeByDbField($column);
