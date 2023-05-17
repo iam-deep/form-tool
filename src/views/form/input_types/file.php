@@ -12,7 +12,7 @@ if ($input->type == 'single') { ?>
                     ?> display:none; <?php } ?>"></i>
             </a>
         </div>
-        <div style="float:left;margin-left:15px;">
+        <div style="float:left;margin-left:15px;width:calc(100% - 150px);">
             <label style="font-weight:550;color:#212427;margin-bottom:0;cursor: pointer;"
                 for="<?php echo $input->column; ?>">
                 Browse your file
