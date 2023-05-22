@@ -130,6 +130,10 @@ if (! function_exists('imageFit')) {
 if (! function_exists('isSuccess')) {
     function isSuccess($response)
     {
+        if (is_array($response)) {
+            return $response['status'] ?? false;
+        }
+
         if ($response instanceof \Illuminate\Http\JsonResponse) {
             $data = $response->getData();
 

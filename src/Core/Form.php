@@ -37,7 +37,7 @@ class Form
     private $updatePostData = [];
     private $oldData = null;
 
-    private $crud = null;
+    private Crud $crud;
     private $options = null;
 
     private bool $isLogAction = true;
@@ -457,7 +457,9 @@ class Form
         }
 
         $message = 'Data added successfully!';
-        if ($this->request->ajax() || $this->request->wantsJson()) {
+        if ($this->crud->isWantsArray()) {
+            return ['status' => true, 'message' => $message];
+        } elseif ($this->isWantsJson()) {
             return response()->json(['status' => true, 'message' => $message]);
         }
 
@@ -489,7 +491,9 @@ class Form
 
             if (! $this->oldData) {
                 $message = 'Something went wrong! Data not found, please try again!';
-                if ($this->request->ajax() || $this->request->wantsJson()) {
+                if ($this->crud->isWantsArray()) {
+                    return ['status' => false, 'message' => $message];
+                } elseif ($this->isWantsJson()) {
                     return response()->json(['status' => false, 'message' => $message], 422);
                 }
 
@@ -546,8 +550,10 @@ class Form
         ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
 
         $message = 'Data updated successfully!';
-        if ($this->request->ajax() || $this->request->wantsJson()) {
-            return response()->json(['status' => false, 'message' => $message]);
+        if ($this->crud->isWantsArray()) {
+            return ['status' => true, 'message' => $message];
+        } elseif ($this->isWantsJson()) {
+            return response()->json(['status' => true, 'message' => $message]);
         }
 
         $redirect = $this->url.$this->queryString;
@@ -555,7 +561,7 @@ class Form
             $redirect = urldecode($this->request->query('redirect'));
         }
 
-        return redirect($redirect)->with('success', 'Data updated successfully!');
+        return redirect($redirect)->with('success', $message);
     }
 
     private function afterSave()
@@ -732,12 +738,16 @@ class Form
         $validator = Validator::make($this->request->all(), $rules, $messages, $labels);
 
         if ($validator->fails()) {
-            if ($this->request->ajax() || $this->request->wantsJson()) {
-                return response()->json([
-                    'success' => false,
-                    'message' => $validator->errors()->first(),
-                    'errors' => $validator->getMessageBag()->toArray(),
-                ], 422);
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->getMessageBag()->toArray(),
+            ];
+
+            if ($this->crud->isWantsArray()) {
+                return $response;
+            } elseif ($this->isWantsJson()) {
+                return response()->json($response, 422);
             }
 
             return back()->withErrors($validator)->withInput();
@@ -768,7 +778,9 @@ class Form
                     \implode(', ', array_values($combination))
                 );
 
-                if ($this->request->ajax() || $this->request->wantsJson()) {
+                if ($this->crud->isWantsArray()) {
+                    return ['status' => false, 'message' => $message];
+                } elseif ($this->isWantsJson()) {
                     return response()->json(['status' => false, 'message' => $message], 422);
                 }
 
@@ -781,7 +793,9 @@ class Form
             $response = $callbackValidation($this->request, $validationType);
             if ($response !== true) {
                 if (\is_string($response)) {
-                    if ($this->request->ajax() || $this->request->wantsJson()) {
+                    if ($this->crud->isWantsArray()) {
+                        return ['status' => false, 'message' => $response];
+                    } elseif ($this->isWantsJson()) {
                         return response()->json(['status' => false, 'message' => $response], 422);
                     }
 
@@ -792,7 +806,9 @@ class Form
                     return $response->send();
                 } else {
                     $message = 'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION';
-                    if ($this->request->ajax() || $this->request->wantsJson()) {
+                    if ($this->crud->isWantsArray()) {
+                        return ['status' => false, 'message' => $message];
+                    } elseif ($this->isWantsJson()) {
                         return response()->json(['status' => false, 'message' => $message], 422);
                     }
 
@@ -913,7 +929,9 @@ class Form
         $result = $this->model->getOne($id);
         if (! $result) {
             $message = 'Something went wrong! Data not found, please try again!';
-            if ($this->request->ajax() || $this->request->wantsJson()) {
+            if ($this->crud->isWantsArray()) {
+                return ['status' => false, 'message' => $message];
+            } elseif ($this->isWantsJson()) {
                 return response()->json(['status' => false, 'message' => $message], 422);
             }
 
@@ -935,7 +953,9 @@ class Form
         ActionLogger::delete($this->bluePrint, $pId, $result);
 
         $message = 'Data deleted successfully!';
-        if ($this->request->ajax() || $this->request->wantsJson()) {
+        if ($this->crud->isWantsArray()) {
+            return ['status' => true, 'message' => $message];
+        } elseif ($this->isWantsJson()) {
             return response()->json(['status' => true, 'message' => $message]);
         }
 
@@ -961,7 +981,9 @@ class Form
         $result = $this->model->getWhereOne([$idCol => $id]);
         if (! $result) {
             $message = 'Something went wrong! Data not found, please try again!';
-            if ($this->request->ajax() || $this->request->wantsJson()) {
+            if ($this->crud->isWantsArray()) {
+                return ['status' => false, 'message' => $message];
+            } elseif ($this->isWantsJson()) {
                 return response()->json(['status' => false, 'message' => $message], 422);
             }
 
@@ -1046,7 +1068,9 @@ class Form
             ActionLogger::destroy($this->bluePrint, $pId, $result);
 
             $message = 'Data permanently deleted successfully!';
-            if ($this->request->ajax() || $this->request->wantsJson()) {
+            if ($this->crud->isWantsArray()) {
+                return ['status' => true, 'message' => $message];
+            } elseif ($this->isWantsJson()) {
                 return response()->json(['status' => true, 'message' => $message]);
             }
 
@@ -1145,7 +1169,9 @@ class Form
 
         if ($dataCount) {
             $message = $this->createMessage($id, $dataToDelete, $dataCount, $totalCount, $totalReferencesToFetch);
-            if ($this->request->ajax() || $this->request->wantsJson()) {
+            if ($this->crud->isWantsArray()) {
+                return ['status' => false, 'message' => $message];
+            } elseif ($this->isWantsJson()) {
                 return response()->json(['status' => false, 'message' => $message], 422);
             }
 
@@ -1335,6 +1361,11 @@ class Form
     public function isLogAction()
     {
         return $this->isLogAction;
+    }
+
+    public function isWantsJson()
+    {
+        return $this->crud->isWantsJson() || $this->request->ajax() || $this->request->wantsJson();
     }
 
     //endregion

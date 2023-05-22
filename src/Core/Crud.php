@@ -22,6 +22,8 @@ class Crud
     protected string $format = 'default';
     protected string $groupName = 'default';
     protected bool $isSoftDelete = true;
+    protected bool $isWantsJson = false;
+    protected bool $isWantsArray = false;
 
     private $deleteRestrictForOthers = [];
     private $deleteRestrictForMe = [];
@@ -111,6 +113,20 @@ class Crud
     {
         $this->isSoftDelete = $enable;
         $this->model->softDelete($enable);
+
+        return $this;
+    }
+
+    public function wantsJson()
+    {
+        $this->isWantsJson = true;
+
+        return $this;
+    }
+
+    public function wantsArray()
+    {
+        $this->isWantsArray = true;
 
         return $this;
     }
@@ -408,6 +424,16 @@ class Crud
         }
 
         return $input;
+    }
+
+    public function isWantsJson()
+    {
+        return $this->isWantsJson;
+    }
+
+    public function isWantsArray()
+    {
+        return $this->isWantsArray;
     }
 
     //endregion
