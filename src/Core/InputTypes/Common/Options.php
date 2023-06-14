@@ -460,7 +460,7 @@ trait Options
                 return $value == $this->valueYes ? $this->captionYes : $this->captionNo;
             }
 
-            if (isset($this->options->{$value})) {
+            if (! is_array($value) && isset($this->options->{$value})) {
                 return $this->options->{$value};
             }
 
