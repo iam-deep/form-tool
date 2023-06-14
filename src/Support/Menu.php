@@ -54,7 +54,7 @@ class Menu
      * @param  string  $label  Provide label/text of the anchor tag
      * @param  string  $icon  Provide icon class
      * @param  string  $guardUrl  Provide guarded route/key if different from route
-     * @param $guardAction optionally you can specify action to guard (Values: null, view, create, edit, delete, destroy)
+     * @param  $guardAction  optionally you can specify action to guard (Values: null, view, create, edit, delete, destroy)
      * @return null
      **/
     public function add(string $route, string $label, ?string $icon = '', ?string $guardUrl = null, $guardAction = 'view')
