@@ -123,7 +123,9 @@
                 html += '</ul>';
             });
 
-            html += '</div></div>';
+            html += `<p><br /><b>Note:</b> If you encounter an "invalid data" error, it could be due to either a
+                spelling mistake in the data or the data not being included in the master data.</p>
+            </div></div>`;
 
             $('#errors').html(html);
         }

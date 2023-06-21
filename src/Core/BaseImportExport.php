@@ -38,7 +38,14 @@ trait BaseImportExport
             ], 421);
         }
 
-        $insertData = $this->formatData($insertData);
+        if (! $this->formatData($insertData, $errors)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Something went wrong! There are some errors please resolve it first:',
+                'errors' => $errors,
+            ], 421);
+        }
+
         $this->crud->getModel()->addMany($insertData);
 
         return response()->json([
@@ -116,11 +123,14 @@ trait BaseImportExport
             }
 
             if (in_array($input->getDbField(), $uniqueColumnValidations)) {
-                if (in_array($rowData[$input->getDbField()], $uniqueData[$input->getDbField()] ?? []) &&
-                    isset($errors[$index + $headerRowCount + 1][$input->getDbField()])) {
+                if (in_array($rowData[$input->getDbField()], $uniqueData[$input->getDbField()] ?? [])) {
+                    if (! isset($errors[$index + $headerRowCount + 1][$input->getDbField()])) {
+                        $errors[$index + $headerRowCount + 1][$input->getDbField()] = [];
+                    }
+
                     $errors[$index + $headerRowCount + 1][$input->getDbField()][] = sprintf(
                         'The %s is repeated/duplicated in the file: <b>%s</b>',
-                        $input->getDbField(),
+                        $this->getHeaderLabel($input->getDbField()),
                         $rowData[$input->getDbField()]
                     );
                 }
@@ -132,9 +142,10 @@ trait BaseImportExport
         return ! $errors;
     }
 
-    protected function formatData($data)
+    protected function formatData(&$data, &$errors)
     {
         [, $inputs] = $this->getHeaders();
+        $headerRowCount = 1;
 
         $model = $this->crud->getModel();
 
@@ -142,9 +153,33 @@ trait BaseImportExport
         $createdBy = ($metaColumns['createdBy'] ?? 'createdBy') ?: 'createdBy';
         $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
 
-        foreach ($data as &$row) {
+        foreach ($data as $index => &$row) {
             foreach ($inputs as $input) {
-                $input->setValue($row[$input->getDbField()]);
+                $value = trim($row[$input->getDbField()]);
+
+                if (strlen($value)) {
+                    $response = $input->getImportValue($value);
+
+                    if ($response === null) {
+                        // We don't have map/appropriate data for the value
+                        if (! isset($errors[$index + $headerRowCount + 1][$input->getDbField()])) {
+                            $errors[$index + $headerRowCount + 1][$input->getDbField()] = [];
+                        }
+
+                        $errors[$index + $headerRowCount + 1][$input->getDbField()][] = sprintf(
+                            'The %s have invalid data: <b>%s</b>',
+                            $this->getHeaderLabel($input->getDbField()),
+                            $row[$input->getDbField()]
+                        );
+                    } else {
+                        $value = $response;
+                    }
+                } else {
+                    $value = null;
+                }
+
+                $row[$input->getDbField()] = $value;
+                $input->setValue($value);
 
                 $response = $input->beforeStore((object) $row);
                 if ($response !== null) {
@@ -160,7 +195,7 @@ trait BaseImportExport
             $row[$createdAt] = \date('Y-m-d H:i:s');
         }
 
-        return $data;
+        return ! $errors;
     }
 
     public function sample()
@@ -230,11 +265,26 @@ trait BaseImportExport
         foreach ($this->sampleData as $col => $sample) {
             $input = $this->crud->getBluePrint()->getInputTypeByDbField($col);
 
-            $headerColumns[] = preg_replace('/\s+/', '_', trim($input->getLabel()));
+            $headerColumns[] = $this->createHeaderLabel($input->getLabel());
             $inputs[] = $input;
         }
 
         return [$headerColumns, $inputs];
+    }
+
+    private function getHeaderLabel($column)
+    {
+        $input = $this->crud->getBluePrint()->getInputTypeByDbField($column);
+        if ($input) {
+            return $this->createHeaderLabel($input->getLabel());
+        }
+
+        return $column;
+    }
+
+    private function createHeaderLabel($label)
+    {
+        return preg_replace('/\s+/', '_', trim($label));
     }
 
     private function download($filename, $callback)

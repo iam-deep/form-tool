@@ -369,6 +369,11 @@ class BaseInputType
         return $this->importSample;
     }
 
+    public function getImportValue($value)
+    {
+        return $value;
+    }
+
     public function isLogColumn()
     {
         return $this->isLogColumn;

@@ -470,6 +470,37 @@ trait Options
         }
     }
 
+    public function getImportValue($value)
+    {
+        $this->createOptions(true);
+
+        $value = trim($value);
+        if ($this->isMultiple) {
+            $value = array_map('trim', explode(', ', $value));
+        }
+
+        $this->options = (array)$this->options;
+
+        $ids = [];
+        if ($this->isMultiple) {
+            foreach ($value as $val) {
+                foreach ($this->options as $id => $text) {
+                    if ($val == $text) {
+                        $ids[] = $id;
+                    }
+                }
+            }
+        } else {
+            foreach ($this->options as $id => $text) {
+                if ($value == $text) {
+                    return $id;
+                }
+            }
+        }
+
+        return $ids ?: null;
+    }
+
     public function getOptionData()
     {
         return $this->optionData;
