@@ -472,7 +472,7 @@ trait Options
 
     public function getImportValue($value)
     {
-        $this->createOptions(true);
+        $this->createOptions();
 
         $value = trim($value);
         if ($this->isMultiple) {
