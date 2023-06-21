@@ -312,8 +312,12 @@ class Guard
         return $type;
     }
 
-    private function getLaravelRoute()
+    public function getLaravelRoute()
     {
+        if ($this->route) {
+            return $this->route;
+        }
+
         // Let's get the route and action
         $currentRoute = Route::currentRouteName();
         if ($currentRoute) {
@@ -338,5 +342,7 @@ class Guard
             $currentAction = Route::currentRouteAction();
             $this->action = \substr($currentAction, \strpos($currentAction, '@') + 1);
         }
+
+        return $this->route;
     }
 }

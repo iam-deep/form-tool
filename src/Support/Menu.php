@@ -5,7 +5,6 @@ namespace Deep\FormTool\Support;
 use Closure;
 use Deep\FormTool\Core\Guard;
 use Illuminate\Support\Facades\URL;
-use Request;
 
 class Menu
 {
@@ -13,7 +12,7 @@ class Menu
     public $list = [];
     public $activeLink = '';
 
-    protected string $baseURl = '';
+    protected string $baseURL = '';
     protected bool $isMenuMade = false;
 
     protected bool $isParent = false;
@@ -54,10 +53,17 @@ class Menu
      * @param  string  $label  Provide label/text of the anchor tag
      * @param  string  $icon  Provide icon class
      * @param  string  $guardUrl  Provide guarded route/key if different from route
-     * @param  $guardAction  optionally you can specify action to guard (Values: null, view, create, edit, delete, destroy)
+     * @param  $guardAction  optionally you can specify action to guard (Values: null, view, create, edit, delete,
+     * destroy)
      * @return null
      **/
-    public function add(string $route, string $label, ?string $icon = '', ?string $guardUrl = null, $guardAction = 'view')
+    public function add(
+        string $route,
+        string $label,
+        ?string $icon = '',
+        ?string $guardUrl = null,
+        $guardAction = 'view'
+    )
     {
         if (! $guardAction || Guard::{'has'.$guardAction}($guardUrl ?: $route)) {
             $this->list[] = (object) [
@@ -108,8 +114,9 @@ class Menu
             $this->activeLink = $matches[1] ?? null;
         } elseif (\preg_match('/(.*)\/[0-9].*/', $url, $matches) !== false && $matches) {
             $this->activeLink = $matches[1] ?? null;
-        } elseif (\preg_match('/(.*)/', $url, $matches) !== false && $matches) {
-            $this->activeLink = $matches[1] ?? null;
+        } else {
+            // We may directly use this method without the above regex
+            $this->activeLink = Guard::$instance->getLaravelRoute();
         }
 
         return $this->activeLink;
