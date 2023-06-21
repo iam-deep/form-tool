@@ -54,7 +54,7 @@ class Menu
      * @param  string  $icon  Provide icon class
      * @param  string  $guardUrl  Provide guarded route/key if different from route
      * @param  $guardAction  optionally you can specify action to guard (Values: null, view, create, edit, delete,
-     * destroy)
+     *                       destroy)
      * @return null
      **/
     public function add(
@@ -63,8 +63,7 @@ class Menu
         ?string $icon = '',
         ?string $guardUrl = null,
         $guardAction = 'view'
-    )
-    {
+    ) {
         if (! $guardAction || Guard::{'has'.$guardAction}($guardUrl ?: $route)) {
             $this->list[] = (object) [
                 'href' => URL::to($this->baseURL.'/'.$route),
