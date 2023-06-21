@@ -3,8 +3,8 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Validator;
+use Maatwebsite\Excel\Facades\Excel;
 
 trait BaseImportExport
 {
@@ -34,7 +34,7 @@ trait BaseImportExport
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong! There are some errors please resolve it first:',
-                'errors' => $errors
+                'errors' => $errors,
             ], 421);
         }
 
@@ -43,7 +43,7 @@ trait BaseImportExport
 
         return response()->json([
             'status' => true,
-            'message' => 'Data imported successfully!'
+            'message' => 'Data imported successfully!',
         ]);
     }
 
@@ -58,7 +58,7 @@ trait BaseImportExport
                 if ('csv' != strtolower(trim($info['extension'] ?? null))) {
                     $fail('The :attribute must be a file of type: csv.');
                 }
-            }]
+            }],
         ]);
 
         $headerRowCount = 1;
@@ -67,7 +67,7 @@ trait BaseImportExport
         $data = array_slice(Excel::toArray([], $request->file('file'))[0] ?? [], $headerRowCount);
 
         // Get the header columns and inputs
-        list($headerColumns, $inputs) = $this->getHeaders();
+        [$headerColumns, $inputs] = $this->getHeaders();
         $headerCount = count($headerColumns);
 
         // Set custom messages
@@ -134,7 +134,7 @@ trait BaseImportExport
 
     protected function formatData($data)
     {
-        list(, $inputs) = $this->getHeaders();
+        [, $inputs] = $this->getHeaders();
 
         $model = $this->crud->getModel();
 
@@ -171,7 +171,7 @@ trait BaseImportExport
 
         $filename = $this->title.'_sample.csv';
 
-        list($headerColumns, $inputs) = $this->getHeaders();
+        [$headerColumns, $inputs] = $this->getHeaders();
 
         $callback = function () use ($headerColumns, $inputs) {
             $file = fopen('php://output', 'w');
@@ -198,7 +198,7 @@ trait BaseImportExport
 
         $resultData = $this->crud->getModel()->getWhere(['deletedAt' => null]);
 
-        list($headerColumns, $inputs) = $this->getHeaders();
+        [$headerColumns, $inputs] = $this->getHeaders();
 
         $callback = function () use ($resultData, $headerColumns, $inputs) {
             $file = fopen('php://output', 'w');
@@ -244,7 +244,7 @@ trait BaseImportExport
             'Content-Disposition' => "attachment; filename=$filename",
             'Pragma' => 'no-cache',
             'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
-            'Expires' => '0'
+            'Expires' => '0',
         ];
 
         return response()->stream($callback, 200, $headers);
