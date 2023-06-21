@@ -91,6 +91,25 @@ class Doc
         return self::$manualState;
     }
 
+    // Quick way to get doc id. Same method as in Form::getId()
+    public static function id()
+    {
+        $request = request();
+
+        $url = $request->getRequestUri();
+        $route = Guard::$instance->getLaravelRoute();
+
+        $matches = [];
+        \preg_match('/'.$route.'\/([^\/\?$]*)/', $url, $matches);
+        if (\count($matches) > 1) {
+            $id = $matches[1];
+
+            return $id;
+        }
+
+        throw new \InvalidArgumentException('Could not fetch "id"!');
+    }
+
     //region Css&Js
 
     public static function addCssLink($link)
