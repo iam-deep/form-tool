@@ -479,7 +479,7 @@ trait Options
             $value = array_map('trim', explode(', ', $value));
         }
 
-        $this->options = (array)$this->options;
+        $this->options = (array) $this->options;
 
         $ids = [];
         if ($this->isMultiple) {
