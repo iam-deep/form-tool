@@ -30,15 +30,10 @@ trait BaseImportExport
     {
         $this->setupImport();
 
-        if (! $this->validateImport($insertData, $errors)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Something went wrong! There are some errors please resolve it first:',
-                'errors' => $errors,
-            ], 421);
-        }
+        $this->validateImport($insertData, $errors);
+        $this->formatData($insertData, $errors);
 
-        if (! $this->formatData($insertData, $errors)) {
+        if ($errors) {
             return response()->json([
                 'status' => false,
                 'message' => 'Something went wrong! There are some errors please resolve it first:',
@@ -96,6 +91,8 @@ trait BaseImportExport
             foreach ($rawValidations as $val) {
                 if ($val instanceof \Illuminate\Validation\Rules\Unique) {
                     $uniqueColumnValidations[] = $input->getDbField();
+                } elseif (false !== strpos($val, 'date_format:')) {
+                    $val = 'date_format:d-M-Y';
                 }
 
                 $validations[$input->getDbField()][] = $val;
@@ -144,6 +141,10 @@ trait BaseImportExport
 
     protected function formatData(&$data, &$errors)
     {
+        if ($errors) {
+            return false;
+        }
+
         [, $inputs] = $this->getHeaders();
         $headerRowCount = 1;
 

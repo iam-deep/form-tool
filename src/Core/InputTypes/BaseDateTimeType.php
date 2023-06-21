@@ -41,6 +41,20 @@ class BaseDateTimeType extends BaseFilterType
         return $this->modifyFormat($value);
     }
 
+    public function getImportValue($value)
+    {
+        try {
+            $value = date($this->niceFormat, strtotime($value));
+            if ($value) {
+                return DTConverter::toDb($value, $this->dbFormat, $this->isConvertToLocal);
+            }
+        } catch(\Exception $e) {
+            return null;
+        }
+
+        return null;
+    }
+
     public function getLoggerValue(string $action, $oldValue = null)
     {
         $newValue = $this->value;
