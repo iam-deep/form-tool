@@ -170,17 +170,22 @@ class FileType extends BaseInputType
 
     public function getNiceValue($value)
     {
-        if ($value) {
-            if (FileManager::isImage($this->value)) {
-                $image = ImageCache::resize($this->value);
-
-                return'<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
-            } else {
-                return'<i class="'.FileManager::getFileIcon($this->value).'"></i>';
-            }
+        if (! $value) {
+            return null;
         }
 
-        return null;
+        if (FileManager::isImage($this->value)) {
+            $image = ImageCache::resize($this->value);
+
+            return'<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
+        } else {
+            return'<i class="'.FileManager::getFileIcon($this->value).'"></i>';
+        }
+    }
+
+    public function getExportValue($value)
+    {
+        return $value;
     }
 
     public function getLoggerValue(string $action, $oldValue = null)

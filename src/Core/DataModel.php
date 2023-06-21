@@ -2,7 +2,6 @@
 
 namespace Deep\FormTool\Core;
 
-use Closure;
 use Deep\FormTool\Models\BaseModel;
 use Deep\FormTool\Support\Random;
 

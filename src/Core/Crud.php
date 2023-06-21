@@ -292,6 +292,24 @@ class Crud
         return $this->table->search();
     }
 
+    public function setImportSample($data)
+    {
+        foreach ($data as $key => $value) {
+            $input = $this->bluePrint->getInputTypeByDbField($key);
+            if (! $input) {
+                throw new \Exception(sprintf('Column "%s" not found in blue print!'));
+            }
+
+            if ($input instanceof BluePrint) {
+                throw new \Exception(sprintf('Multiple table field are not supported!'));
+            }
+
+            $input->importSample($value);
+        }
+
+        return $this;
+    }
+
     //TODO: This method need to move somewhere
     public function getOptionsByParentId()
     {
@@ -371,17 +389,17 @@ class Crud
 
     //region Getter
 
-    public function getForm()
+    public function getForm(): Form
     {
         return $this->form;
     }
 
-    public function getTable()
+    public function getTable(): Table
     {
         return $this->table;
     }
 
-    public function getModel()
+    public function getModel(): DataModel
     {
         return $this->model;
     }
@@ -411,7 +429,7 @@ class Crud
         return $this->name;
     }
 
-    public function getBluePrint()
+    public function getBluePrint(): BluePrint
     {
         return $this->bluePrint;
     }

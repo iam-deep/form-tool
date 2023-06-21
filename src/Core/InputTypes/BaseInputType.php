@@ -13,11 +13,13 @@ class BaseInputType
     protected $bluePrint = null;
 
     protected int $type = InputType::TEXT;
+    protected string $typeInString = '';
 
     protected string $dbField = '';
     protected string $label = '';
     protected $value = '';
     protected $defaultValue = null;
+    protected $importSample = null;
 
     protected string $placeholder = '';
     protected string $help = '';
@@ -185,6 +187,13 @@ class BaseInputType
         return $this;
     }
 
+    public function importSample($value)
+    {
+        $this->importSample = $value;
+
+        return $this;
+    }
+
     public function addClass($classes): BaseInputType
     {
         if (\is_array($classes)) {
@@ -216,6 +225,8 @@ class BaseInputType
     public function addStyle($style): BaseInputType
     {
         $this->inlineCSS .= $style.'';
+
+        return $this;
     }
     //endregion
 
@@ -346,6 +357,16 @@ class BaseInputType
     public function getNiceValue($value)
     {
         return $value;
+    }
+
+    public function getExportValue($value)
+    {
+        return $this->getNiceValue($value);
+    }
+
+    public function getImportSample()
+    {
+        return $this->importSample;
     }
 
     public function isLogColumn()

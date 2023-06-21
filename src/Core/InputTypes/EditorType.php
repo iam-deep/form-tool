@@ -51,6 +51,11 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
         return \mb_substr($value, 0, $this->limitTableViewLength).($length > $this->limitTableViewLength ? '...' : '');
     }
 
+    public function getExportValue($value)
+    {
+        return $value;
+    }
+
     public function getLoggerValue(string $action, $oldValue = null)
     {
         $newValue = $this->value;

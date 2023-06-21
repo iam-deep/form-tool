@@ -18,6 +18,16 @@ class CrudRoute
         return Route::resource($route, $class, $options)->parameters([$route => 'id']);
     }
 
+    public static function importExport($route, $class)
+    {
+        $name = str_replace('/', '.', $route);
+
+        Route::get($route.'/import', [$class, 'import'])->name($name.'.import');
+        Route::post($route.'/import', [$class, 'importStore'])->name($name.'.import-store');
+        Route::get($route.'/export', [$class, 'export'])->name($name.'.export');
+        Route::get($route.'/sample', [$class, 'sample'])->name($name.'.sample');
+    }
+
     public static function indexAndStore($route, $class)
     {
         $name = str_replace('/', '.', $route);

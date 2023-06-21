@@ -20,6 +20,11 @@ class PasswordType extends BaseInputType
         return '';
     }
 
+    public function getExportValue($value)
+    {
+        return '';
+    }
+
     public function getLoggerValue(string $action, $oldValue = null)
     {
         if ($action == 'update') {
