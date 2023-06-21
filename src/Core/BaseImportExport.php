@@ -58,8 +58,8 @@ trait BaseImportExport
                 if ('csv' != strtolower(trim($info['extension'] ?? null))) {
                     $fail('The :attribute must be a file of type: csv.');
                 }
-            }],
-        ]);
+            }]
+        ], [], ['file' => 'Upload CSV File']);
 
         $headerRowCount = 1;
 
