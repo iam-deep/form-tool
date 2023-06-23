@@ -91,7 +91,7 @@ trait BaseImportExport
             foreach ($rawValidations as $val) {
                 if ($val instanceof \Illuminate\Validation\Rules\Unique) {
                     $uniqueColumnValidations[] = $input->getDbField();
-                } elseif (false !== strpos($val, 'date_format:')) {
+                } elseif (is_string($val) && false !== strpos($val, 'date_format:')) {
                     $val = 'date_format:d-M-Y';
                 }
 
