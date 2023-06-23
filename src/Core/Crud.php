@@ -297,7 +297,7 @@ class Crud
         foreach ($data as $key => $value) {
             $input = $this->bluePrint->getInputTypeByDbField($key);
             if (! $input) {
-                throw new \Exception(sprintf('Column "%s" not found in blue print!'));
+                throw new \Exception(sprintf('Column "%s" not found in blue print!', $key));
             }
 
             if ($input instanceof BluePrint) {
