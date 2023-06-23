@@ -265,6 +265,9 @@ trait BaseImportExport
         $inputs = [];
         foreach ($this->sampleData as $col => $sample) {
             $input = $this->crud->getBluePrint()->getInputTypeByDbField($col);
+            if (! $input) {
+                throw new \Exception(sprintf('Column "%s" not found in blue print!', $col));
+            }
 
             $headerColumns[] = $this->createHeaderLabel($input->getLabel());
             $inputs[] = $input;
