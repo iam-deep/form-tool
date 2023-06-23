@@ -23,4 +23,13 @@ class DateTimeType extends BaseDateTimeType
         $this->placeholder('Click to select date and time');
         $this->setFilterOptions(['range']);
     }
+
+    public function getExportValue($value)
+    {
+        if (! $value) {
+            return null;
+        }
+
+        return date('d-M-Y', strtotime($value));
+    }
 }

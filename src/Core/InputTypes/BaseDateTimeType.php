@@ -55,6 +55,15 @@ class BaseDateTimeType extends BaseFilterType
         return null;
     }
 
+    public function getExportValue($value)
+    {
+        if (! $value) {
+            return null;
+        }
+
+        return date('d-M-Y h:i a', strtotime($value));
+    }
+
     public function getLoggerValue(string $action, $oldValue = null)
     {
         $newValue = $this->value;

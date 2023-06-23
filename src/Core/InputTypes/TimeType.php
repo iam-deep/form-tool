@@ -23,4 +23,13 @@ class TimeType extends BaseDateTimeType
         $this->placeholder('Click to select time');
         $this->setFilterOptions(['range']);
     }
+
+    public function getExportValue($value)
+    {
+        if (! $value) {
+            return null;
+        }
+
+        return date('h:i a', strtotime($value));
+    }
 }
