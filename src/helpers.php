@@ -237,8 +237,8 @@ if (! function_exists('getDependencies')) {
                     break;
 
                 case 'ckeditor':
-                    $editor = new Deep\FormTool\Core\InputTypes\EditorType();
-                    $editor->setDependencies();
+                    $editor = (new Deep\FormTool\Core\InputTypes\EditorType())->plugin('ckeditor');
+                    $editor->setDependencies('ckeditor');
                     if ($configs) {
                         $editor->setJs(...$configs);
                     }

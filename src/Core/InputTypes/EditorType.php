@@ -177,6 +177,11 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
         return $this;
     }
 
+    public function getPlugin()
+    {
+        return $this->currentPlugin;
+    }
+
     public function getPlugins()
     {
         return ['ckeditor', 'tinymce'];
