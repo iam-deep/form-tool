@@ -36,19 +36,18 @@
                         <p><b>Note:</b></p>
                         <ul>
                             <li>Download the <b>sample file</b> and update the data as per the column name.</li>
-                            <li>Date format should be like this: <b>25-Sep-1985</b></li>
+                            <li>Date format should be like this: <b>dd-mmm-yyyy</b> (25-Sep-1985)</li>
                             <li>Save the file as .csv (Comma-Separated Values)</li>
                         </ul>
                     </div>
                     <div class="col-sm-6">
                         <p>Steps to change date format in MS Excel:</p>
                         <ul>
-                            <li>Select the first date column</li>
+                            <li>Select the date column</li>
                             <li>Press CTRL + SHIFT + Down Arrow</li>
                             <li>Right click on the selection and select "Format Cells..."</li>
-                            <li>Select "Date" in the left category under "Number" tab</li>
-                            <li>Select "English (US)" in Locale (location)</li>
-                            <li>Scroll down to the bottom in "Type" and select format "14-Mar-2001"</li>
+                            <li>Under "Number" tab, Select "Custom" in the left "Category"</li>
+                            <li>Then write on the "Type" field: <b>dd-mmm-yyyy</b></li>
                         </ul>
                     </div>
                 </div>
