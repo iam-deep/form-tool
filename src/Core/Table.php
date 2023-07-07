@@ -213,7 +213,7 @@ class Table
         if (! $fieldsToSearch) {
             foreach ($this->bluePrint->getInputList() as $input) {
                 if ($input instanceof ISearchable) {
-                    $fieldsToSearch[] = $input->getDbField();
+                    $fieldsToSearch[] = $input->getAlias().'.'.$input->getDbField();
                 }
             }
 
