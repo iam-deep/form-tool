@@ -1079,7 +1079,7 @@ class Form
 
         return redirect($this->url.$this->queryString)->with(
             'error',
-            'Something went wrong! Data not deleted fully, please contact Support Administartor.'
+            'Something went wrong! Data not deleted fully, please contact Support Administrator.'
         );
     }
 

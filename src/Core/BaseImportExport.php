@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Facades\Excel;
 trait BaseImportExport
 {
     protected $sampleData = null;
+    protected $importDateFormat = 'd-M-Y';
 
     protected function setupImport()
     {
@@ -78,6 +79,8 @@ trait BaseImportExport
             'unique' => 'The :attribute has already been taken: <b>:input</b>',
         ];
 
+        $niceDateFormat = config('form-tool.formatDate');
+
         // Get the validation from our Blueprint setup
         $validations = [];
         $attributes = [];
@@ -92,7 +95,14 @@ trait BaseImportExport
                 if ($val instanceof \Illuminate\Validation\Rules\Unique) {
                     $uniqueColumnValidations[] = $input->getDbField();
                 } elseif (is_string($val) && false !== strpos($val, 'date_format:')) {
-                    $val = 'date_format:d-M-Y';
+                    $val = str_replace('date_format:'.$niceDateFormat, 'date_format:'.$this->importDateFormat, $val);
+
+                    $dateFormat = substr($val, strpos($val, 'date_format:' + 1));
+
+                    $messages[$input->getDbField().'.date_format'] = sprintf(
+                        'The :attribute does not match the format: %s (:format).',
+                        date($this->importDateFormat, strtotime('25-08-2022 06:30 pm'))
+                    );
                 }
 
                 $validations[$input->getDbField()][] = $val;
