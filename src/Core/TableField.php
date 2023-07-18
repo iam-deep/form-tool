@@ -46,9 +46,9 @@ class TableField
             ));
         }
 
-        if (! $inputType instanceof InputTypes\ICustomType) {
+        if (! $inputType instanceof InputTypes\Common\ICustomType) {
             throw new \InvalidArgumentException(\sprintf(
-                '%s should implements Deep\FormTool\Core\InputTypes\ICustomType',
+                '%s should implements Deep\FormTool\Core\InputTypes\Common\ICustomType',
                 $class
             ));
         }
@@ -272,5 +272,15 @@ class TableField
     public function getBlueprint()
     {
         return $this->bluePrint;
+    }
+
+    public function toArray()
+    {
+        $fields = [];
+        foreach ($this->cellList as $field) {
+            $fields[] = $field->getDbField();
+        }
+
+        return $fields;
     }
 }

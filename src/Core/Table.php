@@ -278,6 +278,15 @@ class Table
         $this->field = $tableField;
     }
 
+    public function getFields(): TableField
+    {
+        if (! $this->field) {
+            $this->setDefaultField();
+        }
+
+        return $this->field;
+    }
+
     protected function createList(): object
     {
         $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
@@ -535,9 +544,8 @@ class Table
 
     protected function setupTable()
     {
-        if (! $this->field) {
-            $this->setDefaultField();
-        }
+        // Set default fields if not exists
+        $this->getFields();
 
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
         $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';

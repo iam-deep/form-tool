@@ -3,7 +3,6 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Illuminate\Support\Arr;
 
 class BluePrint
@@ -430,6 +429,11 @@ class BluePrint
         return $list;
     }
 
+    /**
+     * Get array of Input Types
+     *
+     * @return array<\Deep\FormTool\Core\InputTypes\BaseInputType>
+     **/
     public function getInputList(): array
     {
         $list = [];

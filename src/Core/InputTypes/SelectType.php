@@ -5,11 +5,14 @@ namespace Deep\FormTool\Core\InputTypes;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\Options;
+use Deep\FormTool\Core\InputTypes\Common\ISaveable;
+use Deep\FormTool\Core\InputTypes\Common\Saveable;
 use Illuminate\Support\Facades\DB;
 
-class SelectType extends BaseFilterType
+class SelectType extends BaseFilterType implements ISaveable
 {
     use Options;
+    use Saveable;
 
     public int $type = InputType::SELECT;
     public string $typeInString = 'select';
@@ -178,7 +181,7 @@ class SelectType extends BaseFilterType
         $value = old($this->dbField);
         if ($value === null) {
             $value = $this->value;
-            if ($this->isMultiple) {
+            if ($this->isMultiple && ! $this->isSaveAt()) {
                 $value = (array) \json_decode($this->value, true);
             }
         }

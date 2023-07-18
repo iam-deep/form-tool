@@ -2,8 +2,10 @@
 
 namespace Deep\FormTool\Core;
 
+use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Models\BaseModel;
 use Deep\FormTool\Support\Random;
+use Illuminate\Support\Facades\DB;
 
 class DataModel
 {
@@ -13,7 +15,7 @@ class DataModel
     protected ?string $foreignKey = null;
     protected ?string $alias = null;
 
-    protected ?string $primaryCol = null;
+    //protected ?string $primaryCol = null;
 
     protected ?string $orderByCol = null;
     protected string $orderByDirection = 'asc';
@@ -43,7 +45,7 @@ class DataModel
             $this->token = $this->model::$token;
             $this->foreignKey = $this->model::$foreignKey;
             $this->alias = $this->model::$alias ?: $this->tableName;
-            $this->primaryCol = $this->model::$primaryCol;
+            //$this->primaryCol = $this->model::$primaryCol;
             $this->orderByCol = $this->model::$orderByCol;
             $this->orderByDirection = $this->model::$orderByDirection;
         } else {
@@ -178,12 +180,50 @@ class DataModel
         $this->orderByCol = $orderByCol;
         $this->orderByDirection = $direction;
 
-        return $this->setup()::getAll($where);
+        $data = $this->setup()::getAll($where);
+
+        if ($data->count()) {
+            $inputs = $this->crud->getBluePrint()->getInputList();
+
+            $fields = $this->crud->getTable()->getFields()->toArray();
+            foreach ($data as &$dataRow) {
+                foreach ($inputs as $input) {
+                    if ($input instanceof ISaveable && $input->isSaveAt() && in_array($input->getDbField(), $fields)) {
+                        $saveAt = $input->getSaveAt();
+
+                        $dataRow->{$input->getDbField()} = [];
+                        $result = DB::table($saveAt->table)->where($saveAt->refId, $dataRow->{$this->primaryId})->get();
+                        foreach ($result as $row) {
+                            $dataRow->{$input->getDbField()}[] = $row->{$input->getDbField()};
+                        }
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
 
     public function getOne($id, $isToken = null)
     {
-        return $this->setup()::getOne($id, $isToken ?? $this->isToken);
+        $data = $this->setup()::getOne($id, $isToken ?? $this->isToken);
+
+        if ($data) {
+            $inputs = $this->crud->getBluePrint()->getInputList();
+            foreach ($inputs as $input) {
+                if ($input instanceof ISaveable && $input->isSaveAt()) {
+                    $saveAt = $input->getSaveAt();
+
+                    $data->{$input->getDbField()} = [];
+                    $result = DB::table($saveAt->table)->where($saveAt->refId, $id)->get();
+                    foreach ($result as $row) {
+                        $data->{$input->getDbField()}[] = $row->{$input->getDbField()};
+                    }
+                }
+            }
+        }
+
+        return $data;
     }
 
     public function search($searchTerm, $fields, $where = null, $orderByCol = null, string $direction = 'desc')
@@ -288,7 +328,7 @@ class DataModel
         $this->model::$foreignKey = $this->foreignKey;
         $this->model::$alias = $this->alias;
 
-        $this->model::$primaryCol = $this->primaryCol;
+        //$this->model::$primaryCol = $this->primaryCol;
 
         $this->model::$orderByCol = $this->orderByCol;
         $this->model::$orderByDirection = $this->orderByDirection;

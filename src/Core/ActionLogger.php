@@ -2,10 +2,6 @@
 
 namespace Deep\FormTool\Core;
 
-use Deep\FormTool\Core\InputTypes\Common\IEncryptable;
-use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Illuminate\Support\Facades\DB;
-
 // TODO: Multiple Logger
 // TODO: Keep deleted files and images
 

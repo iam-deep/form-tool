@@ -429,6 +429,11 @@ trait Options
 
     public function getNiceValue($value)
     {
+        return $this->createNiceValue($value);
+    }
+
+    protected function createNiceValue($value, $isFull = false)
+    {
         if ($value === null && $this->optionType != InputType::CHECKBOX) {
             return null;
         }
@@ -449,9 +454,13 @@ trait Options
             foreach ($rawValues as $val) {
                 $values[] = $this->options->{$val} ?? null;
 
-                if ($i++ >= 2) {
+                if (! $isFull && $i++ >= 2) {
                     break;
                 }
+            }
+
+            if ($isFull) {
+                return implode(', ', $values);
             }
 
             return implode(', ', $values).(\count($rawValues) > 3 ? '...' : '');
@@ -499,6 +508,27 @@ trait Options
         }
 
         return $ids ?: null;
+    }
+
+    public function getLoggerValue(string $action, $oldValue = null)
+    {
+        $oldValue = $this->createNiceValue($oldValue, true);
+        $newValue = $this->createNiceValue($this->value, true);
+
+        $type = 'text'.($this->isMultiple ? ':multiple' : '');
+
+        if ($action == 'update') {
+            if ($oldValue != $newValue) {
+                return [
+                    'type' => $type,
+                    'data' => [$oldValue ?? '', $newValue ?? ''],
+                ];
+            }
+
+            return '';
+        }
+
+        return $newValue !== null ? ['type' => $type, 'data' => $newValue] : '';
     }
 
     public function getOptionData()

@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
@@ -36,6 +37,7 @@ class Form
     private $postData = [];
     private $updatePostData = [];
     private $oldData = null;
+    private $saveAtInputs = [];
 
     private Crud $crud;
     private $options = null;
@@ -54,7 +56,7 @@ class Form
         'deletedAt' => 'deletedAt',
     ];
 
-    public function __construct($resource, BluePrint $bluePrint, DataModel $model)
+    public function __construct($resource, ?BluePrint $bluePrint, ?DataModel $model)
     {
         $this->resource = $resource;
         $this->bluePrint = $bluePrint;
@@ -594,6 +596,8 @@ class Form
             }
         }
 
+        $this->doSaveAt();
+
         $this->saveMultipleFields();
     }
 
@@ -705,6 +709,35 @@ class Form
                 }
             } else {
                 $this->model->updateOne($this->editId, [$input->getKey() => json_encode($data)]);
+            }
+        }
+    }
+
+    private function doSaveAt()
+    {
+        $postData = $this->request->input();
+
+        foreach ($this->saveAtInputs as $input) {
+            $saveAt = $input->getSaveAt();
+            $values = $postData[$input->getDbField()] ?? null;
+
+            $data = [];
+            $this->postData[$input->getDbField()] = [];
+            if ($values && is_array($values)) {
+                foreach ($values as $val) {
+                    $data[] = [
+                        $input->getDbField() => $val,
+                        $saveAt->refId => $this->editId
+                    ];
+
+                    $this->postData[$input->getDbField()][] = $val;
+                }
+            }
+            $input->setValue($this->postData[$input->getDbField()]);
+
+            DB::table($saveAt->table)->where($saveAt->refId, $this->editId)->delete();
+            if (\count($data)) {
+                DB::table($saveAt->table)->insert($data);
             }
         }
     }
@@ -862,8 +895,14 @@ class Form
 
             if ($input instanceof BluePrint) {
                 if (! $input->getModel()) {
-                    $this->postData[$input->getKey()] = \json_encode($this->request[$input->getKey()]);
+                    $this->postData[$input->getKey()] = \json_encode($this->request[$input->getKey()] ?? null);
                 }
+
+                continue;
+            }
+
+            if ($input instanceof ISaveable && $input->isSaveAt()) {
+                $this->saveAtInputs[$dbField] = $input;
 
                 continue;
             }
