@@ -88,6 +88,7 @@ trait BaseImportExport
             $input = $inputs[$i];
 
             $rawValidations = $input->getValidations('store');
+            $messages = array_merge($messages, $input->getValidationMessages());
             $validations[$input->getDbField()] = [];
 
             foreach ($rawValidations as $val) {
@@ -118,7 +119,7 @@ trait BaseImportExport
             $rowData = [];
             for ($i = 0; $i < $headerCount; $i++) {
                 $input = $inputs[$i];
-                $rowData[$input->getDbField()] = $row[$i];
+                $rowData[$input->getDbField()] = $row[$i] ?? null;
             }
 
             $validator = Validator::make($rowData, $validations, $messages, $attributes);
