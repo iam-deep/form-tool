@@ -75,7 +75,6 @@ trait BaseImportExport
 
         // Set custom messages
         $messages = [
-            'email' => 'The :attribute must be a valid email address: <b>:input</b>',
             'unique' => 'The :attribute has already been taken: <b>:input</b>',
         ];
 
@@ -97,7 +96,7 @@ trait BaseImportExport
                 } elseif (is_string($val) && false !== strpos($val, 'date_format:')) {
                     $val = str_replace('date_format:'.$niceDateFormat, 'date_format:'.$this->importDateFormat, $val);
 
-                    $dateFormat = substr($val, strpos($val, 'date_format:' + 1));
+                    // $dateFormat = substr($val, strpos($val, strlen('date_format:') + 1));
 
                     $messages[$input->getDbField().'.date_format'] = sprintf(
                         'The :attribute does not match the format: %s (:format).',
