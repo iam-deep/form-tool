@@ -107,7 +107,7 @@ class Doc
             return $id;
         }
 
-        throw new \InvalidArgumentException('Could not fetch "id"!');
+        throw new \InvalidArgumentException('Could not fetch "id"! Pass $id manually as parameter.');
     }
 
     //region Css&Js
