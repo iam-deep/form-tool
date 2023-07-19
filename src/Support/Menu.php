@@ -62,7 +62,8 @@ class Menu
         string $label,
         ?string $icon = '',
         ?string $guardUrl = null,
-        $guardAction = 'view'
+        $guardAction = 'view',
+        $activeType = 'default'
     ) {
         if (! $guardAction || Guard::{'has'.$guardAction}($guardUrl ?: $route)) {
             $this->list[] = (object) [
@@ -72,6 +73,7 @@ class Menu
                 'icon' => $icon,
                 'active' => false,
                 'isParent' => false,
+                'activeType' => $activeType
             ];
         }
     }
@@ -113,9 +115,8 @@ class Menu
             $this->activeLink = $matches[1] ?? null;
         } elseif (\preg_match('/(.*)\/[0-9].*/', $url, $matches) !== false && $matches) {
             $this->activeLink = $matches[1] ?? null;
-        } else {
-            // We may directly use this method without the above regex
-            $this->activeLink = Guard::$instance->getLaravelRoute();
+        } elseif (\preg_match('/(.*)/', $url, $matches) !== false && $matches) {
+            $this->activeLink = $matches[1] ?? null;
         }
 
         return $this->activeLink;
