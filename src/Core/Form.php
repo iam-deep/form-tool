@@ -742,7 +742,7 @@ class Form
         }
     }
 
-    private function validate()
+    public function validate()
     {
         $validationType = $this->formStatus == FormStatus::STORE ? 'store' : 'update';
 
