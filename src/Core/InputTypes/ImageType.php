@@ -94,7 +94,7 @@ class ImageType extends FileType
                 $image = ImageCache::resize($value);
 
                 return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" '.
-                    'src="'.asset($image).'" style="max-height:150px;max-width:150px;"></a>';
+                    'src="'.asset($image).'" style="max-height:100px;max-width:100px;"></a>';
             }
 
             return parent::getNiceValue($value);

@@ -14,12 +14,12 @@ class ImageCache
 
     protected static string $memoryLimit = '512M';
 
-    private static function getConfigs()
+    private static function getConfigs($width, $height)
     {
         // Let's get the configs
         self::$cachePath = removeSlash(\config('form-tool.imageCachePath', self::$cachePath) ?: self::$cachePath);
-        self::$width = \config('form-tool.imageCacheWidth', self::$width) ?: self::$width;
-        self::$height = \config('form-tool.imageCacheHeight', self::$height) ?: self::$height;
+        self::$width = $width ?: (\config('form-tool.imageCacheWidth', self::$width) ?: self::$width);
+        self::$height = $height ?: (\config('form-tool.imageCacheHeight', self::$height) ?: self::$height);
         self::$memoryLimit = \config('form-tool.memoryLimit', self::$memoryLimit) ?: self::$memoryLimit;
     }
 
@@ -29,10 +29,9 @@ class ImageCache
             return $imagePath;
         }
 
-        $width = $width ?: self::$width;
-        $height = $height ?: self::$height;
+        self::getConfigs($width, $height);
 
-        [$path, $cacheImagePath] = self::getPath($imagePath, $width, $height);
+        [$path, $cacheImagePath] = self::getPath($imagePath);
 
         // If file exists let's return
         if (\file_exists($cacheImagePath)) {
@@ -48,7 +47,7 @@ class ImageCache
             $img = Image::make($imagePath);
 
             // resize image instance
-            $img->resize($width, $height, function ($constraint) {
+            $img->resize(self::$width, self::$height, function ($constraint) {
                 $constraint->aspectRatio();
             });
 
@@ -71,10 +70,9 @@ class ImageCache
             return $imagePath;
         }
 
-        $width = $width ?: self::$width;
-        $height = $height ?: self::$height;
+        self::getConfigs($width, $height);
 
-        [$path, $cacheImagePath] = self::getPath($imagePath, $width, $height);
+        [$path, $cacheImagePath] = self::getPath($imagePath);
 
         // If file exists let's return
         if (\file_exists($cacheImagePath)) {
@@ -90,7 +88,7 @@ class ImageCache
             $img = Image::make($imagePath);
 
             // resize image instance
-            $img->fit($width, $height);
+            $img->fit(self::$width, self::$height);
 
             // insert a watermark
             // $img->insert('public/watermark.png');
@@ -105,17 +103,15 @@ class ImageCache
         return $cacheImagePath;
     }
 
-    private static function getPath($imagePath, $width = null, $height = null)
+    private static function getPath($imagePath)
     {
-        self::getConfigs();
-
         $pathinfo = \pathinfo($imagePath);
 
         // Create the cache path
         $path = self::$cachePath.'/'.$pathinfo['dirname'];
 
         // Create the cache filename
-        $filename = $pathinfo['filename'].'-'.$width.'x'.$height.'.'.$pathinfo['extension'];
+        $filename = $pathinfo['filename'].'-'.self::$width.'x'.self::$height.'.'.$pathinfo['extension'];
 
         // Full path of the cache image
         $cacheImagePath = $path.'/'.$filename;
@@ -125,7 +121,7 @@ class ImageCache
 
     public static function clearCache()
     {
-        self::getConfigs();
+        self::getConfigs(null, null);
 
         $files = new \RecursiveIteratorIterator(
             new \RecursiveDirectoryIterator(self::$cachePath, \RecursiveDirectoryIterator::SKIP_DOTS),

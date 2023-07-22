@@ -116,14 +116,14 @@ if (! function_exists('imageThumb')) {
 if (! function_exists('imageResize')) {
     function imageResize($imagePath, $width = null, $height = null)
     {
-        return (new Deep\FormTool\Support\ImageCache())->resize($imagePath, $width, $height);
+        return \Deep\FormTool\Support\ImageCache::resize($imagePath, $width, $height);
     }
 }
 
 if (! function_exists('imageFit')) {
     function imageFit($imagePath, $width = null, $height = null)
     {
-        return (new Deep\FormTool\Support\ImageCache())->fit($imagePath, $width, $height);
+        return \Deep\FormTool\Support\ImageCache::fit($imagePath, $width, $height);
     }
 }
 
