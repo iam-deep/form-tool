@@ -10,6 +10,7 @@ trait BaseImportExport
 {
     protected $sampleData = null;
     protected $importDateFormat = 'd-M-Y';
+    protected $importExcelFormat = 'dd-mmm-yyyy';
 
     protected function setupImport()
     {
@@ -100,8 +101,9 @@ trait BaseImportExport
                     // $dateFormat = substr($val, strpos($val, strlen('date_format:') + 1));
 
                     $messages[$input->getDbField().'.date_format'] = sprintf(
-                        'The :attribute does not match the format: %s (:format).',
-                        date($this->importDateFormat, strtotime('25-08-2022 06:30 pm'))
+                        'The :attribute does not match the format: %s (%s).',
+                        date($this->importDateFormat, strtotime('25-08-2022 06:30 pm')),
+                        $this->importExcelFormat
                     );
                 }
 

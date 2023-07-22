@@ -2,7 +2,6 @@
 
 namespace Deep\FormTool\Support;
 
-use Deep\FormTool\Http\Middleware\AdminCheckLoggedIn;
 use Illuminate\Support\Facades\Route;
 
 class CrudRoute
@@ -33,7 +32,7 @@ class CrudRoute
         $name = str_replace('/', '.', $route);
 
         Route::get($route, [$class, 'index'])->name($name);
-        Route::post($route.'/create', [$class, 'store'])->name($name.'.store');
+        Route::post($route, [$class, 'store'])->name($name.'.store');
     }
 
     public static function indexAndUpdate($route, $class, $id = null)
