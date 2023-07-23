@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -12,11 +13,18 @@ trait BaseImportExport
     protected $importDateFormat = 'd-M-Y';
     protected $importExcelFormat = 'dd-mmm-yyyy';
 
+    protected $uniqueColumns = [];
+
     protected function setupImport()
     {
         $this->setup();
 
         $this->sampleData = null;
+    }
+
+    protected function setUnique($columns)
+    {
+        $this->uniqueColumns = Arr::wrap($columns);
     }
 
     public function import()
@@ -55,6 +63,8 @@ trait BaseImportExport
     {
         $request = request();
 
+        //TODO: Validate unique columns, if exists in blueprint
+
         // Validating the .csv file
         $request->validate([
             'file' => ['bail', 'required', 'mimes:csv,txt', function ($attribute, $value, Closure $fail) {
@@ -84,7 +94,7 @@ trait BaseImportExport
         // Get the validation from our Blueprint setup
         $validations = [];
         $attributes = [];
-        $uniqueColumnValidations = [];
+        $uniqueColumnValidations = $this->uniqueColumns;
         for ($i = 0; $i < $headerCount; $i++) {
             $input = $inputs[$i];
 
@@ -97,8 +107,6 @@ trait BaseImportExport
                     $uniqueColumnValidations[] = $input->getDbField();
                 } elseif (is_string($val) && false !== strpos($val, 'date_format:')) {
                     $val = str_replace('date_format:'.$niceDateFormat, 'date_format:'.$this->importDateFormat, $val);
-
-                    // $dateFormat = substr($val, strpos($val, strlen('date_format:') + 1));
 
                     $messages[$input->getDbField().'.date_format'] = sprintf(
                         'The :attribute does not match the format: %s (%s).',
@@ -131,20 +139,22 @@ trait BaseImportExport
                 $insert[] = $rowData;
             }
 
-            if (in_array($input->getDbField(), $uniqueColumnValidations)) {
-                if (in_array($rowData[$input->getDbField()], $uniqueData[$input->getDbField()] ?? [])) {
-                    if (! isset($errors[$index + $headerRowCount + 1][$input->getDbField()])) {
-                        $errors[$index + $headerRowCount + 1][$input->getDbField()] = [];
+            foreach ($uniqueColumnValidations as $uniqueCol) {
+                if (in_array($rowData[$uniqueCol], $uniqueData[$uniqueCol] ?? [])) {
+                    if (! isset($errors[$index + $headerRowCount + 1][$uniqueCol])) {
+                        $errors[$index + $headerRowCount + 1][$uniqueCol] = [];
                     }
 
-                    $errors[$index + $headerRowCount + 1][$input->getDbField()][] = sprintf(
+                    $errors[$index + $headerRowCount + 1][$uniqueCol][] = sprintf(
                         'The %s is repeated/duplicated in the file: <b>%s</b>',
-                        $this->getHeaderLabel($input->getDbField()),
-                        $rowData[$input->getDbField()]
+                        $this->getHeaderLabel($uniqueCol),
+                        $rowData[$uniqueCol]
                     );
                 }
 
-                $uniqueData[$input->getDbField()][] = $rowData[$input->getDbField()];
+                if ($rowData[$uniqueCol]) {
+                    $uniqueData[$uniqueCol][] = $rowData[$uniqueCol];
+                }
             }
         }
 
@@ -168,6 +178,7 @@ trait BaseImportExport
 
         foreach ($data as $index => &$row) {
             foreach ($inputs as $input) {
+                $input->reset();
                 $value = trim($row[$input->getDbField()]);
 
                 if (strlen($value)) {
@@ -192,6 +203,7 @@ trait BaseImportExport
                 }
 
                 $row[$input->getDbField()] = $value;
+
                 $input->setValue($value);
 
                 $response = $input->beforeStore((object) $row);
@@ -300,7 +312,9 @@ trait BaseImportExport
 
     private function createHeaderLabel($label)
     {
-        return preg_replace('/\s+/', '_', trim($label));
+        $label = str_replace("'s", '', trim($label));
+        $label = preg_replace('/[^A-Za-z0-9_]+/', '_', $label);
+        return trim($label, '_');
     }
 
     private function download($filename, $callback)

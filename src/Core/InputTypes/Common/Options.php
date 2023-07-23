@@ -535,4 +535,9 @@ trait Options
     {
         return $this->optionData;
     }
+
+    public function reset()
+    {
+        $this->options = null;
+    }
 }

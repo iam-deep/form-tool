@@ -434,6 +434,10 @@ class BaseInputType
         return $this->inlineCSS;
     }
 
+    public function reset()
+    {
+    }
+
     final public function getTableCell(TableField $tableField)
     {
         return CellDefinition::Input($tableField, $this);

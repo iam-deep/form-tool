@@ -12,7 +12,7 @@
             {!! $field->input !!}
             
             @if ($field->error)
-                <p class="help-block">{{ $field->error }}</p>
+                <p class="help-block">{!! $field->error !!}</p>
             @endif
         </div>
     @else
@@ -29,7 +29,7 @@
         </div>
         <div class="col-sm-4">
             @if ($field->error)
-                <p class="help-block">{{ $field->error }}</p>
+                <p class="help-block">{!! $field->error !!}</p>
             @endif
         </div>
     @endif
