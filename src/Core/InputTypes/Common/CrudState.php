@@ -12,4 +12,5 @@ enum CrudState: string
     case UPDATE = 'update';
     case DELETE = 'delete';
     case DESTROY = 'destroy';
+    case IMPORT = 'import';
 }

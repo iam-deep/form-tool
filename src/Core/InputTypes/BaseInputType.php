@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\CellDefinition;
+use Deep\FormTool\Core\ImportConfig;
 use Deep\FormTool\Core\InputTypes\Common\ICustomType;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\TableField;
@@ -366,6 +367,10 @@ class BaseInputType
 
     public function getImportSample()
     {
+        if ($this->importSample instanceof ImportConfig) {
+            return $this->importSample->getSampleData();
+        }
+
         return $this->importSample;
     }
 

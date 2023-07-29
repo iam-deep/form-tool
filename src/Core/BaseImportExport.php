@@ -14,6 +14,7 @@ trait BaseImportExport
     protected $importExcelFormat = 'dd-mmm-yyyy';
 
     protected $uniqueColumns = [];
+    protected $importData = [];
 
     protected function setupImport()
     {
@@ -78,11 +79,16 @@ trait BaseImportExport
         $headerRowCount = 1;
 
         // Slicing the header part
-        $data = array_slice(Excel::toArray([], $request->file('file'))[0] ?? [], $headerRowCount);
+        $excelData = Excel::toArray([], $request->file('file'))[0] ?? [];
+        $excelHeaderLabels = array_slice($excelData, 0, 1)[0] ?? [];
+        $data = array_slice($excelData, $headerRowCount);
 
         // Get the header columns and inputs
-        [$headerColumns, $inputs] = $this->getHeaders();
-        $headerCount = count($headerColumns);
+        $headers = $this->getHeaders();
+        $originalHeaderLabels = array_keys($headers);
+
+        // Include unsupplied labels
+        $excelHeaderLabels = array_merge($excelHeaderLabels, array_diff($originalHeaderLabels, $excelHeaderLabels));
 
         // Set custom messages
         $messages = [
@@ -95,9 +101,7 @@ trait BaseImportExport
         $validations = [];
         $attributes = [];
         $uniqueColumnValidations = $this->uniqueColumns;
-        for ($i = 0; $i < $headerCount; $i++) {
-            $input = $inputs[$i];
-
+        foreach ($headers as $input) {
             $rawValidations = $input->getValidations('store');
             $messages = array_merge($messages, $input->getValidationMessages());
             $validations[$input->getDbField()] = [];
@@ -121,16 +125,24 @@ trait BaseImportExport
             $attributes[$input->getDbField()] = $input->getLabel();
         }
 
+        $uniqueColumnValidations = array_unique($uniqueColumnValidations);
+
         // Let's validate row by row
         $insert = [];
         $errors = [];
         $uniqueData = [];
         foreach ($data as $index => $row) {
             $rowData = [];
-            for ($i = 0; $i < $headerCount; $i++) {
-                $input = $inputs[$i];
-                $rowData[$input->getDbField()] = $row[$i] ?? null;
+            $i = 0;
+            foreach ($excelHeaderLabels as $headerLabel) {
+                $input = $headers[$headerLabel] ?? null;
+                if ($input) {
+                    $rowData[$input->getDbField()] = $row[$i] ?? null;
+                }
+                $i++;
             }
+
+            $this->setImportData($rowData);
 
             $validator = Validator::make($rowData, $validations, $messages, $attributes);
             if ($validator->fails()) {
@@ -140,6 +152,10 @@ trait BaseImportExport
             }
 
             foreach ($uniqueColumnValidations as $uniqueCol) {
+                if (! isset($rowData[$uniqueCol])) {
+                    continue;
+                }
+
                 if (in_array($rowData[$uniqueCol], $uniqueData[$uniqueCol] ?? [])) {
                     if (! isset($errors[$index + $headerRowCount + 1][$uniqueCol])) {
                         $errors[$index + $headerRowCount + 1][$uniqueCol] = [];
@@ -167,7 +183,7 @@ trait BaseImportExport
             return false;
         }
 
-        [, $inputs] = $this->getHeaders();
+        $headers = $this->getHeaders();
         $headerRowCount = 1;
 
         $model = $this->crud->getModel();
@@ -177,7 +193,7 @@ trait BaseImportExport
         $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
 
         foreach ($data as $index => &$row) {
-            foreach ($inputs as $input) {
+            foreach ($headers as $input) {
                 $input->reset();
                 $value = trim($row[$input->getDbField()]);
 
@@ -231,14 +247,14 @@ trait BaseImportExport
 
         $filename = $this->title.'_sample.csv';
 
-        [$headerColumns, $inputs] = $this->getHeaders();
+        $headers = $this->getHeaders();
 
-        $callback = function () use ($headerColumns, $inputs) {
+        $callback = function () use ($headers) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $headerColumns);
+            fputcsv($file, array_keys($headers));
 
             $data = [];
-            foreach ($inputs as $input) {
+            foreach ($headers as $input) {
                 $data[] = $input->getImportSample();
             }
 
@@ -258,15 +274,15 @@ trait BaseImportExport
 
         $resultData = $this->crud->getModel()->getWhere(['deletedAt' => null]);
 
-        [$headerColumns, $inputs] = $this->getHeaders();
+        $headers = $this->getHeaders();
 
-        $callback = function () use ($resultData, $headerColumns, $inputs) {
+        $callback = function () use ($resultData, $headers) {
             $file = fopen('php://output', 'w');
-            fputcsv($file, $headerColumns);
+            fputcsv($file, array_keys($headers));
 
             foreach ($resultData as $row) {
                 $data = [];
-                foreach ($inputs as $input) {
+                foreach ($headers as $input) {
                     $data[] = $input->getExportValue($row->{$input->getDbField()} ?? null);
                 }
 
@@ -279,25 +295,49 @@ trait BaseImportExport
         return $this->download($filename, $callback);
     }
 
+    public function getImportValue($column)
+    {
+        return $this->importData[$column] ?? null;
+    }
+
+    public function getImportData()
+    {
+        return $this->importData;
+    }
+
+    protected function setImportData($data, $id = null)
+    {
+        //$this->crud->setId($id);
+        $this->importData = $data;
+    }
+
     private function getHeaders()
     {
         if (! $this->sampleData) {
             return [[], []];
         }
 
-        $headerColumns = [];
-        $inputs = [];
+        $headers = [];
         foreach ($this->sampleData as $col => $sample) {
             $input = $this->crud->getBluePrint()->getInputTypeByDbField($col);
             if (! $input) {
                 throw new \Exception(sprintf('Column "%s" not found in blue print!', $col));
             }
 
-            $headerColumns[] = $this->createHeaderLabel($input->getLabel());
-            $inputs[] = $input;
+            if ($sample instanceof ImportConfig) {
+                $label = $sample->getHeader();
+            } else {
+                $label = $this->createHeaderLabel($input->getLabel());
+            }
+
+            if (isset($headers[$label])) {
+                throw new \Exception(sprintf('Duplicate header label found: %s', $label));
+            }
+
+            $headers[$label] = $input;
         }
 
-        return [$headerColumns, $inputs];
+        return $headers;
     }
 
     private function getHeaderLabel($column)
