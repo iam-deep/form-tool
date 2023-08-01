@@ -23,6 +23,11 @@ trait BaseImportExport
         $this->sampleData = null;
     }
 
+    protected function setExportData()
+    {
+        return $this->crud->getModel()->getWhere(['deletedAt' => null]);
+    }
+
     protected function setUnique($columns)
     {
         $this->uniqueColumns = Arr::wrap($columns);
@@ -272,7 +277,7 @@ trait BaseImportExport
 
         $filename = $this->title.'.csv';
 
-        $resultData = $this->crud->getModel()->getWhere(['deletedAt' => null]);
+        $resultData = $this->setExportData();
 
         $headers = $this->getHeaders();
 

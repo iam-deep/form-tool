@@ -483,12 +483,12 @@ trait Options
     {
         $this->createOptions();
 
-        $value = trim($value);
+        $value = strtolower(trim($value));
         if ($this->isMultiple) {
             $value = array_map('trim', explode(', ', $value));
         }
 
-        $this->options = (array) $this->options;
+        $this->options = array_map('strtolower', (array) $this->options);
 
         $ids = [];
         if ($this->isMultiple) {
