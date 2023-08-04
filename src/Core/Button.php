@@ -20,7 +20,7 @@ class Button
     private ?string $processedLink = null;
     private ?string $processedHtml = null;
 
-    public function __construct(?string $name = null, string $link = null, string $guard = null)
+    public function __construct(?string $name = null, string $link = null, $guard = null)
     {
         $this->name = trim($name);
         $this->link = trim($link);
@@ -29,47 +29,47 @@ class Button
         return $this;
     }
 
-    public static function make(string $name = null, string $link = null, string $guard = null): Button
+    public static function make(string $name = null, string $link = null, $guard = null): Button
     {
-        $button = new Button($name, $link, strtolower($guard));
+        $button = new Button($name, $link, $guard);
         $button->type = 'link';
 
-        if ($guard && ! Guard::can($guard)) {
+        if (! self::isGuard($guard)) {
             $button->active = false;
         }
 
         return $button;
     }
 
-    public static function makeView(string $name = 'View', string $link = '/{id}', string $guard = 'view'): Button
+    public static function makeView(string $name = 'View', string $link = '/{id}', $guard = 'view'): Button
     {
         $button = self::make($name, $link, strtolower($guard));
         $button->icon('<i class="'.config('form-tool.icons.view').'"></i>');
 
-        if ($guard && ! Guard::can($guard)) {
+        if (! self::isGuard($guard)) {
             $button->active = false;
         }
 
         return $button;
     }
 
-    public static function makeEdit(string $name = 'Edit', string $link = '/{id}/edit', string $guard = 'edit'): Button
+    public static function makeEdit(string $name = 'Edit', string $link = '/{id}/edit', $guard = 'edit'): Button
     {
         $button = self::make($name, $link, strtolower($guard));
         $button->icon('<i class="'.config('form-tool.icons.edit').'"></i>');
 
-        if ($guard && ! Guard::can($guard)) {
+        if (! self::isGuard($guard)) {
             $button->active = false;
         }
 
         return $button;
     }
 
-    public static function makeDelete(string $name = 'Delete', string $link = '/{id}', string $guard = 'delete'): Button
+    public static function makeDelete(string $name = 'Delete', string $link = '/{id}', $guard = 'delete'): Button
     {
         $button = new Button($name, $link, strtolower($guard));
 
-        if ($guard && ! Guard::can($guard)) {
+        if (! self::isGuard($guard)) {
             $button->active = false;
         }
 
@@ -87,7 +87,7 @@ class Button
     public static function makeHtml(string $html, string $guard = null): Button
     {
         $button = (new Button())->html($html);
-        if ($guard && ! Guard::can($guard)) {
+        if (! self::isGuard($guard)) {
             $button->active = false;
         }
 
@@ -129,7 +129,7 @@ class Button
 
     public function guard(?string $guard): Button
     {
-        if ($guard && ! Guard::can($guard)) {
+        if (! self::isGuard($guard)) {
             $this->active = false;
         }
 
@@ -223,11 +223,31 @@ class Button
     public function process($search, $replace)
     {
         if ($this->link) {
-            $this->processedLink = str_replace($search, $replace, '{crud_url}'.$this->link.'?{query_string}');
+            if (false !== strpos($this->link, 'http')) {
+                $link = $this->link;
+                $link .= strpos($this->link, '?') ? '&' : '?';
+
+                $this->processedLink = str_replace($search, $replace, $link.'{query_string}');
+            } else {
+                $this->processedLink = str_replace($search, $replace, '{crud_url}'.$this->link.'?{query_string}');
+            }
         }
 
         if ($this->raw) {
             $this->processedHtml = str_replace($search, $replace, $this->raw);
         }
+    }
+
+    private static function isGuard($guard)
+    {
+        if (! is_null($guard)) {
+            if (is_string($guard)) {
+                return Guard::can(strtolower($guard));
+            } else {
+                return $guard;
+            }
+        }
+
+        return true;
     }
 }
