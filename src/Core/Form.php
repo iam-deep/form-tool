@@ -1151,7 +1151,7 @@ class Form
                         }
                         $resultData = $query->limit($totalReferencesToFetch)->get();
 
-                        $count = \count($resultData);
+                        $count = $resultData->count();
                         if ($count > 0) {
                             $dataCount[] = [
                                 'count' => $count,
@@ -1185,7 +1185,7 @@ class Form
                     }
                     $resultData = $query->limit($totalReferencesToFetch)->get();
 
-                    $count = \count($resultData);
+                    $count = $resultData->count();
                     if ($count > 0) {
                         $dataCount[] = [
                             'count' => $count,

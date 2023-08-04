@@ -224,12 +224,19 @@ trait BaseImportExport
                 }
 
                 $row[$input->getDbField()] = $value;
-
                 $input->setValue($value);
 
                 $response = $input->beforeStore((object) $row);
                 if ($response !== null) {
                     $row[$input->getDbField()] = $response;
+                }
+
+                // Set default value
+                if ($value === null && $input->getDefaultValue() !== null) {
+                    $value = $input->getDefaultValue();
+
+                    $row[$input->getDbField()] = $value;
+                    $input->setValue($value);
                 }
             }
 
