@@ -113,9 +113,8 @@ class Menu
             $this->activeLink = $matches[1] ?? null;
         } elseif (\preg_match('/(.*)\/[0-9].*/', $url, $matches) !== false && $matches) {
             $this->activeLink = $matches[1] ?? null;
-        } else {
-            // We may directly use this method without the above regex
-            $this->activeLink = Guard::$instance->getLaravelRoute();
+        } elseif (\preg_match('/(.*)/', $url, $matches) !== false && $matches) {
+            $this->activeLink = $matches[1] ?? null;
         }
 
         return $this->activeLink;
