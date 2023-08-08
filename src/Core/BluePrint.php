@@ -430,7 +430,7 @@ class BluePrint
     }
 
     /**
-     * Get array of Input Types
+     * Get array of Input Types.
      *
      * @return array<\Deep\FormTool\Core\InputTypes\BaseInputType>
      **/

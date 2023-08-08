@@ -73,7 +73,7 @@ class Menu
                 'icon' => $icon,
                 'active' => false,
                 'isParent' => false,
-                'activeType' => $activeType
+                'activeType' => $activeType,
             ];
         }
     }

@@ -14,10 +14,10 @@ trait Saveable
             throw new \Exception(sprintf('Field "%s" should be multiple to apply saveAt method!', $this->dbField));
         }
 
-        $this->save = (object)[
+        $this->save = (object) [
             'table' => $tableName,
             'id' => $id,
-            'refId' => $refId
+            'refId' => $refId,
         ];
 
         return $this;

@@ -4,8 +4,8 @@ namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Deep\FormTool\Core\InputTypes\Common\Options;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
+use Deep\FormTool\Core\InputTypes\Common\Options;
 use Deep\FormTool\Core\InputTypes\Common\Saveable;
 use Illuminate\Support\Facades\DB;
 

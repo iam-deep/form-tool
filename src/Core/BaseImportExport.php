@@ -366,6 +366,7 @@ trait BaseImportExport
     {
         $label = str_replace("'s", '', trim($label));
         $label = preg_replace('/[^A-Za-z0-9_]+/', '_', $label);
+
         return trim($label, '_');
     }
 
