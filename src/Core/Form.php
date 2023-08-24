@@ -731,7 +731,7 @@ class Form
                 foreach ($values as $val) {
                     $data[] = [
                         $input->getDbField() => $val,
-                        $saveAt->refId => $this->editId
+                        $saveAt->refId => $this->editId,
                     ];
 
                     $this->postData[$input->getDbField()][] = $val;

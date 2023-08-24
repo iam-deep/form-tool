@@ -92,12 +92,13 @@ class Doc
     }
 
     /**
-     * Get current Edit/Update ID
+     * Get current Edit/Update ID.
      *
      * $isRequired will throw error if ID not found otherwise return null
      *
-     * @param bool $isRequired
+     * @param  bool  $isRequired
      * @return int|null
+     *
      * @throws InvalidArgumentException
      **/
     public static function id(bool $isRequired = true)
