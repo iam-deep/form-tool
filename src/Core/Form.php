@@ -183,6 +183,10 @@ class Form
         $url = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
         $data->action = $data->cancel = $url.$this->queryString;
 
+        if ($this->request->query('redirect')) {
+            $data->cancel = urldecode($this->request->query('redirect'));
+        }
+
         if ($data->isEdit) {
             $editId = $this->model->isToken() ?
                 $this->resultData->{$this->model->getTokenCol()} :
@@ -727,7 +731,7 @@ class Form
                 foreach ($values as $val) {
                     $data[] = [
                         $input->getDbField() => $val,
-                        $saveAt->refId => $this->editId,
+                        $saveAt->refId => $this->editId
                     ];
 
                     $this->postData[$input->getDbField()][] = $val;
