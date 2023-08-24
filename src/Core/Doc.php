@@ -91,8 +91,16 @@ class Doc
         return self::$manualState;
     }
 
-    // Quick way to get doc id. Same method as in Form::getId()
-    public static function id()
+    /**
+     * Get current Edit/Update ID
+     *
+     * $isRequired will throw error if ID not found otherwise return null
+     *
+     * @param bool $isRequired
+     * @return int|null
+     * @throws InvalidArgumentException
+     **/
+    public static function id(bool $isRequired = true)
     {
         $request = request();
 
@@ -107,7 +115,11 @@ class Doc
             return $id;
         }
 
-        throw new \InvalidArgumentException('Could not fetch "id"! Pass $id manually as parameter.');
+        if ($isRequired) {
+            throw new \InvalidArgumentException('Could not fetch "id"! Pass $id manually as parameter.');
+        } else {
+            return null;
+        }
     }
 
     //region Css&Js
