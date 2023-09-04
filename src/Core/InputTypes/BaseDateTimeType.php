@@ -146,9 +146,8 @@ class BaseDateTimeType extends BaseFilterType
     public function setDependencies()
     {
         /**
-         * Documentation: https://getdatepicker.com/4/
+         * Documentation: https://getdatepicker.com/4/.
          */
-
         Doc::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
 
         Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
