@@ -145,6 +145,10 @@ class BaseDateTimeType extends BaseFilterType
 
     public function setDependencies()
     {
+        /**
+         * Documentation: https://getdatepicker.com/4/
+         */
+
         Doc::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.47/css/bootstrap-datetimepicker.min.css');
 
         Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js');
@@ -159,9 +163,24 @@ class BaseDateTimeType extends BaseFilterType
         Doc::addJs(
             '
         // Date and DateTimePicker
-        $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
-        $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", useCurrent: false});
-        $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", useCurrent: false});
+        let dateConfig = {
+            useCurrent: false,
+            icons: {
+                type: "icons",
+                time: "fa fa-clock",
+                date: "fa fa-calendar",
+                up: "fa fa-arrow-up",
+                down: "fa fa-arrow-down",
+                previous: "fa fa-arrow-left",
+                next: "fa fa-arrow-right",
+                today: "fa fa-calendar-check",
+                clear: "fa fa-trash",
+                close: "fa fa-xmark"
+            },
+        };
+        $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", ...dateConfig});
+        $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", ...dateConfig});
+        $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", ...dateConfig});
         ',
             'datetime'
         );
@@ -169,9 +188,9 @@ class BaseDateTimeType extends BaseFilterType
         Doc::addJs(
             '
         // Date and DateTimePicker
-        $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", useCurrent: false});
-        $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", useCurrent: false});
-        $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", useCurrent: false});
+        $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", ...dateConfig});
+        $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", ...dateConfig});
+        $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", ...dateConfig});
         ',
             'datetime',
             'multiple_after_add'
