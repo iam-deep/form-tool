@@ -1148,6 +1148,9 @@ class Form
                 foreach ($data->foreignKey as $option) {
                     if ($option->table == $this->model->getTableName()) {
                         $query = DB::table($data->main->table)->where($option->column, $id);
+                        if (isset($option->where)) {
+                            $query->where((array)$option->where);
+                        }
 
                         // If we are checking the same table then ignore the id we want to delete
                         if ($data->main->table == $option->table) {
@@ -1259,7 +1262,7 @@ class Form
         foreach ($dataCount as $result) {
             if ($result['label']) {
                 $msg .= \sprintf(
-                    '<li>%s data of <b>%s</b> in field "%s"</li>',
+                    '<li>%s data of <b>%s</b> in field <b>%s</b></li>',
                     $result['count'],
                     $result['title'],
                     $result['label']

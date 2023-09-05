@@ -136,20 +136,25 @@ class Crud
         return $this->form->{$method}(...$parameters);
     }
 
-    private function save()
+    public function saveCrud()
     {
-        if (! \config('form-tool.isPreventForeignKeyDelete', true)) {
-            return;
-        }
+        $foreignKey = [];
+        if ($this->format == 'keyValue') {
+            $foreignKey = $this->bluePrint->getSelectDbOptionsForKeyValue();
+        } else {
+            if (! \config('form-tool.isPreventForeignKeyDelete', true)) {
+                return;
+            }
 
-        $commons = \config('form-tool.commonDeleteRestricted', []);
-        foreach ($commons as &$common) {
-            $common = (object) $common;
-        }
+            $commons = \config('form-tool.commonDeleteRestricted', []);
+            foreach ($commons as &$common) {
+                $common = (object) $common;
+            }
 
-        $foreignKey = $commons;
-        $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions());
-        $foreignKey = array_merge($foreignKey, $this->deleteRestrictForOthers);
+            $foreignKey = $commons;
+            $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions());
+            $foreignKey = array_merge($foreignKey, $this->deleteRestrictForOthers);
+        }
 
         $foreignModules = $this->deleteRestrictForMe;
         if (! $foreignKey && ! $foreignModules) {
@@ -225,7 +230,7 @@ class Crud
         $request = request();
         $currentUrl = url()->current();
 
-        $this->save();
+        $this->saveCrud();
 
         $page = new \stdClass();
 

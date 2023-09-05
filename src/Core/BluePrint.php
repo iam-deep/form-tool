@@ -531,6 +531,35 @@ class BluePrint
         return $selects;
     }
 
+    public function getSelectDbOptionsForKeyValue()
+    {
+        $selects = [];
+        foreach ($this->dataTypeList as $group) {
+            foreach ($group as $input) {
+                if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT ||
+                    // table name should be same as crud table, otherwise skip
+                    ($input->getTableName() && $input->getTableName() != $this->form->getModel()->getTableName())) {
+                    continue;
+                }
+
+                foreach ($input->getOptionData() as $options) {
+                    foreach ($options as $type => $optionData) {
+                        if ($type == 'db') {
+                            $selects[] = (object) [
+                                'table' => $optionData->table,
+                                'column' => 'value',
+                                'label' => $input->getLabel(),
+                                'where' => ['key' => $input->getDbField()]
+                            ];
+                        }
+                    }
+                }
+            }
+        }
+
+        return $selects;
+    }
+
     //endregion
 
     public function toObj($type)
