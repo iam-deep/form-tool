@@ -1149,7 +1149,7 @@ class Form
                     if ($option->table == $this->model->getTableName()) {
                         $query = DB::table($data->main->table)->where($option->column, $id);
                         if (isset($option->where)) {
-                            $query->where((array)$option->where);
+                            $query->where((array) $option->where);
                         }
 
                         // If we are checking the same table then ignore the id we want to delete

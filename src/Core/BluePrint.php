@@ -549,7 +549,7 @@ class BluePrint
                                 'table' => $optionData->table,
                                 'column' => 'value',
                                 'label' => $input->getLabel(),
-                                'where' => ['key' => $input->getDbField()]
+                                'where' => ['key' => $input->getDbField()],
                             ];
                         }
                     }
