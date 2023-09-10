@@ -94,9 +94,23 @@ $(function() {
         }
 	});
 
-    $('form').on('submit', function() {
-        let btn = $(this).find('.submit');
-        btn.html('<i class="fa fa-spinner fa-pulse"></i> ' + btn.text()).prop('disabled', true);
+    // Form Submission
+    var btnSubmit = "";
+    $('.submit').click(function(evt) {
+        btnSubmit = $(this).attr('value');
+    });
+
+    $('form').on('submit', function(e) {
+        let form = $(this);
+        let btns = form.find('.submit');
+
+        btns.each(function() {
+            if ($(this).attr('value') == btnSubmit) {
+                form.append('<input type="hidden" name="'+ $(this).attr('name') +'" value="'+ $(this).attr('value') +'">')
+            }
+
+            $(this).html('<i class="fa fa-spinner fa-pulse"></i> ' + $(this).text()).prop('disabled', true);
+        });
     });
     
     // Sort table rows
