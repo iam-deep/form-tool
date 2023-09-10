@@ -38,6 +38,7 @@ class Form
     private $updatePostData = [];
     private $oldData = null;
     private $saveAtInputs = [];
+    private $dataAfterSave = [];
 
     private Crud $crud;
     private $options = null;
@@ -456,6 +457,9 @@ class Form
 
         if ($insertId) {
             $this->editId = $insertId;
+
+            $this->dataAfterSave = $this->postData;
+            $this->dataAfterSave[$this->model->getPrimaryId()] = $insertId;
 
             $this->afterSave();
 
@@ -1360,7 +1364,16 @@ class Form
         $this->updatePostData = $data;
     }
 
-    public function getModel()
+    public function getData()
+    {
+        if ($this->dataAfterSave) {
+            return $this->dataAfterSave;
+        }
+
+        return $this->getPostData();
+    }
+
+    public function getModel(): ?DataModel
     {
         return $this->model;
     }
