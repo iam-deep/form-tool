@@ -38,6 +38,7 @@ trait BaseImportExport
         $data['title'] = $this->title;
 
         $data['route'] = $this->route;
+        $data['menuActive'] = $this->route;
 
         return $this->render('form-tool::list.import.index', $data);
     }

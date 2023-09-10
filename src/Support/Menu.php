@@ -122,7 +122,7 @@ class Menu
         return $this->activeLink;
     }
 
-    public function make()
+    public function make($active = null)
     {
         if ($this->isMenuMade) {
             return $this->list;
@@ -130,7 +130,7 @@ class Menu
 
         $this->isMenuMade = true;
 
-        $this->activeLink = $this->getActiveLink();
+        $this->activeLink = $active ?: $this->getActiveLink();
 
         foreach ($this->list as $key => &$menu) {
             if ($menu instanceof Menu) {
@@ -140,7 +140,7 @@ class Menu
                 $newMenu->icon = $menu->parentIcon;
 
                 // Make the menu and active the parent if any child is active
-                $newMenu->childs = $menu->make();
+                $newMenu->childs = $menu->make($active);
                 $newMenu->active = $menu->isChildActive;
                 $this->isChildActive = ! $this->isChildActive ? $menu->isChildActive : true;
 
@@ -162,12 +162,12 @@ class Menu
         return $this->list;
     }
 
-    public static function generate(string $menuName = 'default', string $view = null)
+    public static function generate(string $menuName = 'default', string $view = null, $active = null)
     {
         $menuName = \trim($menuName);
 
         if (isset(self::$menuBag->{$menuName}) && $menu = self::$menuBag->{$menuName}) {
-            $menu->make();
+            $menu->make($active);
 
             $data['sidebar'] = $menu->list;
 
