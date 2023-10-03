@@ -37,7 +37,7 @@ class Table
         'deletedAt' => 'deletedAt',
     ];
 
-    public $crud = null;
+    public ?Crud $crud = null;
     public $bulkAction = null;
     public $filter = null;
 
@@ -60,7 +60,7 @@ class Table
         $this->url = URL::to(config('form-tool.adminURL').'/'.$resource->route);
     }
 
-    public function setCrud($crud)
+    public function setCrud(Crud $crud)
     {
         $this->crud = $crud;
     }
@@ -121,7 +121,7 @@ class Table
         return $this;
     }
 
-    public function moreButton($name, $showMoreButtonAlways = false)
+    public function moreButton($name, $showMoreButtonAlways = false): Table
     {
         $this->moreButtonName = $name;
         $this->showMoreButtonAlways = $showMoreButtonAlways;

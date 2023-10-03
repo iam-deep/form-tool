@@ -9,7 +9,7 @@ class BulkAction
 {
     private $request;
     private $callback;
-    private $table;
+    private Table $table;
 
     public function setTable($table)
     {
@@ -182,6 +182,8 @@ class BulkAction
         }
 
         ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result, $oldData);
+
+        $this->table->crud->getForm()->invokeEvent(EventType::DUPLICATE, $insertId, $result);
     }
 
     protected function delete($ids)
@@ -222,6 +224,8 @@ class BulkAction
                     $pId = $result->{$this->table->getModel()->getPrimaryId()} ?? null;
                 }
                 ActionLogger::restore($this->table->getBluePrint(), $pId, $result);
+
+                $this->table->crud->getForm()->invokeEvent(EventType::RESTORE, $pId, $result);
             }
         }
 

@@ -407,12 +407,12 @@ class BluePrint
 
     //region GetterAndSetter
 
-    public function setForm($form)
+    public function setForm(Form $form)
     {
         $this->form = $form;
     }
 
-    public function getForm()
+    public function getForm(): ?Form
     {
         return $this->form;
     }

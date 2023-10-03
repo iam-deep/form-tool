@@ -2,21 +2,12 @@
 
 namespace Deep\FormTool\Core;
 
+use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
-
-abstract class FormStatus
-{
-    public const CREATE = 1;
-    public const STORE = 2;
-    public const EDIT = 3;
-    public const UPDATE = 4;
-    public const DELETE = 5;
-    public const DESTROY = 6;
-}
 
 class Form
 {
@@ -56,6 +47,8 @@ class Form
         'deletedBy' => 'deletedBy',
         'deletedAt' => 'deletedAt',
     ];
+
+    private $eventCallbacks = [];
 
     public function __construct($resource, ?BluePrint $bluePrint, ?DataModel $model)
     {
@@ -132,14 +125,14 @@ class Form
         return $this->crud;
     }
 
-    public function callbackValidation(\Closure $callbackValidation)
+    public function callbackValidation(\Closure $callbackValidation): Crud
     {
         $this->callbackValidation = $callbackValidation;
 
         return $this->crud;
     }
 
-    public function unique(array $columns)
+    public function unique(array $columns): Crud
     {
         $this->uniqueColumns = [];
         $columns = array_values($columns);
@@ -150,6 +143,17 @@ class Form
         }
 
         $this->uniqueColumns = $columns;
+
+        return $this->crud;
+    }
+
+    public function onEvent(EventType $event, Closure $closure): Crud
+    {
+        if (isset($this->eventCallbacks[$event->value])) {
+            throw new \InvalidArgumentException(sprintf('Duplicate event: %s', $event->name));
+        }
+
+        $this->eventCallbacks[$event->value] = $closure;
 
         return $this->crud;
     }
@@ -464,6 +468,8 @@ class Form
             $this->afterSave();
 
             ActionLogger::create($this->bluePrint, $insertId);
+
+            $this->invokeEvent(EventType::CREATE);
         }
 
         $message = 'Data added successfully!';
@@ -558,6 +564,8 @@ class Form
         $this->afterSave();
 
         ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
+
+        $this->invokeEvent(EventType::UPDATE);
 
         $message = 'Data updated successfully!';
         if ($this->crud->isWantsArray()) {
@@ -863,6 +871,15 @@ class Form
         return true;
     }
 
+    public function invokeEvent(EventType $eventType, $id = null, $data = null)
+    {
+        foreach ($this->eventCallbacks as $type => $event) {
+            if (($eventType->value == $type || $type == EventType::ALL->value) && $event) {
+                $event($id ?? $this->editId, $data ?? $this->getData());
+            }
+        }
+    }
+
     private function createPostData($id = null): void
     {
         $postData = $this->postData;
@@ -999,6 +1016,8 @@ class Form
 
         ActionLogger::delete($this->bluePrint, $pId, $result);
 
+        $this->invokeEvent(EventType::DELETE);
+
         $message = 'Data deleted successfully!';
         if ($this->crud->isWantsArray()) {
             return ['status' => true, 'message' => $message];
@@ -1113,6 +1132,8 @@ class Form
             }
 
             ActionLogger::destroy($this->bluePrint, $pId, $result);
+
+            $this->invokeEvent(EventType::DESTROY);
 
             $message = 'Data permanently deleted successfully!';
             if ($this->crud->isWantsArray()) {
