@@ -29,7 +29,7 @@ class BaseModel extends Model
 
     public static function getAll($where = null)
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
+        $query = DB::table(static::$tableName, self::$alias);
 
         self::applyWhere($query, $where);
 
@@ -44,13 +44,7 @@ class BaseModel extends Model
 
     public static function getOne($id, $isToken = false)
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
-        if (self::$isSoftDelete) {
-            $metaColumns = \config('form-tool.table_meta_columns');
-            $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
-
-            $query->whereNull(self::$alias.'.'.$deletedAt);
-        }
+        $query = DB::table(static::$tableName, self::$alias);
 
         if ($isToken) {
             $query->where(self::$alias.'.'.static::$token, $id);
@@ -58,12 +52,21 @@ class BaseModel extends Model
             $query->where(self::$alias.'.'.static::$primaryId, $id);
         }
 
+        if (self::$isSoftDelete) {
+            $metaColumns = \config('form-tool.table_meta_columns');
+            $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
+
+            $query->whereNull(self::$alias.'.'.$deletedAt);
+        }
+
         return $query->first();
     }
 
     public static function search($searchTerm, $fields, $where = null)
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
+        $query = DB::table(static::$tableName, self::$alias);
+
+        self::applyWhere($query, $where);
 
         $searchTerm = array_filter(\explode(' ', $searchTerm));
         foreach ($searchTerm as $term) {
@@ -73,8 +76,6 @@ class BaseModel extends Model
                 }
             });
         }
-
-        self::applyWhere($query, $where);
 
         if (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
@@ -87,7 +88,7 @@ class BaseModel extends Model
 
     public static function getWhereOne($where = null)
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
+        $query = DB::table(static::$tableName, self::$alias);
         self::applyWhere($query, $where);
 
         return $query->first();
@@ -95,7 +96,7 @@ class BaseModel extends Model
 
     public static function getWhere($where = null, $orderBy = null, $direction = 'asc')
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
+        $query = DB::table(static::$tableName, self::$alias);
         self::applyWhere($query, $where);
 
         if ($orderBy) {
@@ -111,7 +112,7 @@ class BaseModel extends Model
 
     public static function countWhere($where = null)
     {
-        $query = DB::table(static::$tableName.' as '.self::$alias);
+        $query = DB::table(static::$tableName, self::$alias);
         self::applyWhere($query, $where);
 
         return $query->count();
