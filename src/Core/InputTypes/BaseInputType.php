@@ -2,16 +2,16 @@
 
 namespace Deep\FormTool\Core\InputTypes;
 
+use Deep\FormTool\Core\BluePrint;
 use Deep\FormTool\Core\CellDefinition;
 use Deep\FormTool\Core\ImportConfig;
-use Deep\FormTool\Core\InputTypes\Common\ICustomType;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\TableField;
 use Illuminate\Support\Facades\Session;
 
 class BaseInputType
 {
-    protected $bluePrint = null;
+    protected ?BluePrint $bluePrint = null;
 
     protected int $type = InputType::TEXT;
     protected string $typeInString = '';
@@ -57,8 +57,14 @@ class BaseInputType
     public function init($bluePrint, ?string $dbField, string $label = null)
     {
         $this->bluePrint = $bluePrint;
-        $this->dbField = \trim($dbField);
-        $this->label = $label ?: \ucfirst($this->dbField);
+
+        if ($dbField) {
+            $this->dbField = \trim($dbField);
+        }
+
+        if ($dbField || $label) {
+            $this->label = $label ?: \ucfirst($this->dbField);
+        }
     }
 
     //region Setter
@@ -129,7 +135,7 @@ class BaseInputType
         return $this;
     }
 
-    public function validations($rules, $messages = [], bool $replace = false)
+    public function validations($rules, $messages = [], bool $replace = false): BaseInputType
     {
         if ($rules) {
             if (\is_string($rules)) {
@@ -159,7 +165,7 @@ class BaseInputType
         return $this;
     }
 
-    public function table($tableName, $alias = null)
+    public function table($tableName, $alias = null): BaseInputType
     {
         $this->tableName = trim($tableName);
         $this->alias = trim($alias) ?: $this->tableName;
@@ -181,14 +187,14 @@ class BaseInputType
         return $this;
     }
 
-    public function logColumn(bool $flag)
+    public function logColumn(bool $flag): BaseInputType
     {
         $this->isLogColumn = $flag;
 
         return $this;
     }
 
-    public function importSample($value)
+    public function importSample($value): BaseInputType
     {
         $this->importSample = $value;
 

@@ -149,11 +149,7 @@ class Form
 
     public function onEvent(EventType $event, Closure $closure): Crud
     {
-        if (isset($this->eventCallbacks[$event->value])) {
-            throw new \InvalidArgumentException(sprintf('Duplicate event: %s', $event->name));
-        }
-
-        $this->eventCallbacks[$event->value] = $closure;
+        $this->eventCallbacks[] = (object)['type' => $event->value, 'closure' => $closure];
 
         return $this->crud;
     }
@@ -873,9 +869,10 @@ class Form
 
     public function invokeEvent(EventType $eventType, $id = null, $data = null)
     {
-        foreach ($this->eventCallbacks as $type => $event) {
-            if (($eventType->value == $type || $type == EventType::ALL->value) && $event) {
-                $event($id ?? $this->editId, $data ?? $this->getData());
+        foreach ($this->eventCallbacks as $callback) {
+            if ($callback->type == $eventType->value || $callback->type == EventType::ALL->value) {
+                $closure = $callback->closure;
+                $closure($id ?? $this->editId, (object)($data ?? $this->getData()));
             }
         }
     }
