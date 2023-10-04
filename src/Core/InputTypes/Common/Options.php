@@ -3,10 +3,10 @@
 namespace Deep\FormTool\Core\InputTypes\Common;
 
 use Closure;
-use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\DataModel;
-use Illuminate\Support\Facades\Cache;
+use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Illuminate\Support\Facades\Cache;
 
 trait Options
 {

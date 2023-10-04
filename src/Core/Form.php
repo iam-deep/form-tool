@@ -149,7 +149,7 @@ class Form
 
     public function onEvent(EventType $event, Closure $closure): Crud
     {
-        $this->eventCallbacks[] = (object)['type' => $event->value, 'closure' => $closure];
+        $this->eventCallbacks[] = (object) ['type' => $event->value, 'closure' => $closure];
 
         return $this->crud;
     }
@@ -872,7 +872,7 @@ class Form
         foreach ($this->eventCallbacks as $callback) {
             if ($callback->type == $eventType->value || $callback->type == EventType::ALL->value) {
                 $closure = $callback->closure;
-                $closure($id ?? $this->editId, (object)($data ?? $this->getData()));
+                $closure($id ?? $this->editId, (object) ($data ?? $this->getData()));
             }
         }
     }
