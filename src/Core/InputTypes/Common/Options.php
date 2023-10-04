@@ -3,11 +3,10 @@
 namespace Deep\FormTool\Core\InputTypes\Common;
 
 use Closure;
-use Deep\FormTool\Core\DataModel;
 use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\DataModel;
+use Illuminate\Support\Facades\Cache;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Illuminate\Container\Container;
-use Illuminate\Support\Facades\DB;
 
 trait Options
 {
@@ -24,6 +23,9 @@ trait Options
     protected bool $isRemoveTrash = true;
 
     protected $depend = [];
+
+    protected $cacheKey = null;
+    protected int $cacheExpiry = 0;
 
     //region Setter
     public function options($options, ...$patternDbFields)
@@ -143,6 +145,14 @@ trait Options
 
         return $this;
     }
+
+    public function cache($key, $expiry = null)
+    {
+        $this->cacheKey = $key;
+        $this->cacheExpiry = $expiry ?? config('form-tool.defaultCacheExpiry', 60 * 60 * 24);
+
+        return $this;
+    }
     //endregion
 
     protected function createOptions($skipDepend = false)
@@ -161,6 +171,8 @@ trait Options
                 foreach ($optionData as $type => $options) {
                     if ('db' == $type || 'closure' == $type) {
                         $where = [];
+                        $dependValue = null;
+
                         // We are skipping depend value at the time of table listing to get all the values at once
                         // Otherwise we need to create option every time for each dependent value
                         if ($this->depend && ! $skipDepend) {
@@ -183,6 +195,7 @@ trait Options
                                     $flagHaveDependValue = true;
                                 }
 
+                                $dependValue = $depend->value;
                                 $where[] = [$depend->column => $depend->value];
 
                                 // Let's reset the dependValue, so that we can fetch the new options for
@@ -252,13 +265,21 @@ trait Options
                                 ));
                             }
                         } else {
-                            $model = (new DataModel())->db($options->table);
+                            if ($this->cacheKey) {
+                                $cacheKey = $this->cacheKey;
+                                if ($cacheKey instanceof Closure) {
+                                    $cacheKey = $cacheKey($dependValue);
+                                    if (! is_string($cacheKey)) {
+                                        throw new \Exception('Return value of the cache closure must be string!');
+                                    }
+                                }
 
-                            // Applying order by default with the text column, if the text column is not pattern
-                            if (! $options->orderByCol && ! $options->dbPatternFields) {
-                                $options->orderByCol = $options->textCol;
+                                $result = Cache::remember($cacheKey, $this->cacheExpiry, function () use ($where, $options) {
+                                    return $this->getOptionsFromDB($where, $options);
+                                });
+                            } else {
+                                $result = $this->getOptionsFromDB($where, $options);
                             }
-                            $result = $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
                         }
 
                         if ($result && $result->count() > 0) {
@@ -337,6 +358,18 @@ trait Options
                 }
             }
         }
+    }
+
+    private function getOptionsFromDB($where, $options)
+    {
+        $model = (new DataModel())->db($options->table);
+
+        // Applying order by default with the text column, if the text column is not pattern
+        if (! $options->orderByCol && ! $options->dbPatternFields) {
+            $options->orderByCol = $options->textCol;
+        }
+
+        return $model->getWhere($where, $options->orderByCol, $options->orderByDirection);
     }
 
     protected function addScript()

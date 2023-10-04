@@ -93,6 +93,9 @@ return [
         'deletedAt' => 'deletedAt', // Default value must be NULL in MySQL
     ],
 
+    // Default cache expiry
+    'defaultCacheExpiry' => 60 * 60 * 24, // 24 hours
+
     // Styles classes
     'styleClass' => [
         // Global class for most of the input fields
