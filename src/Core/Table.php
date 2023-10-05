@@ -202,7 +202,7 @@ class Table
         $table->content = $table->content->render();
         $table->pagination = $table->pagination->render();
         $table->total = \count($this->dataResult);
-        $table->isSuccess = true;
+        $table->status = true;
 
         return $table;
     }
@@ -224,7 +224,7 @@ class Table
 
         if (! $fieldsToSearch) {
             $json = new \stdClass();
-            $json->isSuccess = false;
+            $json->status = false;
             $json->error = 'Fields not found to search!';
 
             return $json;

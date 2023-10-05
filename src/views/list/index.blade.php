@@ -134,7 +134,7 @@ const search = ($input) => {
             $('.loader').hide();
         },
         success: function(json) {
-            if (! json.isSuccess) {
+            if (! json.status) {
                 $("#loadingSearch").html("<span style=\"color:#f00;\">"+json["message"]+"</span>");
             }
             else {

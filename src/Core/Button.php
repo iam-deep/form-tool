@@ -223,7 +223,7 @@ class Button
     public function process($search, $replace)
     {
         if ($this->link) {
-            if (false !== strpos($this->link, 'http')) {
+            if (false !== strpos($this->link, ':')) {
                 $link = $this->link;
                 $link .= strpos($this->link, '?') ? '&' : '?';
 
