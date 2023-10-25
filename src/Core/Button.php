@@ -225,7 +225,9 @@ class Button
         if ($this->link) {
             if (false !== strpos($this->link, ':')) {
                 $link = $this->link;
-                $link .= strpos($this->link, '?') ? '&' : '?';
+                if (false !== strpos($this->link, '{query_string}')) {
+                    $link .= strpos($this->link, '?') ? '&' : '?';
+                }
 
                 $this->processedLink = str_replace($search, $replace, $link.'{query_string}');
             } else {
