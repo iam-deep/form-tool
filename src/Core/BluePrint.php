@@ -217,7 +217,7 @@ class BluePrint
         $field = $this->getInputTypeByDbField($dbField);
         if (! $field) {
             throw new \InvalidArgumentException(\sprintf(
-                'Modify field not found. Field should be in the "create" method: %s',
+                'Field not found in modify() function. Field should be in the setup() or create() function: %s',
                 $dbField
             ));
         }
