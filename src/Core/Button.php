@@ -223,16 +223,20 @@ class Button
     public function process($search, $replace)
     {
         if ($this->link) {
-            if (false !== strpos($this->link, ':')) {
-                $link = $this->link;
-                if (false !== strpos($this->link, '{query_string}')) {
-                    $link .= strpos($this->link, '?') ? '&' : '?';
-                }
+            $link = $this->link;
+            if (false === strpos($link, ':')) {
+                // Relative link
 
-                $this->processedLink = str_replace($search, $replace, $link.'{query_string}');
-            } else {
-                $this->processedLink = str_replace($search, $replace, '{crud_url}'.$this->link.'?{query_string}');
+                $link .= strpos($link, '?') ? '&' : '?';
+                $link = '{crud_url}'.$link.'{query_string}';
+            } elseif (false !== strpos($link, 'http')) {
+                // http link
+
+                $link .= strpos($link, '?') ? '&' : '?';
+                $link = $link.'{query_string}';
             }
+
+            $this->processedLink = str_replace($search, $replace, $link);
         }
 
         if ($this->raw) {
