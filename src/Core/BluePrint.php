@@ -337,7 +337,7 @@ class BluePrint
                 'where' => $where,
             ];
         } else {
-            if (class_exists($model)) {
+            if (! class_exists($model)) {
                 throw new \InvalidArgumentException('Class not found. Class: '.$model);
             }
 
