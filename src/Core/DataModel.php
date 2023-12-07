@@ -15,8 +15,6 @@ class DataModel
     protected ?string $foreignKey = null;
     protected ?string $alias = null;
 
-    //protected ?string $primaryCol = null;
-
     protected ?string $orderByCol = null;
     protected string $orderByDirection = 'asc';
 
@@ -45,7 +43,6 @@ class DataModel
             $this->token = $this->model::$token;
             $this->foreignKey = $this->model::$foreignKey;
             $this->alias = $this->model::$alias ?: $this->tableName;
-            //$this->primaryCol = $this->model::$primaryCol;
             $this->orderByCol = $this->model::$orderByCol;
             $this->orderByDirection = $this->model::$orderByDirection;
         } else {
@@ -210,6 +207,12 @@ class DataModel
 
         if ($data) {
             $inputs = $this->crud->getBluePrint()->getInputList();
+
+            if ($this->isToken()) {
+                $primaryCol = $this->primaryId;
+                $id = $data->{$primaryCol};
+            }
+
             foreach ($inputs as $input) {
                 if ($input instanceof ISaveable && $input->isSaveAt()) {
                     $saveAt = $input->getSaveAt();
@@ -327,8 +330,6 @@ class DataModel
         $this->model::$token = $this->token;
         $this->model::$foreignKey = $this->foreignKey;
         $this->model::$alias = $this->alias;
-
-        //$this->model::$primaryCol = $this->primaryCol;
 
         $this->model::$orderByCol = $this->orderByCol;
         $this->model::$orderByDirection = $this->orderByDirection;
