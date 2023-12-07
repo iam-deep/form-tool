@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Support;
 
 use Deep\FormTool\Core\DataModel;
+use Illuminate\Support\Facades\DB;
 
 class Random
 {
@@ -61,7 +62,7 @@ class Random
      **/
     public static function createTokenForTable(DataModel $model, int $length = 32)
     {
-        $primaryId = $model->getPrimaryId();
+        $primaryCol = $model->getPrimaryId();
         $token = $model->getTokenCol();
 
         $result = $model->getWhere();
@@ -71,8 +72,9 @@ class Random
             }
 
             $random = self::unique($model, $length);
+            $id = $row->{$primaryCol};
 
-            $model->updateOne($row->{$primaryId}, [$token => $random]);
+            DB::table($model->getTableName())->where($primaryCol, $id)->update([$token => $random]);
         }
     }
 }
