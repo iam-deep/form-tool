@@ -102,7 +102,13 @@ class FileManager
     {
         $uploadDir = \trim(config('form-tool.uploadPath', self::$uploadPath));
 
-        $uploadDir = \str_replace('/', '', $uploadDir);
+        // Remove the first / (slash)
+        if (0 === strpos($uploadDir, '/')) {
+            $uploadDir = substr($uploadDir, 1);
+        }
+
+        // This was preventing to create dynamic upload path
+        // $uploadDir = \str_replace('/', '', $uploadDir);
         $uploadPath = '';
 
         if ($uploadDir) {
