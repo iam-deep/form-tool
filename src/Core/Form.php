@@ -1013,7 +1013,7 @@ class Form
 
         ActionLogger::delete($this->bluePrint, $pId, $result);
 
-        $this->invokeEvent(EventType::DELETE);
+        $this->invokeEvent(EventType::DELETE, $pId, $result);
 
         $message = 'Data deleted successfully!';
         if ($this->crud->isWantsArray()) {
@@ -1130,7 +1130,7 @@ class Form
 
             ActionLogger::destroy($this->bluePrint, $pId, $result);
 
-            $this->invokeEvent(EventType::DESTROY);
+            $this->invokeEvent(EventType::DESTROY, $pId, $result);
 
             $message = 'Data permanently deleted successfully!';
             if ($this->crud->isWantsArray()) {
