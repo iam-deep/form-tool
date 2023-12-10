@@ -162,27 +162,29 @@ class BaseDateTimeType extends BaseFilterType
         Doc::addJs(
             '
         // Date and DateTimePicker
+        function getDateConfig()
+        {
+            return {
+                useCurrent: false,
+                icons: {
+                    type: "icons",
+                    time: "fa fa-clock",
+                    date: "fa fa-calendar",
+                    up: "fa fa-arrow-up",
+                    down: "fa fa-arrow-down",
+                    previous: "fa fa-arrow-left",
+                    next: "fa fa-arrow-right",
+                    today: "fa fa-calendar-check",
+                    clear: "fa fa-trash",
+                    close: "fa fa-xmark"
+                },
+            };
+        }
+
         $(function() {
-            if (typeof dateConfig === \'undefined\') {
-                let dateConfig = {
-                    useCurrent: false,
-                    icons: {
-                        type: "icons",
-                        time: "fa fa-clock",
-                        date: "fa fa-calendar",
-                        up: "fa fa-arrow-up",
-                        down: "fa fa-arrow-down",
-                        previous: "fa fa-arrow-left",
-                        next: "fa fa-arrow-right",
-                        today: "fa fa-calendar-check",
-                        clear: "fa fa-trash",
-                        close: "fa fa-xmark"
-                    },
-                };
-                $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", ...dateConfig});
-                $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", ...dateConfig});
-                $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", ...dateConfig});
-            }
+            $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", ...getDateConfig()});
+            $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", ...getDateConfig()});
+            $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", ...getDateConfig()});
         });
         ',
             'datetime'
@@ -192,9 +194,9 @@ class BaseDateTimeType extends BaseFilterType
             '
         // Date and DateTimePicker
         $(function() {
-            $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", ...dateConfig});
-            $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", ...dateConfig});
-            $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", ...dateConfig});
+            $(".datetime-picker").datetimepicker({format: "'.$this->pickerFormatDateTime.'", ...getDateConfig()});
+            $(".date-picker").datetimepicker({format: "'.$this->pickerFormatDate.'", ...getDateConfig()});
+            $(".time-picker").datetimepicker({format: "'.$this->pickerFormatTime.'", ...getDateConfig()});
         });
         ',
             'datetime',
