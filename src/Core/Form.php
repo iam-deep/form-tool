@@ -5,6 +5,7 @@ namespace Deep\FormTool\Core;
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
@@ -147,9 +148,13 @@ class Form
         return $this->crud;
     }
 
-    public function onEvent(EventType $event, Closure $closure): Crud
+    public function onEvent(EventType|array $eventTypes, Closure $closure): Crud
     {
-        $this->eventCallbacks[] = (object) ['type' => $event->value, 'closure' => $closure];
+        $eventTypes = Arr::wrap($eventTypes);
+
+        foreach ($eventTypes as $eventType) {
+            $this->eventCallbacks[] = (object) ['type' => $eventType->value, 'closure' => $closure];
+        }
 
         return $this->crud;
     }
