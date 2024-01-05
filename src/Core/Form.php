@@ -1123,9 +1123,11 @@ class Form
                         $childResult = \json_decode($result->{$input->getKey()});
                     }
 
-                    foreach ($childResult as $row) {
-                        foreach ($input->getInputList() as $childInput) {
-                            $childInput->afterDestroy($row);
+                    if (is_iterable($childResult)) {
+                        foreach ($childResult as $row) {
+                            foreach ($input->getInputList() as $childInput) {
+                                $childInput->afterDestroy($row);
+                            }
                         }
                     }
                 } else {
