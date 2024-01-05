@@ -562,6 +562,16 @@ class BluePrint
 
     //endregion
 
+    public function __clone()
+    {
+        foreach ($this->dataTypeList as &$group) {
+            foreach ($group as &$input) {
+                $input = clone $input;
+                $input->init($this, $input->getDbField(), $input->getLabel());
+            }
+        }
+    }
+
     public function toObj($type)
     {
         $data['fields'] = [];

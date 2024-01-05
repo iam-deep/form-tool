@@ -449,6 +449,11 @@ class BaseInputType
     {
     }
 
+    public function getBluePrint()
+    {
+        return $this->bluePrint;
+    }
+
     final public function getTableCell(TableField $tableField)
     {
         return CellDefinition::Input($tableField, $this);

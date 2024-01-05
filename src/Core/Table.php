@@ -3,10 +3,8 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\URL;
 
@@ -142,8 +140,6 @@ class Table
 
         $this->filter = new Filter($fields);
         $this->filter->setBluePrint($this->bluePrint);
-
-        $this->filter->initialize();
 
         return $this;
     }

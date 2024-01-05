@@ -4,8 +4,6 @@ namespace Deep\FormTool\Core;
 
 use Deep\FormTool\Core\InputTypes\BaseFilterType;
 use Deep\FormTool\Core\InputTypes\BaseInputType;
-use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Illuminate\Support\Facades\DB;
 
 // Select, Checkbox
 // Single, Multiple, Manual & Db
@@ -20,16 +18,26 @@ class Filter
 
     protected $dateRangeFields = [];
 
+    private $isInitialized = false;
+
     public function __construct($fields = [])
     {
         $this->fieldsToFilter = $fields;
-    }
 
-    public function initialize()
-    {
-        if (! $this->fieldsToFilter) {
+        if (! $fields) {
             $this->setDefaultFilter();
         }
+    }
+
+    private function initialize()
+    {
+        if ($this->isInitialized) {
+            return;
+        }
+
+        $this->isInitialized = true;
+
+        $this->bluePrint = clone $this->bluePrint;
     }
 
     public function setBluePrint(BluePrint $bluePrint)
@@ -39,6 +47,8 @@ class Filter
 
     public function create()
     {
+        $this->initialize();
+
         $request = request();
 
         $data = new \stdClass();
@@ -48,6 +58,7 @@ class Filter
             if (\is_integer($key)) {
                 $field = $this->bluePrint->getInputTypeByDbField($option);
                 if ($field instanceof BaseFilterType) {
+                    $field->required(false);
                     $field->setValue($request->query($field->getDbField()));
 
                     $data->inputs[] = $field->getFilterHTML();
@@ -66,6 +77,7 @@ class Filter
                         ));
                     }
 
+                    $field->required(false);
                     $label = $field->getLabel();
                     $dbField = $field->getDbField();
 
@@ -85,6 +97,7 @@ class Filter
                         $option->setDbField($key);
                     }
 
+                    $field->required(false);
                     $option->setValue($request->query($option->getDbField()));
 
                     $data->inputs[] = $option->getFilterHTML();
@@ -95,6 +108,7 @@ class Filter
                 }
             }
         }
+        unset($option);
 
         $queries = array_filter($request->except('page'));
         $data->showClearButton = ! empty($queries);
@@ -105,6 +119,8 @@ class Filter
 
     public function apply()
     {
+        $this->initialize();
+
         return function ($query) {
             $request = request();
             foreach ($this->fieldsToFilter as $key => $option) {

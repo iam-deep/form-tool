@@ -230,7 +230,7 @@ class SelectType extends BaseFilterType implements ISaveable
 
     public function getFilterHTML()
     {
-        $this->raw('onChange="form.submit()"');
+        // $this->raw('onChange="form.submit()"');
 
         return $this->htmlParentDivFilter($this->getInput($this->value));
     }
