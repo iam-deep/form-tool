@@ -81,17 +81,25 @@ class Filter
                     $label = $field->getLabel();
                     $dbField = $field->getDbField();
 
-                    $fromField = clone $field;
-                    $toField = clone $field;
+                    if ($option == 'range') {
+                        $fromField = clone $field;
+                        $toField = clone $field;
 
-                    $fromField->setValue($request->query($dbField.'From'));
-                    $toField->setValue($request->query($dbField.'To'));
+                        $fromField->setValue($request->query($dbField.'From'));
+                        $toField->setValue($request->query($dbField.'To'));
 
-                    $data->inputs[] = $fromField->setDbField($dbField.'From')->label($label.' From')->getFilterHTML();
-                    $data->inputs[] = $toField->setDbField($dbField.'To')->label($label.' To')->getFilterHTML();
+                        $data->inputs[] = $fromField->setDbField($dbField.'From')->label($label.' From')->getFilterHTML();
+                        $data->inputs[] = $toField->setDbField($dbField.'To')->label($label.' To')->getFilterHTML();
 
-                    $this->dateRangeFields[$dbField]['From'] = $fromField;
-                    $this->dateRangeFields[$dbField]['To'] = $toField;
+                        $this->dateRangeFields[$dbField]['From'] = $fromField;
+                        $this->dateRangeFields[$dbField]['To'] = $toField;
+                    } elseif ($option == 'gt') {
+                        $field->setValue($request->query($dbField));
+                        $data->inputs[] = $field->label($label.' From')->getFilterHTML();
+                    } elseif ($option == 'lt') {
+                        $field->setValue($request->query($dbField));
+                        $data->inputs[] = $field->label($label.' To')->getFilterHTML();
+                    }
                 } elseif ($option instanceof BaseFilterType) {
                     if (! $option->getDbField()) {
                         $option->setDbField($key);
@@ -133,7 +141,23 @@ class Filter
                         $field->applyFilter($query);
                     }
                 } else {
-                    if (isset($this->dateRangeFields[$key]) && $option == 'range') {
+                    if ($option == 'gt') {
+                        $field = $this->bluePrint->getInputTypeByDbField($key);
+                        if ($field instanceof BaseFilterType) {
+                            $val = $request->query($field->getDbField());
+                            $field->setValue($val);
+
+                            $field->applyFilter($query, '>=');
+                        }
+                    } elseif ($option == 'lt') {
+                        $field = $this->bluePrint->getInputTypeByDbField($key);
+                        if ($field instanceof BaseFilterType) {
+                            $val = $request->query($field->getDbField());
+                            $field->setValue($val);
+
+                            $field->applyFilter($query, '<=');
+                        }
+                    } elseif ($option == 'range' && isset($this->dateRangeFields[$key])) {
                         $this->dateRangeFields[$key]['From']->setDbField($key)->applyFilter($query, '>=');
                         $this->dateRangeFields[$key]['To']->setDbField($key)->applyFilter($query, '<=');
                     } elseif ($option instanceof BaseFilterType) {

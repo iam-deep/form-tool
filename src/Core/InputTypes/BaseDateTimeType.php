@@ -217,13 +217,15 @@ class BaseDateTimeType extends BaseFilterType
     {
         $this->setDependencies();
 
-        $input = '<div class="input-group">
-            <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-            <input type="text" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
-                $this->dbField.'" value="'.old($this->dbField, $this->value).'" '.$this->raw.$this->inlineCSS.
-                ' autocomplete="off" />
-        </div>';
+        $data['input'] = (object) [
+            'type' => 'single',
+            'column' => $this->dbField,
+            'rawValue' => $this->value,
+            'value' => old($this->dbField, $this->value),
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS,
+        ];
 
-        return $this->htmlParentDivFilter($input);
+        return $this->htmlParentDivFilter(\view('form-tool::form.input_types.datetime', $data)->render());
     }
 }

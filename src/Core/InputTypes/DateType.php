@@ -21,7 +21,7 @@ class DateType extends BaseDateTimeType
 
         $this->classes[] = 'date-picker';
         $this->placeholder('Click to select date');
-        $this->setFilterOptions(['range']);
+        $this->setFilterOptions(['range', 'gt', 'lt']);
 
         $this->isConvertToLocal = false;
     }
