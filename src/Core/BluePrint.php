@@ -229,7 +229,6 @@ class BluePrint
     {
         $fields = Arr::wrap($dbFields);
 
-        $i = 0;
         foreach ($fields as $field) {
             foreach ($this->dataTypeList as $groupName => $group) {
                 foreach ($group as $key => $input) {
@@ -567,7 +566,10 @@ class BluePrint
         foreach ($this->dataTypeList as &$group) {
             foreach ($group as &$input) {
                 $input = clone $input;
-                $input->init($this, $input->getDbField(), $input->getLabel());
+
+                if (! $input instanceof BluePrint) {
+                    $input->init($this, $input->getDbField(), $input->getLabel());
+                }
             }
         }
     }

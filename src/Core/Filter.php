@@ -23,10 +23,6 @@ class Filter
     public function __construct($fields = [])
     {
         $this->fieldsToFilter = $fields;
-
-        if (! $fields) {
-            $this->setDefaultFilter();
-        }
     }
 
     private function initialize()
@@ -105,7 +101,7 @@ class Filter
                         $option->setDbField($key);
                     }
 
-                    $field->required(false);
+                    $option->required(false);
                     $option->setValue($request->query($option->getDbField()));
 
                     $data->inputs[] = $option->getFilterHTML();
@@ -171,7 +167,7 @@ class Filter
         };
     }
 
-    private function setDefaultFilter()
+    public function setDefaultFilter()
     {
         foreach ($this->bluePrint->getInputList() as $field) {
             if ($field instanceof BaseFilterType) {
