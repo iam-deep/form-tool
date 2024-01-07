@@ -231,11 +231,6 @@ class TableField
         return $cell;
     }
 
-    public function create(): array
-    {
-        return $this->columns;
-    }
-
     public function getActionButtons()
     {
         $primary = null;

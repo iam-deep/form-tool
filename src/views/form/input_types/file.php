@@ -1,19 +1,23 @@
 <?php
+
+$maxWidth = config('form-tool.imageThumb.form.maxWidth', '80px');
+$maxHeight = config('form-tool.imageThumb.form.maxHeight', '80px');
+
 if ($input->type == 'single') { ?>
 
-    <div class="row">
-        <div style="width:80px;float:left;margin-left:15px;" id="preview-<?php echo $input->column; ?>"
+    <div style="display:flex;">
+        <div style="max-width:<?php echo $maxWidth; ?>" id="preview-<?php echo $input->column; ?>"
             data-isimage="<?php echo $input->isImageField ? 1 : 0; ?>">
             <a href="<?php echo $input->value; ?>" target="_blank" <?php if (! $input->rawValue) { ?> style="pointer-events:none;" <?php } ?>>
                 <img src="<?php echo $input->imageCache; ?>" id="image-<?php echo $input->column; ?>"
-                    class="img-thumbnail" style="max-height:80px;max-width:80px;<?php if (! $input->isImage && $input->rawValue) {
+                    class="img-thumbnail" style="max-height:<?php echo $maxHeight; ?>;max-width:<?php echo $maxWidth; ?>;<?php if (! $input->isImage && $input->rawValue) {
                         ?> display:none; <?php } ?>" alt="Image">
-                <i class="<?php echo $input->icon; ?>" style="color:#4367A5;<?php if (! $input->isImage && ! $input->rawValue) {
+                <i class="<?php echo $input->icon; ?> fa-5x" style="color:#4367A5;<?php if ($input->isImage || ! $input->rawValue) {
                     ?> display:none; <?php } ?>"></i>
             </a>
         </div>
-        <div style="float:left;margin-left:15px;width:calc(100% - 150px);">
-            <label style="font-weight:550;color:#212427;margin-bottom:0;cursor: pointer;"
+        <div style="margin-left:15px;">
+            <label style="font-weight:550;margin-bottom:0;cursor: pointer;"
                 for="<?php echo $input->column; ?>">
                 Browse your file
             </label>
@@ -21,9 +25,9 @@ if ($input->type == 'single') { ?>
                 name="<?php echo $input->column; ?>" accept="<?php echo $input->accept; ?>"
                 style="display:none;" <?php echo $input->raw; ?> />
 
-            <div style="color:#76787a;">
+            <div style="color:#76787a;font-size:13px;">
                 <?php if ($input->isImageField) { ?>
-                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: png, jpg, svg)
+                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: png, jpg, svg & webp)
                 <?php } else { ?>
                     (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: png, jpg, pdf & docs)
                 <?php } ?>
@@ -120,9 +124,9 @@ if ($input->type == 'single') { ?>
             if ($input->isImage) {
                 $image = $input->imageCache;
                 $file = '<img src="'.$input->imageCache.'" class="img-thumbnail"
-                    style="max-height:150px;max-width:150px;" alt="Image">';
+                    style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';" alt="Image">';
             } else {
-                $file = '<i class="'.$input->icon.'"></i>';
+                $file = '<i class="'.$input->icon.' fa-5x"></i>';
             } ?>
 
             <div class="col-sm-6" id="<?php echo $input->groupId; ?>"> &nbsp;

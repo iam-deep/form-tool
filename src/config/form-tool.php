@@ -38,6 +38,18 @@ return [
     'imageCacheWidth' => 100,
     'imageCacheHeight' => 100,
 
+    // Set image thumb max size
+    'imageThumb' => [
+        'table' => [
+            'maxWidth' => '50px',
+            'maxHeight' => '50px',
+        ],
+        'form' => [
+            'maxWidth' => '80px',
+            'maxHeight' => '80px',
+        ],
+    ],
+
     // Human Date and Time format, will be overridden by db settings
     'formatDateTime' => 'd-m-Y h:i A',
     'formatDate' => 'd-m-Y',
@@ -119,52 +131,52 @@ return [
 
         // File Types Icons
         // PDF
-        'pdf' => 'fa fa-file-pdf fa-5x',
+        'pdf' => 'fa fa-file-pdf',
 
         // Archives
-        'zip' => 'fa fa-file-archive fa-5x',
-        'rar' => 'fa fa-file-archive fa-5x',
-        'tar.gz' => 'fa fa-file-archive fa-5x',
+        'zip' => 'fa fa-file-archive',
+        'rar' => 'fa fa-file-archive',
+        'tar.gz' => 'fa fa-file-archive',
 
         // Codes
-        'php' => 'fa fa-file-code fa-5x',
-        'html' => 'fa fa-file-code fa-5x',
-        'css' => 'fa fa-file-code fa-5x',
-        'js' => 'fa fa-file-code fa-5x',
+        'php' => 'fa fa-file-code',
+        'html' => 'fa fa-file-code',
+        'css' => 'fa fa-file-code',
+        'js' => 'fa fa-file-code',
 
         // Videos
-        'mkv' => 'fa fa-file-video fa-5x',
-        'flv' => 'fa fa-file-video fa-5x',
-        'avi' => 'fa fa-file-video fa-5x',
-        '3gp' => 'fa fa-file-video fa-5x',
+        'mkv' => 'fa fa-file-video',
+        'flv' => 'fa fa-file-video',
+        'avi' => 'fa fa-file-video',
+        '3gp' => 'fa fa-file-video',
 
         // Audios
-        'mp3' => 'fa fa-file-audio fa-5x',
-        'wv' => 'fa fa-file-audio fa-5x',
+        'mp3' => 'fa fa-file-audio',
+        'wv' => 'fa fa-file-audio',
 
         // Images
-        'jpg' => 'fa fa-file-image fa-5x',
-        'jpeg' => 'fa fa-file-image fa-5x',
-        'png' => 'fa fa-file-image fa-5x',
-        'webp' => 'fa fa-file-image fa-5x',
-        'gif' => 'fa fa-file-image fa-5x',
-        'svg' => 'fa fa-file-image fa-5x',
-        'bmp' => 'fa fa-file-image fa-5x',
+        'jpg' => 'fa fa-file-image',
+        'jpeg' => 'fa fa-file-image',
+        'png' => 'fa fa-file-image',
+        'webp' => 'fa fa-file-image',
+        'gif' => 'fa fa-file-image',
+        'svg' => 'fa fa-file-image',
+        'bmp' => 'fa fa-file-image',
 
         // Power Points
-        'ppt' => 'fa fa-file-powerpoint fa-5x',
-        'pptx' => 'fa fa-file-powerpoint fa-5x',
+        'ppt' => 'fa fa-file-powerpoint',
+        'pptx' => 'fa fa-file-powerpoint',
 
         // Excels
-        'csv' => 'fa fa-file-excel fa-5x',
-        'xsl' => 'fa fa-file-excel fa-5x',
-        'xslx' => 'fa fa-file-excel fa-5x',
+        'csv' => 'fa fa-file-excel',
+        'xsl' => 'fa fa-file-excel',
+        'xslx' => 'fa fa-file-excel',
 
         // Words
-        'doc' => 'fa fa-file-word fa-5x',
-        'docx' => 'fa fa-file-word fa-5x',
+        'doc' => 'fa fa-file-word',
+        'docx' => 'fa fa-file-word',
 
         // Others Files
-        '*' => 'fa fa-file-text fa-5x',
+        '*' => 'fa fa-file-text',
     ],
 ];

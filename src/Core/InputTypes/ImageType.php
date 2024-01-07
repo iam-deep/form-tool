@@ -93,8 +93,11 @@ class ImageType extends FileType
             if (FileManager::isImage($value)) {
                 $image = ImageCache::resize($value);
 
+                $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
+                $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
+
                 return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" '.
-                    'src="'.asset($image).'" style="max-height:100px;max-width:100px;"></a>';
+                    'src="'.asset($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
             }
 
             return parent::getNiceValue($value);

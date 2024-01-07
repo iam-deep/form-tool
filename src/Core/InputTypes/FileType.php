@@ -177,9 +177,14 @@ class FileType extends BaseInputType
         if (FileManager::isImage($this->value)) {
             $image = ImageCache::resize($this->value);
 
-            return'<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
+            $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
+            $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
+
+            return '<a href="'.asset($this->value).'" target="_blank">
+                        <img src="'.asset($image).'" class="img-thumbnail" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';">
+                    </a>';
         } else {
-            return'<i class="'.FileManager::getFileIcon($this->value).'"></i>';
+            return '<i class="'.FileManager::getFileIcon($this->value).' fa-3x"></i>';
         }
     }
 
@@ -241,43 +246,6 @@ class FileType extends BaseInputType
         ];
 
         return $this->htmlParentDiv(\view('form-tool::form.input_types.file', $data)->render());
-
-        /*$groupId = 'group-'.$this->dbField;
-
-        if ($this->isRequired && ! $value) {
-            $this->raw('required');
-        }
-
-        $input = '<div class="row">
-            <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
-                    $this->dbField.'" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
-            </div>';
-
-        if ($this->value) {
-            $script = '$(\'#'.$groupId.'\').remove();';
-            if ($this->isRequired) {
-                $script .= '$(\'#'.$this->dbField.'\').prop(\'required\', \'required\')';
-            }
-
-            if (FileManager::isImage($this->value)) {
-                $image = ImageCache::resize($this->value);
-                $file = '<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
-            } else {
-                $file = '<i class="'.FileManager::getFileIcon($this->value).'"></i>';
-            }
-
-            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp;
-                <a href="'.asset($value).'" target="_blank">'.$file.'</a>
-                <input type="hidden" name="'.$this->dbField.'" value="'.$this->value.'">
-                <button class="close pull-left" aria-hidden="true" type="button" onclick="'.$script.
-                    '"><i class="fa fa-times"></i></button>
-            </div>';
-        }
-
-        $input .= '</div>';
-
-        return $this->htmlParentDiv($input);*/
     }
 
     public function getHTMLMultiple($key, $index, $oldValue)
