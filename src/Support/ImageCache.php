@@ -25,7 +25,7 @@ class ImageCache
 
     public static function resize($imagePath, $width = null, $height = null)
     {
-        if (! FileManager::isImage($imagePath) || ! \file_exists($imagePath)) {
+        if (! self::isResizeable($imagePath) || ! \file_exists($imagePath)) {
             return $imagePath;
         }
 
@@ -66,7 +66,7 @@ class ImageCache
 
     public static function fit($imagePath, $width = null, $height = null)
     {
-        if (! FileManager::isImage($imagePath) || ! \file_exists($imagePath)) {
+        if (! self::isResizeable($imagePath) || ! \file_exists($imagePath)) {
             return $imagePath;
         }
 
@@ -134,5 +134,18 @@ class ImageCache
         }
 
         \rmdir(self::$cachePath);
+    }
+
+    private static function isResizeable($file)
+    {
+        $exts = 'jpg,jpeg,png,webp,gif,bmp,tif';
+
+        $ext = \strtolower(\pathinfo($file, PATHINFO_EXTENSION));
+
+        if ($ext && \in_array($ext, \explode(',', $exts))) {
+            return true;
+        }
+
+        return false;
     }
 }
