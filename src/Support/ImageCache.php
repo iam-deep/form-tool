@@ -25,7 +25,11 @@ class ImageCache
 
     public static function resize($imagePath, $width = null, $height = null)
     {
-        if (! self::isResizeable($imagePath) || ! \file_exists($imagePath)) {
+        if (! \file_exists($imagePath)) {
+            return null;
+        }
+
+        if (! self::isResizeable($imagePath)) {
             return $imagePath;
         }
 
