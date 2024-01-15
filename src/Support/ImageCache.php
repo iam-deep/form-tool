@@ -62,7 +62,9 @@ class ImageCache
             $img->save($cacheImagePath);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            throw $e;
+            // throw $e;
+
+            return null;
         }
 
         return $cacheImagePath;
@@ -70,7 +72,11 @@ class ImageCache
 
     public static function fit($imagePath, $width = null, $height = null)
     {
-        if (! self::isResizeable($imagePath) || ! \file_exists($imagePath)) {
+        if (! \file_exists($imagePath)) {
+            return null;
+        }
+
+        if (! self::isResizeable($imagePath)) {
             return $imagePath;
         }
 
@@ -101,7 +107,9 @@ class ImageCache
             $img->save($cacheImagePath);
         } catch (\Exception $e) {
             Log::error($e->getMessage());
-            throw $e;
+            // throw $e;
+
+            return null;
         }
 
         return $cacheImagePath;

@@ -179,7 +179,7 @@ class FileManager
         return 'ICON NOT SPECIFIED';
     }
 
-    private static function filterFilename($value)
+    public static function filterFilename($value)
     {
         do {
             $value = \str_replace([' ', '--'], '-', $value);
