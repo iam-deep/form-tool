@@ -61,7 +61,7 @@ class ImageCache
             // save image in desired format
             $img->save($cacheImagePath);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::error($e->getMessage().' File: '.$imagePath);
             // throw $e;
 
             return null;
@@ -106,7 +106,7 @@ class ImageCache
             // save image in desired format
             $img->save($cacheImagePath);
         } catch (\Exception $e) {
-            Log::error($e->getMessage());
+            Log::error($e->getMessage().' File: '.$imagePath);
             // throw $e;
 
             return null;
