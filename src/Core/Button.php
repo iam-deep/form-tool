@@ -15,63 +15,68 @@ class Button
     private string $raw = '';
 
     private ?string $guard = null;
+    private ?string $guardRoute = '';
     private bool $active = true;
 
     private ?string $processedLink = null;
     private ?string $processedHtml = null;
 
-    public function __construct(?string $name = null, string $link = null, $guard = null)
+    private function __construct(?string $name = null, string $link = null, $guard = null, $guardRoute = '')
     {
         $this->name = trim($name);
         $this->link = trim($link);
         $this->guard = $guard;
+        $this->guardRoute = $guardRoute;
+
+        if (! self::isGuard($guard, $guardRoute)) {
+            $this->active = false;
+        }
 
         return $this;
     }
 
-    public static function make(string $name = null, string $link = null, $guard = null): Button
+    public static function make(string $name = null, string $link = null, $guard = null, $guardRoute = ''): Button
     {
-        $button = new Button($name, $link, $guard);
+        $button = new Button($name, $link, $guard, $guardRoute);
         $button->type = 'link';
 
-        if (! self::isGuard($guard)) {
-            $button->active = false;
-        }
-
         return $button;
     }
 
-    public static function makeView(string $name = 'View', string $link = '/{id}', $guard = 'view'): Button
+    public static function makeView(string $name = 'View', string $link = '/{id}', $guard = 'view', $guardRoute = ''): Button
     {
-        $button = self::make($name, $link, strtolower($guard));
+        $button = self::make($name, $link, strtolower($guard), $guardRoute);
+        $button->type = 'link';
         $button->icon('<i class="'.config('form-tool.icons.view').'"></i>');
 
-        if (! self::isGuard($guard)) {
-            $button->active = false;
-        }
+        // if (! self::isGuard($guard, $guardRoute)) {
+        //     $button->active = false;
+        // }
 
         return $button;
     }
 
-    public static function makeEdit(string $name = 'Edit', string $link = '/{id}/edit', $guard = 'edit'): Button
+    public static function makeEdit(string $name = 'Edit', string $link = '/{id}/edit', $guard = 'edit', $guardRoute = ''): Button
     {
-        $button = self::make($name, $link, strtolower($guard));
+        $button = self::make($name, $link, strtolower($guard), $guardRoute);
+        $button->type = 'link';
         $button->icon('<i class="'.config('form-tool.icons.edit').'"></i>');
 
-        if (! self::isGuard($guard)) {
-            $button->active = false;
-        }
+        // if (! self::isGuard($guard, $guardRoute)) {
+        //     $button->active = false;
+        // }
 
         return $button;
     }
 
-    public static function makeDelete(string $name = 'Delete', string $link = '/{id}', $guard = 'delete'): Button
+    public static function makeDelete(string $name = 'Delete', string $link = '/{id}', $guard = 'delete', $guardRoute = ''): Button
     {
-        $button = new Button($name, $link, strtolower($guard));
+        $button = new Button($name, $link, strtolower($guard), $guardRoute);
+        $button->type = 'link';
 
-        if (! self::isGuard($guard)) {
-            $button->active = false;
-        }
+        // if (! self::isGuard($guard, $guardRoute)) {
+        //     $button->active = false;
+        // }
 
         $data['button'] = (object) [
             'id' => '{crud_name}_delete_{id}',
@@ -84,19 +89,19 @@ class Button
         return $button;
     }
 
-    public static function makeHtml(string $html, string $guard = null): Button
+    public static function makeHtml(string $html, string $guard = null, $guardRoute = ''): Button
     {
-        $button = (new Button())->html($html);
-        if (! self::isGuard($guard)) {
-            $button->active = false;
-        }
+        $button = (new Button(null, null, $guard, $guardRoute))->html($html);
+        // if (! self::isGuard($guard, $guardRoute)) {
+        //     $button->active = false;
+        // }
 
         return $button;
     }
 
-    public static function makeDivider(string $guard = null): Button
+    public static function makeDivider(string $guard = null, $guardRoute = ''): Button
     {
-        return (new Button())->divider()->guard($guard);
+        return (new Button())->divider()->guard($guard, $guardRoute);
     }
 
     public function name(string $name): Button
@@ -127,13 +132,14 @@ class Button
         return $this;
     }
 
-    public function guard(?string $guard): Button
+    public function guard(?string $guard, $guardRoute = ''): Button
     {
-        if (! self::isGuard($guard)) {
+        if (! self::isGuard($guard, $guardRoute)) {
             $this->active = false;
         }
 
         $this->guard = strtolower($guard);
+        $this->guardRoute = $guardRoute;
 
         return $this;
     }
@@ -178,6 +184,11 @@ class Button
     public function getGuard(): ?string
     {
         return $this->guard;
+    }
+
+    public function getGuardRoute(): ?string
+    {
+        return $this->guardRoute;
     }
 
     public function getType(): string
@@ -244,11 +255,11 @@ class Button
         }
     }
 
-    private static function isGuard($guard)
+    private static function isGuard($guard, $route = '')
     {
         if (! is_null($guard)) {
             if (is_string($guard)) {
-                return Guard::can(strtolower($guard));
+                return Guard::can(strtolower($guard), $route);
             } else {
                 return $guard;
             }
