@@ -146,6 +146,8 @@ class Form
         $this->uniqueColumns = [];
         $columns = array_values($columns);
         foreach ($columns as $col) {
+            $col = false !== strpos($col, '.') ? trim(explode('.', $col)[1] ?? '') : trim($col);
+
             if (! $this->bluePrint->getInputTypeByDbField($col)) {
                 throw new \InvalidArgumentException(sprintf('Field "%s" not found for unique validation', $col));
             }
@@ -867,15 +869,20 @@ class Form
         if ($this->uniqueColumns) {
             $where = [];
             $combination = [];
-            $alias = $this->model->getAlias().'.';
             foreach ($this->uniqueColumns as $column) {
+                $alias = $this->model->getAlias();
+                if (false !== strpos($column, '.')) {
+                    [$alias, $column] = explode('.', $column);
+                }
+
                 $input = $this->bluePrint->getInputTypeByDbField($column);
                 $value = $this->request->post($column) ?? $input->getDefaultValue();
 
-                $where[] = [$alias.$column => $value];
+                $where[] = [$alias.'.'.$column => $value];
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
             }
 
+            $alias = $this->model->getAlias().'.';
             if ($this->formStatus == FormStatus::UPDATE) {
                 $where[] = function ($query) use ($alias) {
                     $query->where($alias.$this->model->getPrimaryId(), '!=', $this->editId);
