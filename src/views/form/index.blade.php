@@ -29,17 +29,14 @@ let template = [];
                 <h3 class="box-title">{{ $title ?? '' }}</h3>
             </div>
 
-            <form action="{{ $page->form->action }}" method="POST" enctype="multipart/form-data"
-                class="form-horizontal">
+            <form action="{{ $page->form->action }}" method="{{ $page->form->method }}" enctype="multipart/form-data" class="form-horizontal">
                 <div class="box-body">
-                    @csrf
+                    @if ($page->form->method != 'GET')
+                        @csrf
+                    @endif
 
                     @if ($page->form->isEdit)
                         <input type="hidden" name="_method" value="PUT">
-                    @else
-                        <!-- this is only needed when you use run() -->
-                        <!-- name="method" is different from the above edit -->
-                        <input type="hidden" name="method" value="CREATE">
                     @endif
 
                     <div id="beforeForm"></div>
@@ -53,8 +50,11 @@ let template = [];
                 <div class="box-footer footer-sticky">
                     <div class="row">
                         <div class="col-sm-8 col-sm-offset-2">
-                            <button class="btn btn-success btn-flat submit">Save</button>
-                            &nbsp; <a href="{{ $page->form->cancel }}" class="btn btn-default btn-flat">Cancel</a>
+                            <button class="btn btn-success btn-flat submit">{{ $page->form->buttonSubmit }}</button>
+
+                            @if ($page->form->isButtonCancel)
+                                &nbsp; <a href="{{ $page->form->cancel }}" class="btn btn-default btn-flat">{{ $page->form->buttonCancel }}</a>
+                            @endif
                         </div>
                     </div>
                 </div>

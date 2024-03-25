@@ -50,6 +50,14 @@ class Form
     ];
 
     private $eventCallbacks = [];
+    private $htmlForm = [
+        'action' => null,
+        'method' => 'POST',
+        'buttonSubmit' => 'Save',
+        'isButtonCancel' => true,
+        'buttonCancel' => 'Cancel',
+        'cancel' => null
+    ];
 
     public function __construct($resource, ?BluePrint $bluePrint, ?DataModel $model)
     {
@@ -159,6 +167,41 @@ class Form
         return $this->crud;
     }
 
+    public function formMethod($method)
+    {
+        $method = strtoupper(trim($method));
+        if (! in_array($method, ['POST', 'GET'])) {
+            throw new \Exception('Form method must be GET or POST');
+        }
+
+        $this->htmlForm['method'] = $method;
+
+        return $this->crud;
+    }
+
+    public function formAction($action)
+    {
+        $this->htmlForm['action'] = $action;
+
+        return $this->crud;
+    }
+
+    public function formSubmitButton($label)
+    {
+        $this->htmlForm['buttonSubmit'] = trim($label) ?: 'Save';
+
+        return $this->crud;
+    }
+
+    public function formCancelButton($label, $isVisible = true, $cancelUrl = null)
+    {
+        $this->htmlForm['buttonCancel'] = trim($label) ?: 'Cancel';
+        $this->htmlForm['isButtonCancel'] = $isVisible;
+        $this->htmlForm['cancel'] = $cancelUrl;
+
+        return $this->crud;
+    }
+
     //endregion
 
     //region GenerateForm
@@ -185,16 +228,31 @@ class Form
         }
 
         $data->isEdit = $this->formStatus == FormStatus::EDIT;
-
         $url = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
-        $data->action = $data->cancel = $url.$this->queryString;
+
+        $data = (object) array_merge((array) $data, $this->htmlForm);
+        if ($data->action) {
+            if (false !== strpos($data->action, 'http')) {
+                $data->action = url($data->action);
+            }
+        } else {
+            $data->action = $url.$this->queryString;
+        }
 
         if ($this->request->query('redirect')) {
             $data->cancel = urldecode($this->request->query('redirect'));
+        } else {
+            if ($data->cancel) {
+                if (false !== strpos($data->cancel, 'http')) {
+                    $data->cancel = url($data->cancel);
+                }
+            } else {
+                $data->cancel = $url.$this->queryString;
+            }
         }
 
         if ($data->isEdit) {
-            $editId = $this->model->isToken() ?
+            $editId = $this->editId = $this->model->isToken() ?
                 $this->resultData->{$this->model->getTokenCol()} :
                 ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
@@ -204,6 +262,9 @@ class Form
                 $data->action = $url.$this->queryString;
             }
         }
+
+        $data->action = str_replace(['{id}', '{query_string}'], [$this->editId, $this->queryString], $data->action);
+        $data->cancel = str_replace(['{id}', '{query_string}'], [$this->editId, $this->queryString], $data->cancel);
 
         return $data;
     }
