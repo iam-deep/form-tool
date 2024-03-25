@@ -56,7 +56,7 @@ class Form
         'buttonSubmit' => 'Save',
         'isButtonCancel' => true,
         'buttonCancel' => 'Cancel',
-        'cancel' => null
+        'cancel' => null,
     ];
 
     public function __construct($resource, ?BluePrint $bluePrint, ?DataModel $model)
