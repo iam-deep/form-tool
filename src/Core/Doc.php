@@ -6,6 +6,7 @@ use Closure;
 use Deep\FormTool\Core\InputTypes\Common\CrudState;
 use Deep\FormTool\Support\DTConverter;
 use Deep\FormTool\Support\Settings;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\URL;
 
 class Doc
@@ -97,30 +98,30 @@ class Doc
      * $isRequired will throw error if ID not found otherwise return null
      *
      * @param  bool  $isRequired
-     * @return int|null
+     * @param  string  $parameter By default it will send the first parameter value, pass parameter name if the id is not the first parameter
+     * @return int|string|null
      *
      * @throws InvalidArgumentException
      **/
-    public static function id(bool $isRequired = true)
+    public static function id(bool $isRequired = true, $parameter = '')
     {
-        $request = request();
-
-        $url = $request->getRequestUri();
-        $route = Guard::$instance->getLaravelRoute();
-
-        $matches = [];
-        \preg_match('/'.$route.'\/([^\/\?$]*)/', $url, $matches);
-        if (\count($matches) > 1) {
-            $id = $matches[1];
-
-            return $id;
+        if ($parameter) {
+            $id = request()->parameter($parameter);
+            if ($id) {
+                return $id;
+            }
+        } else {
+            $parameters = Route::getCurrentRoute()->parameters();
+            if ($parameters) {
+                return array_values($parameters)[0];
+            }
         }
 
         if ($isRequired) {
-            throw new \InvalidArgumentException('Could not fetch "id"! Pass $id manually as parameter.');
-        } else {
-            return null;
+            throw new \InvalidArgumentException('Could not fetch "id"! Pass $parameter or $id manually.');
         }
+
+        return null;
     }
 
     //region Css&Js

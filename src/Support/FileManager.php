@@ -98,9 +98,9 @@ class FileManager
         }
     }
 
-    public static function getUploadPath($subPath = ''): string
+    public static function getUploadPath($subPath = '', $uploadDir = ''): string
     {
-        $uploadDir = \trim(config('form-tool.uploadPath', self::$uploadPath));
+        $uploadDir = $uploadDir ?: \trim(config('form-tool.uploadPath', self::$uploadPath));
 
         // Remove the first / (slash)
         if (0 === strpos($uploadDir, '/')) {
