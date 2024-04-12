@@ -98,7 +98,7 @@ class Doc
      * $isRequired will throw error if ID not found otherwise return null
      *
      * @param  bool  $isRequired
-     * @param  string  $parameter By default it will send the first parameter value, pass parameter name if the id is not the first parameter
+     * @param  string  $parameter  By default it will send the first parameter value, pass parameter name if the id is not the first parameter
      * @return int|string|null
      *
      * @throws InvalidArgumentException
