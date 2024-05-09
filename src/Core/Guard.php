@@ -234,8 +234,9 @@ class Guard
         $this->getLaravelRoute();
 
         $user = Auth::user();
+        $groupIdCol = config('form-tool.userColumns.groupId', 'groupId');
 
-        $group = DB::table('user_groups')->where('groupId', $user->groupId)->first();
+        $group = DB::table('user_groups')->where('groupId', $user->{$groupIdCol})->first();
         if (! isset($group->permission)) {
             $this->abort();
         }
