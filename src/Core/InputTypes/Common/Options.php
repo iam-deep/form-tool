@@ -184,6 +184,10 @@ trait Options
                                         throw new \Exception(sprintf('Depended field not found: %s', $depend->field));
                                     }
 
+                                    if ($dependInput->isMultiple) {
+                                        throw new \Exception(sprintf('Depended field cannot be multiple: %s', $depend->field));
+                                    }
+
                                     $depend->value = $dependInput->getValue();
 
                                     if (isNullOrEmpty($depend->value)) {
