@@ -27,18 +27,50 @@ class Guard
     private static bool $isEnable = false;
 
     /**
-     * This function must called first from middleware to initialize the guard class
-     * This function must called only once.
+     * This function can be called from middleware to initialize the guard class
      **/
-    public static function init(Request $request, Closure $next)
+    public static function init(Request $request, Closure $next = null, String $permissions = null, String $route = null)
     {
-        self::$instance = new Guard();
+        if (! isset(self::$instance)) {
+            self::$instance = new Guard();
+        }
 
-        return self::$instance->doCheck($request, $next);
+        if (! self::$isEnable) {
+            if ($next) {
+                return $next($request);
+            }
+
+            return;
+        }
+
+        self::$instance->route = $route;
+        self::$instance->getLaravelRoute();
+
+        if (! $permissions) {
+            $user = Auth::user();
+            $groupIdCol = config('form-tool.userColumns.groupId', 'groupId');
+
+            $group = DB::table('user_groups')->where('groupId', $user->{$groupIdCol})->first();
+            if (! isset($group->permission)) {
+                return self::abort($request);
+            }
+            $permissions = $group->permission;
+        }
+
+        self::$instance->permissions = \json_decode($permissions);
+
+        $response = self::$instance->doCheck($request);
+        if ($response !== true) {
+            return $response;
+        }
+
+        if ($next) {
+            return $next($request);
+        }
     }
 
     // Private is to prevent direct instantiation of this class
-    private function __construct()
+    final private function __construct()
     {
         // The construct must remain private
         self::$isEnable = config('form-tool.isGuarded', true);
@@ -134,7 +166,7 @@ class Guard
             return;
         }
 
-        self::abort();
+        return self::abort(request());
     }
 
     public static function hasCreateOrAbort(string $route = '')
@@ -154,7 +186,7 @@ class Guard
             return;
         }
 
-        self::abort();
+        return self::abort(request());
     }
 
     public static function hasEditOrAbort(string $route = '')
@@ -174,7 +206,7 @@ class Guard
             return;
         }
 
-        self::abort();
+        return self::abort(request());
     }
 
     public static function hasDeleteOrAbort(string $route = '')
@@ -194,7 +226,7 @@ class Guard
             return;
         }
 
-        self::abort();
+        return self::abort(request());
     }
 
     public static function hasDestroyOrAbort(string $route = '')
@@ -214,7 +246,7 @@ class Guard
             return;
         }
 
-        self::abort();
+        return self::abort(request());
     }
 
     public static function can(string $guardType, string $route = '')
@@ -225,29 +257,13 @@ class Guard
         return self::$method($route);
     }
 
-    public function doCheck(Request $request, Closure $next)
+    public function doCheck(Request $request)
     {
-        if (! self::$isEnable) {
-            return $next($request);
-        }
-
-        $this->getLaravelRoute();
-
-        $user = Auth::user();
-        $groupIdCol = config('form-tool.userColumns.groupId', 'groupId');
-
-        $group = DB::table('user_groups')->where('groupId', $user->{$groupIdCol})->first();
-        if (! isset($group->permission)) {
-            $this->abort();
-        }
-
-        $this->permissions = \json_decode($group->permission);
-
         // Check first if we have view permission
         if (isset($this->permissions->{$this->route}->view)) {
             $this->hasView = true;
         } else {
-            $this->abort();
+            return $this->abort($request);
         }
 
         $this->hasCreate = isset($this->permissions->{$this->route}->create) ? true : false;
@@ -261,7 +277,7 @@ class Guard
             case 'store':
             case 'add':
                 if (! $this->hasCreate) {
-                    $this->abort();
+                    return $this->abort($request);
                 }
 
                 break;
@@ -269,21 +285,21 @@ class Guard
             case 'edit':
             case 'update':
                 if (! $this->hasEdit) {
-                    $this->abort();
+                    return $this->abort($request);
                 }
 
                 break;
 
             case 'delete':
                 if (! $this->hasDelete) {
-                    $this->abort();
+                    return $this->abort($request);
                 }
 
                 break;
 
             case 'destroy':
                 if (! $this->hasDestroy) {
-                    $this->abort();
+                    return $this->abort($request);
                 }
 
                 break;
@@ -291,11 +307,15 @@ class Guard
             default:
         }
 
-        return $next($request);
+        return true;
     }
 
-    public static function abort()
+    public static function abort($request)
     {
+        if ($request->wantsJson()) {
+            return ['status' => false, 'message' => "You don't have enough permission to perform this action!"];
+        }
+
         abort(403, "You don't have enough permission to perform this action!");
     }
 
@@ -333,6 +353,10 @@ class Guard
         } else {
             $currentRoute = request()->path();
             $this->route = \substr($currentRoute, \strlen(\config('form-tool.adminURL')));
+
+            if (($pos = strpos($this->route, 'api/')) !== false) {
+                $this->route = substr($this->route, $pos + strlen('api/'));
+            }
 
             // Let's remove the action if we have any
             $pos = \strrpos($this->route, '/');
