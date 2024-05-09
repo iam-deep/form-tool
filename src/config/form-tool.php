@@ -73,7 +73,7 @@ return [
 
     // User table columns
     'userColumns' => [
-        'groupId' => 'UserGroupId',
+        'groupId' => 'groupId',
     ],
 
     // You can set your own default model for CRUD operations (Methods should be similar to BaseModel)
