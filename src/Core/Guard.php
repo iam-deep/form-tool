@@ -27,9 +27,9 @@ class Guard
     private static bool $isEnable = false;
 
     /**
-     * This function can be called from middleware to initialize the guard class
+     * This function can be called from middleware to initialize the guard class.
      **/
-    public static function init(Request $request, Closure $next = null, String $permissions = null, String $route = null)
+    public static function init(Request $request, Closure $next = null, string $permissions = null, string $route = null)
     {
         if (! isset(self::$instance)) {
             self::$instance = new Guard();
