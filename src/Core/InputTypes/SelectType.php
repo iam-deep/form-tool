@@ -98,7 +98,7 @@ class SelectType extends BaseFilterType implements ISaveable
 
     private function getFormValue($newData)
     {
-        $val = $newData->{$this->dbField};
+        $val = $newData->{$this->dbField} ?? null;
         if ($this->isMultiple) {
             if ($val === null) {
                 return null;
@@ -198,12 +198,14 @@ class SelectType extends BaseFilterType implements ISaveable
         $this->addScript();
 
         $value = $oldValue ?? $this->value;
+        if ($this->isMultiple) {
+            $value = (array) \json_decode($this->value, true);
+        }
 
         // This is needed for depend value
         $this->value = $value;
-
         $input = '<select class="'.\implode(' ', $this->classes).' '.$key.'-'.$this->dbField.' input-sm" id="'.
-            $key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" '.$this->raw.
+            $key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']'.($this->isMultiple ? '[]' : '').'" '.$this->raw.
             $this->inlineCSS.'>';
         $input .= $this->getOptions($value);
         $input .= '</select>';

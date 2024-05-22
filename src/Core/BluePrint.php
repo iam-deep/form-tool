@@ -263,7 +263,7 @@ class BluePrint
 
     //region Multiple
 
-    public function multiple(string $dbField, string $label, Closure $field)
+    public function multiple(string $dbField, string $label, Closure $field): BluePrint
     {
         $dbField = \trim($dbField);
 
