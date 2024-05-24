@@ -141,7 +141,7 @@ trait Options
             'field' => $field,
             'column' => trim($foreignKey) ?: $field,
             'value' => null,
-            'bluePrint' => $bluePrint
+            'bluePrint' => $bluePrint,
         ];
 
         return $this;
@@ -158,7 +158,7 @@ trait Options
             'field' => $field,
             'column' => trim($foreignKey) ?: $field,
             'value' => null,
-            'bluePrint' => $this->bluePrint->getParentBluePrint()
+            'bluePrint' => $this->bluePrint->getParentBluePrint(),
         ];
 
         return $this;
