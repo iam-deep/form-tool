@@ -327,11 +327,11 @@ class BluePrint
     // TODO: Create Interface saveable
     public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null, Closure $where = null)
     {
-        if ($idCol && $foreignKeyCol) {
+        if ($idCol) {
             $this->multipleTable = (object) [
                 'table' => \trim($model),
                 'id' => \trim($idCol),
-                'foreignKey' => \trim($foreignKeyCol),
+                'foreignKey' => \trim($foreignKeyCol) ?: $this->form->getModel()->getPrimaryId(),
                 'orderBy' => \trim($orderBy),
                 'where' => $where,
             ];
@@ -414,6 +414,11 @@ class BluePrint
     public function getForm(): ?Form
     {
         return $this->form;
+    }
+
+    public function getParentBluePrint()
+    {
+        return $this->parentBluePrint;
     }
 
     public function getList(): array

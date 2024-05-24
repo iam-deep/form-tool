@@ -130,7 +130,7 @@ trait Options
         return $this;
     }
 
-    public function depend($field, $foreignKey = null)
+    public function depend($field, $foreignKey = null, $bluePrint = null)
     {
         $field = \trim($field);
         if (isset($this->depend[$field])) {
@@ -141,6 +141,24 @@ trait Options
             'field' => $field,
             'column' => trim($foreignKey) ?: $field,
             'value' => null,
+            'bluePrint' => $bluePrint
+        ];
+
+        return $this;
+    }
+
+    public function dependParent($field, $foreignKey = null)
+    {
+        $field = \trim($field);
+        if (isset($this->depend[$field])) {
+            throw new \InvalidArgumentException(\sprintf('Depend field "%s" is already exists!', $field));
+        }
+
+        $this->depend[$field] = (object) [
+            'field' => $field,
+            'column' => trim($foreignKey) ?: $field,
+            'value' => null,
+            'bluePrint' => $this->bluePrint->getParentBluePrint()
         ];
 
         return $this;
@@ -179,7 +197,14 @@ trait Options
                             $flagHaveDependValue = false;
                             foreach ($this->depend as &$depend) {
                                 if (isNullOrEmpty($depend->value)) {
-                                    $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+                                    $dependInput = null;
+                                    if ($depend->bluePrint) {
+                                        $bluePrint = $depend->bluePrint;
+                                        $dependInput = $bluePrint->getInputTypeByDbField($depend->field);
+                                    } else {
+                                        $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+                                    }
+
                                     if (! $dependInput) {
                                         throw new \Exception(sprintf('Depended field not found: %s', $depend->field));
                                     }
@@ -415,7 +440,17 @@ trait Options
 
             $input->isFirstOption = $this->isFirstOption;
             if (! isset($this->firstOption)) {
-                $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+                $dependInput = null;
+                if ($depend->bluePrint) {
+                    $bluePrint = $depend->bluePrint;
+                    $dependInput = $bluePrint->getInputTypeByDbField($depend->field);
+                } else {
+                    $dependInput = $this->bluePrint->getInputTypeByDbField($depend->field);
+                }
+
+                if (! $dependInput) {
+                    throw new \Exception(sprintf('Depended field not found: %s', $depend->field));
+                }
 
                 $input->firstOptionText = '(select '.\strtolower($dependInput->getLabel()).' first)';
                 $input->firstOptionValue = '';
