@@ -678,7 +678,9 @@ class Form
 
         $this->doSaveAt();
 
-        $this->saveMultipleFields();
+        if ($this->crud->isDefaultFormat()) {
+            $this->saveMultipleFields();
+        }
     }
 
     private function saveMultipleFields()
