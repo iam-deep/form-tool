@@ -507,7 +507,7 @@ class BluePrint
         return null;
     }
 
-    public function getSelectDbOptions()
+    public function getSelectDbOptions($ignoreColumns = [])
     {
         $selects = [];
         foreach ($this->dataTypeList as $group) {
@@ -520,7 +520,7 @@ class BluePrint
 
                 foreach ($input->getOptionData() as $options) {
                     foreach ($options as $type => $optionData) {
-                        if ($type == 'db') {
+                        if ($type == 'db' && ! in_array($input->getDbField(), $ignoreColumns)) {
                             $selects[] = (object) [
                                 'table' => $optionData->table,
                                 'column' => $input->getDbField(),

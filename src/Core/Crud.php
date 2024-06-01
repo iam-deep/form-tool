@@ -27,6 +27,8 @@ class Crud
 
     private $deleteRestrictForOthers = [];
     private $deleteRestrictForMe = [];
+    private $deleteRestrictIsIgnore = false;
+    private $deleteRestrictIgnoreColumns = [];
 
     private CrudState $currentState = CrudState::NONE;
 
@@ -142,17 +144,21 @@ class Crud
         if ($this->format == 'keyValue') {
             $foreignKey = $this->bluePrint->getSelectDbOptionsForKeyValue();
         } else {
-            if (! \config('form-tool.isPreventForeignKeyDelete', true)) {
+            if (! \config('form-tool.isPreventForeignKeyDelete', true) || ($this->deleteRestrictIsIgnore && ! $this->deleteRestrictIgnoreColumns)) {
                 return;
             }
 
             $commons = \config('form-tool.commonDeleteRestricted', []);
-            foreach ($commons as &$common) {
+            foreach ($commons as $key => &$common) {
                 $common = (object) $common;
+
+                if (in_array($common->column, $this->deleteRestrictIgnoreColumns)) {
+                    unset($commons[$key]);
+                }
             }
 
             $foreignKey = $commons;
-            $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions());
+            $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions($this->deleteRestrictIgnoreColumns));
             $foreignKey = array_merge($foreignKey, $this->deleteRestrictForOthers);
         }
 
@@ -219,6 +225,14 @@ class Crud
             'route' => trim($route),
             'label' => $foreignKeyLabel,
         ];
+
+        return $this;
+    }
+
+    public function ignoreDeleteRestrictions($ignoreColumns = []): Crud
+    {
+        $this->deleteRestrictIsIgnore = true;
+        $this->deleteRestrictIgnoreColumns = $ignoreColumns;
 
         return $this;
     }
