@@ -40,21 +40,21 @@ trait ApiResponses
         }
 
         return response()->json(array_merge($this->getCommonResponse($message, true), [
-            'data' => is_array($data) ? (object) $data : $data
+            'data' => is_array($data) ? (object) $data : $data,
         ]), \Illuminate\Http\Response::HTTP_OK);
     }
 
     protected function failed($message = '', $data = [])
     {
         return response()->json(array_merge($this->getCommonResponse($message, false), [
-            'data' => is_array($data) ? (object) $data : $data
+            'data' => is_array($data) ? (object) $data : $data,
         ]), \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     protected function notFound($message = '404 not found!', $data = [])
     {
         return response()->json(array_merge($this->getCommonResponse($message, false), [
-            'data' => is_array($data) ? (object) $data : $data
+            'data' => is_array($data) ? (object) $data : $data,
         ]), \Illuminate\Http\Response::HTTP_NOT_FOUND);
     }
 
@@ -75,7 +75,7 @@ trait ApiResponses
         }
 
         return response()->json(array_merge($this->getCommonResponse($message, false), [
-            'errors' => (object) $data
+            'errors' => (object) $data,
         ]), \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 

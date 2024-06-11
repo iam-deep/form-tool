@@ -15,7 +15,7 @@ class CrudSimpleApi extends Crud
             'to' => $data->lastItem() ?? 0,
             'total' => $data->total(),
             'per_page' => $data->perPage(),
-            'data' => $data->items()
+            'data' => $data->items(),
         ];
 
         return $data;
