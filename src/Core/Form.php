@@ -5,6 +5,7 @@ namespace Deep\FormTool\Core;
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
+use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
@@ -534,21 +535,11 @@ class Form
             ActionLogger::create($this->bluePrint, $insertId);
 
             $this->invokeEvent(EventType::CREATE);
+
+            return $this->response(true, 'Data added successfully!');
         }
 
-        $message = 'Data added successfully!';
-        if ($this->crud->isWantsArray()) {
-            return ['status' => true, 'message' => $message];
-        } elseif ($this->isWantsJson()) {
-            return response()->json(['status' => true, 'message' => $message]);
-        }
-
-        $redirect = $this->url.'/create'.$this->queryString;
-        if ($this->request->query('redirect')) {
-            $redirect = urldecode($this->request->query('redirect'));
-        }
-
-        return redirect($redirect)->with('success', $message);
+        return $this->response(false, 'Something went wrong! Data not added successfully!');
     }
 
     public function update($id = null, callable $callbackBeforeUpdate = null)
@@ -826,7 +817,7 @@ class Form
 
     public function validate()
     {
-        $validationType = $this->formStatus == FormStatus::STORE ? 'store' : 'update';
+        $validationType = $this->formStatus == FormStatus::UPDATE ? 'update' : 'store';
 
         $rules = $messages = $labels = $merge = [];
         foreach ($this->bluePrint->getInputList() as $input) {
@@ -853,19 +844,7 @@ class Form
         $validator = Validator::make($this->request->all(), $rules, $messages, $labels);
 
         if ($validator->fails()) {
-            $response = [
-                'success' => false,
-                'message' => $validator->errors()->first(),
-                'errors' => $validator->getMessageBag()->toArray(),
-            ];
-
-            if ($this->crud->isWantsArray()) {
-                return $response;
-            } elseif ($this->isWantsJson()) {
-                return response()->json($response, 422);
-            }
-
-            return back()->withErrors($validator)->withInput();
+            return $this->response(false, '', $validator);
         }
 
         if ($this->uniqueColumns) {
@@ -1434,6 +1413,46 @@ class Form
         $msg .= '</ul>';
 
         return $msg;
+    }
+
+    private function response($status, $message, $validator = null)
+    {
+        if ($validator) {
+            if ($this->resource instanceof SimpleRestApiInterface) {
+                return $validator;
+            }
+
+            $response = [
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->getMessageBag()->toArray(),
+            ];
+
+            if ($this->crud->isWantsArray()) {
+                return $response;
+            } elseif ($this->isWantsJson()) {
+                return response()->json($response, 422);
+            }
+
+            return back()->withErrors($validator)->withInput();
+        }
+
+        if ($this->resource instanceof SimpleRestApiInterface || $this->crud->isWantsArray()) {
+            return ['status' => $status, 'message' => $message];
+        } elseif ($this->isWantsJson()) {
+            return response()->json(['status' => $status, 'message' => $message]);
+        }
+
+        if ($status === true) {
+            $redirect = $this->url.'/create'.$this->queryString;
+            if ($this->request->query('redirect')) {
+                $redirect = urldecode($this->request->query('redirect'));
+            }
+
+            return redirect($redirect)->with('success', $message);
+        }
+
+        return back()->with('error', $message)->withInput();
     }
 
     //endregion

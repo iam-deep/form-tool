@@ -50,4 +50,14 @@ class CrudRoute
         Route::get($route, [$class, 'index'])->name($name);
         Route::destroy($route.$id, [$class, 'destroy'])->name($name.'.destroy');
     }
+
+    public static function apiResource($route, $class, array $options = [])
+    {
+        $name = str_replace('/', '.', $route);
+
+        Route::get($route.'/search', [$class, 'search'])->name($name.'.search');
+        Route::post($route.'/get-options', [$class, 'getOptions'])->name($name.'.get-options');
+
+        return Route::apiResource($route, $class, $options)->parameters([$route => 'id']);
+    }
 }

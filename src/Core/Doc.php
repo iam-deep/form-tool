@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\CrudState;
+use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Deep\FormTool\Support\DTConverter;
 use Deep\FormTool\Support\Settings;
 use Illuminate\Support\Facades\Route;
@@ -51,7 +52,12 @@ class Doc
 
         $name = $name ?: self::$defaultCrudName;
 
-        $crud = new Crud();
+        $crud = null;
+        if ($controller instanceof SimpleRestApiInterface) {
+            $crud = new CrudSimpleApi();
+        } else {
+            $crud = new Crud();
+        }
         self::$crudList->{$name} = $crud;
 
         $crud->make($controller, $model, $blueprint, $name);
