@@ -1576,6 +1576,8 @@ class Form
     public function setFormStatusStore()
     {
         $this->formStatus = FormStatus::STORE;
+
+        return $this;
     }
 
     public function setFormStatusUpdate($id = null)
@@ -1585,6 +1587,8 @@ class Form
         }
 
         $this->formStatus = FormStatus::UPDATE;
+
+        return $this;
     }
 
     public function setFormStatusSoftDelete($id = null)
@@ -1594,6 +1598,8 @@ class Form
         }
 
         $this->formStatus = FormStatus::DELETE;
+
+        return $this;
     }
 
     public function setFormStatusDelete($id = null)
@@ -1603,15 +1609,13 @@ class Form
         }
 
         $this->formStatus = FormStatus::DESTROY;
+
+        return $this;
     }
 
     public function setFormStatusDestroy($id = null)
     {
-        if ($id) {
-            $this->editId = $id;
-        }
-
-        $this->formStatus = FormStatus::DESTROY;
+        return $this->setFormStatusDelete($id);
     }
 
     public function directStore(): bool
