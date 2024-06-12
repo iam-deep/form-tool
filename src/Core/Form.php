@@ -933,6 +933,10 @@ class Form
 
     private function createPostData($id = null): void
     {
+        if (! $id) {
+            $id = $this->editId;
+        }
+
         $postData = $this->postData;
         $this->postData = [];
 
@@ -1131,6 +1135,30 @@ class Form
             }
         }
 
+        if ($this->doDestroy($id, $result)) {
+            $message = 'Data permanently deleted successfully!';
+            if ($this->crud->isWantsArray()) {
+                return ['status' => true, 'message' => $message];
+            } elseif ($this->isWantsJson()) {
+                return response()->json(['status' => true, 'message' => $message]);
+            }
+
+            return redirect($this->url.$this->queryString)->with('success', $message);
+        }
+
+        return redirect($this->url.$this->queryString)->with(
+            'error',
+            'Something went wrong! Data not deleted fully, please contact Support Administrator.'
+        );
+    }
+
+    private function doDestroy($id, $result): bool
+    {
+        $pId = $id;
+        if ($this->model->isToken()) {
+            $pId = $result->{$this->model->getPrimaryId()} ?? null;
+        }
+
         foreach ($this->bluePrint->getInputList() as $field) {
             if ($field instanceof BluePrint) {
                 // TODO: Still now not needed
@@ -1188,20 +1216,10 @@ class Form
 
             $this->invokeEvent(EventType::DESTROY, $pId, $result);
 
-            $message = 'Data permanently deleted successfully!';
-            if ($this->crud->isWantsArray()) {
-                return ['status' => true, 'message' => $message];
-            } elseif ($this->isWantsJson()) {
-                return response()->json(['status' => true, 'message' => $message]);
-            }
-
-            return redirect($this->url.$this->queryString)->with('success', $message);
+            return true;
         }
 
-        return redirect($this->url.$this->queryString)->with(
-            'error',
-            'Something went wrong! Data not deleted fully, please contact Support Administrator.'
-        );
+        return false;
     }
 
     private function checkForeignKeyRestriction($id, $dataToDelete)
@@ -1473,6 +1491,13 @@ class Form
         return $this->request->post();
     }
 
+    public function getProcessedData($id = null)
+    {
+        $this->createPostData($id);
+
+        return $this->postData;
+    }
+
     public function updatePostData($data)
     {
         $this->updatePostData = $data;
@@ -1539,6 +1564,122 @@ class Form
     public function isWantsJson()
     {
         return $this->crud->isWantsJson() || $this->request->ajax() || $this->request->wantsJson();
+    }
+
+    public function setFormStatus(FormStatus $status)
+    {
+        $this->formStatus = $status;
+
+        return $this;
+    }
+
+    public function setFormStatusStore()
+    {
+        $this->formStatus = FormStatus::STORE;
+    }
+
+    public function setFormStatusUpdate($id = null)
+    {
+        if ($id) {
+            $this->editId = $id;
+        }
+
+        $this->formStatus = FormStatus::UPDATE;
+    }
+
+    public function setFormStatusSoftDelete($id = null)
+    {
+        if ($id) {
+            $this->editId = $id;
+        }
+
+        $this->formStatus = FormStatus::DELETE;
+    }
+
+    public function setFormStatusDelete($id = null)
+    {
+        if ($id) {
+            $this->editId = $id;
+        }
+
+        $this->formStatus = FormStatus::DESTROY;
+    }
+
+    public function setFormStatusDestroy($id = null)
+    {
+        if ($id) {
+            $this->editId = $id;
+        }
+
+        $this->formStatus = FormStatus::DESTROY;
+    }
+
+    public function directStore(): bool
+    {
+        $this->formStatus = FormStatus::STORE;
+
+        $this->createPostData();
+
+        $insertId = $this->model->add($this->postData);
+
+        if ($insertId) {
+            $this->editId = $insertId;
+
+            $this->dataAfterSave = $this->postData;
+            $this->dataAfterSave[$this->model->getPrimaryId()] = $insertId;
+
+            $this->afterSave();
+
+            ActionLogger::create($this->bluePrint, $insertId);
+
+            $this->invokeEvent(EventType::CREATE);
+
+            return true;
+        }
+
+        return false;
+    }
+
+    public function directUpdate($id, $data = null)
+    {
+        $this->formStatus = FormStatus::UPDATE;
+
+        $this->editId = $this->parseEditId($id);
+
+        $this->oldData = $data;
+        if (! $this->oldData) {
+            $this->oldData = $this->model->getOne($this->editId);
+        }
+
+        $this->createPostData($this->editId);
+
+        $this->model->updateOne($this->editId, $this->postData, false);
+
+        $this->afterSave();
+
+        ActionLogger::update($this->bluePrint, $this->editId, $this->oldData, $this->postData);
+
+        $this->invokeEvent(EventType::UPDATE);
+
+        return true;
+    }
+
+    public function directDestroy($id, $data = null)
+    {
+        $this->formStatus = FormStatus::DESTROY;
+
+        $id = $this->parseEditId($id);
+
+        if (! $data) {
+            // We can't use getOne, as we need to fetch deleted item
+            $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
+            $data = $this->model->getWhereOne([$idCol => $id]);
+            if (! $data) {
+                return false;
+            }
+        }
+
+        return $this->doDestroy($id, $data);
     }
 
     //endregion
