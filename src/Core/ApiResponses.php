@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Deep\FormTool\Support\Settings;
+use Illuminate\Http\Request;
 
 trait ApiResponses
 {
@@ -10,22 +11,28 @@ trait ApiResponses
 
     protected $isIncludeSettings = false;
 
+    private $firstRequest;
+    private $firstRequestFiles;
+
     public function __construct()
     {
-        $this->middleware(function ($request, $next) {
+        $this->middleware(function (Request $request, $next) {
             Settings::init();
+
+            $this->firstRequest = clone $request;
+            $this->firstRequestFiles = $_FILES;
 
             return $next($request);
         });
     }
 
-    protected function getCommonResponse($message, $status)
+    protected function getCommonResponse($message, $status, $data = [])
     {
         return [
             'version' => $this->version,
             'message' => $message,
             'status' => $status,
-            'data' => (object) [],
+            'data' => is_array($data) ? (object) $data : $data,
         ];
     }
 
@@ -39,23 +46,17 @@ trait ApiResponses
             $data['settings'] = app('settings');
         }
 
-        return response()->json(array_merge($this->getCommonResponse($message, true), [
-            'data' => is_array($data) ? (object) $data : $data,
-        ]), \Illuminate\Http\Response::HTTP_OK);
+        return $this->sendResponse($this->getCommonResponse($message, true, $data), \Illuminate\Http\Response::HTTP_OK);
     }
 
     protected function failed($message = '', $data = [])
     {
-        return response()->json(array_merge($this->getCommonResponse($message, false), [
-            'data' => is_array($data) ? (object) $data : $data,
-        ]), \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
+        return $this->sendResponse($this->getCommonResponse($message, false, $data), \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     protected function notFound($message = '404 not found!', $data = [])
     {
-        return response()->json(array_merge($this->getCommonResponse($message, false), [
-            'data' => is_array($data) ? (object) $data : $data,
-        ]), \Illuminate\Http\Response::HTTP_NOT_FOUND);
+        return $this->sendResponse($this->getCommonResponse($message, false, $data), \Illuminate\Http\Response::HTTP_NOT_FOUND);
     }
 
     protected function validationError($validator, $message = '')
@@ -74,14 +75,16 @@ trait ApiResponses
             $message = $validator->messages()->first();
         }
 
-        return response()->json(array_merge($this->getCommonResponse($message, false), [
+        $response = array_merge($this->getCommonResponse($message, false), [
             'errors' => (object) $data,
-        ]), \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
+        ]);
+
+        return $this->sendResponse($response, \Illuminate\Http\Response::HTTP_UNPROCESSABLE_ENTITY);
     }
 
     protected function authError($message = '')
     {
-        return response()->json($this->getCommonResponse($message, false), \Illuminate\Http\Response::HTTP_UNAUTHORIZED);
+        return $this->sendResponse($this->getCommonResponse($message, false), \Illuminate\Http\Response::HTTP_UNAUTHORIZED);
     }
 
     protected function serverError($message)
@@ -90,6 +93,11 @@ trait ApiResponses
             $message = '';
         }
 
-        return response()->json($this->getCommonResponse($message, false), \Illuminate\Http\Response::HTTP_INTERNAL_SERVER_ERROR);
+        return $this->sendResponse($this->getCommonResponse($message, false), \Illuminate\Http\Response::HTTP_INTERNAL_SERVER_ERROR);
+    }
+
+    protected function sendResponse($response, $statusCode)
+    {
+        return response()->json($response, $statusCode);
     }
 }
