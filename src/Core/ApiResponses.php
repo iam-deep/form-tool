@@ -17,8 +17,6 @@ trait ApiResponses
     public function __construct()
     {
         $this->middleware(function (Request $request, $next) {
-            Settings::init();
-
             $this->firstRequest = clone $request;
             $this->firstRequestFiles = $_FILES;
 
