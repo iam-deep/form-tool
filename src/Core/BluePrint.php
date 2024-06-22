@@ -73,7 +73,7 @@ class BluePrint
         $inputType->typeInString = 'email';
         $inputType->inputType = 'email';
 
-        $inputType->validations(['email' => 'email']);
+        $inputType->validations(['email' => 'email:dns']);
 
         $this->dataTypeList[$this->groupName][] = $inputType;
 
