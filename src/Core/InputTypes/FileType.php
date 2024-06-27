@@ -59,6 +59,8 @@ class FileType extends BaseInputType
     public function accept($accept)
     {
         $this->accept = \trim($accept);
+
+        return $this;
     }
 
     public function getValidations($type)

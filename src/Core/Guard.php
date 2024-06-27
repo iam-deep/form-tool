@@ -298,7 +298,7 @@ class Guard
                 break;
 
             case 'destroy':
-                if (! $this->hasDestroy) {
+                if (! $this->hasDestroy && (config('form-tool.isSoftDelete') || ! $this->hasDelete)) {
                     return $this->abort($request);
                 }
 
