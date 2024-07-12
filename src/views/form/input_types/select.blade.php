@@ -48,7 +48,7 @@ if ($input->type == 'single') {
                     }
                 });
             });
-        </Script>
+        </script>
 
     <?php } else { ?>
         <select class="{{ $input->classes }}" id="{{ $input->column }}" name="{{ $input->column.($input->isMultiple ? '[]' : '') }}" {{ $input->raw }}>
