@@ -105,11 +105,11 @@ $(function() {
         let btns = form.find('.submit');
 
         btns.each(function() {
-            if ($(this).attr('value') == btnSubmit) {
+            if ($(this).attr('value') == btnSubmit && $(this).attr('name') != undefined) {
                 form.append('<input type="hidden" name="'+ $(this).attr('name') +'" value="'+ $(this).attr('value') +'">')
             }
 
-            $(this).html('<i class="fa fa-spinner fa-pulse"></i> ' + $(this).text()).prop('disabled', true);
+            $(this).attr('data-text', $(this).text()).html('<i class="fa fa-spinner fa-pulse"></i> ' + $(this).text()).prop('disabled', true);
         });
     });
     
@@ -149,4 +149,13 @@ $(function() {
         }
     });
 });
+
+function revertSubmit() {
+    let form = $('form');
+    let btns = form.find('.submit');
+
+    btns.each(function() {
+        $(this).prop('disabled', false).html($(this).attr('data-text'));
+    });
+}
 </script>

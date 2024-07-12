@@ -536,6 +536,12 @@ class Form
 
             $this->invokeEvent(EventType::CREATE);
 
+            // Let's handle quick add
+            $response = $this->handleQuickAdd($insertId);
+            if ($response) {
+                return $response;
+            }
+
             return $this->response(true, 'Data added successfully!');
         }
 
@@ -813,6 +819,46 @@ class Form
                 DB::table($saveAt->table)->insert($data);
             }
         }
+    }
+
+    private function handleQuickAdd($insertId)
+    {
+        $optionData = $this->request->input('_option');
+        if (! $optionData) {
+            return false;
+        }
+
+        [$route, $fieldName] = explode('.', $optionData);
+        if (! $route || ! $fieldName) {
+            return false;
+        }
+
+        $result = DB::table('cruds')->where('route', $route)->first();
+        if (! $result) {
+            return false;
+        }
+
+        $parentClass = (new $result->classPath());
+        if (! $parentClass) {
+            return false;
+        }
+
+        $parentClass->setup();
+        $quickParentCrud = $parentClass->getCrud();
+        if (! $quickParentCrud) {
+            return false;
+        }
+
+        $field = $quickParentCrud->getBluePrint()->getInputTypeByDbField($fieldName);
+        if (! $field) {
+            return false;
+        }
+
+        $options = $field->getOptions($insertId);
+
+        return response()->json(['status' => true, 'data' => [
+            'options' => $options
+        ]]);
     }
 
     public function validate()

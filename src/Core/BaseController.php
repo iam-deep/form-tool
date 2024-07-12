@@ -10,7 +10,7 @@ trait BaseController
 {
     protected $crud = null;
 
-    protected function setup()
+    public function setup()
     {
         // Setup your BluePrint here in the child class
     }
@@ -45,7 +45,12 @@ trait BaseController
 
         $data['title'] = 'Add '.$this->singularTitle;
 
-        $data['page'] = $this->crud->create();
+        $response = $this->crud->create();
+        if ($request->query('quickAdd')) {
+            return $response;
+        }
+
+        $data['page'] = $response;
 
         return $this->render('form-tool::form.index', $data);
     }
@@ -105,5 +110,10 @@ trait BaseController
         $this->setup();
 
         return $this->crud->getOptionsByParentId();
+    }
+
+    public function getCrud()
+    {
+        return $this->crud;
     }
 }

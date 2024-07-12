@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\Doc;
+use Deep\FormTool\Core\Guard;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\Options;
@@ -22,6 +23,8 @@ class SelectType extends BaseFilterType implements ISaveable
 
     protected $plugins = ['default', 'chosen'];
     protected string $currentPlugin = '';
+
+    private $quickAddClass = null;
 
     public function __construct()
     {
@@ -84,6 +87,26 @@ class SelectType extends BaseFilterType implements ISaveable
 
         return $this;
     }
+
+    public function quickAdd($controllerClass)
+    {
+        if (! $this->optionData) {
+            throw new \Exception('Set options first!');
+        }
+
+        foreach ($this->optionData as $optionData) {
+            foreach ($optionData as $type => $options) {
+                if ('db' != $type) {
+                    throw new \Exception('Options must be set to database to use Auto Quick Add!');
+                }
+            }
+        }
+
+        $this->quickAddClass = $controllerClass;
+
+        return $this;
+    }
+
     //endregion
 
     public function beforeStore($newData)
@@ -148,7 +171,7 @@ class SelectType extends BaseFilterType implements ISaveable
         }
     }
 
-    private function getOptions($value)
+    public function getOptions($value)
     {
         $this->createOptions();
 
@@ -189,7 +212,35 @@ class SelectType extends BaseFilterType implements ISaveable
         // This is needed for depend value
         $this->value = $value;
 
-        return $this->htmlParentDiv($this->getInput($value));
+        $this->setPlugin();
+        $this->addScript();
+
+        $data['input'] = (object) [
+            'type' => 'single',
+            'column' => $this->dbField,
+            'rawValue' => $this->value,
+            'value' => $this->value,
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS,
+            'isMultiple' => $this->isMultiple,
+            'options' => $this->getOptions($value),
+            'isPlugin' => $this->currentPlugin ? true : false,
+            'plugin' => $this->currentPlugin,
+            'isQuickAdd' => false,
+        ];
+
+        $quickClass = $this->quickAddClass ? new $this->quickAddClass() : null;
+        if ($quickClass && Guard::hasCreate($quickClass->route)) {
+            $data['input']->isQuickAdd = true;
+
+            $data['input']->quickData = (object) [
+                'title' => $quickClass->singularTitle,
+                'optionData' => $this->bluePrint->getForm()->getResource()->route.'.'.$this->dbField,
+                'route' => config('form-tool.adminURL').'/'.$quickClass->route.'/create?quickAdd=1'
+            ];
+        }
+
+        return $this->htmlParentDiv(view('form-tool::form.input_types.select', $data)->render());
     }
 
     public function getHTMLMultiple($key, $index, $oldValue)
@@ -204,13 +255,28 @@ class SelectType extends BaseFilterType implements ISaveable
 
         // This is needed for depend value
         $this->value = $value;
-        $input = '<select class="'.\implode(' ', $this->classes).' '.$key.'-'.$this->dbField.' input-sm" id="'.
-            $key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']'.($this->isMultiple ? '[]' : '').'" '.$this->raw.
-            $this->inlineCSS.'>';
-        $input .= $this->getOptions($value);
-        $input .= '</select>';
 
-        return $input;
+        $id = $key.'-'.$this->dbField.'-'.$index;
+        $name = $key.'['.$index.']['.$this->dbField.']';
+
+        $data['input'] = (object) [
+            'type' => 'multiple',
+            'key' => $key,
+            'index' => $index,
+            'column' => $this->dbField,
+            'value' => $this->value,
+            'oldValue' => $oldValue,
+            'id' => $id,
+            'name' => $name,
+            'classes' => \implode(' ', $this->classes).' '.$key.'-'.$this->dbField,
+            'raw' => $this->raw.$this->inlineCSS,
+            'isMultiple' => $this->isMultiple,
+            'options' => $this->getOptions($value),
+        ];
+
+        return \view('form-tool::form.input_types.password', $data)->render();
+
+        // return $input;
     }
 
     public function applyFilter($query, $operator = '=')
@@ -234,7 +300,22 @@ class SelectType extends BaseFilterType implements ISaveable
     {
         // $this->raw('onChange="form.submit()"');
 
-        return $this->htmlParentDivFilter($this->getInput($this->value));
+        $this->setPlugin();
+        $this->addScript();
+
+        $data['input'] = (object) [
+            'type' => 'single',
+            'column' => $this->dbField,
+            'rawValue' => $this->value,
+            'value' => $this->value,
+            'classes' => \implode(' ', $this->classes),
+            'raw' => $this->raw.$this->inlineCSS,
+            'isMultiple' => $this->isMultiple,
+            'options' => $this->getOptions($this->value),
+            'isQuickAdd' => $this->quickAddClass ? true : false
+        ];
+
+        return $this->htmlParentDivFilter(view('form-tool::form.input_types.select', $data)->render());
     }
 
     /**
@@ -243,18 +324,5 @@ class SelectType extends BaseFilterType implements ISaveable
     protected function getDependOptions()
     {
         return $this->getOptions($this->value);
-    }
-
-    private function getInput($value)
-    {
-        $this->setPlugin();
-        $this->addScript();
-
-        $input = '<select class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.'" name="'.
-            $this->dbField.($this->isMultiple ? '[]' : '').'" '.$this->raw.$this->inlineCSS.'>';
-        $input .= $this->getOptions($value);
-        $input .= '</select>';
-
-        return $input;
     }
 }

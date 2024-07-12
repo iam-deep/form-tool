@@ -180,6 +180,7 @@ class Crud
         $crudData = [
             'route' => $this->resource->route,
             'data' => \json_encode($data),
+            'classPath' => $this->resource::class
         ];
 
         $count = DB::table('cruds')->where('route', $this->resource->route)->count();
@@ -287,6 +288,16 @@ class Crud
 
         $page->style = Doc::getCssLinks().Doc::getCss();
         $page->script = Doc::getJsLinks().Doc::getJs();
+
+        if (request()->query('quickAdd')) {
+            return response()->json([
+                'status' => 1,
+                'data' => [
+                    'routeUpdate' => route($this->resource->route.'.store'),
+                    'form' => view('form-tool::form.quick_add', ['page' => $page])->render()
+                ]
+            ]);
+        }
 
         return $page;
     }
