@@ -236,7 +236,7 @@ class SelectType extends BaseFilterType implements ISaveable
             $data['input']->quickData = (object) [
                 'title' => $quickClass->singularTitle,
                 'optionData' => $this->bluePrint->getForm()->getResource()->route.'.'.$this->dbField,
-                'route' => config('form-tool.adminURL').'/'.$quickClass->route.'/create?quickAdd=1'
+                'route' => config('form-tool.adminURL').'/'.$quickClass->route.'/create?quickAdd=1',
             ];
         }
 
@@ -312,7 +312,7 @@ class SelectType extends BaseFilterType implements ISaveable
             'raw' => $this->raw.$this->inlineCSS,
             'isMultiple' => $this->isMultiple,
             'options' => $this->getOptions($this->value),
-            'isQuickAdd' => $this->quickAddClass ? true : false
+            'isQuickAdd' => $this->quickAddClass ? true : false,
         ];
 
         return $this->htmlParentDivFilter(view('form-tool::form.input_types.select', $data)->render());

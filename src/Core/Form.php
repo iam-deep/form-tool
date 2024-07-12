@@ -857,7 +857,7 @@ class Form
         $options = $field->getOptions($insertId);
 
         return response()->json(['status' => true, 'data' => [
-            'options' => $options
+            'options' => $options,
         ]]);
     }
 
