@@ -215,14 +215,21 @@ class BulkAction
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'restore')) {
                 $filtered[] = $id;
-                $this->table->getModel()->restore($id);
 
-                $result = $this->table->getModel()->getOne($id);
+                $result = null;
+                if ($this->table->getModel()->isToken()) {
+                    $result = $this->table->getModel()->getWhereOne([$this->table->getModel()->getTokenCol() => $id]);
+                } else {
+                    $result = $this->table->getModel()->getWhereOne([$this->table->getModel()->getPrimaryId() => $id]);
+                }
 
                 $pId = $id;
                 if ($this->table->getModel()->isToken()) {
                     $pId = $result->{$this->table->getModel()->getPrimaryId()} ?? null;
                 }
+
+                $this->table->getModel()->restore($pId);
+
                 ActionLogger::restore($this->table->getBluePrint(), $pId, $result);
 
                 $this->table->crud->getForm()->invokeEvent(EventType::RESTORE, $pId, $result);

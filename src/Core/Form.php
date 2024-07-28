@@ -1113,7 +1113,7 @@ class Form
             return $response;
         }
 
-        $this->model->updateDelete($id);
+        $this->model->updateDelete($pId);
 
         ActionLogger::delete($this->bluePrint, $pId, $result);
 
