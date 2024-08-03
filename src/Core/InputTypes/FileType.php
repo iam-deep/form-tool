@@ -57,9 +57,9 @@ class FileType extends BaseInputType
     }
 
     /**
-     * Validate and accept file type
+     * Validate and accept file type.
      *
-     * @param string $accept mimes like pdf,docs,jpg
+     * @param  string  $accept  mimes like pdf,docs,jpg
      * @return Deep\FormTool\Core\InputTypes\FileType
      **/
     public function accept(string $accept)
