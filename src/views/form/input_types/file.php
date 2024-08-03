@@ -21,13 +21,13 @@ if ($input->type == 'single') { ?>
                 Browse your file
             </label>
             <input type="file" class="<?php echo $input->classes; ?>" id="<?php echo $input->column; ?>" name="<?php echo $input->column; ?>"
-                accept="<?php echo $input->accept; ?>" style="display:none;" <?php echo $input->raw; ?> />
+                accept="<?php echo implode(',', array_map(fn ($mime) => '.'.$mime, array_filter(explode(',', $input->accept)))); ?>" style="display:none;" <?php echo $input->raw; ?> />
 
             <div style="color:#76787a;font-size:13px;">
                 <?php if ($input->isImageField) { ?>
-                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: png, jpg, svg & webp)
+                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: <?php echo $input->accept ? $input->accept : 'png, jpg, svg & webp'; ?>)
                 <?php } else { ?>
-                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: png, jpg, pdf & docs)
+                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: <?php echo $input->accept ? $input->accept : 'png, jpg, pdf & docs'; ?>)
                 <?php } ?>
             </div>
 

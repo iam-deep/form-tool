@@ -56,7 +56,13 @@ class FileType extends BaseInputType
         return $this;
     }
 
-    public function accept($accept)
+    /**
+     * Validate and accept file type
+     *
+     * @param string $accept mimes like pdf,docs,jpg
+     * @return Deep\FormTool\Core\InputTypes\FileType
+     **/
+    public function accept(string $accept)
     {
         $this->accept = \trim($accept);
 
@@ -76,9 +82,13 @@ class FileType extends BaseInputType
         if ($request->file($this->dbField)) {
             $validations[] = 'file';
 
-            $allowedTypes = FileManager::getAllowedTypes();
-            if ($allowedTypes && ! isset($validations['mimes'])) {
-                $validations['mimes'] = 'mimes:'.$allowedTypes;
+            if ($this->accept) {
+                $validations['mimes'] = 'mimes:'.$this->accept;
+            } else {
+                $allowedTypes = FileManager::getAllowedTypes();
+                if ($allowedTypes && ! isset($validations['mimes'])) {
+                    $validations['mimes'] = 'mimes:'.$allowedTypes;
+                }
             }
         } else {
             $validations = [];
