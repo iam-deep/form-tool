@@ -16,19 +16,16 @@ if ($input->type == 'single') { ?>
                 <i class="<?php echo $input->icon; ?> fa-5x" style="color:#4367A5;<?php if ($input->isImage || ! $input->rawValue) {?> display:none; <?php } ?>"></i>
             </a>
         </div>
+
         <div style="margin-left:15px;">
             <label style="font-weight:550;margin-bottom:0;cursor: pointer;" for="<?php echo $input->column; ?>">
                 Browse your file
             </label>
             <input type="file" class="<?php echo $input->classes; ?>" id="<?php echo $input->column; ?>" name="<?php echo $input->column; ?>"
-                accept="<?php echo implode(',', array_map(fn ($mime) => '.'.$mime, array_filter(explode(',', $input->accept)))); ?>" style="display:none;" <?php echo $input->raw; ?> />
+                accept="<?php echo $input->accept; ?>" style="display:none;" <?php echo $input->raw; ?> />
 
             <div style="color:#76787a;font-size:13px;">
-                <?php if ($input->isImageField) { ?>
-                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: <?php echo $input->accept ? $input->accept : 'png, jpg, svg & webp'; ?>)
-                <?php } else { ?>
-                    (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: <?php echo $input->accept ? $input->accept : 'png, jpg, pdf & docs'; ?>)
-                <?php } ?>
+                (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: <?php echo $input->formats; ?>)
             </div>
 
             <div style="margin-top: 5px;">

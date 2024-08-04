@@ -57,9 +57,9 @@ class FileType extends BaseInputType
     }
 
     /**
-     * Validate and accept file type.
+     * Validate and accept file type
      *
-     * @param  string  $accept  mimes like pdf,docs,jpg
+     * @param string $accept mimes like pdf,docs,jpg
      * @return Deep\FormTool\Core\InputTypes\FileType
      **/
     public function accept(string $accept)
@@ -239,6 +239,16 @@ class FileType extends BaseInputType
             }
         }
 
+        $accept = $this->accept;
+        $formats = 'png, jpg, pdf & docs';
+        if ($this->accept == 'image/*') {
+            $formats  = 'png, jpg, svg & webp';
+        } elseif ($this->accept) {
+            $mimes = array_filter(explode(',', $this->accept));
+            $formats = implode(', ', $mimes);
+            $accept = implode(',', array_map(fn ($mime) => '.'.$mime, $mimes));
+        }
+
         $data['input'] = (object) [
             'type' => 'single',
             'column' => $this->dbField,
@@ -250,7 +260,8 @@ class FileType extends BaseInputType
             // File Specific
             'maxSize' => $this->maxSizeInKb,
             'isImageField' => $isImageField,
-            'accept' => $this->accept,
+            'accept' => $accept,
+            'formats' => $formats,
             'isImage' => $isImage,
             'imageCache' => $imageCache,
             'noImage' => $noImage,
@@ -289,6 +300,16 @@ class FileType extends BaseInputType
             }
         }
 
+        $accept = $this->accept;
+        $formats = 'png, jpg, pdf & docs';
+        if ($this->accept == 'image/*') {
+            $formats  = 'png, jpg, svg & webp';
+        } elseif ($this->accept) {
+            $mimes = array_filter(explode(',', $this->accept));
+            $formats = implode(', ', $mimes);
+            $accept = implode(',', array_map(fn ($mime) => '.'.$mime, $mimes));
+        }
+
         $data['input'] = (object) [
             'type' => 'multiple',
             'key' => $key,
@@ -307,7 +328,8 @@ class FileType extends BaseInputType
             'groupId' => $groupId,
             'maxSize' => $this->maxSizeInKb,
             'isImageField' => $isImageField,
-            'accept' => $this->accept,
+            'accept' => $accept,
+            'formats' => $formats,
             'isImage' => $isImage,
             'imageCache' => $imageCache,
             'noImage' => $noImage,
