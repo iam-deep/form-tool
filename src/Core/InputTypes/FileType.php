@@ -57,9 +57,9 @@ class FileType extends BaseInputType
     }
 
     /**
-     * Validate and accept file type
+     * Validate and accept file type.
      *
-     * @param string $accept mimes like pdf,docs,jpg
+     * @param  string  $accept  mimes like pdf,docs,jpg
      * @return Deep\FormTool\Core\InputTypes\FileType
      **/
     public function accept(string $accept)
@@ -242,7 +242,7 @@ class FileType extends BaseInputType
         $accept = $this->accept;
         $formats = 'png, jpg, pdf & docs';
         if ($this->accept == 'image/*') {
-            $formats  = 'png, jpg, svg & webp';
+            $formats = 'png, jpg, svg & webp';
         } elseif ($this->accept) {
             $mimes = array_filter(explode(',', $this->accept));
             $formats = implode(', ', $mimes);
@@ -303,7 +303,7 @@ class FileType extends BaseInputType
         $accept = $this->accept;
         $formats = 'png, jpg, pdf & docs';
         if ($this->accept == 'image/*') {
-            $formats  = 'png, jpg, svg & webp';
+            $formats = 'png, jpg, svg & webp';
         } elseif ($this->accept) {
             $mimes = array_filter(explode(',', $this->accept));
             $formats = implode(', ', $mimes);
