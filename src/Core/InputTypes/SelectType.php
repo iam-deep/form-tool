@@ -33,7 +33,7 @@ class SelectType extends BaseFilterType implements ISaveable
         $this->isRemoveTrash = \config('isSoftDelete', true);
     }
 
-    //region Options
+    // region Options
     public function noFirst()
     {
         $this->isFirstOption = false;
@@ -107,7 +107,7 @@ class SelectType extends BaseFilterType implements ISaveable
         return $this;
     }
 
-    //endregion
+    // endregion
 
     public function beforeStore($newData)
     {
@@ -274,7 +274,7 @@ class SelectType extends BaseFilterType implements ISaveable
             'options' => $this->getOptions($value),
         ];
 
-        return \view('form-tool::form.input_types.password', $data)->render();
+        return \view('form-tool::form.input_types.select', $data)->render();
 
         // return $input;
     }

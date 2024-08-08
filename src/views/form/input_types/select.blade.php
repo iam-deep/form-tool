@@ -58,7 +58,7 @@ if ($input->type == 'single') {
 
 } else { ?>
 
-    <select class="{{ $input->classes.' input-sm' }}" id="{{ $input->id }}" name="{{ $input->name.($this->isMultiple ? '[]' : '') }}" {!! $input->raw !!}>
+    <select class="{{ $input->classes.' input-sm' }}" id="{{ $input->id }}" name="{{ $input->name.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}>
         {!! $input->options !!}
     </select>
 
