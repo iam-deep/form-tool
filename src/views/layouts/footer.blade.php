@@ -9,29 +9,3 @@
         Copyright &copy; {{ date('Y') }} <a href="/" target="_blank">{{ config('app.name', 'Admin') }}</a>.
     </strong> All rights reserved.
   </footer>
-
-</div>
-<!-- ./wrapper -->
-
-<!-- REQUIRED JS SCRIPTS -->
-
-<!-- Bootstrap 3.3.7 -->
-<script src="{{ URL::asset('/assets/form-tool/plugins/bootstrap/dist/js/bootstrap.min.js') }}"></script>
-<!-- AdminLTE App -->
-<script src="{{ URL::asset('/assets/form-tool/dist/js/adminlte.min.js') }}"></script>
-
-<script>
-$(document).ready(function() {
-    $("body").tooltip({ selector: '[data-toggle=tooltip]' });
-});
-
-// To make dropdown visible over the table
-$('.table-responsive').on('show.bs.dropdown', function () {
-     $('.table-responsive').css( "overflow", "inherit" );
-});
-$('.table-responsive').on('hide.bs.dropdown', function () {
-     $('.table-responsive').css( "overflow", "auto" );
-})
-</script>
-</body>
-</html>
