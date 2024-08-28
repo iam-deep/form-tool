@@ -135,7 +135,7 @@ class TableField
         return $cell;
     }
 
-    public function all(bool $checkbox = true, bool $slNo = true, $actions = null)
+    public function all($except = [], bool $checkbox = true, bool $slNo = true, $actions = null)
     {
         if ($checkbox) {
             $this->bulkActionCheckbox();
@@ -145,8 +145,14 @@ class TableField
             $this->slNo();
         }
 
+        if ($except) {
+            $except = Arr::wrap($except);
+        }
+
         foreach ($this->bluePrint->getInputList() as $input) {
-            $this->default($input->getDbField());
+            if (! $except || ! in_array($input->getDbField(), $except)) {
+                $this->default($input->getDbField());
+            }
         }
 
         if ($actions) {
