@@ -23,6 +23,11 @@ trait BaseImportExport
         $this->sampleData = null;
     }
 
+    protected function setupExport()
+    {
+        $this->setupImport();
+    }
+
     protected function setExportData()
     {
         return $this->crud->getModel()->getWhere(['deletedAt' => null]);
@@ -281,7 +286,7 @@ trait BaseImportExport
 
     public function export()
     {
-        $this->setupImport();
+        $this->setupExport();
 
         $filename = $this->title.'.csv';
 
