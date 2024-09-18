@@ -1021,7 +1021,20 @@ class Form
 
             if ($input instanceof BluePrint) {
                 if (! $input->getModel()) {
-                    $this->postData[$input->getKey()] = \json_encode($this->request[$input->getKey()] ?? null);
+                    $bluePrint = $input;
+                    $postKey = $bluePrint->getKey();
+                    $multiplePostData = $this->request[$postKey] ?? null;
+
+                    $newMultiplePostData = [];
+                    foreach ($multiplePostData as $key => $value) {
+                        foreach ($bluePrint->getInputList() as $input) {
+                            $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()];
+
+                            $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object)[]);
+                        }
+                    }
+
+                    $this->postData[$postKey] = \json_encode($newMultiplePostData);
                 }
 
                 continue;
@@ -1034,26 +1047,52 @@ class Form
             }
 
             // If we don't have a post data for an field like for an optional file field
+            // Reassigning the postData is important
             $this->postData[$dbField] = $postData[$dbField] ?? null;
 
-            $input->setValue($this->postData[$dbField]);
+            $this->postData[$dbField] = $this->getPostValue($input, $this->postData[$dbField], $this->postData, $this->oldData);
 
-            $response = null;
-            if ($this->formStatus == FormStatus::STORE) {
-                $response = $input->beforeStore((object) $this->postData);
-            } else {
-                $response = $input->beforeUpdate($this->oldData, (object) $this->postData);
-            }
+            // $input->setValue($this->postData[$dbField]);
 
-            if ($response !== null) {
-                $this->postData[$dbField] = $response;
-            }
-
-            if ($this->postData[$dbField] === null && $input->getDefaultValue() !== null) {
-                $this->postData[$dbField] = $input->getDefaultValue();
-                $input->setValue($this->postData[$dbField]);
-            }
+            // $response = null;
+            // if ($this->formStatus == FormStatus::STORE) {
+            //     $response = $input->beforeStore((object) $this->postData);
+            // } else {
+            //     $response = $input->beforeUpdate($this->oldData, (object) $this->postData);
+            // }
+            //
+            // if ($response !== null) {
+            //     $this->postData[$dbField] = $response;
+            // }
+            //
+            // if ($this->postData[$dbField] === null && $input->getDefaultValue() !== null) {
+            //     $this->postData[$dbField] = $input->getDefaultValue();
+            //     $input->setValue($this->postData[$dbField]);
+            // }
         }
+    }
+
+    private function getPostValue($input, $postValue, $postData, $oldData)
+    {
+        $input->setValue($postValue);
+
+        $response = null;
+        if ($this->formStatus == FormStatus::STORE) {
+            $response = $input->beforeStore((object) $postData);
+        } else {
+            $response = $input->beforeUpdate($oldData, (object) $postData);
+        }
+
+        if ($response !== null) {
+            $postValue = $response;
+        }
+
+        if ($postValue === null && $input->getDefaultValue() !== null) {
+            $postValue = $input->getDefaultValue();
+            $input->setValue($postValue);
+        }
+
+        return $postValue;
     }
 
     private function parseEditId($id)

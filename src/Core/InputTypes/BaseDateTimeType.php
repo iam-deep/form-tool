@@ -84,7 +84,7 @@ class BaseDateTimeType extends BaseFilterType
 
     public function beforeStore(object $newData)
     {
-        $val = \trim($newData->{$this->dbField});
+        $val = \trim($newData->{$this->dbField} ?? null);
 
         $this->value = DTConverter::toDb($val, $this->dbFormat, $this->isConvertToLocal);
 
