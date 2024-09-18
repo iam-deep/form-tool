@@ -144,8 +144,8 @@ if (! function_exists('isSuccess')) {
     }
 }
 
-if (! function_exists('getSidemenu')) {
-    function getSidemenu()
+if (! function_exists('getSideMenu')) {
+    function getSideMenu()
     {
         return \Deep\FormTool\Support\Menu::generate();
     }

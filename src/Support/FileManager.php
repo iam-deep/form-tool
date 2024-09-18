@@ -37,7 +37,7 @@ class FileManager
 
                 $ext = $pathinfo['extension'] ?? '';
 
-                // Check the old file extention with new file
+                // Check the old file extension with new file
                 if ($ext == $file->getClientOriginalExtension()) {
                     $flagCheck = false;
 

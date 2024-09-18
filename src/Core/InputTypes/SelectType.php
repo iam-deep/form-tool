@@ -249,7 +249,7 @@ class SelectType extends BaseFilterType implements ISaveable
         $this->addScript();
 
         $value = $oldValue ?? $this->value;
-        if ($this->isMultiple) {
+        if ($this->isMultiple && is_string($value)) {
             $value = (array) \json_decode($this->value, true);
         }
 

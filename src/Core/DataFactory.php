@@ -3,7 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Illuminate\Support\Facades\Route;
-use Storage;
+use Illuminate\Support\Facades\Storage;
 
 class DataFactory
 {

@@ -29,7 +29,7 @@ class ImageCache
             return null;
         }
 
-        if (! self::isResizeable($imagePath)) {
+        if (! self::isResizable($imagePath)) {
             return $imagePath;
         }
 
@@ -76,7 +76,7 @@ class ImageCache
             return null;
         }
 
-        if (! self::isResizeable($imagePath)) {
+        if (! self::isResizable($imagePath)) {
             return $imagePath;
         }
 
@@ -148,7 +148,7 @@ class ImageCache
         \rmdir(self::$cachePath);
     }
 
-    private static function isResizeable($file)
+    private static function isResizable($file)
     {
         $exts = 'jpg,jpeg,png,webp,gif,bmp,tif';
 

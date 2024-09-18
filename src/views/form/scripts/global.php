@@ -121,7 +121,7 @@ $(function() {
         /*forcePlaceholderSize: true,
         forceHelperSize :true,
         start: function( event, ui ) {
-            let width = ui.item.find('fonr-control').width();
+            let width = ui.item.find('form-control').width();
             console.log(width);
             //ui.item.find('input')[0].css('width', width);
         },*/

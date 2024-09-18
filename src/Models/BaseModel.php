@@ -24,7 +24,7 @@ class BaseModel extends Model
 
     public static $limit = 20;
 
-    // If you dont' want to soft delete for this module then call softDelete(false) on CRUD
+    // If you don't want to soft delete for this module then call softDelete(false) on CRUD
     protected static $isSoftDelete = true;
 
     public static function getAll($where = null)
@@ -132,7 +132,7 @@ class BaseModel extends Model
 
     public static function updateOne($id, $data, $isToken = false)
     {
-        // We are not preventing updation of deleted data, otherwise we can't update restore
+        // We are not preventing updating of deleted data, otherwise we can't update restore
 
         $query = DB::table(static::$tableName);
 

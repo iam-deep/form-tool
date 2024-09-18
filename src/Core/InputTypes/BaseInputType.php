@@ -38,7 +38,7 @@ class BaseInputType
     protected bool $isError = false;
     protected string $error = '';
 
-    // For mulitle table alias
+    // For multiple table alias
     protected ?string $tableName = null;
     protected ?string $alias = null;
 

@@ -13,7 +13,7 @@ class Crud
     public string $name;
 
     private $resource;
-    private DataModel $model;
+    protected DataModel $model;
     private BluePrint $bluePrint;
     private Form $form;
     private Table $table;

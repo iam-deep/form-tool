@@ -733,7 +733,7 @@ class Form
 
                         $dbField = $field->getDbField();
 
-                        // If we don't have a postdata for an field like for an optional file field
+                        // If we don't have a post data for an field like for an optional file field
                         $dataRow[$dbField] = $row[$dbField] ?? null;
 
                         $field->setValue($dataRow[$dbField]);
@@ -994,7 +994,7 @@ class Form
             }
         }
 
-        // I think we should not remove the meta data like dates and updatedby
+        // I think we should not remove the meta data like dates and updatedBy
         // Remove if there is any extra fields that are not needed
 
         foreach ($this->bluePrint->getInputList() as $input) {
@@ -1033,7 +1033,7 @@ class Form
                 continue;
             }
 
-            // If we don't have a postdata for an field like for an optional file field
+            // If we don't have a post data for an field like for an optional file field
             $this->postData[$dbField] = $postData[$dbField] ?? null;
 
             $input->setValue($this->postData[$dbField]);
