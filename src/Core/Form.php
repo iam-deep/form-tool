@@ -1030,7 +1030,7 @@ class Form
                         foreach ($bluePrint->getInputList() as $input) {
                             $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()];
 
-                            $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object)[]);
+                            $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object) []);
                         }
                     }
 
