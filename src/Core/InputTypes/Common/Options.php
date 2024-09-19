@@ -617,6 +617,6 @@ trait Options
     {
         $this->createOptions();
 
-        return (array)$this->options;
+        return (array) $this->options;
     }
 }
