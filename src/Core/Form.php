@@ -1034,6 +1034,7 @@ class Form
                         }
                     }
 
+                    // If we have a select multiple field, we need to prevent it from double encoding when we have KeyValue CRUD format
                     $this->postData[$postKey] = \json_encode($newMultiplePostData);
                 }
 

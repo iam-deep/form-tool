@@ -612,4 +612,11 @@ trait Options
     {
         $this->options = null;
     }
+
+    public function getOptionsAsArray()
+    {
+        $this->createOptions();
+
+        return (array)$this->options;
+    }
 }
