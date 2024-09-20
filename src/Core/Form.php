@@ -1026,11 +1026,13 @@ class Form
                     $multiplePostData = $this->request[$postKey] ?? null;
 
                     $newMultiplePostData = [];
-                    foreach ($multiplePostData as $key => $value) {
-                        foreach ($bluePrint->getInputList() as $input) {
-                            $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()];
+                    if ($multiplePostData && is_array($multiplePostData)) {
+                        foreach ($multiplePostData as $key => $value) {
+                            foreach ($bluePrint->getInputList() as $input) {
+                                $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()];
 
-                            $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object) []);
+                                $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object) []);
+                            }
                         }
                     }
 
