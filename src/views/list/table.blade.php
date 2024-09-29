@@ -107,9 +107,13 @@ function beforeBulkSubmit()
         return false;
     }
 
+    let title = '{{ $title }}';
+    let singularTitle = '{{ $singularTitle }}';
+    title = $('#bulkIds').val().split(',').length == 1 ? singularTitle : title;
+
     let action = $('select[name="bulkAction"]').val();
     if (action == 'destroy') {
-        return confirm('Are you sure you want to DELETE the selected rows PERMANENTLY?\n\n'+
+        return confirm('Are you sure you want to DELETE the selected '+ title +' PERMANENTLY?\n\n'+
             'This action CANNOT be UNDONE!');
     }
 

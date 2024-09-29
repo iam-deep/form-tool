@@ -302,6 +302,8 @@ class Table
 
         $data['headings'] = $data['tableData'] = [];
         $data['route'] = $this->url;
+        $data['title'] = $this->resource->title ?? 'rows';
+        $data['singularTitle'] = $this->resource->singularTitle ?? 'row';
 
         // Let's remove the alias from orderBy column
         $orderBy = $this->orderBy;

@@ -67,7 +67,7 @@ trait BaseImportExport
 
         return response()->json([
             'status' => true,
-            'message' => 'Data imported successfully!',
+            'message' => ($this->title ?? 'Data').' imported successfully!',
         ]);
     }
 

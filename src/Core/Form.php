@@ -542,7 +542,13 @@ class Form
                 return $response;
             }
 
-            return $this->response(true, 'Data added successfully!');
+            $heroField = $this->bluePrint->getHeroField();
+            $heroValue = '';
+            if ($heroField && ($this->postData[$heroField] ?? null) ) {
+                $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
+            }
+
+            return $this->response(true, ($this->resource->singularTitle ?? 'Data').$heroValue.' added successfully!');
         }
 
         return $this->response(false, 'Something went wrong! Data not added successfully!');
@@ -628,7 +634,13 @@ class Form
 
         $this->invokeEvent(EventType::UPDATE);
 
-        $message = 'Data updated successfully!';
+        $heroField = $this->bluePrint->getHeroField();
+            $heroValue = '';
+            if ($heroField && ($this->postData[$heroField] ?? null) ) {
+                $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
+            }
+
+        $message = ($this->resource->singularTitle ?? 'Data').$heroValue.' updated successfully!';
         if ($this->crud->isWantsArray()) {
             return ['status' => true, 'message' => $message];
         } elseif ($this->isWantsJson()) {
@@ -1161,11 +1173,17 @@ class Form
 
         $this->invokeEvent(EventType::DELETE, $pId, $result);
 
-        $message = 'Data deleted successfully!';
+        $heroField = $this->bluePrint->getHeroField();
+            $heroValue = '';
+            if ($heroField && ($result->{$heroField} ?? null) ) {
+                $heroValue = $result->{$heroField};
+            }
+
+        $message = ($this->resource->singularTitle ?? 'Data').' <b>'.$heroValue.'</b> deleted successfully!';
         if ($this->crud->isWantsArray()) {
-            return ['status' => true, 'message' => $message];
+            return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
         } elseif ($this->isWantsJson()) {
-            return response()->json(['status' => true, 'message' => $message]);
+            return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
         }
 
         return redirect($this->url.$this->queryString)->with('success', $message);
@@ -1208,6 +1226,12 @@ class Form
         if ($response !== true) {
             return $response;
         }
+        
+        $heroField = $this->bluePrint->getHeroField();
+        $heroValue = '';
+        if ($heroField && ($result->{$heroField} ?? null) ) {
+            $heroValue = ' <b>'.$result->{$heroField}.'</b>';
+        }
 
         if ($this->crud->isSoftDelete()) {
             if (! \property_exists($result, $deletedAt)) {
@@ -1215,20 +1239,25 @@ class Form
             }
 
             if ($result->{$deletedAt} === null) {
-                return redirect($this->url.$this->queryString)->with(
-                    'error',
-                    'Soft delete is enabled for this module. You need to mark as delete first
-                        then only you can delete it permanently!'
-                );
+                $message = 'Soft delete is enabled for this module. You need to mark as delete first
+                        then only you can delete it permanently!';
+                if ($this->crud->isWantsArray()) {
+                    return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
+                } elseif ($this->isWantsJson()) {
+                    return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
+                }
+
+                return redirect($this->url.$this->queryString)->with('error', $message);
             }
         }
 
         if ($this->doDestroy($id, $result)) {
-            $message = 'Data permanently deleted successfully!';
+
+            $message = ($this->resource->singularTitle ?? 'Data').$heroValue.' permanently deleted successfully!';
             if ($this->crud->isWantsArray()) {
-                return ['status' => true, 'message' => $message];
+                return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
             } elseif ($this->isWantsJson()) {
-                return response()->json(['status' => true, 'message' => $message]);
+                return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
             }
 
             return redirect($this->url.$this->queryString)->with('success', $message);

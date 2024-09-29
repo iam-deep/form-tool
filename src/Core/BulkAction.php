@@ -60,6 +60,8 @@ class BulkAction
             return \back()->withErrors('Please select some rows to delete!');
         }
 
+        $this->table->crud->wantsArray();
+
         $response = null;
         switch ($bulkAction) {
             case 'duplicate':
@@ -99,20 +101,33 @@ class BulkAction
         $data[$metaColumns['createdBy'] ?? 'createdBy'] = Auth::id();
         $data[$metaColumns['createdAt'] ?? 'createdAt'] = \date('Y-m-d H:i:s');
 
+        $heroField = $this->table->getBluePrint()->getHeroField();
+
         $callback = $this->callback;
         $filtered = [];
+        $errorMessages = [];
+        $heroValues = [];
+        $countSuccess = 0;
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'duplicate')) {
                 $filtered[] = $id;
-                $this->doDuplicate($id, $data);
+                $result = $this->doDuplicate($id, $data);
+
+                if ($result) {
+                    $heroValue = '';
+                    if ($heroField && ($result[$heroField] ?? null)) {
+                        $heroValue = $result[$heroField];
+                    }
+                    $heroValues[] = $heroValue;
+
+                    $countSuccess++;
+                } else {
+                    $errorMessages[] = 'Error restoring <b>'.($id).'</b>';
+                }
             }
         }
 
-        if (! $filtered) {
-            return \back()->withErrors('Nothing copied!');
-        }
-
-        return \back()->with('success', 'Selected rows copied successfully!');
+        return $this->sendResponse('copied', $filtered, $countSuccess, $errorMessages, $heroValues);
     }
 
     protected function doDuplicate($id, $data)
@@ -134,7 +149,7 @@ class BulkAction
 
         // Creation is not successful let's return
         if (! $insertId) {
-            return;
+            return false;
         }
 
         foreach ($this->table->getBluePrint()->getList() as $input) {
@@ -184,6 +199,8 @@ class BulkAction
         ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result, $oldData);
 
         $this->table->crud->getForm()->invokeEvent(EventType::DUPLICATE, $insertId, $result);
+
+        return $result;
     }
 
     protected function delete($ids)
@@ -194,24 +211,36 @@ class BulkAction
 
         $callback = $this->callback;
         $filtered = [];
+        $errorMessages = [];
+        $heroValues = [];
+        $countSuccess = 0;
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'delete')) {
                 $filtered[] = $id;
-                $this->table->crud->getForm()->delete($id);
+                $response = $this->table->crud->getForm()->delete($id);
+                if (is_array($response)) {
+                    if (($response['status'] ?? false) === false) {
+                        $errorMessages[] = $response['message'] ?? ('Error deleting <b>'.($response['data']['heroValue'] ?? $id).'</b>');
+                    } else {
+                        $countSuccess++;
+                        if ($response['data']['heroValue'] ?? null) {
+                            $heroValues[] = $response['data']['heroValue'];
+                        }
+                    }
+                }
             }
         }
 
-        if (! $filtered) {
-            return \back()->withErrors('Nothing deleted!');
-        }
-
-        return \back()->with('success', 'Selected rows deleted successfully!');
+        return $this->sendResponse('deleted', $filtered, $countSuccess, $errorMessages, $heroValues);
     }
 
     protected function restore($ids)
     {
         $callback = $this->callback;
         $filtered = [];
+        $errorMessages = [];
+        $heroValues = [];
+        $countSuccess = 0;
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'restore')) {
                 $filtered[] = $id;
@@ -228,7 +257,19 @@ class BulkAction
                     $pId = $result->{$this->table->getModel()->getPrimaryId()} ?? null;
                 }
 
-                $this->table->getModel()->restore($pId);
+                $heroField = $this->table->getBluePrint()->getHeroField();
+                $heroValue = '';
+                if ($heroField && ($result->{$heroField} ?? null)) {
+                    $heroValue = $result->{$heroField};
+                }
+                $heroValues[] = $heroValue;
+
+                $response = $this->table->getModel()->restore($pId);
+                if ($response) {
+                    $countSuccess++;
+                } else {
+                    $errorMessages[] = 'Error restoring <b>'.($heroValue ?: $id).'</b>';
+                }
 
                 ActionLogger::restore($this->table->getBluePrint(), $pId, $result);
 
@@ -236,11 +277,7 @@ class BulkAction
             }
         }
 
-        if (! $filtered) {
-            return \back()->withErrors('Nothing restored!');
-        }
-
-        return \back()->with('success', 'Selected rows restored successfully!');
+        return $this->sendResponse('restored', $filtered, $countSuccess, $errorMessages, $heroValues);
     }
 
     protected function destroy($ids)
@@ -251,17 +288,49 @@ class BulkAction
 
         $callback = $this->callback;
         $filtered = [];
+        $errorMessages = [];
+        $heroValues = [];
+        $countSuccess = 0;
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'destroy')) {
                 $filtered[] = $id;
-                $this->table->crud->getForm()->destroy($id);
+                $response = $this->table->crud->getForm()->destroy($id);
+
+                if (is_array($response)) {
+                    if (($response['status'] ?? false) === false) {
+                        $errorMessages[] = $response['message'] ?? ('Error destroying <b>'.($response['data']['heroValue'] ?? $id).'</b>');
+                    } else {
+                        $countSuccess++;
+                        if ($response['data']['heroValue'] ?? null) {
+                            $heroValues[] = $response['data']['heroValue'];
+                        }
+                    }
+                }
             }
         }
 
+        return $this->sendResponse('destroyed', $filtered, $countSuccess, $errorMessages, $heroValues);
+    }
+
+    private function sendResponse($action, $filtered, $countSuccess, $errorMessages, $heroValues)
+    {
+        $resource = $this->table->getBluePrint()->getForm()->getResource();
+        $title = $resource->title;
+        $singularTitle = $resource->singularTitle;
+
         if (! $filtered) {
-            return \back()->withErrors('Nothing deleted!');
+            return \back()->withErrors('Nothing '.$action.'!');
+        }
+        if ($countSuccess && $heroValues) {
+            return \back()->with('success', $countSuccess.' '.($countSuccess > 1 ? $title : $singularTitle).' '.$action.' successfully includes <b>'.implode(', ', $heroValues).'</b>!');
+        }
+        if ($countSuccess) {
+            return \back()->with('success', $countSuccess.' '.($countSuccess > 1 ? $title : $singularTitle).' '.$action.' successfully!');
+        }
+        if ($errorMessages) {
+            return \back()->withErrors($errorMessages);
         }
 
-        return \back()->with('success', 'Selected rows deleted permanently!');
+        return \back()->with('success', 'Selected '.$title.' '.$action.' successfully!');
     }
 }
