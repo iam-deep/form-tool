@@ -122,7 +122,7 @@ class BulkAction
 
                     $countSuccess++;
                 } else {
-                    $errorMessages[] = 'Error restoring <b>'.($id).'</b>';
+                    $errorMessages[] = 'Error restoring <b>'.$id.'</b>';
                 }
             }
         }

@@ -544,7 +544,7 @@ class Form
 
             $heroField = $this->bluePrint->getHeroField();
             $heroValue = '';
-            if ($heroField && ($this->postData[$heroField] ?? null) ) {
+            if ($heroField && ($this->postData[$heroField] ?? null)) {
                 $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
             }
 
@@ -635,10 +635,10 @@ class Form
         $this->invokeEvent(EventType::UPDATE);
 
         $heroField = $this->bluePrint->getHeroField();
-            $heroValue = '';
-            if ($heroField && ($this->postData[$heroField] ?? null) ) {
-                $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
-            }
+        $heroValue = '';
+        if ($heroField && ($this->postData[$heroField] ?? null)) {
+            $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
+        }
 
         $message = ($this->resource->singularTitle ?? 'Data').$heroValue.' updated successfully!';
         if ($this->crud->isWantsArray()) {
@@ -1174,10 +1174,10 @@ class Form
         $this->invokeEvent(EventType::DELETE, $pId, $result);
 
         $heroField = $this->bluePrint->getHeroField();
-            $heroValue = '';
-            if ($heroField && ($result->{$heroField} ?? null) ) {
-                $heroValue = $result->{$heroField};
-            }
+        $heroValue = '';
+        if ($heroField && ($result->{$heroField} ?? null)) {
+            $heroValue = $result->{$heroField};
+        }
 
         $message = ($this->resource->singularTitle ?? 'Data').' <b>'.$heroValue.'</b> deleted successfully!';
         if ($this->crud->isWantsArray()) {
@@ -1226,10 +1226,10 @@ class Form
         if ($response !== true) {
             return $response;
         }
-        
+
         $heroField = $this->bluePrint->getHeroField();
         $heroValue = '';
-        if ($heroField && ($result->{$heroField} ?? null) ) {
+        if ($heroField && ($result->{$heroField} ?? null)) {
             $heroValue = ' <b>'.$result->{$heroField}.'</b>';
         }
 
@@ -1252,7 +1252,6 @@ class Form
         }
 
         if ($this->doDestroy($id, $result)) {
-
             $message = ($this->resource->singularTitle ?? 'Data').$heroValue.' permanently deleted successfully!';
             if ($this->crud->isWantsArray()) {
                 return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
