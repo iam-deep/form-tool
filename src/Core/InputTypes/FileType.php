@@ -15,6 +15,10 @@ class FileType extends BaseInputType
     private float $maxSizeInKb = 0;
     private $accept = '';
 
+    private $cropWidth = null;
+    private $cropHeight = null;
+    private string $cropPosition = 'center';
+
     protected string $placeholderImage = 'assets/form-tool/images/placeholder.png';
 
     public function __construct()
@@ -49,9 +53,25 @@ class FileType extends BaseInputType
         return $this;
     }
 
-    public function maxSize(float $maxSizeInKb)
+    public function maxUploadSize(float $maxSizeInKb)
     {
         $this->maxSizeInKb = $maxSizeInKb;
+
+        return $this;
+    }
+
+    public function crop($width, $height = null, $position = 'center')
+    {
+        $this->cropWidth = $width;
+        $this->cropHeight = $height;
+        $this->cropPosition = $position;
+
+        return $this;
+    }
+
+    public function imagePlaceholder(string $relativePath)
+    {
+        $this->placeholderImage = $relativePath;
 
         return $this;
     }
@@ -119,12 +139,12 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            $this->value = FileManager::uploadFile($file, $this->path);
+            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path);
 
             return $this->value;
         } else {
             $file = $request->file($this->dbField);
-            $this->value = FileManager::uploadFile($file, $this->path);
+            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path);
 
             return $this->value;
         }
@@ -141,7 +161,7 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            $filename = FileManager::uploadFile($file, $this->path, $oldFile);
+            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path, $oldFile);
             if ($filename !== null) {
                 $this->value = $filename;
 
@@ -151,7 +171,7 @@ class FileType extends BaseInputType
             $oldFile = $request->post($this->dbField);
             $file = $request->file($this->dbField);
 
-            $filename = FileManager::uploadFile($file, $this->path, $oldFile);
+            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path, $oldFile);
             if ($filename !== null) {
                 $this->value = $filename;
 

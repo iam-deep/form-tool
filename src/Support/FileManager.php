@@ -3,15 +3,32 @@
 namespace Deep\FormTool\Support;
 
 use Illuminate\Http\UploadedFile;
+use Intervention\Image\Facades\Image;
 
 class FileManager
 {
     protected static string $uploadPath = 'storage';
     protected static string $uploadSubDirFormat = 'm-Y';
     protected static string $allowedTypes = 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,'.
-        'pptx,webm,mkv,flv,vob,avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz'.
-        ',zipx';
+        'pptx,webm,mkv,flv,vob,avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz,zipx';
     protected static string $imageTypes = 'jpg,jpeg,png,webp,gif,svg,bmp,tif';
+
+    protected static $cropWidth = null;
+    protected static $cropHeight = null;
+    protected static $cropPosition = 'center';
+
+    public static function setCrop($width, $height = null, $position = 'center')
+    {
+        if ($height === null) {
+            $height = $width;
+        }
+
+        self::$cropWidth = $width;
+        self::$cropHeight = $height;
+        self::$cropPosition = $position;
+
+        return self::class;
+    }
 
     public static function getAllowedTypes()
     {
@@ -80,7 +97,23 @@ class FileManager
             }
         }
 
-        $file->move($destinationPath, $filename);
+        if (self::isImage($filename) && self::$cropWidth) {
+            $image = Image::make($file);
+
+            // perform orientation using intervention, this is needed for direct upload from mobile camera capture
+            $image->orientate();
+
+            $image->fit(self::$cropWidth, self::$cropHeight, null, self::$cropPosition);
+
+            $image->save($destinationPath.$filename);
+        } else {
+            $file->move($destinationPath, $filename);
+        }
+
+        // set back to null
+        self::$cropWidth = null;
+        self::$cropHeight = null;
+        self::$cropPosition = 'center';
 
         return $destinationPath.$filename;
     }
