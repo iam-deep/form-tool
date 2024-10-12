@@ -173,23 +173,23 @@ if (! function_exists('isNullOrEmpty')) {
 }
 
 if (! function_exists('niceDateTime')) {
-    function niceDateTime(?string $datetime, bool $isConvertToLocal = true)
+    function niceDateTime(?string $datetime, bool $isConvertToLocal = true, ?string $format = null)
     {
-        return \Deep\FormTool\Support\DTConverter::niceDateTime($datetime, $isConvertToLocal);
+        return \Deep\FormTool\Support\DTConverter::niceDateTime($datetime, $isConvertToLocal, $format);
     }
 }
 
 if (! function_exists('niceDate')) {
-    function niceDate(?string $date, bool $isConvertToLocal = true)
+    function niceDate(?string $date, bool $isConvertToLocal = true, ?string $format = null)
     {
-        return \Deep\FormTool\Support\DTConverter::niceDate($date, $isConvertToLocal);
+        return \Deep\FormTool\Support\DTConverter::niceDate($date, $isConvertToLocal, $format);
     }
 }
 
 if (! function_exists('niceTime')) {
-    function niceTime(?string $time, bool $isConvertToLocal = true)
+    function niceTime(?string $time, bool $isConvertToLocal = true, ?string $format = null)
     {
-        return \Deep\FormTool\Support\DTConverter::niceTime($time, $isConvertToLocal);
+        return \Deep\FormTool\Support\DTConverter::niceTime($time, $isConvertToLocal, $format);
     }
 }
 
