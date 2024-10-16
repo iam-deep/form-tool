@@ -23,7 +23,6 @@ class Form
 
     private $editId;
 
-    private $url = '';
     private $queryString = '';
 
     private $resultData = null;
@@ -69,7 +68,6 @@ class Form
         $this->options = new \stdClass();
 
         $this->request = request();
-        $this->url = config('form-tool.adminURL').'/'.$this->resource->route;
         $this->queryString = '?'.$this->request->getQueryString();
 
         $this->isLogAction = \config('form-tool.isLogActions', true);
@@ -231,15 +229,15 @@ class Form
         }
 
         $data->isEdit = $this->formStatus == FormStatus::EDIT;
-        $url = URL::to(config('form-tool.adminURL').'/'.$this->resource->route);
+        $url = createUrl($this->resource->route, $this->queryString);
 
         $data = (object) array_merge((array) $data, $this->htmlForm);
         if ($data->action) {
             if (false !== strpos($data->action, 'http')) {
-                $data->action = url($data->action);
+                $data->action = createUrl($data->action);
             }
         } else {
-            $data->action = $url.$this->queryString;
+            $data->action = $url;
         }
 
         if ($this->request->query('redirect')) {
@@ -247,10 +245,10 @@ class Form
         } else {
             if ($data->cancel) {
                 if (false !== strpos($data->cancel, 'http')) {
-                    $data->cancel = url($data->cancel);
+                    $data->cancel = createUrl($data->cancel);
                 }
             } else {
-                $data->cancel = $url.$this->queryString;
+                $data->cancel = $url;
             }
         }
 
@@ -260,9 +258,9 @@ class Form
                 ($this->resultData->{$this->model->getPrimaryId()} ?? null);
 
             if ($editId) {
-                $data->action = $url.'/'.$editId.$this->queryString;
+                $data->action = createUrl($this->resource->route.'/'.$editId, $this->queryString);
             } else {
-                $data->action = $url.$this->queryString;
+                $data->action = $url;
             }
         }
 
@@ -580,7 +578,7 @@ class Form
                     return response()->json(['status' => false, 'message' => $message], 422);
                 }
 
-                return redirect($this->url.$this->queryString)->with('error', $message);
+                return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
             }
 
             $this->editId = $this->oldData->{$this->model->getPrimaryId()};
@@ -647,12 +645,12 @@ class Form
             return response()->json(['status' => true, 'message' => $message]);
         }
 
-        $redirect = $this->url.$this->queryString;
-        if ($this->request->query('redirect')) {
-            $redirect = urldecode($this->request->query('redirect'));
+        $redirect = $this->request->query('redirect');
+        if ($redirect) {
+            return redirect(urldecode($redirect))->with('success', $message);
         }
 
-        return redirect($redirect)->with('success', $message);
+        return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
     }
 
     private function afterSave()
@@ -1154,7 +1152,7 @@ class Form
                 return response()->json(['status' => false, 'message' => $message], 422);
             }
 
-            return redirect($this->url.$this->queryString)->with('error', $message);
+            return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
         }
 
         $pId = $id;
@@ -1186,7 +1184,7 @@ class Form
             return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
         }
 
-        return redirect($this->url.$this->queryString)->with('success', $message);
+        return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
     }
 
     public function destroy($id = null)
@@ -1214,7 +1212,7 @@ class Form
                 return response()->json(['status' => false, 'message' => $message], 422);
             }
 
-            return redirect($this->url.$this->queryString)->with('error', $message);
+            return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
         }
 
         $pId = $id;
@@ -1247,7 +1245,7 @@ class Form
                     return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
                 }
 
-                return redirect($this->url.$this->queryString)->with('error', $message);
+                return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
             }
         }
 
@@ -1259,10 +1257,10 @@ class Form
                 return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
             }
 
-            return redirect($this->url.$this->queryString)->with('success', $message);
+            return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
         }
 
-        return redirect($this->url.$this->queryString)->with(
+        return redirect(createUrl($this->resource->route, $this->queryString))->with(
             'error',
             'Something went wrong! Data not deleted fully, please contact Support Administrator.'
         );
@@ -1433,7 +1431,7 @@ class Form
                 return response()->json(['status' => false, 'message' => $message], 422);
             }
 
-            return redirect($this->url.$this->queryString)->with('error', $message);
+            return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
         }
 
         return true;
@@ -1487,7 +1485,7 @@ class Form
                 );
             }
 
-            $url = $result['route'] ? URL::to(\config('form-tool.adminURL').'/'.$result['route']) : null;
+            $url = $result['route'] ? createUrl($result['route']) : null;
             $hasEditPermission = $result['route'] ? Guard::hasEdit($result['route']) : false;
             $hasDestroyPermission = $result['route'] ? Guard::hasDestroy($result['route']) : false;
 
@@ -1578,12 +1576,12 @@ class Form
         }
 
         if ($status === true) {
-            $redirect = $this->url.'/create'.$this->queryString;
-            if ($this->request->query('redirect')) {
-                $redirect = urldecode($this->request->query('redirect'));
+            $redirect = $this->request->query('redirect');
+            if ($redirect) {
+                return redirect(urldecode($redirect))->with('success', $message);
             }
 
-            return redirect($redirect)->with('success', $message);
+            return back()->with('success', $message);
         }
 
         return back()->with('error', $message)->withInput();
@@ -1652,14 +1650,14 @@ class Form
         return $this->resultData;
     }
 
-    public function getUrl()
+    public function getRoute()
     {
-        return $this->url;
+        return $this->resource->route;
     }
 
     public function getFullUrl()
     {
-        return $this->url.$this->queryString;
+        return createUrl($this->resource->route, $this->queryString);
     }
 
     public function setCrud(Crud $crud)

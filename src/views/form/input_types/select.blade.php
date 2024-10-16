@@ -27,7 +27,7 @@ if ($input->type == 'single') {
                 $('#quickAddModal').modal('show');
 
                 $.ajax({
-                    url: "{{ url($input->quickData->route) }}",
+                    url: "{{ createUrl($input->quickData->route) }}",
                     type: "get",
                     dataType: "json",
                     error: function(json) {

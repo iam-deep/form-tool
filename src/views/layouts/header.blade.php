@@ -2,7 +2,7 @@
 <header class="main-header">
 
   <!-- Logo -->
-  <a href="{{ url(config('form-tool.adminURL') . '/dashboard') }}" class="logo">
+  <a href="{{ createUrl('/dashboard') }}" class="logo">
     <!-- mini logo for sidebar mini 50x50 pixels -->
     <span class="logo-mini">{{ substr(config('app.name', 'Admin'), 0, 3) }}</span>
     <!-- logo for regular state and mobile devices -->
@@ -20,7 +20,7 @@
       <ul class="nav navbar-nav">
         @if ('website' == config('app.type'))
           <li>
-            <a href="{{ url('/') }}" target="_blank" title="View Website" data-toggle="tooltip">
+            <a href="{{ createUrl('/') }}" target="_blank" title="View Website" data-toggle="tooltip">
               <i class="fa fa-globe"></i>
             </a>
           </li>
@@ -47,11 +47,11 @@
             </li>
             <li class="user-footer">
               <div class="pull-left">
-                <a href="{{ url(config('form-tool.adminURL') . '/change-password') }}"
+                <a href="{{ createUrl('/change-password') }}"
                   class="btn btn-default btn-flat">Password</a>
               </div>
               <div class="pull-right">
-                {{-- <a href="{{ url(config('form-tool.adminURL') . '/logout') }}" class="btn btn-default btn-flat">Sign out</a> --}}
+                {{-- <a href="{{ createUrl('/logout') }}" class="btn btn-default btn-flat">Sign out</a> --}}
                 <form method="POST" action="{{ route('logout') }}">
                   @csrf
                   <a href="{{ route('logout') }}" onclick="event.preventDefault();this.closest('form').submit();"

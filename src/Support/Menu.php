@@ -4,7 +4,6 @@ namespace Deep\FormTool\Support;
 
 use Closure;
 use Deep\FormTool\Core\Guard;
-use Illuminate\Support\Facades\URL;
 
 class Menu
 {
@@ -23,7 +22,7 @@ class Menu
     private function __construct()
     {
         // The construct must remain private
-        $this->baseURL = config('form-tool.adminURL', '');
+        $this->baseURL = createUrl('/');
     }
 
     /**
@@ -67,7 +66,7 @@ class Menu
     ) {
         if (! $guardAction || Guard::{'has'.$guardAction}($guardUrl ?: $route)) {
             $this->list[] = (object) [
-                'href' => URL::to($this->baseURL.'/'.$route),
+                'href' => $this->baseURL.'/'.$route,
                 'route' => $route,
                 'label' => $label,
                 'icon' => $icon,
@@ -104,6 +103,7 @@ class Menu
             return $this->activeLink;
         }
 
+        // TODO: need to change this after createUrl callback is added
         $url = str_replace(url(\config('form-tool.adminURL')).'/', '', url()->current());
         $this->activeLink = $url;
 
@@ -140,11 +140,11 @@ class Menu
                 $newMenu->icon = $menu->parentIcon;
 
                 // Make the menu and active the parent if any child is active
-                $newMenu->childs = $menu->make($active);
+                $newMenu->children = $menu->make($active);
                 $newMenu->active = $menu->isChildActive;
                 $this->isChildActive = ! $this->isChildActive ? $menu->isChildActive : true;
 
-                if (\count($newMenu->childs)) {
+                if (\count($newMenu->children)) {
                     $menu = $newMenu;
                 } else {
                     unset($this->list[$key]);

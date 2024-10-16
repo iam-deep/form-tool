@@ -5,7 +5,7 @@
         </span>
     </a>
     <ul class="treeview-menu">
-        @foreach ($menu->childs as $subMenu)
+        @foreach ($menu->children as $subMenu)
             @if ($subMenu->isParent)
                 @include('form-tool::layouts.sub_menu', ['menu' => $subMenu])
             @else

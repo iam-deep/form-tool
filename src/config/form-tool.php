@@ -184,4 +184,7 @@ return [
         // Others Files
         '*' => 'fa fa-file-text',
     ],
+
+    // Callbacks
+    'callbackUrl' => null,
 ];

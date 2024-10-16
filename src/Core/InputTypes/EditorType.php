@@ -8,7 +8,6 @@ use Deep\FormTool\Core\InputTypes\Common\IPluginableType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
 class EditorType extends BaseInputType implements ISearchable, IPluginableType
@@ -108,7 +107,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
         $path = FileManager::uploadFile($request->file($fieldName), $request->query('path'));
         if ($path != null) {
-            return response()->json(['url' => URL::asset($path)], 200);
+            return response()->json(['url' => asset($path)], 200);
         }
 
         return response()->json([
@@ -217,7 +216,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
     public function setJs(string $selectorId, string $uploadPath = '')
     {
-        $uploadPath = url(config('form-tool.adminURL').'/form-tool/editor-upload').'?path='.$uploadPath;
+        $uploadPath = createUrl('/form-tool/editor-upload', 'path='.$uploadPath);
 
         if ($this->currentPlugin == 'ckeditor') {
             Doc::addJs(
@@ -238,11 +237,11 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
     public function decodeHTML($data)
     {
-        return \str_replace('{BASE_URL}', URL::to('/'), \htmlspecialchars_decode($data));
+        return \str_replace('{BASE_URL}', createUrl('/'), \htmlspecialchars_decode($data));
     }
 
     public function encodeHTML($data)
     {
-        return \str_replace(URL::to('/'), '{BASE_URL}', \htmlspecialchars($data));
+        return \str_replace(createUrl('/'), '{BASE_URL}', \htmlspecialchars($data));
     }
 }

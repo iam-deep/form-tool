@@ -242,7 +242,6 @@ class Crud
     public function index()
     {
         $request = request();
-        $currentUrl = url()->current();
 
         $this->saveCrud();
 
@@ -255,7 +254,7 @@ class Crud
         $page->quickFilter = $filter->quickFilter;
 
         $page->searchQuery = $request->query('search');
-        $page->searchLink = $currentUrl.'/search?'.\http_build_query($request->except(['search', 'page']));
+        $page->searchLink = createUrl($this->resource->route.'/search', $request->except(['search', 'page']));
 
         $page->bulkAction = $this->table->getBulkAction();
         $page->tableContent = $this->table->getContent();

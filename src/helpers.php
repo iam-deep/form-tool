@@ -260,3 +260,24 @@ if (! function_exists('dateHumanDiff')) {
         return $dt->diffForHumans();
     }
 }
+
+if (! function_exists('createUrl')) {
+    function createUrl($route, $queryParams = null)
+    {
+        $queryParams = is_array($queryParams) ? http_build_query($queryParams) : $queryParams;
+
+        $callbackUrl = config('form-tool.callbackUrl');
+        if ($callbackUrl) {
+            return $callbackUrl($route, $queryParams);
+        }
+
+        $route .= $queryParams ? '?'.$queryParams : '';
+
+        $adminDir = config('form-tool.adminURL');
+        if ($adminDir) {
+            return url($adminDir.'/'.$route);
+        }
+
+        return url($route);
+    }
+}

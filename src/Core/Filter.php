@@ -116,7 +116,7 @@ class Filter
 
         $queries = array_filter($request->except('page'));
         $data->showClearButton = ! empty($queries);
-        $data->clearUrl = url($this->bluePrint->getForm()->getUrl());
+        $data->clearUrl = createUrl($this->bluePrint->getForm()->getRoute());
 
         return $data;
     }

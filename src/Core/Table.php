@@ -6,7 +6,6 @@ use Closure;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\URL;
 
 class Table
 {
@@ -21,7 +20,6 @@ class Table
     private $dataResult;
 
     private Request $request;
-    private $url;
 
     private $isFromTrash = false;
     private ?string $orderBy = null;
@@ -55,7 +53,6 @@ class Table
         $this->bulkAction->setTable($this);
 
         $this->request = request();
-        $this->url = URL::to(config('form-tool.adminURL').'/'.$resource->route);
     }
 
     public function setCrud(Crud $crud)
@@ -173,7 +170,7 @@ class Table
             }
 
             $search = ['{crud_name}', '{crud_url}', '{query_string}'];
-            $replace = [$crudName, $this->url, $queryString];
+            $replace = [$crudName, createUrl($this->resource->route), $queryString];
             $button->process($search, $replace);
 
             if (! $primary && ! $button->isDivider()) {
@@ -301,7 +298,7 @@ class Table
         $orderUrlQueryString = \http_build_query($this->request->except(['orderby', 'direction', 'page']));
 
         $data['headings'] = $data['tableData'] = [];
-        $data['route'] = $this->url;
+        $data['route'] = createUrl($this->resource->route);
         $data['title'] = $this->resource->title ?? 'rows';
         $data['singularTitle'] = $this->resource->singularTitle ?? 'row';
 
@@ -424,7 +421,7 @@ class Table
                     }
 
                     $search = ['{id}', '{crud_name}', '{crud_url}', '{query_string}'];
-                    $replace = [$value->{$primaryId}, $crudName, $this->url, $queryString];
+                    $replace = [$value->{$primaryId}, $crudName, createUrl($this->resource->route), $queryString];
                     $buttons = $this->field->getActionButtons();
                     if ($buttons->primary) {
                         $buttons->primary = clone $buttons->primary;
@@ -482,14 +479,14 @@ class Table
 
         $quickFilters = [
             'all' => [
-                'href' => $this->url,
+                'href' => createUrl($this->resource->route),
                 'label' => 'All',
                 'count' => 0,
                 'active' => false,
                 'separator' => true,
             ],
             'trash' => [
-                'href' => $this->url.'?quick_status=trash',
+                'href' => createUrl($this->resource->route, ['quick_status' => 'trash']),
                 'label' => 'Trash',
                 'count' => 0,
                 'active' => false,
@@ -627,7 +624,7 @@ class Table
 
         $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
         $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
-        $data['formAction'] = $this->url.'/bulk-action?'.$this->request->getQueryString();
+        $data['formAction'] = createUrl($this->resource->route.'/bulk-action', $this->request->getQueryString());
 
         return \view('form-tool::list.bulk_action', $data);
     }

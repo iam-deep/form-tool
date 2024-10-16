@@ -29,7 +29,7 @@ $("#{{ $input->multipleKey }}").on("change", '.{{ $input->multipleKey }}-{{ $inp
     @endif
 
     $.ajax({
-        url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
+        url: "{{ createUrl($input->route.'/get-options') }}",
         type: "post",
         dataType:"json",
         data: { _token: csrf_token, values: vals, field: "{{ $input->field }}", multipleKey: '{{ $input->multipleKey }}', state: "{{ $state }}" },

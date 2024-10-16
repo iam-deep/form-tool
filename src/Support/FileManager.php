@@ -126,7 +126,7 @@ class FileManager
                     \unlink($file);
                 }
             } catch (\Exception $e) {
-                // TODO: log
+                ($e);
             }
         }
     }

@@ -6,6 +6,6 @@
   </div>
   <!-- Default to the left -->
   <strong>
-      Copyright &copy; {{ date('Y') }} <a href="{{ url('/') }}" target="_blank">{{ config('app.name', 'Admin') }}</a>.
+      Copyright &copy; {{ date('Y') }} <a href="{{ createUrl('/') }}" target="_blank">{{ config('app.name', 'Admin') }}</a>.
   </strong> All rights reserved.
 </footer>

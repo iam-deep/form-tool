@@ -8,7 +8,6 @@ use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Deep\FormTool\Support\DTConverter;
 use Deep\FormTool\Support\Settings;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\URL;
 
 class Doc
 {
@@ -186,7 +185,7 @@ class Doc
                 if (false !== \strpos($link, '//')) {
                     $links[] = '<link href="'.$link.'" rel="stylesheet" type="text/css" />';
                 } else {
-                    $links[] = '<link href="'.URL::asset($link).'" rel="stylesheet" type="text/css" />';
+                    $links[] = '<link href="'.asset($link).'" rel="stylesheet" type="text/css" />';
                 }
             }
         }
@@ -202,7 +201,7 @@ class Doc
                 if (false !== \strpos($link, '//')) {
                     $links[] = '<script src="'.$link.'"></script>';
                 } else {
-                    $links[] = '<script src="'.URL::asset($link).'"></script>';
+                    $links[] = '<script src="'.asset($link).'"></script>';
                 }
             }
         }

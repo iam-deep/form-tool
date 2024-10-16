@@ -19,7 +19,7 @@
                     <div class="box-footer">
                         @csrf
                         <button type="submit" class="btn btn-primary btn-flat">Upload</button>
-                        <a class="pull-right" href="{{ url(config('form-tool.adminURL') . '/' . $route) }}/sample">
+                        <a class="pull-right" href="{{ createUrl($route.'/sample') }}">
                             Download Sample File
                         </a>
                     </div>

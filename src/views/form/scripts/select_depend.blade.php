@@ -30,7 +30,7 @@ $("#{{ $input->dependField }}").on("change", function() {
     @endif
 
     $.ajax({
-        url: "{{ url(config('form-tool.adminURL').'/'.$input->route.'/get-options') }}",
+        url: "{{ createUrl($input->route.'/get-options') }}",
         type: "post",
         dataType:"json",
         data: { _token: csrf_token, values: vals, field: "{{ $input->field }}", state: "{{ $state }}" },
