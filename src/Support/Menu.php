@@ -103,20 +103,33 @@ class Menu
             return $this->activeLink;
         }
 
-        // TODO: need to change this after createUrl callback is added
-        $url = str_replace(url(\config('form-tool.adminURL')).'/', '', url()->current());
-        $this->activeLink = $url;
+        // TODO: We need to be sure the controller is not getting instantiated twice
+        $controller = \Illuminate\Support\Facades\Route::current()->getController();
 
-        // Let's check if we have opened edit/create/show/index
-        // We don't have anything that can select for show() with token
-        if (false !== \strpos($url, '/edit')) {
-            $this->activeLink = \substr($url, 0, \strrpos($url, '/', -6));
-        } elseif (\preg_match('/(.*)\/create/', $url, $matches) !== false && $matches) {
-            $this->activeLink = $matches[1] ?? null;
-        } elseif (\preg_match('/(.*)\/[0-9].*/', $url, $matches) !== false && $matches) {
-            $this->activeLink = $matches[1] ?? null;
-        } elseif (\preg_match('/(.*)/', $url, $matches) !== false && $matches) {
-            $this->activeLink = $matches[1] ?? null;
+        // Let's check if we have a route property in the controller
+        if ($controller && isset($controller->route)) {
+            $this->activeLink = $controller->route;
+        } else {
+            $name = \Illuminate\Support\Facades\Route::current()->getName();
+            $this->activeLink = \explode('.', $name)[0] ?? null;
+
+            // This only works without prefix, I don't think this is need as we are using the route and name
+            if (! $this->activeLink) {
+                $url = str_replace(url(\config('form-tool.adminURL')).'/', '', url()->current());
+                $this->activeLink = $url;
+
+                // Let's check if we have opened edit/create/show/index
+                // We don't have anything that can select for show() with token
+                if (false !== \strpos($url, '/edit')) {
+                    $this->activeLink = \substr($url, 0, \strrpos($url, '/', -6));
+                } elseif (\preg_match('/(.*)\/create/', $url, $matches) !== false && $matches) {
+                    $this->activeLink = $matches[1] ?? null;
+                } elseif (\preg_match('/(.*)\/\d.*/', $url, $matches) !== false && $matches) {
+                    $this->activeLink = $matches[1] ?? null;
+                } elseif (\preg_match('/(.*)/', $url, $matches) !== false && $matches) {
+                    $this->activeLink = $matches[1] ?? null;
+                }
+            }
         }
 
         return $this->activeLink;

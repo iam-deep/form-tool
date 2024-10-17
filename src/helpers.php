@@ -264,14 +264,24 @@ if (! function_exists('dateHumanDiff')) {
 if (! function_exists('createUrl')) {
     function createUrl($route, $queryParams = null)
     {
-        $queryParams = is_array($queryParams) ? http_build_query($queryParams) : $queryParams;
-
         $callbackUrl = config('form-tool.callbackUrl');
         if ($callbackUrl) {
             return $callbackUrl($route, $queryParams);
         }
 
-        $route .= $queryParams ? '?'.$queryParams : '';
+        if ($route && $route[0] == '/') {
+            $route = substr($route, 1);
+        }
+
+        if ($queryParams) {
+            $queryParams = is_array($queryParams) ? http_build_query($queryParams) : $queryParams;
+
+            if (strpos($route, '?') !== false) {
+                $route .= '&'.$queryParams;
+            } else {
+                $route .= '?'.$queryParams;
+            }
+        }
 
         $adminDir = config('form-tool.adminURL');
         if ($adminDir) {
