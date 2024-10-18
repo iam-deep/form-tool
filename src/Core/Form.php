@@ -8,7 +8,6 @@ use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\Validator;
 
 class Form
@@ -68,7 +67,7 @@ class Form
         $this->options = new \stdClass();
 
         $this->request = request();
-        $this->queryString = '?'.$this->request->getQueryString();
+        $this->queryString = $this->request->getQueryString();
 
         $this->isLogAction = \config('form-tool.isLogActions', true);
     }
