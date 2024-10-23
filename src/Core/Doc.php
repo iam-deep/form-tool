@@ -116,9 +116,27 @@ class Doc
                 return $id;
             }
         } else {
-            $parameters = Route::getCurrentRoute()->parameters();
-            if ($parameters) {
-                return array_values($parameters)[0];
+            $currentRoute = Route::getCurrentRoute();
+            if ($currentRoute) {
+                $prefix = $currentRoute->getPrefix();
+                if ($prefix) {
+                    $prefixes = explode('/', str_replace(['{', '}'], '', $prefix));
+                    if ($prefixes) {
+                        $parameters = $currentRoute->parameters();
+                        foreach ($prefixes as $prefix) {
+                            unset($parameters[$prefix]);
+                        }
+
+                        if ($parameters) {
+                            return array_values($parameters)[0];
+                        }
+                    }
+                } else {
+                    $parameters = $currentRoute->parameters();
+                    if ($parameters) {
+                        return array_values($parameters)[0];
+                    }
+                }
             }
         }
 
