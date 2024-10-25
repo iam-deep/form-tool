@@ -312,7 +312,9 @@ class SelectType extends BaseFilterType implements ISaveable
             'raw' => $this->raw.$this->inlineCSS,
             'isMultiple' => $this->isMultiple,
             'options' => $this->getOptions($this->value),
-            'isQuickAdd' => $this->quickAddClass ? true : false,
+            'isPlugin' => $this->currentPlugin ? true : false,
+            'plugin' => $this->currentPlugin,
+            'isQuickAdd' => false,
         ];
 
         return $this->htmlParentDivFilter(view('form-tool::form.input_types.select', $data)->render());
