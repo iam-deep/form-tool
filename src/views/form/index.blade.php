@@ -50,7 +50,9 @@ let template = [];
                 <div class="box-footer footer-sticky">
                     <div class="row">
                         <div class="col-sm-8 col-sm-offset-2">
-                            <button class="btn btn-success btn-flat submit">{{ $page->form->buttonSubmit }}</button>
+                            @if ($page->form->isButtonSubmit)
+                                <button class="btn btn-success btn-flat submit">{{ $page->form->buttonSubmit }}</button>
+                            @endif
 
                             @if ($page->form->isButtonCancel)
                                 &nbsp; <a href="{{ $page->form->cancel }}" class="btn btn-default btn-flat">{{ $page->form->buttonCancel }}</a>

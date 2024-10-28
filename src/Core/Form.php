@@ -52,6 +52,7 @@ class Form
     private $htmlForm = [
         'action' => null,
         'method' => 'POST',
+        'isButtonSubmit' => true,
         'buttonSubmit' => 'Save',
         'isButtonCancel' => true,
         'buttonCancel' => 'Cancel',
@@ -186,9 +187,10 @@ class Form
         return $this->crud;
     }
 
-    public function formSubmitButton($label)
+    public function formSubmitButton($label, $isVisible = true)
     {
         $this->htmlForm['buttonSubmit'] = trim($label) ?: 'Save';
+        $this->htmlForm['isButtonSubmit'] = $isVisible;
 
         return $this->crud;
     }
