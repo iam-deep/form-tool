@@ -120,7 +120,7 @@ if ($input->type == 'single') { ?>
 
             <div class="col-sm-6" id="<?php echo $input->groupId; ?>"> &nbsp;
                 <a href="<?php echo asset($input->value); ?>" target="_blank"><?php echo $file; ?></a>
-                <input type="hidden" name="<?php echo $input->name; ?>" value="<?php echo $input->value; ?>">
+                <input type="hidden" name="<?php echo $input->name; ?>" value="<?php echo $input->rawValue; ?>">
                 <button class="close pull-right" aria-hidden="true" type="button" onclick="<?php echo $script; ?>">
                     <i class="fa fa-times"></i>
                 </button>
