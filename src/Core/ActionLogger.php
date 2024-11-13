@@ -7,7 +7,7 @@ namespace Deep\FormTool\Core;
 
 class ActionLogger
 {
-    public static function create(BluePrint $bluePrint, $refId)
+    public static function create(BluePrint $bluePrint, $refId, $newData = null, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
@@ -19,6 +19,10 @@ class ActionLogger
         foreach ($bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint || ! $input->isLogColumn()) {
                 continue;
+            }
+
+            if ($newData) {
+                $input->setValue($newData[$input->getDbField()] ?? '');
             }
 
             $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
@@ -40,11 +44,12 @@ class ActionLogger
             'token' => $bluePrint->getForm()->getModel()->getLastToken(),
             'description' => $description,
             'data' => $data,
+            'path' => $path,
         ];
         self::insert($bluePrint, $request);
     }
 
-    public static function duplicate(BluePrint $bluePrint, $refId, $result, $oldData)
+    public static function duplicate(BluePrint $bluePrint, $refId, $result, $oldData, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
@@ -83,11 +88,12 @@ class ActionLogger
             'token' => $bluePrint->getForm()->getModel()->getLastToken(),
             'description' => $description,
             'data' => $data,
+            'path' => $path,
         ];
         self::insert($bluePrint, $request);
     }
 
-    public static function update(BluePrint $bluePrint, $refId, $oldData, $newData)
+    public static function update(BluePrint $bluePrint, $refId, $oldData, $newData, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
@@ -131,11 +137,12 @@ class ActionLogger
             'token' => self::getToken($bluePrint, $oldData),
             'description' => $description,
             'data' => $data,
+            'path' => $path,
         ];
         self::insert($bluePrint, $request);
     }
 
-    public static function delete(BluePrint $bluePrint, $refId, $oldData)
+    public static function delete(BluePrint $bluePrint, $refId, $oldData, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
@@ -157,11 +164,12 @@ class ActionLogger
             'token' => self::getToken($bluePrint, $oldData),
             'description' => $description,
             'data' => null,
+            'path' => $path,
         ];
         self::insert($bluePrint, $request);
     }
 
-    public static function destroy(BluePrint $bluePrint, $refId, $oldData)
+    public static function destroy(BluePrint $bluePrint, $refId, $oldData, $path)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
@@ -193,11 +201,12 @@ class ActionLogger
             'token' => self::getToken($bluePrint, $oldData),
             'description' => $description,
             'data' => $data,
+            'path' => $path,
         ];
         self::insert($bluePrint, $request);
     }
 
-    public static function restore(BluePrint $bluePrint, $refId, $oldData)
+    public static function restore(BluePrint $bluePrint, $refId, $oldData, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
@@ -219,6 +228,7 @@ class ActionLogger
             'token' => self::getToken($bluePrint, $oldData),
             'description' => $description,
             'data' => null,
+            'path' => $path,
         ];
         self::insert($bluePrint, $request);
     }
@@ -235,6 +245,44 @@ class ActionLogger
         $insert = array_merge($insert, $data);
 
         (new DataModel())->db('action_logs', 'id')->add($insert);
+    }
+
+    public static function log($action, $id, $data, $route = null, $moduleTitle = null, $options = null)
+    {
+        $dataTitle = $options['dataTitle'] ?? null;
+        $description = $options['description'] ?? null;
+        $token = $options['token'] ?? null;
+
+        if (! $description && $moduleTitle && $dataTitle) {
+            $suffix = '';
+            if ($action == 'create') {
+                $suffix = 'created';
+            } elseif ($action == 'update') {
+                $suffix = 'updated';
+            } elseif ($action == 'delete') {
+                $suffix = 'deleted';
+            } elseif ($action == 'destroy') {
+                $suffix = 'permanently deleted';
+            } elseif ($action == 'restore') {
+                $suffix = 'restored';
+            } elseif ($action == 'duplicate') {
+                $suffix = 'duplicated';
+            }
+
+            $description = $moduleTitle.' '.$dataTitle.' '.$suffix;
+        }
+
+        $insert = [
+            'action' => $action,
+            'refId' => $id,
+            'token' => $token,
+            'description' => $description,
+            'data' => $data ? \json_encode($data) : null,
+            'module' => $moduleTitle,
+            'route' => $route,
+            'createdByName' => Auth::user()->name,
+        ];
+        return (new DataModel())->db('action_logs', 'id')->add($insert);
     }
 
     private static function getToken(BluePrint $bluePrint, $result)

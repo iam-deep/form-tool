@@ -13,7 +13,6 @@ class FormToolServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__.'/config/form-tool.php', 'form-tool');
 
-        //if (!$this->app->routesAreCached())
         $this->loadRoutesFrom(__DIR__.'/routes/web.php');
         $this->loadViewsFrom(__DIR__.'/views', 'form-tool');
         $this->loadMigrationsFrom(__DIR__.'/database/migrations');
