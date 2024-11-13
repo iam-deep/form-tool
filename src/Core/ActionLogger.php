@@ -282,6 +282,7 @@ class ActionLogger
             'route' => $route,
             'createdByName' => Auth::user()->name,
         ];
+
         return (new DataModel())->db('action_logs', 'id')->add($insert);
     }
 
