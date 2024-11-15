@@ -169,7 +169,7 @@ class ActionLogger
         self::insert($bluePrint, $request);
     }
 
-    public static function destroy(BluePrint $bluePrint, $refId, $oldData, $path)
+    public static function destroy(BluePrint $bluePrint, $refId, $oldData, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
