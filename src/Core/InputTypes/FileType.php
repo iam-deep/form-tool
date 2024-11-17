@@ -216,7 +216,9 @@ class FileType extends BaseInputType
                         <img src="'.asset($image).'" class="img-thumbnail" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';">
                     </a>';
         } else {
-            return '<i class="'.FileManager::getFileIcon($this->value).' fa-3x"></i>';
+            return '<a href="'.asset($this->value).'" target="_blank">
+                <i class="'.FileManager::getFileIcon($this->value).' fa-3x"></i>
+            </a>';
         }
     }
 
