@@ -126,7 +126,6 @@ class FileManager
                     \unlink($file);
                 }
             } catch (\Exception $e) {
-                $e;
             }
         }
     }

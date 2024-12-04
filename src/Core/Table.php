@@ -342,6 +342,7 @@ class Table
             $this->table->data = '';
             $this->table->content = '';
             $this->table->pagination = '';
+
             return $this->table;
         }
 
