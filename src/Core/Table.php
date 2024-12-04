@@ -336,6 +336,15 @@ class Table
         $crudName = $this->crud->getName();
         $queryString = $this->request->getQueryString();
 
+        if (! $this->dataResult) {
+            $this->table = new \stdClass();
+            $this->table->raw = '';
+            $this->table->data = '';
+            $this->table->content = '';
+            $this->table->pagination = '';
+            return $this->table;
+        }
+
         $perPage = $this->dataResult->perPage();
         $page = (int) $this->request->query('page');
 
