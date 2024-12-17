@@ -302,7 +302,7 @@ class Form
         $totalCols = 0;
         foreach ($model->getGroups() as $groupName => $group) {
             if (is_string($groupName)) {
-                $tableData->header[] = $groupName;
+                $tableData->header[] = (object) ['label' => $groupName, 'isRequired' => false, 'help' => ''];
                 $totalCols++;
                 continue;
             }
@@ -310,16 +310,16 @@ class Form
             foreach ($group as $field) {
                 if (! $field instanceof BluePrint) {
                     if ($field->getType() != InputType::HIDDEN) {
-                        $tableData->header[] = $field->getLabel();
+                        $tableData->header[] = (object) ['label' => $field->getLabel(), 'isRequired' => $field->isRequired(), 'help' => $field->getHelp()];
                         $totalCols++;
                     }
                 } else {
-                    $tableData->header[] = '';
+                    $tableData->header[] = (object) ['label' => '', 'isRequired' => false, 'help' => ''];
                     $totalCols++;
                 }
             }
         }
-        $tableData->header[] = '';
+        $tableData->header[] = (object) ['label' => '', 'isRequired' => false, 'help' => ''];
 
         // TODO: Need to work for only one file field
         // Check if any session data exists

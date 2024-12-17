@@ -8,7 +8,12 @@
             <thead>
                 <tr class="active">
                     @foreach ($table->header as $header)
-                        <th>{{ $header }}</th>
+                        <th>
+                            <span class="@if($header->help) has-help @endif" data-toggle="tooltip" data-placement="top" data-bs-original-title="{{ $header->help }}">
+                                {{ $header->label }}
+                            </span>
+                            @if ($header->isRequired) <span class="text-danger">*</span> @endif
+                        </th>
                     @endforeach
                 </tr>
             </thead>
