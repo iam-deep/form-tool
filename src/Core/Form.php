@@ -369,7 +369,7 @@ class Form
                 $result = \json_decode($this->resultData->{$key});
             }
 
-            if ($result) {
+            if ($result && is_countable($result)) {
                 $totalRowsInEdit = \count($result);
 
                 $i = 0;
