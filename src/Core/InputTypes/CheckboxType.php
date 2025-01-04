@@ -89,6 +89,12 @@ class CheckboxType extends BaseInputType
             return \json_encode($val);
         }
 
+        // I don't know why I have put $val[0] as return value, but it's working with string value
+        // but not working with integer value. So, I have to put this condition
+        if (is_numeric($val)) {
+            return $val;
+        }
+
         // If we have no options or single option then let's use single values
         return $val[0] ?? $this->valueNo;
     }
