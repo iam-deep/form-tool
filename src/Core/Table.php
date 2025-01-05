@@ -100,7 +100,7 @@ class Table
         $this->crudButtons = [];
         foreach ($buttons as $button) {
             if ($button == 'create') {
-                $this->crudButtons[] = Button::make('Add New', '/create', 'create')->icon('<i class="fa fa-plus"></i>');
+                $this->crudButtons[] = Button::make('Add New', '/create', 'create')->icon('<i class="'.config('form-tool.icons.plus', 'fa fa-plus').'"></i>');
             } elseif ($button == 'divider') {
                 $this->crudButtons[] = Button::makeDivider();
             } elseif ($button instanceof Button) {

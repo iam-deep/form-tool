@@ -1468,6 +1468,8 @@ class Form
         $metaColumns = \config('form-tool.table_meta_columns', $this->tableMetaColumns);
         $deletedAt = $metaColumns['deletedAt'] ?? 'deletedAt';
 
+        $iconExternalLink = config('form-tool.icons.externalLink', 'fa fa-external-link');
+
         $msg .= '<br /><ul>';
         $i = 0;
         foreach ($dataCount as $result) {
@@ -1502,7 +1504,7 @@ class Form
                         if ($hasDestroyPermission) {
                             $newMsg = \sprintf(
                                 '<li>ID: <a href="%s?id=%s&quick_status=trash" target="_blank">%s &nbsp
-                                    <i class="fa fa-external-link"></i></a></li>',
+                                    <i class="'.$iconExternalLink.'"></i></a></li>',
                                 $url,
                                 $id,
                                 $id
@@ -1510,7 +1512,7 @@ class Form
                         }
                     } elseif ($hasEditPermission) {
                         $newMsg = \sprintf(
-                            '<li>ID: <a href="%s?id=%s" target="_blank">%s &nbsp <i class="fa fa-external-link">
+                            '<li>ID: <a href="%s?id=%s" target="_blank">%s &nbsp <i class="'.$iconExternalLink.'">
                                 </i></a></li>',
                             $url,
                             $id,

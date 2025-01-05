@@ -134,6 +134,13 @@ return [
         'edit' => 'fa fa-pencil',
         'delete' => 'fa fa-trash',
 
+        'plus' => 'fa fa-plus',
+        'times' => 'fa fa-times',
+        'loading' => 'fa fa-spinner fa-pulse',
+        'drag' => 'fa fa-arrows',
+        'calendar' => 'fa fa-calendar',
+        'externalLink' => 'fa fa-external-link',
+
         // File Types Icons
         // PDF
         'pdf' => 'fa fa-file-pdf',
