@@ -45,7 +45,19 @@ trait ApiCrudController
             return $this->success($data);
         }
 
-        return $response;
+        return $this->validationError($response);
+    }
+
+    public function show(Request $request, $id = null)
+    {
+        $this->setup();
+
+        $response = $this->crud->getModel()->getOne($id);
+        if (! $response) {
+            return $this->notFound();
+        }
+
+        return $this->success($response);
     }
 
     public function update(Request $request, $id = null)
@@ -59,7 +71,7 @@ trait ApiCrudController
             return $this->success($data);
         }
 
-        return $response;
+        return $this->validationError($response);
     }
 
     public function destroy(Request $request, $id = null)

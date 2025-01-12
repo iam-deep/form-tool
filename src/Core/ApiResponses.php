@@ -64,13 +64,13 @@ trait ApiResponses
         }
 
         $data = [];
-        $errors = $validator->messages()->toArray();
+        $errors = $validator?->messages()->toArray() ?? [];
         foreach ($errors as $key => $row) {
             $data[$key] = $row[0] ?? '';
         }
 
         if (! $message) {
-            $message = $validator->messages()->first();
+            $message = $validator?->messages()->first();
         }
 
         $response = array_merge($this->getCommonResponse($message, false), [

@@ -24,12 +24,4 @@ class CrudSimpleApi extends Crud
     public function list($callback = null)
     {
     }
-
-    public function update()
-    {
-    }
-
-    public function search()
-    {
-    }
 }
