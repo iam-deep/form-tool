@@ -958,6 +958,7 @@ class Form
 
             /**
              * $response can be string, \Illuminate\Http\RedirectResponse, \Illuminate\Http\JsonResponse.
+             *
              * @var $response string|\Illuminate\Http\RedirectResponse|\Illuminate\Http\JsonResponse
              */
             $response = $callbackValidation($this->request, $validationType);
