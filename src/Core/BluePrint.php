@@ -3,6 +3,8 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Core\InputTypes\SelectType;
+use Deep\FormTool\Core\InputTypes\TextType;
 use Illuminate\Support\Arr;
 
 class BluePrint
@@ -497,8 +499,7 @@ class BluePrint
 
         foreach ($this->dataTypeList as $group) {
             foreach ($group as $input) {
-                if (isset($input->type) && $input->type == InputTypes\Common\InputType::TEXT &&
-                    ! $input->isEncrypted()) {
+                if ($input instanceof TextType && ! $input->isEncrypted()) {
                     return $input->getDbField();
                 }
             }
@@ -512,7 +513,7 @@ class BluePrint
         $selects = [];
         foreach ($this->dataTypeList as $group) {
             foreach ($group as $input) {
-                if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT ||
+                if ($input instanceof BluePrint || ! $input instanceof SelectType ||
                     // table name should be same as crud table, otherwise skip
                     ($input->getTableName() && $input->getTableName() != $this->form->getModel()->getTableName())) {
                     continue;
@@ -540,7 +541,7 @@ class BluePrint
         $selects = [];
         foreach ($this->dataTypeList as $group) {
             foreach ($group as $input) {
-                if ($input instanceof BluePrint || $input->type != InputTypes\Common\InputType::SELECT ||
+                if ($input instanceof BluePrint || ! $input instanceof SelectType ||
                     // table name should be same as crud table, otherwise skip
                     ($input->getTableName() && $input->getTableName() != $this->form->getModel()->getTableName())) {
                     continue;
