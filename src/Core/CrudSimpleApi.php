@@ -10,7 +10,7 @@ class CrudSimpleApi extends Crud
 
         $data = [
             'current_page' => $data->currentPage(),
-            'last_page' => $data->perPage(),
+            'last_page' => $data->lastPage(),
             'from' => $data->firstItem() ?? 0,
             'to' => $data->lastItem() ?? 0,
             'total' => $data->total(),

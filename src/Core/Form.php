@@ -911,6 +911,8 @@ class Form
         if ($this->uniqueColumns) {
             $where = [];
             $combination = [];
+
+            $postData = (object) $this->request->post();
             foreach ($this->uniqueColumns as $column) {
                 $alias = $this->model->getAlias();
                 if (false !== strpos($column, '.')) {
@@ -918,13 +920,17 @@ class Form
                 }
 
                 $input = $this->bluePrint->getInputTypeByDbField($column);
-                $value = $this->request->post($column) ?? $input->getDefaultValue();
 
-                $where[] = [$alias.'.'.$column => $value];
+                // Before store is called so that value like date can be coveverted to db date format
+                $input->setValue($postData->{$column} ?? null);
+                $value = $input->beforeStore($postData) ?? $input->getDefaultValue();
+
+                $alias = $alias ? $alias.'.' : '';
+                $where[] = [$alias.$column => $value];
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
             }
 
-            $alias = $this->model->getAlias().'.';
+            $alias = $this->model->getAlias() ? $this->model->getAlias().'.' : '';
             if ($this->formStatus == FormStatus::UPDATE) {
                 $where[] = function ($query) use ($alias) {
                     $query->where($alias.$this->model->getPrimaryId(), '!=', $this->editId);
@@ -946,10 +952,7 @@ class Form
 
                 // return back()->with('error', $message)->withInput();
 
-                return $this->response(false, \sprintf(
-                    'The combination of "%s" is already exist!',
-                    \implode(', ', array_values($combination))
-                ));
+                return $this->response(false, \sprintf('The combination of "%s" is already exist!', \implode(', ', array_values($combination))));
             }
         }
 
@@ -1632,7 +1635,7 @@ class Form
                 return redirect(urldecode($redirect))->with('success', $message);
             }
 
-            return back()->with('success', $message);
+            return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
         }
 
         return back()->with('error', $message)->withInput();

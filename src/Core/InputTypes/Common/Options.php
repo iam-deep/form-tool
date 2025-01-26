@@ -619,4 +619,36 @@ trait Options
 
         return (array) $this->options;
     }
+
+    // This is maily needed to send as a response to Mobile API
+    public function getOptionsAsValueText()
+    {
+        $this->createOptions();
+
+        $options = (array) $this->options;
+
+        $convert = [];
+        if ($this->isFirstOption) {
+            if ($this->firstOption === null) {
+                $convert[] = [
+                    'value' => '',
+                    'text' => '(select '.\strtolower($this->label).')',
+                ];
+            } else {
+                $convert[] = [
+                    'value' => $this->firstOption->value,
+                    'text' => $this->firstOption->text,
+                ];
+            }
+        }
+
+        foreach ($options as $key => $value) {
+            $convert[] = [
+                'value' => $key,
+                'text' => $value,
+            ];
+        }
+
+        return $convert;
+    }
 }

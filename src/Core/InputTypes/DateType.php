@@ -25,4 +25,13 @@ class DateType extends BaseDateTimeType
 
         $this->isConvertToLocal = false;
     }
+
+    public function getExportValue($value)
+    {
+        if (! $value) {
+            return null;
+        }
+
+        return date('d-M-Y', strtotime($value));
+    }
 }

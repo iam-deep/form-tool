@@ -216,7 +216,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
     public function setJs(string $selectorId, string $uploadPath = '')
     {
-        $uploadPath = createUrl('/form-tool/editor-upload', 'path='.$uploadPath);
+        $uploadPath = url('/form-tool/editor-upload?path='.$uploadPath);
 
         if ($this->currentPlugin == 'ckeditor') {
             Doc::addJs(

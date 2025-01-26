@@ -686,6 +686,11 @@ class Table
     {
         return $this->tableMetaColumns;
     }
+
+    public function getSearchFields()
+    {
+        return $this->searchFields;
+    }
 }
 
 class TableViewRow
