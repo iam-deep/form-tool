@@ -1626,6 +1626,10 @@ class Form
         if ($this->resource instanceof SimpleRestApiInterface || $this->crud->isWantsArray()) {
             return ['status' => $status, 'message' => $message, 'data' => $data];
         } elseif ($this->isWantsJson()) {
+            if ($status === false) {
+                return response()->json(['status' => $status, 'message' => $message, 'data' => $data], 422);
+            }
+
             return response()->json(['status' => $status, 'message' => $message, 'data' => $data]);
         }
 
