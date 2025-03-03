@@ -115,7 +115,7 @@ class Filter
         unset($option);
 
         $queries = array_filter($request->except('page'), function ($value) {
-            return ($value !== null && $value !== false && $value !== '');
+            return $value !== null && $value !== false && $value !== '';
         });
 
         $data->showClearButton = ! empty($queries);
