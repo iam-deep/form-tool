@@ -199,6 +199,34 @@ class SelectType extends BaseFilterType implements ISaveable
         return $input;
     }
 
+    public function getOptionsForFilter($value)
+    {
+        $this->createOptions();
+
+        $input = '';
+
+        // We will add append the first option either not a depended field or if if depended then it have options
+        if (! $this->depend && $this->options) {
+            $input .= '<option value="">(select '.\strtolower($this->label).')</option>';
+        }
+
+        if ($this->isFirstOption && $this->firstOption?->value !== null) {
+            $this->options = array_merge([$this->firstOption->value => $this->firstOption->text], (array) $this->options);
+        }
+
+        if ($this->isMultiple) {
+            foreach ($this->options as $val => $text) {
+                $input .= '<option value="'.$val.'" '.(\is_array($value) && \in_array($val, $value) ? 'selected' : '').'>'.$text.'</option>';
+            }
+        } else {
+            foreach ($this->options as $val => $text) {
+                $input .= '<option value="'.$val.'" '.($value !== null && $val == $value ? 'selected' : '').'>'.$text.'</option>';
+            }
+        }
+
+        return $input;
+    }
+
     public function getHTML()
     {
         $value = old($this->dbField);
@@ -311,7 +339,7 @@ class SelectType extends BaseFilterType implements ISaveable
             'classes' => \implode(' ', $this->classes),
             'raw' => $this->raw.$this->inlineCSS,
             'isMultiple' => $this->isMultiple,
-            'options' => $this->getOptions($this->value),
+            'options' => $this->getOptionsForFilter($this->value),
             'isPlugin' => $this->currentPlugin ? true : false,
             'plugin' => $this->currentPlugin,
             'isQuickAdd' => false,

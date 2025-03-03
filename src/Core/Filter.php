@@ -114,7 +114,10 @@ class Filter
         }
         unset($option);
 
-        $queries = array_filter($request->except('page'));
+        $queries = array_filter($request->except('page'), function ($value) {
+            return ($value !== null && $value !== false && $value !== '');
+        });
+
         $data->showClearButton = ! empty($queries);
         $data->clearUrl = createUrl($this->bluePrint->getForm()->getRoute());
 
