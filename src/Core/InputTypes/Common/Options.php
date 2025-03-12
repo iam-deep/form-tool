@@ -229,7 +229,9 @@ trait Options
 
                                 // Let's reset the dependValue, so that we can fetch the new options for
                                 // depended field in multiple table
-                                $depend->value = null;
+                                if ($this->bluePrint->amIChildBluePrint()) {
+                                    $depend->value = null;
+                                }
                             }
 
                             if (! $flagHaveDependValue) {

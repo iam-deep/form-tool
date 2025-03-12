@@ -423,6 +423,11 @@ class BluePrint
         return $this->parentBluePrint;
     }
 
+    public function amIChildBluePrint()
+    {
+        return $this->parentBluePrint !== null;
+    }
+
     public function getList(): array
     {
         $list = [];
