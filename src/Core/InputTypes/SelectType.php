@@ -211,7 +211,7 @@ class SelectType extends BaseFilterType implements ISaveable
         }
 
         if ($this->isFirstOption && $this->firstOption?->value !== null) {
-            $this->options = array_merge([$this->firstOption->value => $this->firstOption->text], (array) $this->options);
+            $this->options = [$this->firstOption->value => $this->firstOption->text] + (array) $this->options;
         }
 
         if ($this->isMultiple) {

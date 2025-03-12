@@ -104,13 +104,13 @@ class Menu
         }
 
         // TODO: We need to be sure the controller is not getting instantiated twice
-        $controller = \Illuminate\Support\Facades\Route::current()->getController();
+        $controller = \Illuminate\Support\Facades\Route::current()?->getController();
 
         // Let's check if we have a route property in the controller
         if ($controller && isset($controller->route)) {
             $this->activeLink = $controller->route;
         } else {
-            $name = \Illuminate\Support\Facades\Route::current()->getName();
+            $name = \Illuminate\Support\Facades\Route::current()?->getName();
             $this->activeLink = \explode('.', $name)[0] ?? null;
 
             // This only works without prefix, I don't think this is need as we are using the route and name
