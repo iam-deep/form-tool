@@ -203,23 +203,25 @@ class SelectType extends BaseFilterType implements ISaveable
     {
         $this->createOptions();
 
+        $options = (array) $this->options;
+
         $input = '';
 
-        // We will add append the first option either not a depended field or if if depended then it have options
-        if (! $this->depend && $this->options) {
+        // We will append the first option if it has options
+        if ($options) {
             $input .= '<option value="">(select '.\strtolower($this->label).')</option>';
         }
 
         if ($this->isFirstOption && $this->firstOption?->value !== null) {
-            $this->options = [$this->firstOption->value => $this->firstOption->text] + (array) $this->options;
+            $options = [$this->firstOption->value => $this->firstOption->text] + $options;
         }
 
         if ($this->isMultiple) {
-            foreach ($this->options as $val => $text) {
+            foreach ($options as $val => $text) {
                 $input .= '<option value="'.$val.'" '.(\is_array($value) && \in_array($val, $value) ? 'selected' : '').'>'.$text.'</option>';
             }
         } else {
-            foreach ($this->options as $val => $text) {
+            foreach ($options as $val => $text) {
                 $input .= '<option value="'.$val.'" '.($value !== null && $val == $value ? 'selected' : '').'>'.$text.'</option>';
             }
         }
