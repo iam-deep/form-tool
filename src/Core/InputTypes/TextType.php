@@ -27,7 +27,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
     private bool $isSlug = false;
     private bool $forceNullIfEmpty = false;
 
-    public function unique(Closure $uniqueCondition = null)
+    public function unique(?Closure $uniqueCondition = null)
     {
         $this->isUnique = true;
         $this->uniqueClosure = $uniqueCondition;

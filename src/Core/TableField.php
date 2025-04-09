@@ -22,7 +22,7 @@ class TableField
         $this->bluePrint = $this->table->getBluePrint();
     }
 
-    public function default(string $dbField, string $label = null): CellDefinition
+    public function default(string $dbField, ?string $label = null): CellDefinition
     {
         $input = $this->bluePrint->getInputTypeByDbField($dbField);
         if (! $input) {
@@ -35,7 +35,7 @@ class TableField
         return $cell;
     }
 
-    public function custom($class, string $dbField, string $label = null): CellDefinition
+    public function custom($class, string $dbField, ?string $label = null): CellDefinition
     {
         $inputType = new $class();
 
@@ -69,7 +69,7 @@ class TableField
         return $cell;
     }
 
-    public function text(string $dbField, string $label = null): CellDefinition
+    public function text(string $dbField, ?string $label = null): CellDefinition
     {
         $type = new InputTypes\TextType();
         $type->init($this->bluePrint, $dbField, $label);
@@ -80,7 +80,7 @@ class TableField
         return $cell;
     }
 
-    public function select(string $dbField, string $label = null): CellDefinition
+    public function select(string $dbField, ?string $label = null): CellDefinition
     {
         $type = new InputTypes\SelectType();
         $type->init($this->bluePrint, $dbField, $label);
@@ -91,7 +91,7 @@ class TableField
         return $cell;
     }
 
-    public function date(string $dbField, string $label = null): CellDefinition
+    public function date(string $dbField, ?string $label = null): CellDefinition
     {
         $type = new InputTypes\DateType();
         $type->init($this->bluePrint, $dbField, $label);
@@ -102,7 +102,7 @@ class TableField
         return $cell;
     }
 
-    public function time(string $dbField, string $label = null): CellDefinition
+    public function time(string $dbField, ?string $label = null): CellDefinition
     {
         $type = new InputTypes\TimeType();
         $type->init($this->bluePrint, $dbField, $label);
@@ -113,7 +113,7 @@ class TableField
         return $cell;
     }
 
-    public function datetime(string $dbField, string $label = null): CellDefinition
+    public function datetime(string $dbField, ?string $label = null): CellDefinition
     {
         $type = new InputTypes\DateTimeType();
         $type->init($this->bluePrint, $dbField, $label);
@@ -124,7 +124,7 @@ class TableField
         return $cell;
     }
 
-    public function image(string $dbField, string $label = null): CellDefinition
+    public function image(string $dbField, ?string $label = null): CellDefinition
     {
         $type = new InputTypes\ImageType();
         $type->init($this->bluePrint, $dbField, $label);
@@ -229,7 +229,7 @@ class TableField
         return $cell;
     }
 
-    public function slNo(string $label = null): CellDefinition
+    public function slNo(?string $label = null): CellDefinition
     {
         $cell = CellDefinition::Other($this, '_slno', $label ?? '#', '')->width('50px')->orderable(false);
         $this->cellList[] = $cell;
