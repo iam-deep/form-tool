@@ -36,7 +36,7 @@ class CellDefinition
         // The construct must remain private
     }
 
-    public static function Input(TableField $tableField, BaseInputType $inputType): CellDefinition
+    public static function input(TableField $tableField, BaseInputType $inputType): CellDefinition
     {
         $cell = new CellDefinition();
         $cell->tableField = $tableField;
@@ -47,12 +47,8 @@ class CellDefinition
         return $cell;
     }
 
-    public static function Other(
-        TableField $tableField,
-        string $fieldType,
-        string $dbField,
-        string $label = null
-    ): CellDefinition {
+    public static function other(TableField $tableField, string $fieldType, string $dbField, ?string $label = null): CellDefinition
+    {
         $cell = new CellDefinition();
         $cell->tableField = $tableField;
 
@@ -63,7 +59,7 @@ class CellDefinition
         return $cell;
     }
 
-    public static function Any(TableField $tableField, $pattern, $dbFields): CellDefinition
+    public static function any(TableField $tableField, $pattern, $dbFields): CellDefinition
     {
         $cell = new CellDefinition();
         $cell->tableField = $tableField;
@@ -191,13 +187,13 @@ class CellDefinition
             $styleCss = 'style="'.$styleCss.'"';
         }
 
-        $this->styleClass = \implode(' ', $this->styleClass);
-        if ($this->styleClass) {
-            $this->styleClass = 'class="'.$this->styleClass.'"';
+        $styleClass = \implode(' ', $this->styleClass);
+        if ($styleClass) {
+            $styleClass = 'class="'.$styleClass.'"';
         }
 
         $this->raw($styleCss);
-        $this->raw($this->styleClass);
+        $this->raw($styleClass);
     }
 
     // Getter

@@ -553,7 +553,7 @@ class Form
         return $this->response(false, 'Something went wrong! Data not added successfully!');
     }
 
-    public function update($id = null, callable $callbackBeforeUpdate = null)
+    public function update($id = null, ?callable $callbackBeforeUpdate = null)
     {
         $this->formStatus = FormStatus::UPDATE;
 
@@ -921,7 +921,7 @@ class Form
 
                 $input = $this->bluePrint->getInputTypeByDbField($column);
 
-                // Before store is called so that value like date can be coveverted to db date format
+                // Before store is called so that value like date can be converted to db date format
                 $input->setValue($postData->{$column} ?? null);
                 $value = $input->beforeStore($postData) ?? $input->getDefaultValue();
 
@@ -1738,7 +1738,7 @@ class Form
         return $this->crud->isWantsJson() || $this->request->ajax() || $this->request->wantsJson();
     }
 
-    public function setFormStatus(FormStatus $status)
+    public function setFormStatus(int $status)
     {
         $this->formStatus = $status;
 

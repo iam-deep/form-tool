@@ -8,7 +8,7 @@ trait Saveable
 {
     protected $save = null;
 
-    public function saveAt(string $tableName, string $id = 'id', string $refId = null): BaseInputType
+    public function saveAt(string $tableName, string $id = 'id', ?string $refId = null): BaseInputType
     {
         if (! $this->isMultiple) {
             throw new \Exception(sprintf('Field "%s" should be multiple to apply saveAt method!', $this->dbField));

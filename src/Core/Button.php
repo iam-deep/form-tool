@@ -21,7 +21,7 @@ class Button
     private ?string $processedLink = null;
     private ?string $processedHtml = null;
 
-    private function __construct(?string $name = null, string $link = null, $guard = null, $guardRoute = '')
+    private function __construct(?string $name = null, ?string $link = null, $guard = null, $guardRoute = '')
     {
         $this->name = trim($name);
         $this->link = trim($link);
@@ -35,7 +35,7 @@ class Button
         return $this;
     }
 
-    public static function make(string $name = null, string $link = null, $guard = null, $guardRoute = ''): Button
+    public static function make(?string $name = null, ?string $link = null, $guard = null, $guardRoute = ''): Button
     {
         $button = new Button($name, $link, $guard, $guardRoute);
         $button->type = 'link';
@@ -89,7 +89,7 @@ class Button
         return $button;
     }
 
-    public static function makeHtml(string $html, string $guard = null, $guardRoute = ''): Button
+    public static function makeHtml(string $html, ?string $guard = null, $guardRoute = ''): Button
     {
         $button = (new Button(null, null, $guard, $guardRoute))->html($html);
         // if (! self::isGuard($guard, $guardRoute)) {
@@ -99,7 +99,7 @@ class Button
         return $button;
     }
 
-    public static function makeDivider(string $guard = null, $guardRoute = ''): Button
+    public static function makeDivider(?string $guard = null, $guardRoute = ''): Button
     {
         return (new Button())->divider()->guard($guard, $guardRoute);
     }
@@ -226,7 +226,7 @@ class Button
         return $this->processedLink;
     }
 
-    public function getHtml(string $class = null)
+    public function getHtml(?string $class = null)
     {
         return \str_replace('{class}', $class, $this->processedHtml);
     }

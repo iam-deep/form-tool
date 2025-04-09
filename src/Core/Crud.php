@@ -268,7 +268,7 @@ class Crud
         return $page;
     }
 
-    public function bulkAction(Closure $callback = null)
+    public function bulkAction(?Closure $callback = null)
     {
         return $this->table->bulkAction->perform($callback);
     }

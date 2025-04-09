@@ -27,7 +27,7 @@ abstract class InputType
     public const TIME = 41;
     public const DATE_TIME = 42;
 
-    // Textare & Editor
+    // Textarea & Editor
     public const TEXTAREA = 50;
     public const EDITOR = 51;
 

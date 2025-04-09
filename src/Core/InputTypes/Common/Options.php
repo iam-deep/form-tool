@@ -622,7 +622,7 @@ trait Options
         return (array) $this->options;
     }
 
-    // This is maily needed to send as a response to Mobile API
+    // This is mainly needed to send as a response to Mobile API
     public function getOptionsAsValueText()
     {
         $this->createOptions();

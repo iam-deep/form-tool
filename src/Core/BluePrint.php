@@ -42,7 +42,7 @@ class BluePrint
         $this->dataTypeList[$this->groupName] = [];
     }
 
-    public function text(string $dbField, string $label = null): InputTypes\TextType
+    public function text(string $dbField, ?string $label = null): InputTypes\TextType
     {
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
@@ -51,7 +51,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function number(string $dbField, string $label = null): InputTypes\TextType
+    public function number(string $dbField, ?string $label = null): InputTypes\TextType
     {
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
@@ -66,7 +66,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function email(string $dbField, string $label = null): InputTypes\TextType
+    public function email(string $dbField, ?string $label = null): InputTypes\TextType
     {
         $inputType = new InputTypes\TextType();
         $inputType->init($this, $dbField, $label);
@@ -82,7 +82,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function password(string $dbField, string $label = null): InputTypes\PasswordType
+    public function password(string $dbField, ?string $label = null): InputTypes\PasswordType
     {
         $inputType = new InputTypes\PasswordType();
         $inputType->init($this, $dbField, $label);
@@ -91,7 +91,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function hidden(string $dbField, string $label = null): InputTypes\HiddenType
+    public function hidden(string $dbField, ?string $label = null): InputTypes\HiddenType
     {
         $inputType = new InputTypes\HiddenType();
         $inputType->init($this, $dbField, $label);
@@ -100,7 +100,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function file(string $dbField, string $label = null): InputTypes\FileType
+    public function file(string $dbField, ?string $label = null): InputTypes\FileType
     {
         $inputType = new InputTypes\FileType();
         $inputType->init($this, $dbField, $label);
@@ -109,7 +109,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function image(string $dbField, string $label = null): InputTypes\ImageType
+    public function image(string $dbField, ?string $label = null): InputTypes\ImageType
     {
         $inputType = new InputTypes\ImageType();
         $inputType->init($this, $dbField, $label);
@@ -118,7 +118,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function textarea(string $dbField, string $label = null): InputTypes\TextareaType
+    public function textarea(string $dbField, ?string $label = null): InputTypes\TextareaType
     {
         $inputType = new InputTypes\TextareaType();
         $inputType->init($this, $dbField, $label);
@@ -127,7 +127,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function date(string $dbField, string $label = null): InputTypes\DateType
+    public function date(string $dbField, ?string $label = null): InputTypes\DateType
     {
         $inputType = new InputTypes\DateType();
         $inputType->init($this, $dbField, $label);
@@ -136,7 +136,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function time(string $dbField, string $label = null): InputTypes\TimeType
+    public function time(string $dbField, ?string $label = null): InputTypes\TimeType
     {
         $inputType = new InputTypes\TimeType();
         $inputType->init($this, $dbField, $label);
@@ -145,7 +145,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function datetime(string $dbField, string $label = null): InputTypes\DateTimeType
+    public function datetime(string $dbField, ?string $label = null): InputTypes\DateTimeType
     {
         $inputType = new InputTypes\DateTimeType();
         $inputType->init($this, $dbField, $label);
@@ -154,7 +154,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function select(string $dbField, string $label = null): InputTypes\SelectType
+    public function select(string $dbField, ?string $label = null): InputTypes\SelectType
     {
         $inputType = new InputTypes\SelectType();
         $inputType->init($this, $dbField, $label);
@@ -163,7 +163,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function editor(string $dbField, string $label = null): InputTypes\EditorType
+    public function editor(string $dbField, ?string $label = null): InputTypes\EditorType
     {
         $inputType = new InputTypes\EditorType();
         $inputType->init($this, $dbField, $label);
@@ -172,7 +172,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function checkbox(string $dbField, string $label = null): InputTypes\CheckboxType
+    public function checkbox(string $dbField, ?string $label = null): InputTypes\CheckboxType
     {
         $inputType = new InputTypes\CheckboxType();
         $inputType->init($this, $dbField, $label);
@@ -181,7 +181,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function custom($class, string $dbField = null, string $label = null)
+    public function custom($class, ?string $dbField = null, ?string $label = null)
     {
         $inputType = new $class();
 
@@ -205,7 +205,7 @@ class BluePrint
         return $inputType;
     }
 
-    public function html(string $html, string $dbField = null): InputTypes\HtmlType
+    public function html(string $html, ?string $dbField = null): InputTypes\HtmlType
     {
         $inputType = new InputTypes\HtmlType();
         $inputType->init($this, $dbField, $html);
@@ -327,7 +327,7 @@ class BluePrint
     }
 
     // TODO: Create Interface saveable
-    public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null, Closure $where = null)
+    public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null, ?Closure $where = null)
     {
         if ($idCol) {
             $this->multipleTable = (object) [

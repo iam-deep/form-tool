@@ -288,6 +288,11 @@ trait BaseImportExport
     {
         $this->setupExport();
 
+        return $this->doExport();
+    }
+
+    protected function doExport()
+    {
         $filename = $this->title.'.csv';
 
         $resultData = $this->setExportData();

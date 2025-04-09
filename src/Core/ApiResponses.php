@@ -2,7 +2,6 @@
 
 namespace Deep\FormTool\Core;
 
-use Deep\FormTool\Support\Settings;
 use Illuminate\Http\Request;
 
 trait ApiResponses
