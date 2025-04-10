@@ -28,7 +28,7 @@ trait Saveable
         return ! is_null($this->save);
     }
 
-    public function getSaveAt(): object|null
+    public function getSaveAt(): ?object
     {
         if (! $this->save) {
             return null;

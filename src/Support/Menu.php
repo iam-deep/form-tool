@@ -53,7 +53,7 @@ class Menu
      * @param  string  $icon  Provide icon class
      * @param  string  $guardUrl  Provide guarded route/key if different from route
      * @param  $guardAction  optionally you can specify action to guard (Values: null, view, create, edit, delete,
-     *                       destroy)
+     *                      destroy)
      * @return null
      **/
     public function add(
@@ -175,7 +175,7 @@ class Menu
         return $this->list;
     }
 
-    public static function generate(string $menuName = 'default', string $view = null, $active = null)
+    public static function generate(string $menuName = 'default', ?string $view = null, $active = null)
     {
         $menuName = \trim($menuName);
 

@@ -24,7 +24,7 @@ class Random
         }
     }
 
-    public static function custom(int $length = 32, string $characters = null)
+    public static function custom(int $length = 32, ?string $characters = null)
     {
         $defaultCharacters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
         $characters = $characters ?: $defaultCharacters;
