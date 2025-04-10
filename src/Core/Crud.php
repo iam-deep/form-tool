@@ -329,7 +329,7 @@ class Crud
             }
 
             if ($input instanceof BluePrint) {
-                throw new \Exception(sprintf('Multiple table field are not supported!'));
+                throw new \Exception(sprintf('Multiple table field are not supported! Field: '.$input->label));
             }
 
             $input->importSample($value);

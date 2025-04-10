@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Support\FileManager;
 use Illuminate\Support\Facades\DB;
 
 class BulkAction
@@ -45,7 +46,7 @@ class BulkAction
         return null;
     }
 
-    public function perform(?Closure $callback = null)
+    public function perform(Closure $callback = null)
     {
         $this->request = \request();
         $this->callback = $callback;
@@ -132,8 +133,6 @@ class BulkAction
 
     protected function doDuplicate($id, $data)
     {
-        // TODO: Duplicate the actual images and files
-
         $result = $this->table->getModel()->getOne($id);
         $oldData = clone $result;
 
@@ -144,6 +143,13 @@ class BulkAction
 
         $result->{$primaryIdColumn} = 0;
         $result = array_merge((array) $result, $data);
+
+        // Let's clone the image
+        foreach ($this->table->getBluePrint()->getList() as $input) {
+            if ($input instanceof InputTypes\FileType) {
+                $result[$input->getDbField()] = FileManager::copyFile($result[$input->getDbField()]);
+            }
+        }
 
         $insertId = $this->table->getModel()->add($result);
 
@@ -177,6 +183,13 @@ class BulkAction
                 $row = (array) $row;
                 $row[$model->id] = 0;
                 $row[$foreignKey] = $insertId;
+
+                // Let's clone the image
+                foreach ($input->getList() as $childInput) {
+                    if ($childInput instanceof InputTypes\FileType) {
+                        $row[$childInput->getDbField()] = FileManager::copyFile($row[$childInput->getDbField()]);
+                    }
+                }
 
                 $insert[] = $row;
             }

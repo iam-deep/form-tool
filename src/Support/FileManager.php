@@ -118,6 +118,26 @@ class FileManager
         return $destinationPath.$filename;
     }
 
+    public static function copyFile($file): ?string
+    {
+        $newFile = null;
+
+        // TODO: Need to check the file exists and copy and update the file in the current month folder
+
+        try {
+            if (file_exists($file)) {
+                $info = pathinfo($file);
+
+                $newFile = $info['dirname'].'/'.$info['filename'].'_'.time().'.'.$info['extension'];
+                copy($file, $newFile);
+            }
+        } catch (\Exception) {
+            //
+        }
+
+        return $newFile;
+    }
+
     public static function deleteFile($file)
     {
         if ($file) {
@@ -125,7 +145,8 @@ class FileManager
                 if (\file_exists($file)) {
                     \unlink($file);
                 }
-            } catch (\Exception $e) {
+            } catch (\Exception) {
+                //
             }
         }
     }
