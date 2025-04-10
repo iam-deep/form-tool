@@ -46,7 +46,7 @@ class BulkAction
         return null;
     }
 
-    public function perform(Closure $callback = null)
+    public function perform(?Closure $callback = null)
     {
         $this->request = \request();
         $this->callback = $callback;
