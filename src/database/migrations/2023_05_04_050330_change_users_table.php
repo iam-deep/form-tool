@@ -35,20 +35,20 @@ class ChangeUsersTable extends Migration
      *
      * @return void
      */
-    public function down()
-    {
-        Schema::table('users', function (Blueprint $table) {
-            $table->renameColumn('userId', 'id');
-            $table->renameColumn('createdAt', 'created_at');
-            $table->renameColumn('updatedAt', 'updated_at');
+    // public function down()
+    // {
+    //     Schema::table('users', function (Blueprint $table) {
+    //         $table->renameColumn('userId', 'id');
+    //         $table->renameColumn('createdAt', 'created_at');
+    //         $table->renameColumn('updatedAt', 'updated_at');
 
-            $table->dropColumn('groupId');
-            $table->dropColumn('status');
+    //         $table->dropColumn('groupId');
+    //         $table->dropColumn('status');
 
-            $table->dropColumn('updatedBy');
-            $table->dropColumn('createdBy');
-            $table->dropColumn('deletedBy');
-            $table->dropColumn('deletedAt');
-        });
-    }
+    //         $table->dropColumn('updatedBy');
+    //         $table->dropColumn('createdBy');
+    //         $table->dropColumn('deletedBy');
+    //         $table->dropColumn('deletedAt');
+    //     });
+    // }
 }

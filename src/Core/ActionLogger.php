@@ -2,6 +2,8 @@
 
 namespace Deep\FormTool\Core;
 
+use Deep\FormTool\Core\Dtos\ActionLoggerDto;
+
 // TODO: Multiple Logger
 // TODO: Keep deleted files and images
 
@@ -235,9 +237,13 @@ class ActionLogger
 
     private static function insert(BluePrint $bluePrint, $data)
     {
+        $request = request();
+
         $insert = [
             'module' => $bluePrint->getForm()->getResource()->title,
             'route' => $bluePrint->getForm()->getResource()->route,
+            'ipAddress' => $request->ip(),
+            'userAgent' => $request->userAgent(),
             'createdByName' => Auth::user()->name,
         ];
 
@@ -247,13 +253,10 @@ class ActionLogger
         (new DataModel())->db('action_logs', 'id')->add($insert);
     }
 
-    public static function log($action, $id, $data, $route = null, $moduleTitle = null, $options = null)
+    public static function log(ActionLoggerDto $action)
     {
-        $dataTitle = $options['dataTitle'] ?? null;
-        $description = $options['description'] ?? null;
-        $token = $options['token'] ?? null;
-
-        if (! $description && $moduleTitle && $dataTitle) {
+        $description = null;
+        if (! $action->description && $action->moduleTitle && $action->nameOfTheData) {
             $suffix = '';
             if ($action == 'create') {
                 $suffix = 'created';
@@ -269,22 +272,65 @@ class ActionLogger
                 $suffix = 'duplicated';
             }
 
-            $description = $moduleTitle.' '.$dataTitle.' '.$suffix;
+            $description = $action->moduleTitle.' '.$action->nameOfTheData.' '.$suffix;
         }
 
+        $request = request();
+
         $insert = [
-            'action' => $action,
-            'refId' => $id,
-            'token' => $token,
-            'description' => $description,
-            'data' => $data ? \json_encode($data) : null,
-            'module' => $moduleTitle,
-            'route' => $route,
+            'action' => $action->action,
+            'refId' => $action->id,
+            'token' => $action->token,
+            'description' => $description ?? $action->description,
+            'data' => $action->data ? \json_encode($action->data) : null,
+            'module' => $action->moduleTitle,
+            'route' => $action->route,
+            'ipAddress' => $request->ip(),
+            'userAgent' => $request->userAgent(),
             'createdByName' => Auth::user()->name,
         ];
 
-        return (new DataModel())->db('action_logs', 'id')->add($insert);
+        (new DataModel())->db('action_logs', 'id')->add($insert);
     }
+
+    // public static function logAction($action, $id, $data, $route = null, $moduleTitle = null, $options = null)
+    // {
+    //     $dataTitle = $options['dataTitle'] ?? null;
+    //     $description = $options['description'] ?? null;
+    //     $token = $options['token'] ?? null;
+
+    //     if (! $description && $moduleTitle && $dataTitle) {
+    //         $suffix = '';
+    //         if ($action == 'create') {
+    //             $suffix = 'created';
+    //         } elseif ($action == 'update') {
+    //             $suffix = 'updated';
+    //         } elseif ($action == 'delete') {
+    //             $suffix = 'deleted';
+    //         } elseif ($action == 'destroy') {
+    //             $suffix = 'permanently deleted';
+    //         } elseif ($action == 'restore') {
+    //             $suffix = 'restored';
+    //         } elseif ($action == 'duplicate') {
+    //             $suffix = 'duplicated';
+    //         }
+
+    //         $description = $moduleTitle.' '.$dataTitle.' '.$suffix;
+    //     }
+
+    //     $insert = [
+    //         'action' => $action,
+    //         'refId' => $id,
+    //         'token' => $token,
+    //         'description' => $description,
+    //         'data' => $data ? \json_encode($data) : null,
+    //         'module' => $moduleTitle,
+    //         'route' => $route,
+    //         'createdByName' => Auth::user()->name,
+    //     ];
+
+    //     return (new DataModel())->db('action_logs', 'id')->add($insert);
+    // }
 
     private static function getToken(BluePrint $bluePrint, $result)
     {

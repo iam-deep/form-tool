@@ -40,8 +40,8 @@ class CreateActionLoggerTable extends Migration
      *
      * @return void
      */
-    public function down()
-    {
-        Schema::dropIfExists('action_logs');
-    }
+    // public function down()
+    // {
+    //     Schema::dropIfExists('action_logs');
+    // }
 }

@@ -149,6 +149,11 @@ trait BaseImportExport
                 $input = $headers[$headerLabel] ?? null;
                 if ($input) {
                     $rowData[$input->getDbField()] = $row[$i] ?? null;
+
+                    $newValue = $input->beforeValidation($row[$i] ?? null);
+                    if ($newValue !== null) {
+                        $rowData[$input->getDbField()] = $newValue;
+                    }
                 }
                 $i++;
             }

@@ -29,8 +29,8 @@ class CreateCrudsTable extends Migration
      *
      * @return void
      */
-    public function down()
-    {
-        Schema::dropIfExists('cruds');
-    }
+    // public function down()
+    // {
+    //     Schema::dropIfExists('cruds');
+    // }
 }

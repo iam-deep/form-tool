@@ -11,17 +11,8 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('action_logs', function (Blueprint $table) {
-            $table->string('path')->nullable()->after('route');
+            $table->string('ipAddress')->nullable()->after('data');
+            $table->string('userAgent', 255)->nullable()->after('ipAddress');
         });
     }
-
-    /**
-     * Reverse the migrations.
-     */
-    // public function down(): void
-    // {
-    //     Schema::table('action_logs', function (Blueprint $table) {
-    //         $table->dropColumn('path');
-    //     });
-    // }
 };
