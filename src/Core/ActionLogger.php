@@ -2,7 +2,8 @@
 
 namespace Deep\FormTool\Core;
 
-use Deep\FormTool\Core\Dtos\ActionLoggerDto;
+use Deep\FormTool\Dtos\ActionLoggerDto;
+use Deep\FormTool\Enums\ActionLoggerEnum;
 
 // TODO: Multiple Logger
 // TODO: Keep deleted files and images
@@ -15,20 +16,9 @@ class ActionLogger
             return;
         }
 
-        $action = 'create';
+        $action = ActionLoggerEnum::CREATE->value;
 
-        $data = [];
-        foreach ($bluePrint->getInputList() as $input) {
-            if ($input instanceof BluePrint || ! $input->isLogColumn()) {
-                continue;
-            }
-
-            if ($newData) {
-                $input->setValue($newData[$input->getDbField()] ?? '');
-            }
-
-            $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
-        }
+        $data = self::getCreateData($bluePrint, $newData);
 
         $description = null;
         $heroField = $bluePrint->getHeroField();
@@ -51,13 +41,40 @@ class ActionLogger
         self::insert($bluePrint, $request);
     }
 
+    /**
+     * This only works for CREATE
+     */
+    public static function getCreateData(BluePrint $bluePrint, $newData = null)
+    {
+        $action = ActionLoggerEnum::CREATE->value;
+
+        $request = request();
+
+        $data = [];
+        foreach ($bluePrint->getInputList() as $input) {
+            if ($input instanceof BluePrint || ! $input->isLogColumn()) {
+                continue;
+            }
+
+            if ($newData) {
+                $input->setValue($newData[$input->getDbField()] ?? '');
+            } else {
+                $input->setValue($request->input($input->getDbField(), ''));
+            }
+
+            $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
+        }
+
+        return $data;
+    }
+
     public static function duplicate(BluePrint $bluePrint, $refId, $result, $oldData, $path = null)
     {
         if (! $bluePrint->getForm()->isLogAction()) {
             return;
         }
 
-        $action = 'duplicate';
+        $action = ActionLoggerEnum::DUPLICATE->value;
 
         $data = [];
         foreach ($bluePrint->getInputList() as $input) {
@@ -101,7 +118,7 @@ class ActionLogger
             return;
         }
 
-        $action = 'update';
+        $action = ActionLoggerEnum::UPDATE->value;
 
         $newData = (object) $newData;
 
@@ -150,7 +167,7 @@ class ActionLogger
             return;
         }
 
-        $action = 'delete';
+        $action = ActionLoggerEnum::DELETE->value;
 
         $description = null;
         $heroField = $bluePrint->getHeroField();
@@ -177,7 +194,7 @@ class ActionLogger
             return;
         }
 
-        $action = 'destroy';
+        $action = ActionLoggerEnum::DESTROY->value;
 
         $data = [];
         foreach ($bluePrint->getInputList() as $input) {
@@ -214,7 +231,7 @@ class ActionLogger
             return;
         }
 
-        $action = 'restore';
+        $action = ActionLoggerEnum::RESTORE->value;
 
         $description = null;
         $heroField = $bluePrint->getHeroField();
@@ -258,17 +275,17 @@ class ActionLogger
         $description = null;
         if (! $action->description && $action->moduleTitle && $action->nameOfTheData) {
             $suffix = '';
-            if ($action == 'create') {
+            if ($action->action == ActionLoggerEnum::CREATE) {
                 $suffix = 'created';
-            } elseif ($action == 'update') {
+            } elseif ($action->action == ActionLoggerEnum::UPDATE) {
                 $suffix = 'updated';
-            } elseif ($action == 'delete') {
+            } elseif ($action->action == ActionLoggerEnum::DELETE) {
                 $suffix = 'deleted';
-            } elseif ($action == 'destroy') {
+            } elseif ($action->action == ActionLoggerEnum::DESTROY) {
                 $suffix = 'permanently deleted';
-            } elseif ($action == 'restore') {
+            } elseif ($action->action == ActionLoggerEnum::RESTORE) {
                 $suffix = 'restored';
-            } elseif ($action == 'duplicate') {
+            } elseif ($action->action == ActionLoggerEnum::DUPLICATE) {
                 $suffix = 'duplicated';
             }
 

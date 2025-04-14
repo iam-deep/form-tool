@@ -230,6 +230,8 @@ class CellDefinition
         if ($this->fieldType == '_input') {
             return $this->inputType->setValue($value);
         }
+
+        return $this;
     }
 
     public function getValue()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Deep\FormTool\Core\Enums;
+namespace Deep\FormTool\Enums;
 
 enum ActionLoggerEnum: string
 {

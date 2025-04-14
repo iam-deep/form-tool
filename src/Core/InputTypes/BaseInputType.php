@@ -338,6 +338,8 @@ class BaseInputType
     public function setValue($value)
     {
         $this->value = $value;
+
+        return $this;
     }
 
     public function getRawValue()

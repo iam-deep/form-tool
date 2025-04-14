@@ -472,6 +472,20 @@ class Crud
         return $input;
     }
 
+    public function getNiceValue(string $column)
+    {
+        $input = $this->getField($column);
+
+        return $input->getNiceValue(request()->input($column));
+    }
+
+    public function getValue(string $column)
+    {
+        $input = $this->getField($column);
+
+        return $input->getValue();
+    }
+
     public function isWantsJson()
     {
         return $this->isWantsJson;
