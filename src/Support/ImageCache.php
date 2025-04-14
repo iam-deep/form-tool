@@ -115,6 +115,20 @@ class ImageCache
         return $cacheImagePath;
     }
 
+    public static function getCachedImage($imagePath)
+    {
+        self::getConfigs(null, null);
+
+        [$path, $cacheImagePath] = self::getPath($imagePath);
+
+        // If file exists let's return
+        if (\file_exists($cacheImagePath)) {
+            return $cacheImagePath;
+        }
+
+        return null;
+    }
+
     private static function getPath($imagePath)
     {
         $pathinfo = \pathinfo($imagePath);

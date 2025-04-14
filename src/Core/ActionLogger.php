@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Deep\FormTool\Dtos\ActionLoggerDto;
 use Deep\FormTool\Enums\ActionLoggerEnum;
+use Deep\FormTool\Support\ImageCache;
 
 // TODO: Multiple Logger
 // TODO: Keep deleted files and images
@@ -42,13 +43,11 @@ class ActionLogger
     }
 
     /**
-     * This only works for CREATE.
+     * This only works for CREATE
      */
-    public static function getCreateData(BluePrint $bluePrint, $newData = null)
+    public static function getCreateData(BluePrint $bluePrint, ?array $newData = null)
     {
         $action = ActionLoggerEnum::CREATE->value;
-
-        $request = request();
 
         $data = [];
         foreach ($bluePrint->getInputList() as $input) {
@@ -58,8 +57,6 @@ class ActionLogger
 
             if ($newData) {
                 $input->setValue($newData[$input->getDbField()] ?? '');
-            } else {
-                $input->setValue($request->input($input->getDbField(), ''));
             }
 
             $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
@@ -130,6 +127,14 @@ class ActionLogger
 
             $dbField = $input->getDbField();
             $oldValue = $oldData->{$dbField} ?? '';
+
+            // Let's store the cache image of the old image
+            if ($oldValue && $input instanceof \Deep\FormTool\Core\InputTypes\ImageType) {
+                $cacheImage = ImageCache::getCachedImage($oldValue);
+                if ($cacheImage) {
+                    $oldValue = $cacheImage;
+                }
+            }
 
             $value = $input->getLoggerValue($action, $oldValue);
             if ($value) {
@@ -202,7 +207,17 @@ class ActionLogger
                 continue;
             }
 
-            $input->setValue($oldData->{$input->getDbField()} ?? '');
+            $oldValue = $oldData->{$input->getDbField()} ?? '';
+
+            // Let's store the cache image of the old image
+            if ($oldValue && $input instanceof \Deep\FormTool\Core\InputTypes\ImageType) {
+                $cacheImage = ImageCache::getCachedImage($oldValue);
+                if ($cacheImage) {
+                    $oldValue = $cacheImage;
+                }
+            }
+
+            $input->setValue($oldValue);
             $data['data'][$input->getLabel()] = $input->getLoggerValue($action);
         }
 
@@ -309,45 +324,6 @@ class ActionLogger
 
         (new DataModel())->db('action_logs', 'id')->add($insert);
     }
-
-    // public static function logAction($action, $id, $data, $route = null, $moduleTitle = null, $options = null)
-    // {
-    //     $dataTitle = $options['dataTitle'] ?? null;
-    //     $description = $options['description'] ?? null;
-    //     $token = $options['token'] ?? null;
-
-    //     if (! $description && $moduleTitle && $dataTitle) {
-    //         $suffix = '';
-    //         if ($action == 'create') {
-    //             $suffix = 'created';
-    //         } elseif ($action == 'update') {
-    //             $suffix = 'updated';
-    //         } elseif ($action == 'delete') {
-    //             $suffix = 'deleted';
-    //         } elseif ($action == 'destroy') {
-    //             $suffix = 'permanently deleted';
-    //         } elseif ($action == 'restore') {
-    //             $suffix = 'restored';
-    //         } elseif ($action == 'duplicate') {
-    //             $suffix = 'duplicated';
-    //         }
-
-    //         $description = $moduleTitle.' '.$dataTitle.' '.$suffix;
-    //     }
-
-    //     $insert = [
-    //         'action' => $action,
-    //         'refId' => $id,
-    //         'token' => $token,
-    //         'description' => $description,
-    //         'data' => $data ? \json_encode($data) : null,
-    //         'module' => $moduleTitle,
-    //         'route' => $route,
-    //         'createdByName' => Auth::user()->name,
-    //     ];
-
-    //     return (new DataModel())->db('action_logs', 'id')->add($insert);
-    // }
 
     private static function getToken(BluePrint $bluePrint, $result)
     {
