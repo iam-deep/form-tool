@@ -43,7 +43,7 @@ class ActionLogger
     }
 
     /**
-     * This only works for CREATE
+     * This only works for CREATE.
      */
     public static function getCreateData(BluePrint $bluePrint, ?array $newData = null)
     {
