@@ -5,6 +5,7 @@ namespace Deep\FormTool\Core;
 use Closure;
 use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\InputTypes\TextType;
+use Deep\FormTool\Dtos\MultipleTableDto;
 use Illuminate\Support\Arr;
 
 class BluePrint
@@ -29,8 +30,8 @@ class BluePrint
     private $isMultipleOrderable = false;
     private $multipleOrderColumn = '';
 
-    private $multipleModel = null;
-    private $multipleTable = null;
+    private ?MultipleTableDto $multipleModel = null;
+    // private $multipleTable = null;
 
     public function __construct($key = '', $isMultiple = false, $parentBluePrint = null)
     {
@@ -308,13 +309,24 @@ class BluePrint
 
     public function orderable($column = null)
     {
-        $this->isMultipleOrderable = true;
+        if (! $this->multipleModel) {
+            throw new \InvalidArgumentException('orderable only works with db table, Please assign the table() method first.');
+        }
 
+        $this->multipleModel->isOrderable = true;
         $column = \trim($column);
         if ($column) {
-            $this->multipleOrderColumn = $column;
+            $this->multipleModel->orderableColumn = \trim($column);
             $this->hidden($column)->default(0)->addClass('order-value');
         }
+
+        // $this->isMultipleOrderable = true;
+
+        // $column = \trim($column);
+        // if ($column) {
+        //     $this->multipleOrderColumn = $column;
+        //     $this->hidden($column)->default(0)->addClass('order-value');
+        // }
 
         return $this;
     }
@@ -326,27 +338,44 @@ class BluePrint
         return $this;
     }
 
-    // TODO: Create Interface saveable
-    public function table($model, $idCol = null, $foreignKeyCol = null, $orderBy = null, ?Closure $where = null)
+    public function table($tableOrClass, $idCol = null, $foreignKeyCol = null, $orderBy = null, ?Closure $where = null)
     {
         if ($idCol) {
-            $this->multipleTable = (object) [
-                'table' => \trim($model),
-                'id' => \trim($idCol),
-                'foreignKey' => \trim($foreignKeyCol) ?: $this->form->getModel()->getPrimaryId(),
-                'orderBy' => \trim($orderBy),
-                'where' => $where,
-            ];
+            $this->multipleModel = new MultipleTableDto(
+                modelType:'table',
+                tableName: \trim($tableOrClass),
+                primaryCol: \trim($idCol),
+                foreignCol: \trim($foreignKeyCol) ?: $this->form->getModel()->getPrimaryId(),
+                orderBy: \trim($orderBy),
+                where: $where,
+            );
+
+            // $this->multipleTable = (object) [
+            //     'table' => \trim($model),
+            //     'id' => \trim($idCol),
+            //     'foreignKey' => \trim($foreignKeyCol) ?: $this->form->getModel()->getPrimaryId(),
+            //     'orderBy' => \trim($orderBy),
+            //     'where' => $where,
+            // ];
         } else {
-            if (! class_exists($model)) {
-                throw new \InvalidArgumentException('Class not found. Class: '.$model);
-            }
+            // if (! class_exists($model)) {
+            //     throw new \InvalidArgumentException('Class not found. Class: '.$model);
+            // }
 
-            $this->multipleModel = $model;
+            // if ($model && ! $model::$foreignKey) {
+            //     throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
+            // }
 
-            if ($model && ! isset($model::$foreignKey)) {
-                throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
-            }
+            // $this->multipleModel = (object) [
+            //     'modelClass' => $model,
+            //     'where' => $where,
+            // ];
+
+            $this->multipleModel = new MultipleTableDto(
+                modelType:'class',
+                className: $tableOrClass,
+                where: $where,
+            );
         }
 
         return $this;
@@ -354,7 +383,7 @@ class BluePrint
 
     public function keepId()
     {
-        if (! $this->multipleModel && ! $this->multipleTable) {
+        if (! $this->multipleModel) {
             throw new \InvalidArgumentException(
                 'keepId only works with db table, Please assign the table first. And keepId must called at last.'
             );
@@ -366,11 +395,7 @@ class BluePrint
             );
         }
 
-        if ($this->multipleModel) {
-            $this->hidden($this->multipleModel::$primaryId);
-        } elseif ($this->multipleTable) {
-            $this->hidden($this->multipleTable->id);
-        }
+        $this->hidden($this->multipleModel->primaryCol);
 
         return $this;
     }
@@ -390,11 +415,11 @@ class BluePrint
         return $this->isMultipleConfirmBeforeDelete;
     }
 
-    public function getModel()
+    public function getModel(): ?MultipleTableDto
     {
-        if ($this->multipleTable) {
-            return $this->multipleTable;
-        }
+        // if ($this->multipleTable) {
+        //     return $this->multipleTable;
+        // }
 
         return $this->multipleModel;
     }

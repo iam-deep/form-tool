@@ -40,8 +40,8 @@ class Directory
                         <body><p>Directory access is forbidden.</p></body></html>';
                     \fwrite($handle, $fileData);
                     \fclose($handle);
-                } catch (\Exception $e) {
-                    // TODO: Log
+                } catch (\Exception $ignoredException) {
+                    //
                 }
             }
 

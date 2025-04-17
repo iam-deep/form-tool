@@ -3,8 +3,10 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use Deep\FormTool\Support\FileManager;
+use PhpParser\Parser\Multiple;
 use Illuminate\Support\Facades\DB;
+use Deep\FormTool\Support\FileManager;
+use Deep\FormTool\Models\MultipleTableModel;
 
 class BulkAction
 {
@@ -163,26 +165,29 @@ class BulkAction
                 continue;
             }
 
-            $model = $input->getModel();
+            // $model = $input->getModel();
 
-            $foreignKey = null;
-            if ($model instanceof \stdClass) {
-                $foreignKey = $model->foreignKey;
-            } else {
-                if (! isset($model::$foreignKey)) {
-                    throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
-                }
+            // $foreignKey = null;
+            // if ($model instanceof \stdClass) {
+            //     $foreignKey = $model->foreignKey;
+            // } else {
+            //     if (! isset($model::$foreignKey)) {
+            //         throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
+            //     }
 
-                $foreignKey = $model::$foreignKey;
-            }
+            //     $foreignKey = $model::$foreignKey;
+            // }
 
-            $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
+            // $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
+
+            $model = MultipleTableModel::init($input->getModel());
+            $childResult = $model->getAll($insertId);
 
             $insert = [];
             foreach ($childResult as $row) {
                 $row = (array) $row;
-                $row[$model->id] = 0;
-                $row[$foreignKey] = $insertId;
+                $row[$model->getPrimaryCol()] = 0;
+                $row[$model->getForeignCol()] = $insertId;
 
                 // Let's clone the image
                 foreach ($input->getList() as $childInput) {
@@ -194,19 +199,20 @@ class BulkAction
                 $insert[] = $row;
             }
 
-            // TODO: Need to do this in the data model, it's not BulkAction or Form's job
-            $where = [$foreignKey => $insertId];
-            if ($model instanceof \stdClass) {
-                DB::table($model->table)->where($where)->delete();
-                if (\count($insert)) {
-                    DB::table($model->table)->insert($insert);
-                }
-            } else {
-                $model::deleteWhere($where);
-                if (\count($insert)) {
-                    $model::addMany($insert);
-                }
-            }
+            // $where = [$foreignKey => $insertId];
+            // if ($model instanceof \stdClass) {
+            //     DB::table($model->table)->where($where)->delete();
+            //     if (\count($insert)) {
+            //         DB::table($model->table)->insert($insert);
+            //     }
+            // } else {
+            //     $model::deleteWhere($where);
+            //     if (\count($insert)) {
+            //         $model::addMany($insert);
+            //     }
+            // }
+
+            $model->add($insertId, $insert);
         }
 
         ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result, $oldData);

@@ -7,7 +7,7 @@ use Deep\FormTool\Enums\ActionLoggerEnum;
 use Deep\FormTool\Support\ImageCache;
 
 // TODO: Multiple Logger
-// TODO: Keep deleted files and images
+// We are keeping cached images (if available) for now, other deleted files are not kept. Need to discuss should we keep deleted files
 
 class ActionLogger
 {
