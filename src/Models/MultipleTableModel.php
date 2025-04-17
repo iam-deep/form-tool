@@ -49,6 +49,7 @@ class MultipleTableModel
                 $closure = $this->model->where;
                 $closure($query);
             }
+
             return $query->orderBy($this->model->primaryCol, 'asc')->get();
         }
 
