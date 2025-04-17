@@ -26,8 +26,8 @@ class MultipleTableDto
                 throw new \InvalidArgumentException('Class not found. Class: '.$className);
             }
 
-            if (! $foreignCol) {
-                throw new \InvalidArgumentException('$foreignKey property not defined at '.$className);
+            if (! $className::$tableName || ! $className::$primaryId || ! $className::$foreignKey) {
+                throw new \InvalidArgumentException('$tableName, $primaryId or $foreignKey property not defined at '.$className);
             }
         }
     }

@@ -49,7 +49,6 @@ class MultipleTableModel
                 $closure = $this->model->where;
                 $closure($query);
             }
-
             return $query->orderBy($this->model->primaryCol, 'asc')->get();
         }
 
@@ -82,7 +81,7 @@ class MultipleTableModel
                 return DB::table($this->model->tableName)->insert($insert);
             }
         } else {
-            $this->model->className::deleteWhere($where);
+            $this->model->className::destroyWhere($where);
             if (\count($insert)) {
                 return $this->model->className::addMany($insert);
             }
