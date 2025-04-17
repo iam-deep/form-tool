@@ -10,7 +10,7 @@ class MultipleTableDto
     public ?string $orderableColumn = null;
 
     /**
-     * @param class-string<\Deep\FormTool\Models\BaseModel> $className
+     * @param  class-string<\Deep\FormTool\Models\BaseModel>  $className
      */
     public function __construct(
         public readonly string $modelType = 'table',

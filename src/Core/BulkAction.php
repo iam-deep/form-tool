@@ -3,10 +3,10 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use PhpParser\Parser\Multiple;
-use Illuminate\Support\Facades\DB;
-use Deep\FormTool\Support\FileManager;
 use Deep\FormTool\Models\MultipleTableModel;
+use Deep\FormTool\Support\FileManager;
+use Illuminate\Support\Facades\DB;
+use PhpParser\Parser\Multiple;
 
 class BulkAction
 {
