@@ -27,8 +27,8 @@ class BluePrint
 
     private $multipleRequired = 0;
     private $isMultipleConfirmBeforeDelete = false;
-    private $isMultipleOrderable = false;
-    private $multipleOrderColumn = '';
+    // private $isMultipleOrderable = false;
+    // private $multipleOrderColumn = '';
 
     private ?MultipleTableDto $multipleModel = null;
     // private $multipleTable = null;
@@ -309,8 +309,8 @@ class BluePrint
 
     public function orderable($column = null)
     {
-        if (! $this->multipleModel) {
-            throw new \InvalidArgumentException('orderable only works with db table, Please assign the table() method first.');
+        if ($this->multipleModel == null) {
+            $this->multipleModel = new MultipleTableDto();
         }
 
         $this->multipleModel->isOrderable = true;
@@ -389,7 +389,7 @@ class BluePrint
             );
         }
 
-        if ($this->isMultipleOrderable && ! $this->multipleOrderColumn) {
+        if ($this->multipleModel->isOrderable && ! $this->multipleModel->orderableColumn) {
             throw new \InvalidArgumentException(
                 'You must pass a dbField in orderable to make work with keepId. And keepId must called at last.'
             );
@@ -405,9 +405,9 @@ class BluePrint
         return $this->multipleRequired;
     }
 
-    public function isOrderable()
+    public function isOrderable(): ?bool
     {
-        return $this->isMultipleOrderable;
+        return $this->multipleModel?->isOrderable;
     }
 
     public function isConfirmBeforeDelete()
@@ -421,12 +421,16 @@ class BluePrint
         //     return $this->multipleTable;
         // }
 
-        return $this->multipleModel;
+        if (in_array($this->multipleModel?->modelType, ['table', 'class'])) {
+            return $this->multipleModel;
+        }
+
+        return null;
     }
 
-    public function getOrderByColumn()
+    public function getOrderByColumn(): ?string
     {
-        return $this->multipleOrderColumn;
+        return $this->multipleModel?->orderableColumn;
     }
 
     //endregion

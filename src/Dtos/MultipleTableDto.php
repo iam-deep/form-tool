@@ -13,7 +13,7 @@ class MultipleTableDto
      * @param  class-string<\Deep\FormTool\Models\BaseModel>  $className
      */
     public function __construct(
-        public readonly string $modelType = 'table',
+        public readonly string $modelType = '',
         public readonly ?string $tableName = null,
         public readonly ?string $className = null,
         public readonly ?string $primaryCol = null,
