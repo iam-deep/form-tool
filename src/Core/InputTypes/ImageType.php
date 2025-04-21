@@ -87,22 +87,22 @@ class ImageType extends FileType
         return $validations;
     }
 
-    public function getNiceValue($value)
-    {
-        if ($value) {
-            if (FileManager::isImage($value)) {
-                $image = ImageCache::resize($value);
+    // public function getNiceValue($value)
+    // {
+    //     if ($value) {
+    //         if (FileManager::isImage($value)) {
+    //             $image = ImageCache::resize($value);
 
-                $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
-                $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
+    //             $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
+    //             $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
 
-                return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" '.
-                    'src="'.asset($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
-            }
+    //             return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" '.
+    //                 'src="'.asset($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
+    //         }
 
-            return parent::getNiceValue($value);
-        }
+    //         return parent::getNiceValue($value);
+    //     }
 
-        return null;
-    }
+    //     return null;
+    // }
 }

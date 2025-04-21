@@ -13,7 +13,7 @@ class PasswordType extends BaseInputType
 
     public function getNiceValue($value)
     {
-        if ($this->value !== null) {
+        if ($value !== null) {
             return '*****';
         }
 

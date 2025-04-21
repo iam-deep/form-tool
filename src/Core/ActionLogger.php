@@ -129,12 +129,12 @@ class ActionLogger
             $oldValue = $oldData->{$dbField} ?? '';
 
             // Let's store the cache image of the old image
-            if ($oldValue && $input instanceof \Deep\FormTool\Core\InputTypes\ImageType) {
-                $cacheImage = ImageCache::getCachedImage($oldValue);
-                if ($cacheImage) {
-                    $oldValue = $cacheImage;
-                }
-            }
+            // if ($oldValue && $input instanceof \Deep\FormTool\Core\InputTypes\ImageType) {
+            //     $cacheImage = ImageCache::getCachedImage($oldValue);
+            //     if ($cacheImage) {
+            //         $oldValue = $cacheImage;
+            //     }
+            // }
 
             $value = $input->getLoggerValue($action, $oldValue);
             if ($value) {
@@ -210,12 +210,12 @@ class ActionLogger
             $oldValue = $oldData->{$input->getDbField()} ?? '';
 
             // Let's store the cache image of the old image
-            if ($oldValue && $input instanceof \Deep\FormTool\Core\InputTypes\ImageType) {
-                $cacheImage = ImageCache::getCachedImage($oldValue);
-                if ($cacheImage) {
-                    $oldValue = $cacheImage;
-                }
-            }
+            // if ($oldValue && $input instanceof \Deep\FormTool\Core\InputTypes\ImageType) {
+            //     $cacheImage = ImageCache::getCachedImage($oldValue);
+            //     if ($cacheImage) {
+            //         $oldValue = $cacheImage;
+            //     }
+            // }
 
             $input->setValue($oldValue);
             $data['data'][$input->getLabel()] = $input->getLoggerValue($action);

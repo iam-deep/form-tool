@@ -41,6 +41,12 @@ class Doc
                 \get_class($controller)
             ));
         }
+        if (! isset($controller->singularTitle)) {
+            throw new \InvalidArgumentException(\sprintf(
+                '$singularTitle not set or not declared as public at [%s]',
+                \get_class($controller)
+            ));
+        }
 
         Settings::init();
         DTConverter::init();

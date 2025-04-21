@@ -206,18 +206,17 @@ class FileType extends BaseInputType
             return null;
         }
 
-        if (FileManager::isImage($this->value)) {
-            $image = ImageCache::resize($this->value);
+        if (FileManager::isImage($value)) {
+            $image = ImageCache::resize($value);
 
             $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
             $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
 
-            return '<a href="'.asset($this->value).'" target="_blank">
-                        <img src="'.asset($image).'" class="img-thumbnail" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';">
-                    </a>';
+            return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" '.
+                'src="'.asset($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
         } else {
-            return '<a href="'.asset($this->value).'" target="_blank">
-                <i class="'.FileManager::getFileIcon($this->value).' fa-3x"></i>
+            return '<a href="'.asset($value).'" target="_blank">
+                <i class="'.FileManager::getFileIcon($value).' fa-3x"></i>
             </a>';
         }
     }
@@ -233,6 +232,10 @@ class FileType extends BaseInputType
 
         if ($action == 'update') {
             if ($oldValue != $newValue) {
+                if (FileManager::isImage($oldValue)) {
+                    $oldValue = ImageCache::getCachedImage($oldValue);
+                }
+
                 return [
                     'type' => $this->typeInString,
                     'data' => [$oldValue ?? '', $newValue ?? ''],
@@ -240,6 +243,10 @@ class FileType extends BaseInputType
             }
 
             return '';
+        }
+
+        if ($action == 'destroy' && FileManager::isImage($newValue)) {
+            $newValue = ImageCache::getCachedImage($newValue);
         }
 
         return $newValue !== null ? ['type' => $this->typeInString, 'data' => $newValue] : '';
