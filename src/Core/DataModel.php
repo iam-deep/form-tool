@@ -23,7 +23,7 @@ class DataModel
 
     protected Crud $crud;
 
-    /** @var class-string<BaseModel>|null $model */
+    /** @var class-string<BaseModel>|null */
     protected $model = null;
 
     private ?string $lastToken = null;
