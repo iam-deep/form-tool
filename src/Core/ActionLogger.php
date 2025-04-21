@@ -4,9 +4,10 @@ namespace Deep\FormTool\Core;
 
 use Deep\FormTool\Dtos\ActionLoggerDto;
 use Deep\FormTool\Enums\ActionLoggerEnum;
-use Deep\FormTool\Support\ImageCache;
+// use Deep\FormTool\Support\ImageCache;
+use Illuminate\Support\Arr;
 
-// TODO: Multiple Logger
+// TODO: Multiple Table Logger
 // We are keeping cached images (if available) for now, other deleted files are not kept. Need to discuss should we keep deleted files
 
 class ActionLogger
@@ -285,44 +286,49 @@ class ActionLogger
         (new DataModel())->db('action_logs', 'id')->add($insert);
     }
 
-    public static function log(ActionLoggerDto $action)
+    public static function log(ActionLoggerDto|array $actions)
     {
-        $description = null;
-        if (! $action->description && $action->moduleTitle && $action->nameOfTheData) {
-            $suffix = '';
-            if ($action->action == ActionLoggerEnum::CREATE) {
-                $suffix = 'created';
-            } elseif ($action->action == ActionLoggerEnum::UPDATE) {
-                $suffix = 'updated';
-            } elseif ($action->action == ActionLoggerEnum::DELETE) {
-                $suffix = 'deleted';
-            } elseif ($action->action == ActionLoggerEnum::DESTROY) {
-                $suffix = 'permanently deleted';
-            } elseif ($action->action == ActionLoggerEnum::RESTORE) {
-                $suffix = 'restored';
-            } elseif ($action->action == ActionLoggerEnum::DUPLICATE) {
-                $suffix = 'duplicated';
-            }
-
-            $description = $action->moduleTitle.' '.$action->nameOfTheData.' '.$suffix;
-        }
-
         $request = request();
 
-        $insert = [
-            'action' => $action->action,
-            'refId' => $action->id,
-            'token' => $action->token,
-            'description' => $description ?? $action->description,
-            'data' => $action->data ? \json_encode($action->data) : null,
-            'module' => $action->moduleTitle,
-            'route' => $action->route,
-            'ipAddress' => $request->ip(),
-            'userAgent' => $request->userAgent(),
-            'createdByName' => Auth::user()->name,
-        ];
+        $actions = Arr::wrap($actions);
 
-        (new DataModel())->db('action_logs', 'id')->add($insert);
+        $insert = [];
+        foreach ($actions as $action) {
+            $description = null;
+            if (! $action->description && $action->moduleTitle && $action->nameOfTheData) {
+                $suffix = '';
+                if ($action->action == ActionLoggerEnum::CREATE) {
+                    $suffix = 'created';
+                } elseif ($action->action == ActionLoggerEnum::UPDATE) {
+                    $suffix = 'updated';
+                } elseif ($action->action == ActionLoggerEnum::DELETE) {
+                    $suffix = 'deleted';
+                } elseif ($action->action == ActionLoggerEnum::DESTROY) {
+                    $suffix = 'permanently deleted';
+                } elseif ($action->action == ActionLoggerEnum::RESTORE) {
+                    $suffix = 'restored';
+                } elseif ($action->action == ActionLoggerEnum::DUPLICATE) {
+                    $suffix = 'duplicated';
+                }
+
+                $description = $action->moduleTitle.' '.$action->nameOfTheData.' '.$suffix;
+            }
+
+            $insert[] = [
+                'action' => $action->action,
+                'refId' => $action->id,
+                'token' => $action->token,
+                'description' => $description ?? $action->description,
+                'data' => $action->data ? \json_encode($action->data) : null,
+                'module' => $action->moduleTitle,
+                'route' => $action->route,
+                'ipAddress' => $request->ip(),
+                'userAgent' => $request->userAgent(),
+                'createdByName' => Auth::user()->name,
+            ];
+        }
+
+        (new DataModel())->db('action_logs', 'id')->addMany($insert);
     }
 
     private static function getToken(BluePrint $bluePrint, $result)

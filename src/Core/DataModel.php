@@ -22,7 +22,9 @@ class DataModel
     protected bool $isSoftDelete = true;
 
     protected Crud $crud;
-    protected $model = '';
+
+    /** @var class-string<BaseModel>|null $model */
+    protected $model = null;
 
     private ?string $lastToken = null;
 
@@ -179,7 +181,7 @@ class DataModel
 
         $data = $this->setup()::getAll($where);
 
-        if ($data->count()) {
+        if ($data->total()) {
             $inputs = $this->crud->getBluePrint()->getInputList();
 
             $fields = $this->crud->getTable()->getFields()->toArray();
@@ -265,6 +267,21 @@ class DataModel
 
     public function addMany($data)
     {
+        $metaColumns = \config('form-tool.table_meta_columns');
+        $createdBy = ($metaColumns['createdBy'] ?? 'createdBy') ?: 'createdBy';
+        $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
+
+        $id = Auth::id();
+
+        foreach ($data as &$row) {
+            if ($this->isToken) {
+                $row[$this->token] = $this->lastToken = Random::unique($this);
+            }
+
+            $row[$createdBy] = $id;
+            $row[$createdAt] = \date('Y-m-d H:i:s');
+        }
+
         $this->setup()::addMany($data);
     }
 

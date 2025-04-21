@@ -126,8 +126,10 @@ class BaseModel extends Model
     public static function addMany($data)
     {
         if (\count($data)) {
-            DB::table(static::$tableName)->insert($data);
+            return DB::table(static::$tableName)->insert($data);
         }
+
+        return null;
     }
 
     public static function updateOne($id, $data, $isToken = false)
