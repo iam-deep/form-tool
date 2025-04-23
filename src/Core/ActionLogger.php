@@ -320,6 +320,7 @@ class ActionLogger
                 'token' => $action->token,
                 'description' => $description ?? $action->description,
                 'data' => $action->data ? \json_encode($action->data) : null,
+                'extraData' => $action->extraData,
                 'module' => $action->moduleTitle,
                 'route' => $action->route,
                 'ipAddress' => $request->ip(),

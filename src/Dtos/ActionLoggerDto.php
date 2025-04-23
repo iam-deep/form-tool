@@ -15,8 +15,9 @@ class ActionLoggerDto
         public readonly ?string $nameOfTheData = null,
         public readonly ?string $id = null,
         public readonly ?string $token = null,
-        public readonly ?string $ipAddress = null,
-        public readonly ?string $userAgent = null,
+        // public readonly ?string $ipAddress = null,
+        // public readonly ?string $userAgent = null,
+        public readonly ?string $extraData = null,
     ) {
     }
 }
