@@ -11,7 +11,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('action_logs', function (Blueprint $table) {
-            $table->string('extraData')->nullable()->after('data');
+            $table->text('extraData')->nullable()->after('data');
         });
     }
 };
