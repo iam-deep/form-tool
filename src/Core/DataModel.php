@@ -267,19 +267,20 @@ class DataModel
 
     public function addMany($data)
     {
-        $metaColumns = \config('form-tool.table_meta_columns');
-        $createdBy = ($metaColumns['createdBy'] ?? 'createdBy') ?: 'createdBy';
-        $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
+        // $metaColumns = \config('form-tool.table_meta_columns');
+        // $createdBy = ($metaColumns['createdBy'] ?? 'createdBy') ?: 'createdBy';
+        // $createdAt = ($metaColumns['createdAt'] ?? 'createdAt') ?: 'createdAt';
 
-        $id = Auth::id();
+        // $id = Auth::id();
 
         foreach ($data as &$row) {
             if ($this->isToken) {
                 $row[$this->token] = $this->lastToken = Random::unique($this);
             }
 
-            $row[$createdBy] = $id;
-            $row[$createdAt] = \date('Y-m-d H:i:s');
+            // This is affecting settings (form group)
+            // $row[$createdBy] = $id;
+            // $row[$createdAt] = \date('Y-m-d H:i:s');
         }
 
         $this->setup()::addMany($data);
