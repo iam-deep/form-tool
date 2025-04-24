@@ -2,10 +2,11 @@
 
 namespace Deep\FormTool\Core;
 
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
+// use Deep\FormTool\Support\ImageCache;
 use Deep\FormTool\Dtos\ActionLoggerDto;
 use Deep\FormTool\Enums\ActionLoggerEnum;
-// use Deep\FormTool\Support\ImageCache;
-use Illuminate\Support\Arr;
 
 // TODO: Multiple Table Logger
 // We are keeping cached images (if available) for now, other deleted files are not kept. Need to discuss should we keep deleted files
@@ -292,6 +293,9 @@ class ActionLogger
 
         $actions = Arr::wrap($actions);
 
+        $createAt = now();
+        $createBy = Auth::user()->id;
+
         $insert = [];
         foreach ($actions as $action) {
             $description = null;
@@ -325,6 +329,8 @@ class ActionLogger
                 'route' => $action->route,
                 'ipAddress' => $request->ip(),
                 'userAgent' => $request->userAgent(),
+                'createdAt' => $createAt,
+                'createdBy' => $createBy,
                 'createdByName' => Auth::user()->name,
             ];
         }
