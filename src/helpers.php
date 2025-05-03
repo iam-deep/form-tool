@@ -1,9 +1,9 @@
 <?php
 
 use Carbon\Carbon;
-use Deep\FormTool\Core\Auth;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\Guard;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Arr;
 
 if (! function_exists('addCssLink')) {
@@ -245,7 +245,7 @@ if (! function_exists('getDependencies')) {
                     break;
 
                 default:
-                    throw new \Exception(sprintf('Plugin not found: %s', $plugin));
+                    throw new FormToolException(sprintf('Plugin not found: %s', $plugin));
                     break;
             }
         }

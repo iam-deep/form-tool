@@ -6,6 +6,7 @@ use Closure;
 use Deep\FormTool\Core\DataModel;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Facades\Cache;
 
 trait Options
@@ -206,11 +207,11 @@ trait Options
                                     }
 
                                     if (! $dependInput) {
-                                        throw new \Exception(sprintf('Depended field not found: %s', $depend->field));
+                                        throw new FormToolException(sprintf('Depended field not found: %s', $depend->field));
                                     }
 
                                     if ($dependInput->isMultiple) {
-                                        throw new \Exception(sprintf('Depended field cannot be multiple: %s', $depend->field));
+                                        throw new FormToolException(sprintf('Depended field cannot be multiple: %s', $depend->field));
                                     }
 
                                     $depend->value = $dependInput->getValue();
@@ -288,7 +289,7 @@ trait Options
                             $result = $closure($where);
                             if (! $result instanceof \Illuminate\Support\Collection) {
                                 $type = gettype($result);
-                                throw new \Exception(\sprintf(
+                                throw new FormToolException(\sprintf(
                                     'Return value of the %s\'s closure must be %s. Currently returned: %s',
                                     $this->dbField,
                                     \Illuminate\Support\Collection::class,
@@ -301,7 +302,7 @@ trait Options
                                 if ($cacheKey instanceof Closure) {
                                     $cacheKey = $cacheKey($dependValue);
                                     if (! is_string($cacheKey)) {
-                                        throw new \Exception('Return value of the cache closure must be string!');
+                                        throw new FormToolException('Return value of the cache closure must be string!');
                                     }
                                 }
 
@@ -451,7 +452,7 @@ trait Options
                 }
 
                 if (! $dependInput) {
-                    throw new \Exception(sprintf('Depended field not found: %s', $depend->field));
+                    throw new FormToolException(sprintf('Depended field not found: %s', $depend->field));
                 }
 
                 $input->firstOptionText = '(select '.\strtolower($dependInput->getLabel()).' first)';

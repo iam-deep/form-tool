@@ -2,6 +2,8 @@
 
 namespace Deep\FormTool\Support;
 
+use Deep\FormTool\Exceptions\FormToolException;
+use Exception;
 use Illuminate\Http\UploadedFile;
 use Intervention\Image\Facades\Image;
 
@@ -42,33 +44,39 @@ class FileManager
 
     public static function uploadFile(?UploadedFile $file, ?string $subPath, ?string $oldFilePath = null)
     {
-        if ($file) {
-            $flagCheck = true;
+        try {
+            if ($file) {
+                $flagCheck = true;
 
-            $destinationPath = FileManager::getUploadPath($subPath);
-            $filename = self::filterFilename($file->getClientOriginalName());
+                $destinationPath = FileManager::getUploadPath($subPath);
+                $filename = self::filterFilename($file->getClientOriginalName());
 
-            // Let's replace the old file if exists
-            /*if ($oldFilePath) {
-                $pathinfo = \pathinfo($oldFilePath);
+                // Let's replace the old file if exists
+                /*if ($oldFilePath) {
+                    $pathinfo = \pathinfo($oldFilePath);
 
-                $ext = $pathinfo['extension'] ?? '';
+                    $ext = $pathinfo['extension'] ?? '';
 
-                // Check the old file extension with new file
-                if ($ext == $file->getClientOriginalExtension()) {
-                    $flagCheck = false;
+                    // Check the old file extension with new file
+                    if ($ext == $file->getClientOriginalExtension()) {
+                        $flagCheck = false;
 
-                    $destinationPath = \ltrim($pathinfo['dirname'], '/').'/';
-                    $filename = $pathinfo['basename'];
-                }
+                        $destinationPath = \ltrim($pathinfo['dirname'], '/').'/';
+                        $filename = $pathinfo['basename'];
+                    }
 
-                // TODO: Delete the cache image
+                    // TODO: Delete the cache image
 
-                // $cacheImage = $destinationPath . $pathinfo['filename'].'-150x150.'.$pathinfo['extension'];
-                // FileManager::deleteFile($cacheImage);
-            }*/
+                    // $cacheImage = $destinationPath . $pathinfo['filename'].'-150x150.'.$pathinfo['extension'];
+                    // FileManager::deleteFile($cacheImage);
+                }*/
 
-            return FileManager::doUpload($file, $destinationPath, $filename, $flagCheck);
+                return FileManager::doUpload($file, $destinationPath, $filename, $flagCheck);
+            }
+        } catch (Exception $e) {
+            $size = config('form-tool.maxFileUploadSize', 1024 * 5) / 1024;
+
+            throw new FormToolException('Upload Error! Please upload photo/file less than '.$size.'MB.');
         }
 
         return null;
@@ -122,17 +130,23 @@ class FileManager
     {
         $newFile = null;
 
-        // TODO: Need to check the file exists and copy and update the file in the current month folder
-
         try {
             if (file_exists($file)) {
                 $info = pathinfo($file);
 
-                $newFile = $info['dirname'].'/'.$info['filename'].'_'.time().'.'.$info['extension'];
+                if (! isset($info['dirname']) || ! isset($info['filename'])) {
+                    return null;
+                }
+
+                $i = 2;
+                do {
+                    $newFile = $info['dirname'].'/'.$info['filename'].'_'.($i++).'.'.($info['extension'] ?? '');
+                } while (file_exists($newFile));
+
                 copy($file, $newFile);
             }
         } catch (\Exception) {
-            //
+            return null;
         }
 
         return $newFile;

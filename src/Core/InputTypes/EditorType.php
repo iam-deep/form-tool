@@ -6,6 +6,7 @@ use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\IPluginableType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -105,16 +106,16 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 
-        $path = FileManager::uploadFile($request->file($fieldName), $request->query('path'));
-        if ($path != null) {
-            return response()->json(['url' => asset($path)], 200);
-        }
+        try {
+            $path = FileManager::uploadFile($request->file($fieldName), $request->query('path'));
+            if (! $path) {
+                throw new FormToolException('Something went wrong! Please try again.');
+            }
 
-        return response()->json([
-            'error' => [
-                'message' => 'Something went wrong! Please try again.',
-            ],
-        ], 400);
+            return response()->json(['url' => asset($path)], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => ['message' => $e->getMessage()]], 400);
+        }
 
         /*{
             "urls": {
@@ -163,7 +164,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
     public function plugin($plugin, $options = [])
     {
         if (! in_array($plugin, $this->getPlugins())) {
-            throw new \Exception(sprintf(
+            throw new FormToolException(sprintf(
                 'Unknown plugin: %s. Available Options: [%s]',
                 $plugin,
                 implode(', ', $this->getPlugins())

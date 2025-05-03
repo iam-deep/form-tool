@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -349,7 +350,7 @@ trait BaseImportExport
         foreach ($this->sampleData as $col => $sample) {
             $input = $this->crud->getBluePrint()->getInputTypeByDbField($col);
             if (! $input) {
-                throw new \Exception(sprintf('Column "%s" not found in blue print!', $col));
+                throw new FormToolException(sprintf('Column "%s" not found in blue print!', $col));
             }
 
             if ($sample instanceof ImportConfig) {
@@ -359,7 +360,7 @@ trait BaseImportExport
             }
 
             if (isset($headers[$label])) {
-                throw new \Exception(sprintf('Duplicate header label found: %s', $label));
+                throw new FormToolException(sprintf('Duplicate header label found: %s', $label));
             }
 
             $headers[$label] = $input;

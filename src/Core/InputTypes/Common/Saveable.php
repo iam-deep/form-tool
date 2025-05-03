@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Core\InputTypes\Common;
 
+use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Core\InputTypes\BaseInputType;
 
 trait Saveable
@@ -11,7 +12,7 @@ trait Saveable
     public function saveAt(string $tableName, string $id = 'id', ?string $refId = null): BaseInputType
     {
         if (! $this->isMultiple) {
-            throw new \Exception(sprintf('Field "%s" should be multiple to apply saveAt method!', $this->dbField));
+            throw new FormToolException(sprintf('Field "%s" should be multiple to apply saveAt method!', $this->dbField));
         }
 
         $this->save = (object) [

@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Core;
 
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Database\Eloquent\Model;
 
 class Auth
@@ -51,7 +52,7 @@ class Auth
         }
 
         if (! \is_subclass_of($config['userModel'], Model::class)) {
-            throw new \Exception(\sprintf('"%s" is not an instance of %s', $config['userModel'], Model::class));
+            throw new FormToolException(\sprintf('"%s" is not an instance of %s', $config['userModel'], Model::class));
         }
 
         if (! $config['isCustomAuth']) {
@@ -70,7 +71,7 @@ class Auth
 
         self::$user = $config['userModel']::user();
         if (! self::$user) {
-            throw new \Exception(\sprintf('User data not found from %s::user()', $config['userModel']));
+            throw new FormToolException(\sprintf('User data not found from %s::user()', $config['userModel']));
         }
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Core;
 
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Http\Request;
 
 trait ApiResponses
@@ -59,7 +60,7 @@ trait ApiResponses
     protected function validationError($validator, $message = '')
     {
         if (! $validator instanceof \Illuminate\Validation\Validator) {
-            throw new \Exception('$validator in not an instance of '.\Illuminate\Validation\Validator::class);
+            throw new FormToolException('$validator in not an instance of '.\Illuminate\Validation\Validator::class);
         }
 
         $data = [];

@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\CrudState;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -282,8 +283,11 @@ class Crud
     {
         $page = new \stdClass();
 
-        $page->form = $this->form->create();
+        $page->title = $this->resource->title;
+        $page->route = $this->resource->route;
+        $page->singularTitle = $this->resource->singularTitle ?? null;
         $page->id = null;
+        $page->form = $this->form->create();
 
         $page->style = Doc::getCssLinks().Doc::getCss();
         $page->script = Doc::getJsLinks().Doc::getJs();
@@ -303,11 +307,14 @@ class Crud
 
     public function edit($id = null)
     {
-        $page = new \stdClass();
-
         $this->form->edit($id);
-        $page->form = $this->form->create();
+
+        $page = new \stdClass();
+        $page->title = $this->resource->title;
+        $page->route = $this->resource->route;
+        $page->singularTitle = $this->resource->singularTitle ?? null;
         $page->id = $id;
+        $page->form = $this->form->create();
 
         $page->style = Doc::getCssLinks().Doc::getCss();
         $page->script = Doc::getJsLinks().Doc::getJs();
@@ -325,11 +332,11 @@ class Crud
         foreach ($data as $key => $value) {
             $input = $this->bluePrint->getInputTypeByDbField($key);
             if (! $input) {
-                throw new \Exception(sprintf('Column "%s" not found in blue print!', $key));
+                throw new FormToolException(sprintf('Column "%s" not found in blue print!', $key));
             }
 
             if ($input instanceof BluePrint) {
-                throw new \Exception(sprintf('Multiple table field are not supported! Field: '.$input->label));
+                throw new FormToolException(sprintf('Multiple table field are not supported! Field: '.$input->label));
             }
 
             $input->importSample($value);

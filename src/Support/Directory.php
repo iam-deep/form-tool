@@ -2,6 +2,8 @@
 
 namespace Deep\FormTool\Support;
 
+use Deep\FormTool\Exceptions\FormToolException;
+
 class Directory
 {
     public static function create($path)
@@ -18,7 +20,7 @@ class Directory
             \mkdir($path, 0777, true);
             self::restrictDirectoryAccess($path);
         } catch (\Exception $e) {
-            throw new \Exception(\sprintf('Failed to create directory: %s. %s', $path, $e->getMessage()));
+            throw new FormToolException(\sprintf('Failed to create directory: %s. %s', $path, $e->getMessage()));
         }
     }
 

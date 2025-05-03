@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Core;
 
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 
@@ -21,7 +22,7 @@ class DataFactory
         }
 
         if (! $filename || ! $action) {
-            throw new \Exception('route name not found!');
+            throw new FormToolException('route name not found!');
         }
 
         $segment = new \stdClass();

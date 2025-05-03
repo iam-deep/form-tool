@@ -8,6 +8,7 @@ use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\Options;
 use Deep\FormTool\Core\InputTypes\Common\Saveable;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Facades\DB;
 
 class SelectType extends BaseFilterType implements ISaveable
@@ -91,13 +92,13 @@ class SelectType extends BaseFilterType implements ISaveable
     public function quickAdd($controllerClass)
     {
         if (! $this->optionData) {
-            throw new \Exception('Set options first!');
+            throw new FormToolException('Set options first!');
         }
 
         foreach ($this->optionData as $optionData) {
             foreach ($optionData as $type => $options) {
                 if ('db' != $type) {
-                    throw new \Exception('Options must be set to database to use Auto Quick Add!');
+                    throw new FormToolException('Options must be set to database to use Auto Quick Add!');
                 }
             }
         }

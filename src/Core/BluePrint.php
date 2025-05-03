@@ -6,6 +6,7 @@ use Closure;
 use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\InputTypes\TextType;
 use Deep\FormTool\Dtos\MultipleTableDto;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Support\Arr;
 
 class BluePrint
@@ -284,11 +285,11 @@ class BluePrint
     public function group(string $name, Closure $fields)
     {
         if (is_numeric($name)) {
-            throw new \Exception('Group name cannot be numeric!');
+            throw new FormToolException('Group name cannot be numeric!');
         }
 
         if (in_array($name, $this->groups)) {
-            throw new \Exception('Group name already exists!');
+            throw new FormToolException('Group name already exists!');
         }
 
         $this->groups[] = $name;

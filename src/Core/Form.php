@@ -6,6 +6,7 @@ use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
+use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Models\MultipleTableModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
@@ -173,7 +174,7 @@ class Form
     {
         $method = strtoupper(trim($method));
         if (! in_array($method, ['POST', 'GET'])) {
-            throw new \Exception('Form method must be GET or POST');
+            throw new FormToolException('Form method must be GET or POST');
         }
 
         $this->htmlForm['method'] = $method;
@@ -1274,7 +1275,7 @@ class Form
 
         if ($this->crud->isSoftDelete()) {
             if (! \property_exists($result, $deletedAt)) {
-                throw new \Exception('Column "deletedAt" not found!');
+                throw new FormToolException('Column "deletedAt" not found!');
             }
 
             if ($result->{$deletedAt} === null) {
