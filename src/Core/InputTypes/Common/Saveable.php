@@ -2,8 +2,8 @@
 
 namespace Deep\FormTool\Core\InputTypes\Common;
 
-use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Core\InputTypes\BaseInputType;
+use Deep\FormTool\Exceptions\FormToolException;
 
 trait Saveable
 {
