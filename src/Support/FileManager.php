@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Support;
 
+use Deep\FormTool\Exceptions\FileUploadException;
 use Deep\FormTool\Exceptions\FormToolException;
 use Exception;
 use Illuminate\Http\UploadedFile;
@@ -74,6 +75,10 @@ class FileManager
                 return FileManager::doUpload($file, $destinationPath, $filename, $flagCheck);
             }
         } catch (Exception $e) {
+            if ($e instanceof FileUploadException) {
+                throw $e;
+            }
+
             $size = config('form-tool.maxFileUploadSize', 1024 * 5) / 1024;
 
             throw new FormToolException('Upload Error! Please upload photo/file less than '.$size.'MB.');
@@ -82,7 +87,7 @@ class FileManager
         return null;
     }
 
-    private static function doUpload($file, $destinationPath, $filename, $flagCheck = true)
+    private static function doUpload(?UploadedFile $file, $destinationPath, $filename, $flagCheck = true)
     {
         $mainFilename = $filename;
 
@@ -115,7 +120,11 @@ class FileManager
 
             $image->save($destinationPath.$filename);
         } else {
-            $file->move($destinationPath, $filename);
+            try {
+                $file->move($destinationPath, $filename);
+            } catch(\Exception $e) {
+                throw new FileUploadException($e->getMessage());
+            }
         }
 
         // set back to null
