@@ -262,9 +262,10 @@ class FileType extends BaseInputType
         $isImage = FileManager::isImage($value);
         if ($isImageField || $isImage) {
             if ($value) {
-                $imageCache = asset(ImageCache::resize($value));
-            } else {
-                $imageCache = $noImage;
+                $tempCachedImage = ImageCache::resize($value);
+                if ($tempCachedImage) {
+                    $imageCache = asset($tempCachedImage);
+                }
             }
         }
 
@@ -315,9 +316,10 @@ class FileType extends BaseInputType
         $isImage = FileManager::isImage($value);
         if ($isImageField || $isImage) {
             if ($value) {
-                $imageCache = asset(ImageCache::resize($value));
-            } else {
-                $imageCache = $noImage;
+                $tempCachedImage = ImageCache::resize($value);
+                if ($tempCachedImage) {
+                    $imageCache = asset($tempCachedImage);
+                }
             }
         }
 

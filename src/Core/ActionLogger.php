@@ -278,7 +278,7 @@ class ActionLogger
             'route' => $bluePrint->getForm()->getResource()->route,
             'ipAddress' => $request->ip(),
             'userAgent' => $request->userAgent(),
-            'createdByName' => Auth::user()->name,
+            'createdByName' => Auth::user()?->name,
         ];
 
         $data['data'] = $data['data'] ? \json_encode($data['data']) : null;
@@ -294,7 +294,7 @@ class ActionLogger
         $actions = Arr::wrap($actions);
 
         $createAt = now();
-        $createBy = Auth::user()->id;
+        $createBy = Auth::user()?->id;
 
         $insert = [];
         foreach ($actions as $action) {
@@ -331,7 +331,7 @@ class ActionLogger
                 'userAgent' => $request->userAgent(),
                 'createdAt' => $createAt,
                 'createdBy' => $createBy,
-                'createdByName' => Auth::user()->name,
+                'createdByName' => Auth::user()?->name,
             ];
         }
 
