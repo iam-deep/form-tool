@@ -82,7 +82,13 @@ class MultipleTableModel
                 return DB::table($this->model->tableName)->insert($insert);
             }
         } else {
-            $this->model->className::destroyWhere($where);
+            $tempWhere = [];
+            $tempWhere[] = $where;
+            if ($this->model->where) {
+                $tempWhere[] = $this->model->where;
+            }
+
+            $this->model->className::destroyWhere($tempWhere);
             if (\count($insert)) {
                 return $this->model->className::addMany($insert);
             }

@@ -183,6 +183,11 @@ class BluePrint
         return $inputType;
     }
 
+    /**
+     * @template T of \Deep\FormTool\Core\InputTypes\Common\ICustomType
+     * @param class-string<T> $class
+     * @return T
+     */
     public function custom($class, ?string $dbField = null, ?string $label = null)
     {
         $inputType = new $class();
