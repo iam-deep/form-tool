@@ -229,8 +229,8 @@ trait Options
                                 $where[] = [$depend->column => $depend->value];
 
                                 // Let's reset the dependValue, so that we can fetch the new options for
-                                // depended field in multiple table
-                                if ($this->bluePrint->amIChildBluePrint()) {
+                                // depended field in multiple table and at the time of import
+                                if ($this->bluePrint->amIChildBluePrint() || $this->bluePrint->getForm()->getCrud()->getCurrentState() == CrudState::IMPORT) {
                                     $depend->value = null;
                                 }
                             }

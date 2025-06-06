@@ -43,16 +43,19 @@ class BaseDateTimeType extends BaseFilterType
 
     public function getImportValue($value)
     {
-        try {
-            $value = date($this->niceFormat, strtotime($value));
-            if ($value) {
-                return DTConverter::toDb($value, $this->dbFormat, $this->isConvertToLocal);
-            }
-        } catch(\Exception $e) {
-            return null;
-        }
+        // Currently we are using excel dates
+        return $this->getDateFromExcel($value);
 
-        return null;
+        // try {
+        //     $value = date($this->niceFormat, strtotime($value));
+        //     if ($value) {
+        //         return DTConverter::toDb($value, $this->dbFormat, $this->isConvertToLocal);
+        //     }
+        // } catch(\Exception $e) {
+        //     return null;
+        // }
+
+        // return null;
     }
 
     public function getExportValue($value)
@@ -227,5 +230,34 @@ class BaseDateTimeType extends BaseFilterType
         ];
 
         return $this->htmlParentDivFilter(\view('form-tool::form.input_types.datetime', $data)->render());
+    }
+
+    private function getDateFromExcel($value)
+    {
+        try {
+            // If it's a DateTime object already
+            if ($value instanceof \DateTime) {
+                return $value->format('Y-m-d');
+            }
+
+            // If it's a numeric date (Excel stores it as a number)
+            if (is_numeric($value)) {
+                return \PhpOffice\PhpSpreadsheet\Shared\Date::excelToDateTimeObject($value)->format('Y-m-d');
+            }
+
+            // If it's a string like 05-Jun-2025, 05-06-2025
+            $formats = ['d-M-Y', 'd-m-Y'];
+            foreach ($formats as $format) {
+                try {
+                    return \Carbon\Carbon::createFromFormat($format, $value)->format('Y-m-d');
+                } catch (\Exception $e) {
+                    // Try next format
+                }
+            }
+
+            return null;
+        } catch (\Exception $e) {
+            return null;
+        }
     }
 }

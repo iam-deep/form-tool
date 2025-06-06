@@ -78,15 +78,15 @@ trait BaseImportExport
 
         //TODO: Validate unique columns, if exists in blueprint
 
-        // Validating the .csv file
+        // Validating the .xlxs file
         $request->validate([
-            'file' => ['bail', 'required', 'mimes:csv,txt', function ($attribute, $value, Closure $fail) {
+            'file' => ['bail', 'required', 'mimes:xlsx', function ($attribute, $value, Closure $fail) {
                 $info = pathinfo($value->getClientOriginalName());
-                if ('csv' != strtolower(trim($info['extension'] ?? null))) {
-                    $fail('The :attribute must be a file of type: csv.');
+                if ('xlsx' != strtolower(trim($info['extension'] ?? null))) {
+                    $fail('The :attribute must be a file of type: xlsx.');
                 }
             }],
-        ], [], ['file' => 'Upload CSV File']);
+        ], [], ['file' => 'Upload XLSX File']);
 
         $headerRowCount = 1;
 
@@ -107,7 +107,7 @@ trait BaseImportExport
             'unique' => 'The :attribute has already been taken: <b>:input</b>',
         ];
 
-        $niceDateFormat = config('form-tool.formatDate');
+        // $niceDateFormat = config('form-tool.formatDate');
 
         // Get the validation from our Blueprint setup
         $validations = [];
@@ -118,17 +118,20 @@ trait BaseImportExport
             $messages = array_merge($messages, $input->getValidationMessages());
             $validations[$input->getDbField()] = [];
 
-            foreach ($rawValidations as $val) {
+            foreach ($rawValidations as  $val) {
                 if ($val instanceof \Illuminate\Validation\Rules\Unique) {
                     $uniqueColumnValidations[] = $input->getDbField();
                 } elseif (is_string($val) && false !== strpos($val, 'date_format:')) {
-                    $val = str_replace('date_format:'.$niceDateFormat, 'date_format:'.$this->importDateFormat, $val);
+                    // $val = str_replace('date_format:'.$niceDateFormat, 'date_format:'.$this->importDateFormat, $val);
 
-                    $messages[$input->getDbField().'.date_format'] = sprintf(
-                        'The :attribute does not match the format: %s (%s).',
-                        date($this->importDateFormat, strtotime('25-08-2022 06:30 pm')),
-                        $this->importExcelFormat
-                    );
+                    // $messages[$input->getDbField().'.date_format'] = sprintf(
+                    //     'The :attribute does not match the format: %s (%s).',
+                    //     date($this->importDateFormat, strtotime('25-08-2022 06:30 pm')),
+                    //     $this->importExcelFormat
+                    // );
+
+                    // We are going to skip this validation, as excel keeps date in number format
+                    continue;
                 }
 
                 $validations[$input->getDbField()][] = $val;
@@ -160,6 +163,10 @@ trait BaseImportExport
             }
 
             $this->setImportData($rowData);
+
+            // Merge with request helps to get the request data in the validation closure
+            // If you want to get the request data in the validation closure like request()->input('name')
+            $request->merge($rowData);
 
             $validator = Validator::make($rowData, $validations, $messages, $attributes);
             if ($validator->fails()) {
