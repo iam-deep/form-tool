@@ -551,6 +551,10 @@ class Form
                 $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
             }
 
+            if (! $this->request->has('redirect')) {
+                $this->request->merge(['redirect' => createUrl($this->resource->route.'/create', $this->queryString)]);
+            }
+
             return $this->response(true, ($this->resource->singularTitle ?? 'Data').$heroValue.' added successfully!');
         }
 
@@ -1650,7 +1654,7 @@ class Form
         }
 
         if ($status === true) {
-            $redirect = $this->request->query('redirect');
+            $redirect = $this->request->input('redirect');
             if ($redirect) {
                 return redirect(urldecode($redirect))->with('success', $message);
             }
@@ -1752,6 +1756,20 @@ class Form
     public function isWantsJson()
     {
         return $this->crud->isWantsJson() || $this->request->ajax() || $this->request->wantsJson();
+    }
+
+    public function setValues(?array $values): void
+    {
+        if (is_null($values)) {
+            return;
+        }
+
+        foreach ($values as $column => $value) {
+            $input = $this->bluePrint->getInputTypeByDbField($column);
+            if ($input) {
+                $input->setValue($value);
+            }
+        }
     }
 
     public function setFormStatus(int $status)
