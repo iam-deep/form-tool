@@ -341,7 +341,7 @@ class DataModel
         return $this->setup()::countWhere($where);
     }
 
-    private function setup()
+    private function setup(): \Deep\FormTool\Models\BaseModel|null
     {
         $this->model::$tableName = $this->tableName;
         $this->model::$primaryId = $this->primaryId;

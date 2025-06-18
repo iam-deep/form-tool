@@ -513,7 +513,9 @@ trait Options
             return null;
         }
 
-        $this->withoutTrash(false);
+        // I don't know why I have ignored the trash
+        // $this->withoutTrash(false);
+
         $this->createOptions(true);
 
         if ($this->isMultiple) {
