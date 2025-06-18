@@ -341,7 +341,8 @@ class DataModel
         return $this->setup()::countWhere($where);
     }
 
-    private function setup(): ?\Deep\FormTool\Models\BaseModel
+    // I think we cannot add the return type here, we are not sure about the return type
+    private function setup()
     {
         $this->model::$tableName = $this->tableName;
         $this->model::$primaryId = $this->primaryId;

@@ -267,7 +267,7 @@ class SelectType extends BaseFilterType implements ISaveable
             $data['input']->quickData = (object) [
                 'title' => $quickClass->singularTitle,
                 'optionData' => $this->bluePrint->getForm()->getResource()->route.'.'.$this->dbField,
-                'route' => config('form-tool.adminURL').'/'.$quickClass->route.'/create?quickAdd=1',
+                'route' => $quickClass->route.'/create?quickAdd=1',
             ];
         }
 
