@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Deep\FormTool\Exceptions\FormToolException;
+use Deep\FormTool\Exports\CrudArrayExport;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
@@ -100,6 +101,7 @@ trait BaseImportExport
         $originalHeaderLabels = array_keys($headers);
 
         // Include unsupplied labels
+        $excelHeaderLabels = array_map('trim', $excelHeaderLabels);
         $excelHeaderLabels = array_merge($excelHeaderLabels, array_diff($originalHeaderLabels, $excelHeaderLabels));
 
         // Set custom messages
@@ -276,25 +278,42 @@ trait BaseImportExport
 
         $this->crud->setImportSample($this->sampleData);
 
-        $filename = $this->title.'_sample.csv';
+        // $filename = $this->title.'_sample.csv';
+
+        // $headers = $this->getHeaders();
+
+        // $callback = function () use ($headers) {
+        //     $file = fopen('php://output', 'w');
+        //     fputcsv($file, array_keys($headers));
+
+        //     $data = [];
+        //     foreach ($headers as $input) {
+        //         $data[] = $input->getImportSample();
+        //     }
+
+        //     fputcsv($file, $data);
+
+        //     fclose($file);
+        // };
+
+        // return $this->download($filename, $callback);
+
+        $filename = $this->title.'_sample.xlsx';
+        $exportData = [];
 
         $headers = $this->getHeaders();
 
-        $callback = function () use ($headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, array_keys($headers));
+        // Set headers
+        $exportData[] = array_keys($headers);
 
-            $data = [];
-            foreach ($headers as $input) {
-                $data[] = $input->getImportSample();
-            }
+        // Set content
+        $data = [];
+        foreach ($headers as $input) {
+            $data[] = $input->getImportSample();
+        }
+        $exportData[] = $data;
 
-            fputcsv($file, $data);
-
-            fclose($file);
-        };
-
-        return $this->download($filename, $callback);
+        return Excel::download(new CrudArrayExport($exportData), $filename);
     }
 
     public function export()
@@ -306,29 +325,50 @@ trait BaseImportExport
 
     protected function doExport()
     {
-        $filename = $this->title.'.csv';
+        // $filename = $this->title.'.csv';
+
+        // $resultData = $this->setExportData();
+
+        // $headers = $this->getHeaders();
+
+        // $callback = function () use ($resultData, $headers) {
+        //     $file = fopen('php://output', 'w');
+        //     fputcsv($file, array_keys($headers));
+
+        //     foreach ($resultData as $row) {
+        //         $data = [];
+        //         foreach ($headers as $input) {
+        //             $data[] = $input->getExportValue($row->{$input->getDbField()} ?? null);
+        //         }
+
+        //         fputcsv($file, $data);
+        //     }
+
+        //     fclose($file);
+        // };
+
+        // return $this->download($filename, $callback);
+
+        $filename = $this->title.'.xlsx';
+        $exportData = [];
 
         $resultData = $this->setExportData();
-
         $headers = $this->getHeaders();
 
-        $callback = function () use ($resultData, $headers) {
-            $file = fopen('php://output', 'w');
-            fputcsv($file, array_keys($headers));
+        // Set headers
+        $exportData[] = array_keys($headers);
 
-            foreach ($resultData as $row) {
-                $data = [];
-                foreach ($headers as $input) {
-                    $data[] = $input->getExportValue($row->{$input->getDbField()} ?? null);
-                }
-
-                fputcsv($file, $data);
+        // Set content
+        foreach ($resultData as $row) {
+            $data = [];
+            foreach ($headers as $input) {
+                $data[] = $input->getExportValue($row->{$input->getDbField()} ?? null);
             }
 
-            fclose($file);
-        };
+            $exportData[] = $data;
+        }
 
-        return $this->download($filename, $callback);
+        return Excel::download(new CrudArrayExport($exportData), $filename);
     }
 
     public function getImportValue($column)

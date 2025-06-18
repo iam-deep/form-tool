@@ -11,8 +11,8 @@
                     <div class="box-body">
                         <div class="box-body">
                             <div class="form-group">
-                                <label for="file">Upload XSLX File <span class="text-danger">*</span></label>
-                                <input name="file" type="file" id="file" accept=".xslx" required />
+                                <label for="file">Upload Excel File <span class="text-danger">*</span></label>
+                                <input name="file" type="file" id="file" accept=".xlsx" required />
                             </div>
                         </div>
                     </div>
@@ -37,7 +37,7 @@
                         <ul>
                             <li>Download the <b>sample file</b> and update the data as per the column name.</li>
                             <li>Date format should be like this: <b>dd-mmm-yyyy</b> (25-Sep-1985)</li>
-                            <li>Save the file as .xslx (Comma-Separated Values)</li>
+                            <li>Save the file as .xlsx (Comma-Separated Values)</li>
                         </ul>
                     </div>
                     <div class="col-sm-6">
