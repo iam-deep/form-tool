@@ -181,15 +181,15 @@ return [
 
         // Excels
         'csv' => 'fa fa-file-excel',
-        'xsl' => 'fa fa-file-excel',
-        'xslx' => 'fa fa-file-excel',
+        'xls' => 'fa fa-file-excel',
+        'xlsx' => 'fa fa-file-excel',
 
         // Words
         'doc' => 'fa fa-file-word',
         'docx' => 'fa fa-file-word',
 
         // Others Files
-        '*' => 'fa fa-file-text',
+        '*' => 'fa fa-file',
     ],
 
     // Callbacks
