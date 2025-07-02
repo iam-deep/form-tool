@@ -833,6 +833,9 @@ class Form
             $data = [];
             $this->postData[$input->getDbField()] = [];
             if ($values && is_array($values)) {
+                // Filter the values, as sometime it gives us falsey values like [null]
+                $values = array_filter($values);
+
                 foreach ($values as $val) {
                     $data[] = [
                         $input->getDbField() => $val,
