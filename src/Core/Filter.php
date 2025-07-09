@@ -52,6 +52,11 @@ class Filter
         $data->inputs = [];
         foreach ($this->fieldsToFilter as $key => $option) {
             if (\is_integer($key)) {
+                // column can have alias, remove it
+                if (strpos($option, '.')) {
+                    $option = substr($option, strpos($option, '.') + 1);
+                }
+
                 $field = $this->bluePrint->getInputTypeByDbField($option);
                 if ($field instanceof BaseFilterType) {
                     $field->required(false);
