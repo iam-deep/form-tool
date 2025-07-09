@@ -135,7 +135,7 @@ class Form
         return $this->crud;
     }
 
-    public function callbackValidation(\Closure $callbackValidation): Crud
+    public function callbackValidation(callable $callbackValidation): Crud
     {
         $this->callbackValidation = $callbackValidation;
 
