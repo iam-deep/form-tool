@@ -69,6 +69,11 @@ class Filter
                     throw new \InvalidArgumentException('"'.$option.'" not found in the BluePrint.');
                 }
             } else {
+                // column can have alias, remove it
+                if (strpos($key, '.')) {
+                    $key = substr($key, strpos($key, '.') + 1);
+                }
+
                 $field = $this->bluePrint->getInputTypeByDbField($key);
                 if ($field instanceof BaseFilterType) {
                     if (! in_array($option, $field->getFilterOptions())) {
