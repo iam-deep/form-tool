@@ -142,6 +142,11 @@ class Filter
             $request = request();
             foreach ($this->fieldsToFilter as $key => $option) {
                 if (\is_integer($key)) {
+                    // column can have alias, remove it
+                    if (strpos($option, '.')) {
+                        $option = substr($option, strpos($option, '.') + 1);
+                    }
+
                     $field = $this->bluePrint->getInputTypeByDbField($option);
                     if ($field instanceof BaseFilterType) {
                         $val = $request->query($field->getDbField());
@@ -150,6 +155,11 @@ class Filter
                         $field->applyFilter($query);
                     }
                 } else {
+                    // column can have alias, remove it
+                    if (strpos($key, '.')) {
+                        $key = substr($key, strpos($key, '.') + 1);
+                    }
+
                     if ($option == 'gt') {
                         $field = $this->bluePrint->getInputTypeByDbField($key);
                         if ($field instanceof BaseFilterType) {
