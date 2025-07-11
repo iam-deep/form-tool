@@ -66,7 +66,7 @@ class Filter
                 } elseif ($field) {
                     throw new \InvalidArgumentException('"'.$option.'" is not a Filter Type.');
                 } else {
-                    throw new \InvalidArgumentException('"'.$option.'" not found in the BluePrint.');
+                    throw new \InvalidArgumentException('"'.$option.'" not found in the BluePrint to apply Filter.');
                 }
             } else {
                 // column can have alias, remove it
