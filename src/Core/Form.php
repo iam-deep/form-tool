@@ -830,10 +830,16 @@ class Form
             $saveAt = $input->getSaveAt();
             $values = $postData[$input->getDbField()] ?? null;
 
+            // This help to store multiple values from a API request
+            if (is_string($values)) {
+                $values = json_decode($values, true);
+            }
+
             $data = [];
             $this->postData[$input->getDbField()] = [];
+
             if ($values && is_array($values)) {
-                // Filter the values, as sometime it gives us falsey values like [null]
+                // Filter the values, as sometime it gives us falsy values like [null]
                 $values = array_filter($values);
 
                 foreach ($values as $val) {
