@@ -1088,7 +1088,7 @@ class Form
                     if ($multiplePostData && is_array($multiplePostData)) {
                         foreach ($multiplePostData as $key => $value) {
                             foreach ($bluePrint->getInputList() as $input) {
-                                $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()];
+                                $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()] ?? null;
 
                                 $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object) []);
                             }

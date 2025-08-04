@@ -200,4 +200,9 @@ class BaseModel extends Model
             }
         }
     }
+
+    public static function alias()
+    {
+        return static::$alias ? static::$alias.'.' : '';
+    }
 }

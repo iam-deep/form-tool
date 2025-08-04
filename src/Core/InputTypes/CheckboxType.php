@@ -136,11 +136,21 @@ class CheckboxType extends BaseInputType
 
     public function getHTMLMultiple($key, $index, $oldValue)
     {
-        // TODO: Multiple not yet done
+        $this->createOptions();
+
         $value = $oldValue ?? $this->value;
 
-        return '<input type="checkbox" class="'.\implode(' ', $this->classes).' input-sm" id="'.
-            $key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.'" '.
-            $this->raw.$this->inlineCSS.' />';
+        $input = '';
+        if (! $this->isMultiple) {
+            foreach ($this->options as $val => $text) {
+                $input .= '<label><input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.
+                    $key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$val.'" '.
+                    (\is_string($value) && $val == $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.
+                    $text.'</label> &nbsp; ';
+                break;
+            }
+        }
+
+        return $input;
     }
 }
