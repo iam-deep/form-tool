@@ -294,44 +294,28 @@ class ActionLogger
         $actions = Arr::wrap($actions);
 
         $createAt = now();
-        $createBy = Auth::user()?->id;
+        $createBy = Auth::id();
+        $createdByName = Auth::user()?->name;
 
         $insert = [];
+
+        /** @var ActionLoggerDto $action */
         foreach ($actions as $action) {
-            $description = null;
-            if (! $action->description && $action->moduleTitle && $action->nameOfTheData) {
-                $suffix = '';
-                if ($action->action == ActionLoggerEnum::CREATE) {
-                    $suffix = 'created';
-                } elseif ($action->action == ActionLoggerEnum::UPDATE) {
-                    $suffix = 'updated';
-                } elseif ($action->action == ActionLoggerEnum::DELETE) {
-                    $suffix = 'deleted';
-                } elseif ($action->action == ActionLoggerEnum::DESTROY) {
-                    $suffix = 'permanently deleted';
-                } elseif ($action->action == ActionLoggerEnum::RESTORE) {
-                    $suffix = 'restored';
-                } elseif ($action->action == ActionLoggerEnum::DUPLICATE) {
-                    $suffix = 'duplicated';
-                }
-
-                $description = $action->moduleTitle.' '.$action->nameOfTheData.' '.$suffix;
-            }
-
             $insert[] = [
                 'action' => $action->action,
                 'refId' => $action->id,
                 'token' => $action->token,
-                'description' => $description ?? $action->description,
-                'data' => $action->data ? \json_encode($action->data) : null,
+                'description' => $action->description,
+                'data' => json_encode($action->getData()),
                 'extraData' => $action->extraData,
                 'module' => $action->moduleTitle,
                 'route' => $action->route,
+                'path' => $action->fullPath,
                 'ipAddress' => $request->ip(),
                 'userAgent' => $request->userAgent(),
                 'createdAt' => $createAt,
                 'createdBy' => $createBy,
-                'createdByName' => Auth::user()?->name,
+                'createdByName' => $createdByName,
             ];
         }
 

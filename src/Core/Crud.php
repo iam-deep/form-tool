@@ -283,6 +283,8 @@ class Crud
     {
         $page = new \stdClass();
 
+        $this->form->setFormStatus(FormStatus::CREATE);
+
         $page->title = $this->resource->title;
         $page->route = $this->resource->route;
         $page->singularTitle = $this->resource->singularTitle ?? null;
