@@ -1031,7 +1031,7 @@ class Form
         foreach ($this->eventCallbacks as $callback) {
             if ($callback->type == $eventType->value || $callback->type == EventType::ALL->value) {
                 $closure = $callback->closure;
-                $closure($id ?? $this->editId, (object) ($data ?? $this->getData()));
+                $closure($id ?? $this->editId, (object) ($data ?? $this->getData()), $callback->type);
             }
         }
     }
