@@ -6,7 +6,6 @@ use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Session;
 
 class Guard
 {
@@ -46,8 +45,13 @@ class Guard
         self::$instance->route = $route;
         self::$instance->getLaravelRoute();
 
+        $user = null;
         if (! $permissions) {
             $user = Auth::user();
+            $permissions = $user->permission ?? null;
+        }
+
+        if (! $permissions) {
             $groupIdCol = config('form-tool.userColumns.groupId', 'groupId');
 
             $group = DB::table('user_groups')->where('groupId', $user->{$groupIdCol})->first();
