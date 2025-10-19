@@ -48,6 +48,12 @@ class ActionLoggerDto
             throw new \Exception('Label already exists');
         }
 
+        if ($this->action == ActionLoggerEnum::UPDATE) {
+            if ($oldValue == $newValue) {
+                return $this;
+            }
+        }
+
         $this->items[$label] = (new \Deep\FormTool\Core\InputTypes\TextType())->setValue($newValue)
             ->getLoggerValue($this->action->value, $oldValue);
 
@@ -58,6 +64,12 @@ class ActionLoggerDto
     {
         if (isset($this->items[$label])) {
             throw new \Exception('Label already exists');
+        }
+
+        if ($this->action == ActionLoggerEnum::UPDATE) {
+            if ($oldValue == $newValue) {
+                return $this;
+            }
         }
 
         $this->items[$label] = (new \Deep\FormTool\Core\InputTypes\DateType())->setValue($newValue)
@@ -72,6 +84,12 @@ class ActionLoggerDto
             throw new \Exception('Label already exists');
         }
 
+        if ($this->action == ActionLoggerEnum::UPDATE) {
+            if ($oldValue == $newValue) {
+                return $this;
+            }
+        }
+
         $this->items[$label] = (new \Deep\FormTool\Core\InputTypes\TimeType())->setValue($newValue)
             ->getLoggerValue($this->action->value, $oldValue);
 
@@ -84,6 +102,12 @@ class ActionLoggerDto
             throw new \Exception('Label already exists');
         }
 
+        if ($this->action == ActionLoggerEnum::UPDATE) {
+            if ($oldValue == $newValue) {
+                return $this;
+            }
+        }
+
         $this->items[$label] = (new \Deep\FormTool\Core\InputTypes\EditorType())->setValue($newValue)
             ->getLoggerValue($this->action->value, $oldValue);
 
@@ -94,6 +118,12 @@ class ActionLoggerDto
     {
         if (isset($this->items[$label])) {
             throw new \Exception('Label already exists');
+        }
+
+        if ($this->action == ActionLoggerEnum::UPDATE) {
+            if ($oldValue == $newValue) {
+                return $this;
+            }
         }
 
         $this->items[$label] = (new \Deep\FormTool\Core\InputTypes\ImageType())->setValue($newValue)
