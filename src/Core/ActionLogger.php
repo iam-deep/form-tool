@@ -306,7 +306,7 @@ class ActionLogger
                 'refId' => $action->id,
                 'token' => $action->token,
                 'description' => $action->description,
-                'data' => json_encode($action->getData()),
+                'data' => $action->getJsonData(),
                 'extraData' => $action->extraData,
                 'module' => $action->moduleTitle,
                 'route' => $action->route,

@@ -25,13 +25,17 @@ class ActionLoggerDto
     ) {
     }
 
-    public function getData()
+    public function getJsonData()
     {
         if ($this->bluePrint) {
             return ActionLogger::getCreateData($this->bluePrint, $this->bluePrintData);
         }
 
-        return ['data' => $this->items];
+        if (! $this->items) {
+            return null;
+        }
+
+        return json_encode(['data' => $this->items]);
     }
 
     public function setBlueprint(BluePrint $bluePrint, $data = null)
