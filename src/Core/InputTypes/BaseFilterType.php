@@ -19,7 +19,7 @@ class BaseFilterType extends BaseInputType
     public function applyFilter($query, $operator = '=')
     {
         if ($this->value !== null) {
-            $query->where($this->getAlias().'.'.$this->dbField, $operator, $this->value);
+            $query->where($this->getAlias().$this->dbField, $operator, $this->value);
         }
     }
 
