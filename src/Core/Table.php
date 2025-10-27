@@ -209,7 +209,7 @@ class Table
         if (! $fieldsToSearch) {
             foreach ($this->bluePrint->getInputList() as $input) {
                 if ($input instanceof ISearchable) {
-                    $fieldsToSearch[] = $input->getAlias().'.'.$input->getDbField();
+                    $fieldsToSearch[] = $input->getAlias().$input->getDbField();
                 }
             }
 
@@ -515,12 +515,12 @@ class Table
             if ($key == 'all') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
                     if ($this->crud->isSoftDelete()) {
-                        $query->whereNull($this->model->getAlias().'.'.$deletedAt);
+                        $query->whereNull($this->model->getAlias().$deletedAt);
                     }
                 });
             } elseif ($key == 'trash') {
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
-                    $query->whereNotNull($this->model->getAlias().'.'.$deletedAt);
+                    $query->whereNotNull($this->model->getAlias().$deletedAt);
                 });
             }
 
@@ -564,17 +564,17 @@ class Table
             $this->isFromTrash = true;
 
             $where[] = function ($query) use ($deletedAt) {
-                $query->whereNotNull($this->model->getAlias().'.'.$deletedAt);
+                $query->whereNotNull($this->model->getAlias().$deletedAt);
             };
         } else {
             $where[] = function ($query) use ($deletedAt) {
-                $query->whereNull($this->model->getAlias().'.'.$deletedAt);
+                $query->whereNull($this->model->getAlias().$deletedAt);
             };
         }
 
         if ($this->request->query('id')) {
             $primaryId = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
-            $where[] = [$this->model->getAlias().'.'.$primaryId => $this->request->query('id')];
+            $where[] = [$this->model->getAlias().$primaryId => $this->request->query('id')];
 
             return $where;
         }
@@ -602,7 +602,7 @@ class Table
                     } else {
                         $inputType = $field->getInputType();
                         if ($inputType) {
-                            $this->orderBy = $inputType->getAlias().'.'.$field->getOrderByColumn();
+                            $this->orderBy = $inputType->getAlias().$field->getOrderByColumn();
                         } else {
                             $this->orderBy = $field->getOrderByColumn();
                         }
@@ -611,9 +611,9 @@ class Table
                 }
             }
         } elseif ($this->isFromTrash && ! $this->orderBy) {
-            $this->orderBy = $this->model->getAlias().'.'.$deletedAt;
+            $this->orderBy = $this->model->getAlias().$deletedAt;
         } else {
-            $this->orderBy = $this->model->getAlias().'.'.$this->model->getOrderBy();
+            $this->orderBy = $this->model->getAlias().$this->model->getOrderBy();
         }
 
         return $where;

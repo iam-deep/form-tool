@@ -305,7 +305,11 @@ class BaseInputType
 
     public function getAlias()
     {
-        return $this->alias ?: $this->bluePrint?->getForm()->getModel()->getAlias();
+        if ($this->alias) {
+            return $this->alias.'.';
+        }
+
+        return $this->bluePrint?->getForm()->getModel()->getAlias();
     }
 
     final public function getType()

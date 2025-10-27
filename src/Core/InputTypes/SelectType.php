@@ -317,7 +317,7 @@ class SelectType extends BaseFilterType implements ISaveable
                 return;
             }
 
-            $column = $this->getAlias().'.'.$this->dbField;
+            $column = $this->getAlias().$this->dbField;
             foreach ($this->value as $value) {
                 $raw = \sprintf("JSON_SEARCH(%s, 'one', '%s')", $column, $value);
                 $query->whereNotNull(DB::raw($raw));

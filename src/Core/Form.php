@@ -941,6 +941,7 @@ class Form
                 $alias = $this->model->getAlias();
                 if (false !== strpos($column, '.')) {
                     [$alias, $column] = explode('.', $column);
+                    $alias = $alias ? $alias.'.' : '';
                 }
 
                 $input = $this->bluePrint->getInputTypeByDbField($column);
@@ -949,15 +950,13 @@ class Form
                 $input->setValue($postData->{$column} ?? null);
                 $value = $input->beforeStore($postData) ?? $input->getDefaultValue();
 
-                $alias = $alias ? $alias.'.' : '';
                 $where[] = [$alias.$column => $value];
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
             }
 
-            $alias = $this->model->getAlias() ? $this->model->getAlias().'.' : '';
             if ($this->formStatus == FormStatus::UPDATE) {
-                $where[] = function ($query) use ($alias) {
-                    $query->where($alias.$this->model->getPrimaryId(), '!=', $this->editId);
+                $where[] = function ($query) {
+                    $query->where($this->model->getAlias().$this->model->getPrimaryId(), '!=', $this->editId);
                 };
             }
 
@@ -1256,7 +1255,7 @@ class Form
 
         // We can't use getOne, as we need to fetch deleted item
         $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
-        $result = $this->model->getWhereOne([$idCol => $id]);
+        $result = $this->model->getWhereOne([$this->model->getAlias().$idCol => $id]);
         if (! $result) {
             // $message = 'Something went wrong! Data not found, please try again!';
             // if ($this->crud->isWantsArray()) {

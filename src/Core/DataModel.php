@@ -159,7 +159,7 @@ class DataModel
 
     public function getAlias()
     {
-        return $this->alias;
+        return $this->alias ? $this->alias.'.' : '';
     }
 
     public function softDelete(bool $enable = true)
