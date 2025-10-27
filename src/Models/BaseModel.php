@@ -36,7 +36,7 @@ class BaseModel extends Model
         if (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
-            $query->orderBy(self::$alias.'.'.static::$primaryId, 'desc');
+            $query->orderBy(self::alias().static::$primaryId, 'desc');
         }
 
         return $query->paginate(static::$limit);
@@ -47,16 +47,16 @@ class BaseModel extends Model
         $query = DB::table(static::$tableName, self::$alias);
 
         if ($isToken) {
-            $query->where(self::$alias.'.'.static::$token, $id);
+            $query->where(self::alias().static::$token, $id);
         } else {
-            $query->where(self::$alias.'.'.static::$primaryId, $id);
+            $query->where(self::alias().static::$primaryId, $id);
         }
 
         if (self::$isSoftDelete) {
             $metaColumns = \config('form-tool.table_meta_columns');
             $deletedAt = ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
 
-            $query->whereNull(self::$alias.'.'.$deletedAt);
+            $query->whereNull(self::alias().$deletedAt);
         }
 
         return $query->first();
@@ -80,7 +80,7 @@ class BaseModel extends Model
         if (static::$orderByCol) {
             $query->orderBy(static::$orderByCol, static::$orderByDirection);
         } else {
-            $query->orderBy(self::$alias.'.'.static::$primaryId, 'desc');
+            $query->orderBy(self::alias().static::$primaryId, 'desc');
         }
 
         return $query->paginate(static::$limit);
