@@ -25,10 +25,10 @@ class ActionLoggerDto
     ) {
     }
 
-    public function getJsonData()
+    public function getJsonData(): string|null
     {
         if ($this->bluePrint) {
-            return ActionLogger::getCreateData($this->bluePrint, $this->bluePrintData);
+            return json_encode(ActionLogger::getCreateData($this->bluePrint, $this->bluePrintData));
         }
 
         if (! $this->items) {
