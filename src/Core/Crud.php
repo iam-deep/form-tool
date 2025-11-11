@@ -391,6 +391,13 @@ class Crud
         return \response()->json($data);
     }
 
+    public function setState(CrudState $state)
+    {
+        $this->currentState = $state;
+
+        return $this;
+    }
+
     public function getCurrentState()
     {
         return $this->currentState;

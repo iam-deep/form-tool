@@ -96,10 +96,15 @@ class Doc
     public static function setState(CrudState $state)
     {
         self::$manualState = $state;
+
+        self::getCrud()?->setState($state);
     }
 
     public static function getState(): CrudState
     {
+        // we can directly return the state from the crud object, this needed to be test first
+        // return self::getCrud()?->getCurrentState();
+
         return self::$manualState;
     }
 
