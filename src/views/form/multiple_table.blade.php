@@ -1,6 +1,9 @@
 <div class="form-group">
-    <label class="col-sm-2 control-label">
+    <label class="col-sm-2 control-label" data-toggle="tooltip" data-placement="right" title="{{ $table->help }}">
         <span>{{ $table->label }}</span>
+        @if ($table->required)
+            <span class="text-danger">*</span>
+        @endif
     </label>
     <div class="col-sm-10">
         <table class="table table-multiple table-bordered {{ $table->classes }}" id="{{ $table->id }}"

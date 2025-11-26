@@ -7,6 +7,7 @@ use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\InputTypes\TextType;
 use Deep\FormTool\Dtos\MultipleTableDto;
 use Deep\FormTool\Exceptions\FormToolException;
+use Exception;
 use Illuminate\Support\Arr;
 
 class BluePrint
@@ -27,6 +28,7 @@ class BluePrint
     private $parentBluePrint = null;
 
     private $multipleRequired = 0;
+    private $multipleHelp = null;
     private $isMultipleConfirmBeforeDelete = false;
     // private $isMultipleOrderable = false;
     // private $multipleOrderColumn = '';
@@ -309,13 +311,32 @@ class BluePrint
 
     public function required($noOfItems = 1)
     {
+        if (! $this->parentBluePrint) {
+            throw new Exception('This method is only for multiple().');
+        }
+
         $this->multipleRequired = \trim($noOfItems);
+
+        return $this;
+    }
+
+    public function help($message)
+    {
+        if (! $this->parentBluePrint) {
+            throw new Exception('This method is only for multiple().');
+        }
+
+        $this->multipleHelp = \trim($message);
 
         return $this;
     }
 
     public function orderable($column = null)
     {
+        if (! $this->parentBluePrint) {
+            throw new Exception('This method is only for multiple().');
+        }
+
         if ($this->multipleModel == null) {
             $this->multipleModel = new MultipleTableDto();
         }
@@ -340,6 +361,10 @@ class BluePrint
 
     public function confirmBeforeDelete()
     {
+        if (! $this->parentBluePrint) {
+            throw new Exception('This method is only for multiple().');
+        }
+
         $this->isMultipleConfirmBeforeDelete = true;
 
         return $this;
@@ -347,6 +372,10 @@ class BluePrint
 
     public function table($tableOrClass, $idCol = null, $foreignKeyCol = null, $orderBy = null, ?Closure $where = null)
     {
+        if (! $this->parentBluePrint) {
+            throw new Exception('This method is only for multiple().');
+        }
+
         if ($idCol) {
             $this->multipleModel = new MultipleTableDto(
                 modelType:'table',
@@ -390,6 +419,10 @@ class BluePrint
 
     public function keepId()
     {
+        if (! $this->parentBluePrint) {
+            throw new Exception('This method is only for multiple().');
+        }
+
         if (! $this->multipleModel) {
             throw new \InvalidArgumentException(
                 'keepId only works with db table, Please assign the table first. And keepId must called at last.'
@@ -410,6 +443,11 @@ class BluePrint
     public function getRequired()
     {
         return $this->multipleRequired;
+    }
+
+    public function getHelp()
+    {
+        return $this->multipleHelp;
     }
 
     public function isOrderable(): ?bool

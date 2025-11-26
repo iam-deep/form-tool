@@ -5,6 +5,7 @@ namespace Deep\FormTool\Core;
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
+use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Models\MultipleTableModel;
@@ -289,6 +290,7 @@ class Form
         $tableData->header = [];
         $tableData->rows = '';
         $tableData->totalColumns = 0;
+        $tableData->help = $model->getHelp();
 
         // TODO: Add help & other attributes in multiple table
         //$tableData->help = $model->help;
@@ -826,6 +828,8 @@ class Form
     {
         $postData = $this->request->input();
 
+        // SelectType is only used for ISaveable interface for now
+        /** @var SelectType $input */
         foreach ($this->saveAtInputs as $input) {
             $saveAt = $input->getSaveAt();
             $values = $postData[$input->getDbField()] ?? null;
