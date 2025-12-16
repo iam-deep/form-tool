@@ -911,6 +911,32 @@ class Form
         $rules = $messages = $labels = $merge = [];
         foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
+                if ($input->getRequired()) {
+                    $rules[$input->getKey()] = 'array|required|min:'.$input->getRequired();
+                } else {
+                    $rules[$input->getKey()] = 'nullable|array';
+                }
+                $labels[$input->getKey()] = $input->label;
+
+                // This need to call recursively later
+                // For now we will only apply validation for numeric fields
+                foreach ($input->getInputList() as $subInput) {
+                    if ($subInput->getType() == InputType::NUMBER) {
+                        $rules[$input->getKey().'.*.'.$subInput->getDbField()] = $subInput->getValidations($validationType);
+                        $labels[$input->getKey().'.*.'.$subInput->getDbField()] = '<b>'.$input->label.'</b>: "'.$subInput->getLabel().'"';
+
+                        $messages = array_merge($messages, $subInput->getValidationMessages());
+                    } else {
+                        // for other fields, we are only checking required validation for now
+                        if ($subInput->isRequired()) {
+                            $rules[$input->getKey().'.*.'.$subInput->getDbField()] = 'required';
+                            $labels[$input->getKey().'.*.'.$subInput->getDbField()] = '<b>'.$input->label.'</b>: "'.$subInput->getLabel().'"';
+
+                            $messages = array_merge($messages, $subInput->getValidationMessages());
+                        }
+                    }
+                }
+
                 continue;
             }
 
