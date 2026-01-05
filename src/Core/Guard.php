@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
@@ -51,12 +52,12 @@ class Guard
             $permissions = $user->permission ?? null;
         }
 
-        if (! $permissions) {
+        if ($user && ! $permissions) {
             $groupIdCol = config('form-tool.userColumns.groupId', 'groupId');
 
             $group = DB::table('user_groups')->where('groupId', $user->{$groupIdCol})->first();
             if (! isset($group->permission)) {
-                return self::abort($request);
+                self::abort($request);
             }
             $permissions = $group->permission;
         }
@@ -317,7 +318,10 @@ class Guard
     public static function abort($request)
     {
         if ($request->wantsJson()) {
-            return ['status' => false, 'message' => "You don't have enough permission to perform this action!"];
+            throw new HttpResponseException(response()->json([
+                'status' => false,
+                'message' => "You don't have enough permission to perform this action!",
+            ], 403));
         }
 
         abort(403, "You don't have enough permission to perform this action!");

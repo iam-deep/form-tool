@@ -237,7 +237,7 @@ class BulkAction
             if (! $callback || true === $callback($id, 'delete')) {
                 $filtered[] = $id;
                 $response = $this->table->crud->getForm()->delete($id);
-                if (is_array($response)) {
+                if (\is_array($response)) {
                     if (($response['status'] ?? false) === false) {
                         $errorMessages[] = $response['message'] ?? ('Error deleting <b>'.($response['data']['heroValue'] ?? $id).'</b>');
                     } else {
@@ -264,12 +264,12 @@ class BulkAction
             if (! $callback || true === $callback($id, 'restore')) {
                 $filtered[] = $id;
 
-                $result = null;
+                $column = $this->table->getModel()->getAlias().$this->table->getModel()->getPrimaryId();
                 if ($this->table->getModel()->isToken()) {
-                    $result = $this->table->getModel()->getWhereOne([$this->table->getModel()->getTokenCol() => $id]);
-                } else {
-                    $result = $this->table->getModel()->getWhereOne([$this->table->getModel()->getPrimaryId() => $id]);
+                    $column = $this->table->getModel()->getAlias().$this->table->getModel()->getTokenCol();
                 }
+
+                $result = $this->table->getModel()->getWhereOne([$column => $id]);
 
                 $pId = $id;
                 if ($this->table->getModel()->isToken()) {
@@ -315,7 +315,7 @@ class BulkAction
                 $filtered[] = $id;
                 $response = $this->table->crud->getForm()->destroy($id);
 
-                if (is_array($response)) {
+                if (\is_array($response)) {
                     if (($response['status'] ?? false) === false) {
                         $errorMessages[] = $response['message'] ?? ('Error destroying <b>'.($response['data']['heroValue'] ?? $id).'</b>');
                     } else {
