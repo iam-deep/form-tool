@@ -342,34 +342,7 @@ class Form
 
         // TODO: Need to check if validation failed without $totalDataInSession
         if (! $totalDataInSession && $this->formStatus == FormStatus::EDIT) {
-            // $dbModel = $model->getModel();
             if ($model->getModel()) {
-                // if ($dbModel instanceof \stdClass) {
-                //     $where = [$dbModel->foreignKey => $this->editId];
-
-                //     $query = DB::table($dbModel->table)->where($where);
-                //     if ($dbModel->where) {
-                //         $closure = $dbModel->where;
-                //         $closure($query);
-                //     }
-                //     if ($dbModel->orderBy) {
-                //         $query->orderBy($dbModel->orderBy, 'asc');
-                //     } elseif ($model->getOrderByColumn()) {
-                //         $query->orderBy($model->getOrderByColumn());
-                //     } else {
-                //         $query->orderBy($dbModel->id, 'asc');
-                //     }
-
-                //     $result = $query->get();
-                // } else {
-                //     if ($model->getOrderByColumn()) {
-                //         $dbModel::$orderBy = $model->getOrderByColumn();
-                //     }
-
-                //     $where = [$dbModel::$foreignKey => $this->editId];
-                //     $result = $dbModel::getWhere($where);
-                // }
-
                 $result = MultipleTableModel::init($model->getModel())->getAll($this->editId);
             } elseif (isset($this->resultData->{$key})) {
                 $result = \json_decode($this->resultData->{$key});
@@ -689,21 +662,6 @@ class Form
                 continue;
             }
 
-            // $model = $input->getModel();
-
-            // $foreignKey = null;
-            // if ($model) {
-            //     if ($model instanceof \stdClass) {
-            //         $foreignKey = $model->foreignKey;
-            //     } else {
-            //         if (! isset($model::$foreignKey)) {
-            //             throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
-            //         }
-
-            //         $foreignKey = $model::$foreignKey;
-            //     }
-            // }
-
             $model = null;
             if ($input->getModel()) {
                 $model = MultipleTableModel::init($input->getModel());
@@ -776,24 +734,6 @@ class Form
             }
 
             if ($model) {
-                // $where = [$foreignKey => $this->editId];
-                // if ($model instanceof \stdClass) {
-                //     $query = DB::table($model->table);
-                //     if ($model->where) {
-                //         $closure = $model->where;
-                //         $closure($query);
-                //     }
-                //     $query->where($where)->delete();
-                //     if (\count($data)) {
-                //         DB::table($model->table)->insert($data);
-                //     }
-                // } else {
-                //     $model::deleteWhere($where);
-                //     if (\count($data)) {
-                //         $model::addMany($data);
-                //     }
-                // }
-
                 $model->add($this->editId, $data);
             } else {
                 $this->model->updateOne($this->editId, [$input->getKey() => json_encode($data)]);
@@ -1256,28 +1196,6 @@ class Form
                     // Let's delete the file and image of sub tables, and data
                     $childResult = [];
                     if ($input->getModel()) {
-                        // $model = $input->getModel();
-
-                        // $foreignKey = null;
-                        // if ($model instanceof \stdClass) {
-                        //     $foreignKey = $model->foreignKey;
-                        // } else {
-                        //     if (! isset($model::$foreignKey)) {
-                        //         throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
-                        //     }
-
-                        //     $foreignKey = $model::$foreignKey;
-                        // }
-
-                        // $where = [$foreignKey => $pId];
-                        // $childResult = DB::table($model->table)->where($where)->orderBy($model->id, 'asc')->get();
-
-                        // if ($model instanceof \stdClass) {
-                        //     DB::table($model->table)->where($where)->delete();
-                        // } else {
-                        //     $model::deleteWhere($where);
-                        // }
-
                         $model = MultipleTableModel::init($input->getModel());
                         $childResult = $model->getAll($pId);
 
