@@ -582,15 +582,6 @@ class Form
             }
 
             if (! $this->oldData) {
-                // $message = 'Something went wrong! Data not found, please try again!';
-                // if ($this->crud->isWantsArray()) {
-                //     return ['status' => false, 'message' => $message];
-                // } elseif ($this->isWantsJson()) {
-                //     return response()->json(['status' => false, 'message' => $message], 422);
-                // }
-
-                // return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
-
                 return $this->response(false, 'Something went wrong! Data not found, please try again!');
             }
 
@@ -650,20 +641,6 @@ class Form
         if ($heroField && ($this->postData[$heroField] ?? null)) {
             $heroValue = ' <b>'.$this->postData[$heroField].'</b>';
         }
-
-        // $message = ($this->resource->singularTitle ?? 'Data').$heroValue.' updated successfully!';
-        // if ($this->crud->isWantsArray()) {
-        //     return ['status' => true, 'message' => $message];
-        // } elseif ($this->isWantsJson()) {
-        //     return response()->json(['status' => true, 'message' => $message]);
-        // }
-
-        // $redirect = $this->request->query('redirect');
-        // if ($redirect) {
-        //     return redirect(urldecode($redirect))->with('success', $message);
-        // }
-
-        // return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
 
         return $this->response(true, ($this->resource->singularTitle ?? 'Data').$heroValue.' updated successfully!');
     }
@@ -992,19 +969,6 @@ class Form
 
             $count = $this->model->countWhere($where);
             if ($count) {
-                // $message = \sprintf(
-                //     'The combination of "%s" is already exist!',
-                //     \implode(', ', array_values($combination))
-                // );
-
-                // if ($this->crud->isWantsArray()) {
-                //     return ['status' => false, 'message' => $message];
-                // } elseif ($this->isWantsJson()) {
-                //     return response()->json(['status' => false, 'message' => $message], 422);
-                // }
-
-                // return back()->with('error', $message)->withInput();
-
                 return $this->response(false, \sprintf('The combination of "%s" is already exist!', \implode(', ', array_values($combination))));
             }
         }
@@ -1019,29 +983,6 @@ class Form
              */
             $response = $callbackValidation($this->request, $validationType);
             if ($response !== true) {
-                // if (\is_string($response)) {
-                //     if ($this->crud->isWantsArray()) {
-                //         return ['status' => false, 'message' => $response];
-                //     } elseif ($this->isWantsJson()) {
-                //         return response()->json(['status' => false, 'message' => $response], 422);
-                //     }
-
-                //     return back()->with('error', $response)->withInput();
-                // } elseif ($response instanceof \Illuminate\Http\RedirectResponse) {
-                //     return $response->send();
-                // } elseif ($response instanceof \Illuminate\Http\JsonResponse) {
-                //     return $response->send();
-                // } else {
-                //     $message = 'Validation failed: NO_CUSTOM_MESSAGE_RETURNED_FROM_CALLBACK_VALIDATION';
-                //     if ($this->crud->isWantsArray()) {
-                //         return ['status' => false, 'message' => $message];
-                //     } elseif ($this->isWantsJson()) {
-                //         return response()->json(['status' => false, 'message' => $message], 422);
-                //     }
-
-                //     return back()->with('error', $message)->withInput();
-                // }
-
                 if ($response) {
                     return $this->response(false, $response);
                 } else {
@@ -1142,24 +1083,6 @@ class Form
             $this->postData[$dbField] = $postData[$dbField] ?? null;
 
             $this->postData[$dbField] = $this->getPostValue($input, $this->postData[$dbField], $this->postData, $this->oldData);
-
-            // $input->setValue($this->postData[$dbField]);
-
-            // $response = null;
-            // if ($this->formStatus == FormStatus::STORE) {
-            //     $response = $input->beforeStore((object) $this->postData);
-            // } else {
-            //     $response = $input->beforeUpdate($this->oldData, (object) $this->postData);
-            // }
-            //
-            // if ($response !== null) {
-            //     $this->postData[$dbField] = $response;
-            // }
-            //
-            // if ($this->postData[$dbField] === null && $input->getDefaultValue() !== null) {
-            //     $this->postData[$dbField] = $input->getDefaultValue();
-            //     $input->setValue($this->postData[$dbField]);
-            // }
         }
     }
 
@@ -1223,15 +1146,6 @@ class Form
 
         $result = $this->model->getOne($id);
         if (! $result) {
-            // $message = 'Something went wrong! Data not found, please try again!';
-            // if ($this->crud->isWantsArray()) {
-            //     return ['status' => false, 'message' => $message];
-            // } elseif ($this->isWantsJson()) {
-            //     return response()->json(['status' => false, 'message' => $message], 422);
-            // }
-
-            // return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
-
             return $this->response(false, 'Something went wrong! Data not found, please try again!');
         }
 
@@ -1257,15 +1171,6 @@ class Form
             $heroValue = $result->{$heroField};
         }
 
-        // $message = ($this->resource->singularTitle ?? 'Data').' <b>'.$heroValue.'</b> deleted successfully!';
-        // if ($this->crud->isWantsArray()) {
-        //     return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
-        // } elseif ($this->isWantsJson()) {
-        //     return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
-        // }
-
-        // return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
-
         return $this->response(true, ($this->resource->singularTitle ?? 'Data').' <b>'.$heroValue.'</b> deleted successfully!', null, ['heroValue' => $heroValue]);
     }
 
@@ -1287,15 +1192,6 @@ class Form
         $idCol = $this->model->isToken() ? $this->model->getTokenCol() : $this->model->getPrimaryId();
         $result = $this->model->getWhereOne([$this->model->getAlias().$idCol => $id]);
         if (! $result) {
-            // $message = 'Something went wrong! Data not found, please try again!';
-            // if ($this->crud->isWantsArray()) {
-            //     return ['status' => false, 'message' => $message];
-            // } elseif ($this->isWantsJson()) {
-            //     return response()->json(['status' => false, 'message' => $message], 422);
-            // }
-
-            // return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
-
             return $this->response(false, 'Something went wrong! Data not found, please try again!');
         }
 
@@ -1321,16 +1217,6 @@ class Form
             }
 
             if ($result->{$deletedAt} === null) {
-                // $message = 'Soft delete is enabled for this module. You need to mark as delete first
-                //         then only you can delete it permanently!';
-                // if ($this->crud->isWantsArray()) {
-                //     return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
-                // } elseif ($this->isWantsJson()) {
-                //     return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
-                // }
-
-                // return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
-
                 return $this->response(
                     false,
                     'Soft delete is enabled for this module. You need to mark as delete first then only you can delete it permanently!',
@@ -1341,22 +1227,8 @@ class Form
         }
 
         if ($this->doDestroy($id, $result)) {
-            // $message = ($this->resource->singularTitle ?? 'Data').$heroValue.' permanently deleted successfully!';
-            // if ($this->crud->isWantsArray()) {
-            //     return ['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]];
-            // } elseif ($this->isWantsJson()) {
-            //     return response()->json(['status' => true, 'message' => $message, 'data' => ['heroValue' => $heroValue]]);
-            // }
-
-            // return redirect(createUrl($this->resource->route, $this->queryString))->with('success', $message);
-
             return $this->response(true, ($this->resource->singularTitle ?? 'Data').$heroValue.' permanently deleted successfully!', null, ['heroValue' => $heroValue]);
         }
-
-        // return redirect(createUrl($this->resource->route, $this->queryString))->with(
-        //     'error',
-        //     'Something went wrong! Data not deleted fully, please contact Support Administrator.'
-        // );
 
         return $this->response(false, 'Something went wrong! Data not deleted fully, please contact Support Administrator.');
     }
@@ -1525,13 +1397,6 @@ class Form
 
         if ($dataCount) {
             $message = $this->createMessage($id, $dataToDelete, $dataCount, $totalCount, $totalReferencesToFetch);
-            // if ($this->crud->isWantsArray()) {
-            //     return ['status' => false, 'message' => $message];
-            // } elseif ($this->isWantsJson()) {
-            //     return response()->json(['status' => false, 'message' => $message], 422);
-            // }
-
-            // return redirect(createUrl($this->resource->route, $this->queryString))->with('error', $message);
 
             return $this->response(false, $message);
         }
@@ -1719,6 +1584,13 @@ class Form
         }
 
         return $this->request->post();
+    }
+
+    public function setOldData($data)
+    {
+        $this->oldData = $data;
+
+        return $this;
     }
 
     public function getProcessedData($id = null)

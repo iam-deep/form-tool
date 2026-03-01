@@ -80,7 +80,7 @@ class FileType extends BaseInputType
      * Validate and accept file type.
      *
      * @param  string  $accept  mimes like pdf,docs,jpg
-     * @return Deep\FormTool\Core\InputTypes\FileType
+     * @return \Deep\FormTool\Core\InputTypes\FileType
      **/
     public function accept(string $accept)
     {
@@ -368,50 +368,5 @@ class FileType extends BaseInputType
         ];
 
         return \view('form-tool::form.input_types.file', $data)->render();
-
-        /*$value = $oldValue ?? $this->value;
-
-        $groupId = $key.'-group-'.$this->dbField.'-'.$index;
-        $inputId = $key.'-'.$this->dbField.'-'.$index;
-        $name = $key.'['.$index.']['.$this->dbField.']';
-
-        if ($this->isRequired) {
-            if (! $value) {
-                $this->raw('required');
-            } else {
-                $this->removeRaw('required');
-            }
-        }
-
-        $input = '<div class="row">
-            <div class="col-sm-3">
-                <input type="file" class="'.\implode(' ', $this->classes).'" id="'.$inputId.'" name="'.$name.
-                    '" accept="'.$this->accept.'" '.$this->raw.$this->inlineCSS.' />
-            </div>';
-
-        if ($value) {
-            $script = '$(\'#'.$groupId.'\').remove();';
-            if ($this->isRequired) {
-                $script .= '$(\'#'.$inputId.'\').prop(\'required\', \'required\')';
-            }
-
-            if (FileManager::isImage($value)) {
-                $image = ImageCache::resize($value);
-                $file = '<img src="'.asset($image).'" class="img-thumbnail" style="max-height:150px;max-width:150px;">';
-            } else {
-                $file = '<i class="'.FileManager::getFileIcon($value).'"></i>';
-            }
-
-            $input .= '<div class="col-sm-6" id="'.$groupId.'"> &nbsp;
-                <a href="'.asset($value).'" target="_blank">'.$file.'</a>
-                <input type="hidden" name="'.$name.'" value="'.$value.'">
-                <button class="close pull-right" aria-hidden="true" type="button" onclick="'.$script.
-                    '"><i class="fa fa-times"></i></button>
-            </div>';
-        }
-
-        $input .= '</div>';
-
-        return $input;*/
     }
 }
