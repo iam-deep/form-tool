@@ -1005,8 +1005,10 @@ class Form
                         }
                     }
 
-                    // If we have a select multiple field, we need to prevent it from double encoding when we have KeyValue CRUD format
-                    $this->postData[$postKey] = \json_encode($newMultiplePostData);
+                    // - If we have a select multiple field, we need to prevent it from double encoding when we have KeyValue CRUD format
+                    // - array_values is important as after sorting in KeyValue CRUD format, if the array index is not starting from 0 then the
+                    //   json encoded result leads to object instead of an array
+                    $this->postData[$postKey] = \json_encode(array_values($newMultiplePostData));
                 }
 
                 continue;
