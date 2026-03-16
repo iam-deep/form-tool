@@ -45,6 +45,8 @@ class BaseInputType
     // Enable this column logging in action logger
     protected bool $isLogColumn = true;
 
+    protected bool $isJson = false;
+
     // CSS
     protected $classes = [];
     protected $inlineCSS = '';
@@ -194,6 +196,13 @@ class BaseInputType
         return $this;
     }
 
+    public function setJson(bool $isJson = true)
+    {
+        $this->isJson = $isJson;
+
+        return $this;
+    }
+
     public function importSample($value): BaseInputType
     {
         $this->importSample = $value;
@@ -246,6 +255,10 @@ class BaseInputType
 
     public function beforeStore(object $newData)
     {
+        if ($this->isJson && \is_array($this->value)) {
+            return json_encode($this->value);
+        }
+
         return null;
     }
 
@@ -256,6 +269,10 @@ class BaseInputType
 
     public function beforeUpdate(object $oldData, object $newData)
     {
+        if ($this->isJson && \is_array($this->value)) {
+            return json_encode($this->value);
+        }
+
         return null;
     }
 
