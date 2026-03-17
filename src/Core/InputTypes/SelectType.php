@@ -27,6 +27,8 @@ class SelectType extends BaseFilterType implements ISaveable
 
     private $quickAddClass = null;
 
+    private $isDisabled = false;
+
     public function __construct()
     {
         parent::__construct();
@@ -57,6 +59,30 @@ class SelectType extends BaseFilterType implements ISaveable
     public function placeholder(string $placeholder): SelectType
     {
         $this->raw('data-placeholder="'.$placeholder.'"');
+
+        return $this;
+    }
+
+    public function disabled(): SelectType
+    {
+        $this->isDisabled = true;
+
+        $this->raw('disabled');
+        $this->bluePrint->hidden($this->dbField, $this->value);
+
+        $this->dbField .= '-disabled';
+
+        return $this;
+    }
+
+    public function setValue($value)
+    {
+        $this->value = $value;
+
+        if ($this->isDisabled) {
+            // setting the value of disabled select field
+            $this->value = $this->bluePrint->getInputTypeByDbField(substr($this->dbField, 0, strpos($this->dbField, '-')))->getValue();
+        }
 
         return $this;
     }
