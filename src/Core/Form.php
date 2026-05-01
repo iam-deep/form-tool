@@ -952,7 +952,10 @@ class Form
             $id = $this->editId;
         }
 
-        $postData = $this->postData;
+        // $postData = $this->postData;
+        // calling the above is more safer, but we cannot modify the values
+        $postData = $this->request->all();
+
         $this->postData = [];
 
         if ($this->formStatus == FormStatus::UPDATE) {
@@ -1556,6 +1559,11 @@ class Form
     public function getEditData()
     {
         return $this->resultData;
+    }
+
+    public function setEditData($resultData)
+    {
+        $this->resultData = $resultData;
     }
 
     public function getRoute()

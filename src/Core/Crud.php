@@ -73,7 +73,8 @@ class Crud
     /**
      * Format of the CRUD. It can de default or store data as key value pair.
      *
-     * @param  string  $var  Desired values: (default, keyValue)
+     * @param  string  $format  Desired values: (default, keyValue)
+     * @param  string  $groupName
      * @return \Deep\FormTool\Core\Crud
      **/
     public function format(string $format = 'default', string $groupName = 'default'): Crud
@@ -138,14 +139,14 @@ class Crud
         return $this->form->{$method}(...$parameters);
     }
 
-    public function saveCrud()
+    public function saveCrud(): Crud
     {
         $foreignKey = [];
         if ($this->format == 'keyValue') {
             $foreignKey = $this->bluePrint->getSelectDbOptionsForKeyValue();
         } else {
             if (! \config('form-tool.isPreventForeignKeyDelete', true) || ($this->deleteRestrictIsIgnore && ! $this->deleteRestrictIgnoreColumns)) {
-                return;
+                return $this;
             }
 
             $commons = \config('form-tool.commonDeleteRestricted', []);
@@ -164,7 +165,7 @@ class Crud
 
         $foreignModules = $this->deleteRestrictForMe;
         if (! $foreignKey && ! $foreignModules) {
-            return;
+            return $this;
         }
 
         $data = new \stdClass();
@@ -190,6 +191,8 @@ class Crud
         } else {
             DB::table('cruds')->insert($crudData);
         }
+
+        return $this;
     }
 
     //region TableOptions
