@@ -636,6 +636,10 @@ class Form
             }
         }
 
+        if (! $result) {
+            throw new FormToolException('Failed to retrieve updated data.');
+        }
+
         foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
                 continue;
