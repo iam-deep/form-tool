@@ -217,6 +217,8 @@ class Form
 
         $data->fields = new \stdClass();
 
+        $this->checkDuplicateFields();
+
         $n = 0;
         foreach ($this->bluePrint->getList() as $input) {
             if ($input instanceof BluePrint) {
@@ -441,6 +443,26 @@ class Form
         $data['row'] = $rowData;
 
         return \view('form-tool::form.multiple_table_row', $data)->render();
+    }
+
+    private function checkDuplicateFields()
+    {
+        $keys = [];
+        foreach ($this->bluePrint->getList() as $input) {
+            if ($input instanceof BluePrint) {
+                if (\in_array($input->getKey(), $keys)) {
+                    throw new \InvalidArgumentException('Duplicate field found: '.$input->getKey());
+                }
+
+                $keys[] = $input->getKey();
+            } else {
+                if (\in_array($input->getDbField(), $keys)) {
+                    throw new \InvalidArgumentException('Duplicate field found: '.$input->getDbField());
+                }
+
+                $keys[] = $input->getDbField();
+            }
+        }
     }
 
     //endregion
