@@ -456,8 +456,8 @@ class Form
 
                 $keys[] = $input->getKey();
             } else {
-                if (\in_array($input->getDbField(), $keys)) {
-                    throw new \InvalidArgumentException('Duplicate field found: '.$input->getDbField());
+                if (\in_array($input->getDbField(), $keys) && $input->typeInString != 'html') {
+                    throw new \InvalidArgumentException('Duplicate field found: '.$input->getDbField().', Label:'.$input->getLabel());
                 }
 
                 $keys[] = $input->getDbField();
