@@ -664,6 +664,41 @@ class Form
 
         foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
+                $bluePrint = $input;
+                $postKey = $bluePrint->getKey();
+
+                if (! $bluePrint->getModel()) {
+                    // This is mainly for File Delete after update & remove
+
+                    $oldData = json_decode($this->oldData->{$postKey} ?? '', true);
+                    $newData = json_decode($result->{$postKey} ?? '', true);
+
+                    if ($oldData && is_array($oldData)) {
+                        foreach ($oldData as $key => $oldRow) {
+                            foreach ($bluePrint->getInputList() as $input) {
+                                $input->setIndex($postKey, $key);
+
+                                $newRow = (object) ($newData[$key] ?? []);
+                                if ($this->formStatus == FormStatus::STORE) {
+                                    $input->afterStore($newRow);
+                                } else {
+                                    $input->afterUpdate((object) $oldRow, $newRow);
+                                }
+                            }
+                        }
+                    } elseif ($newData && is_array($newData)) {
+                        foreach ($newData as $key => $newRow) {
+                            foreach ($bluePrint->getInputList() as $input) {
+                                $input->setIndex($postKey, $key);
+
+                                if ($this->formStatus == FormStatus::STORE) {
+                                    $input->afterStore((object) $newRow);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 continue;
             }
 
@@ -1018,6 +1053,7 @@ class Form
             }
 
             if ($input instanceof BluePrint) {
+                // TODO: We need to test when we are inserting image in the new table
                 if (! $input->getModel()) {
                     $bluePrint = $input;
                     $postKey = $bluePrint->getKey();
@@ -1027,6 +1063,8 @@ class Form
                     if ($multiplePostData && is_array($multiplePostData)) {
                         foreach ($multiplePostData as $key => $value) {
                             foreach ($bluePrint->getInputList() as $input) {
+                                $input->setIndex($postKey, $key);
+
                                 $newMultiplePostData[$key][$input->getDbField()] = $value[$input->getDbField()] ?? null;
 
                                 $newMultiplePostData[$key][$input->getDbField()] = $this->getPostValue($input, $newMultiplePostData[$key][$input->getDbField()], $value, (object) []);
@@ -1038,6 +1076,8 @@ class Form
                     // - array_values is important as after sorting in KeyValue CRUD format, if the array index is not starting from 0 then the
                     //   json encoded result leads to object instead of an array
                     $this->postData[$postKey] = \json_encode(array_values($newMultiplePostData));
+
+                    // $this->postData[$postKey] = \json_encode($newMultiplePostData);
                 }
 
                 continue;

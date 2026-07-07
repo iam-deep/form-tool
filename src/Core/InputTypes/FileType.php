@@ -190,7 +190,7 @@ class FileType extends BaseInputType
         $oldFile = $oldData->{$this->dbField} ?? null;
         $newFile = $newData->{$this->dbField} ?? null;
 
-        if ($oldFile != $newFile) {
+        if ($oldFile != $newFile && is_string($oldFile)) {
             FileManager::deleteFile($oldFile);
         }
     }
@@ -314,6 +314,7 @@ class FileType extends BaseInputType
         $imageCache = null;
         $noImage = asset($this->placeholderImage);
         $isImage = FileManager::isImage($value);
+
         if ($isImageField || $isImage) {
             if ($value) {
                 $tempCachedImage = ImageCache::resize($value);
