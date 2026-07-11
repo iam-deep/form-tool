@@ -24,6 +24,7 @@ $this->crud = Doc::create($this, $model, function (BluePrint $input) {
     $input->editor('description', 'Description');
 });
 ```
+
 #### Let me explain
 
 Let's assume we have a database with a product table named `products` and with columns `productId, productName, categoryId, price, image, description`. And we have category table named `categories` with columns `categoryId, categoryName`
@@ -33,22 +34,23 @@ First, we have created a `$model = new DataModel();` and on the 2nd line we have
 Then we create a CRUD by calling `Doc::create()` and the parameters are:
 
 1. The Laravel's controller class as $this
-2. Passing the $model we created above 
-3. And the last parameter is the *Closure* which will provide us with a *BluePrint* as parameter.
+2. Passing the $model we created above
+3. And the last parameter is the _Closure_ which will provide us with a _BluePrint_ as parameter.
 
 <br />
 Now let's understand our fields inside the Closure. For that let me tell you one thing for the most methods inside closure have 1st parameter as the database column name and 2nd as an optional label of that field. So here are the input fields:
 
 1. We have created a text field with the column `productName` and labelled as `Product Name` and applied the required validation.
-2. Then a dropdown with the column `categoryId` and labelled as `Category` instructing form tool to get the options from another table `categories` and then `categoryId` & `categoryName` separated by dots(.) to show as value and text of the &lt;option&gt; tag respectively  i.e. &lt;option value="`categoryId`"&gt;`categoryName`&lt;/option&gt;. Finally, we have added the required validation.
+2. Then a dropdown with the column `categoryId` and labelled as `Category` instructing form tool to get the options from another table `categories` and then `categoryId` & `categoryName` separated by dots(.) to show as value and text of the &lt;option&gt; tag respectively i.e. &lt;option value="`categoryId`"&gt;`categoryName`&lt;/option&gt;. Finally, we have added the required validation.
 3. Then we have a price field with automatic digit validation as we have specified that it's a number field and then applied the required.
 4. Then we have created an image field which will automatically apply validation for the image file and upload the image under the sub-directory `public/storage/`. More on the file uploading later.
 5. And at last, we have created an editor by default `CKEditor` for our description column.
 
 ---
+
 **Full Code:**
 
-````
+```
 <?php
 
 namespace App\Http\Controllers\Admin;
@@ -86,9 +88,10 @@ class ProductsController extends AdminController
         return $this->crud;
     }
 }
-````
+```
 
 ---
+
 **This will give us:**
 
 1. Products listing page with Bulk Action (Duplicate, Delete), Search, Pagination, Sorting by Columns, Actions (Edit, Delete)
@@ -113,14 +116,30 @@ class ProductsController extends AdminController
 
 ![Screenshot of sctivities updated field](https://res.cloudinary.com/dpfaxke5x/image/upload/v1719396962/form-tool-activities-updated-fields_a8qyh9.jpg)
 
-
-If you have understood this much then you are good to go to start with the package and come back to get help from the below documentation *(I prefer this way of learning new things :wink:)*. If you prefer to read the documentation first then read it below.
+If you have understood this much then you are good to go to start with the package and come back to get help from the below documentation _(I prefer this way of learning new things :wink:)_. If you prefer to read the documentation first then read it below.
 
 > We have many cool features like this. This is just a start. If you like this package please show it by giving it a star in <a href="https://github.com/iam-deep/form-tool">github</a>.
 
+<br>
+
+# FormTool Documentation
+
+Start here:
+
+- [Getting Started](docs/getting-started.md)
+- [Installation](docs/installation.md)
+- [CRUD](docs/crud.md)
+- [Database](docs/database.md)
+- [Common Input Parameters And Functions](docs/common-input-parameters.md)
+- [Input Types Index](docs/input-types/README.md)
+- [Common Issues](docs/common-issues.md)
+- [Project Implications](docs/project-implications.md)
+
 ---
 
-> *This package is still under active development.*
+<br>
+
+> _This package is still under active development._
 
 You can boost start the setup with this skeleton package: <a href="https://github.com/iam-deep/form-tool-skeleton">form-tool-skeleton</a>
 
