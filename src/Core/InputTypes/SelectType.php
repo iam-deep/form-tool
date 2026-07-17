@@ -236,7 +236,11 @@ class SelectType extends BaseFilterType implements ISaveable
         if ($value === null) {
             $value = $this->value;
             if ($this->isMultiple && ! $this->isSaveAt()) {
-                $value = (array) \json_decode($this->value, true);
+                if (is_array($this->value)) {
+                    $value = $this->value;
+                } else {
+                    $value = (array) \json_decode($this->value, true);
+                }
             }
         }
 
