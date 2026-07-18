@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
@@ -1002,7 +1003,7 @@ class Form
     private function applyVisibilityValidationRules(array &$rules): void
     {
         foreach ($this->bluePrint->getInputList() as $controller) {
-            if (! $controller instanceof SelectType) {
+            if (! $controller instanceof IVisibilityController) {
                 continue;
             }
 

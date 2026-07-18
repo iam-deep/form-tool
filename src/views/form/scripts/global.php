@@ -174,7 +174,11 @@ function applyFormToolVisibility(controller) {
         return;
     }
 
-    let currentValue = String(controller.val() ?? '');
+    let currentValue = controller.is(':checkbox')
+        ? String(controller.prop('checked')
+            ? controller.val()
+            : controller.attr('data-form-tool-unchecked-value') ?? '')
+        : String(controller.val() ?? '');
 
     $.each(rules, function(field, rule) {
         if (!rule || !['show', 'hide'].includes(rule.action) || !Array.isArray(rule.values)) {

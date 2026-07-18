@@ -76,6 +76,24 @@ class FormVisibilityValidationTest extends TestCase
         $this->applyVisibilityRules($bluePrint, $rules);
     }
 
+    public function test_it_resolves_checkbox_visibility_rules(): void
+    {
+        $bluePrint = new BluePrint();
+        $bluePrint->checkbox('status')->values('enabled', 'disabled')
+            ->show('details', 'disabled', true);
+        $bluePrint->text('details');
+
+        $rules = [
+            'status' => ['required' => 'nullable'],
+            'details' => ['required' => 'nullable'],
+        ];
+
+        $this->applyVisibilityRules($bluePrint, $rules);
+
+        $this->assertContains('required_if:status,disabled', $rules['details']);
+        $this->assertContains('nullable', $rules['details']);
+    }
+
     private function applyVisibilityRules(BluePrint $bluePrint, array &$rules): void
     {
         $reflection = new ReflectionClass(Form::class);

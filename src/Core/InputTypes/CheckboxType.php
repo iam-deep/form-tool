@@ -3,11 +3,15 @@
 namespace Deep\FormTool\Core\InputTypes;
 
 use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
 use Deep\FormTool\Core\InputTypes\Common\Options;
+use Deep\FormTool\Core\InputTypes\Common\VisibilityRules;
+use Deep\FormTool\Exceptions\FormToolException;
 
-class CheckboxType extends BaseInputType
+class CheckboxType extends BaseInputType implements IVisibilityController
 {
     use Options;
+    use VisibilityRules;
 
     public int $type = InputType::CHECKBOX;
     public string $typeInString = 'checkbox';
@@ -64,7 +68,30 @@ class CheckboxType extends BaseInputType
 
         return $this;
     }
+
+    public function hide(string|array $fields, mixed $value, bool $isRequiredOnShow = false): static
+    {
+        $this->validateVisibilityTriggerValue($value);
+
+        return $this->addVisibilityRule('hide', $fields, $value, $isRequiredOnShow);
+    }
+
+    public function show(string|array $fields, mixed $value, bool $isRequiredOnShow = false): static
+    {
+        $this->validateVisibilityTriggerValue($value);
+
+        return $this->addVisibilityRule('show', $fields, $value, $isRequiredOnShow);
+    }
     //endregion
+
+    public function beforeValidation($data)
+    {
+        if ($this->visibilityRules && $data === null) {
+            return $this->valueNo;
+        }
+
+        return null;
+    }
 
     public function beforeStore($newData)
     {
@@ -103,6 +130,8 @@ class CheckboxType extends BaseInputType
     {
         $this->createOptions();
 
+        $visibilityAttributes = $this->getVisibilityAttributes();
+
         $value = old($this->dbField);
         if ($value === null) {
             $value = $this->value;
@@ -117,7 +146,7 @@ class CheckboxType extends BaseInputType
         if (! $this->isMultiple) {
             foreach ($this->options as $val => $text) {
                 $input .= '<label><input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.
-                    $this->dbField.'" name="'.$this->dbField.'" value="'.$val.'" '.
+                    $this->dbField.'" name="'.$this->dbField.'" value="'.$val.'"'.$visibilityAttributes.' '.
                     (\is_string($value) && $val == $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.
                     $text.'</label> &nbsp; ';
                 break;
@@ -152,5 +181,42 @@ class CheckboxType extends BaseInputType
         }
 
         return $input;
+    }
+
+    protected function getVisibilityAttributes(): string
+    {
+        if (! $this->visibilityRules) {
+            return '';
+        }
+
+        if ($this->isMultiple) {
+            throw new FormToolException('Visibility rules require a single-value controlling checkbox.');
+        }
+
+        $rules = htmlspecialchars(
+            json_encode($this->visibilityRules, JSON_THROW_ON_ERROR),
+            ENT_QUOTES,
+            'UTF-8'
+        );
+        $uncheckedValue = htmlspecialchars(
+            $this->normalizeVisibilityValue($this->valueNo),
+            ENT_QUOTES,
+            'UTF-8'
+        );
+
+        return ' data-form-tool-visibility="'.$rules.'"'
+            .' data-form-tool-unchecked-value="'.$uncheckedValue.'"';
+    }
+
+    private function validateVisibilityTriggerValue(mixed $value): void
+    {
+        if (! is_scalar($value) && $value !== null) {
+            throw new FormToolException('Checkbox visibility trigger value must be scalar or null.');
+        }
+    }
+
+    private function normalizeVisibilityValue(mixed $value): string
+    {
+        return is_bool($value) ? ($value ? '1' : '0') : (string) $value;
     }
 }

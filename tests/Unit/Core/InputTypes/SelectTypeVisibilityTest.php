@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Tests\Unit\Core\InputTypes;
 
 use Deep\FormTool\Core\BluePrint;
+use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
 use Deep\FormTool\Exceptions\FormToolException;
 use PHPUnit\Framework\TestCase;
 
@@ -11,6 +12,8 @@ class SelectTypeVisibilityTest extends TestCase
     public function test_it_normalizes_fields_and_trigger_values(): void
     {
         $input = (new BluePrint())->select('status');
+
+        $this->assertInstanceOf(IVisibilityController::class, $input);
 
         $input->hide(['reason', 'note'], [1, 'pending'], true);
 
