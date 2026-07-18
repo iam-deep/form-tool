@@ -1,6 +1,16 @@
 <script>
 $(function() {
 
+    $('[data-form-tool-visibility]').each(function() {
+        applyFormToolVisibility($(this));
+    });
+
+    $(document)
+        .off('change.formToolVisibility', '[data-form-tool-visibility]')
+        .on('change.formToolVisibility', '[data-form-tool-visibility]', function() {
+            applyFormToolVisibility($(this));
+        });
+
     // Setup the multiple table
     $('.table-multiple').each(function() {
         let table = $(this);
@@ -149,6 +159,70 @@ $(function() {
         }
     });
 });
+
+function applyFormToolVisibility(controller) {
+    let rules;
+
+    try {
+        rules = JSON.parse(controller.attr('data-form-tool-visibility') || '{}');
+    } catch (error) {
+        return;
+    }
+
+    let form = controller.closest('form');
+    if (!form.length) {
+        return;
+    }
+
+    let currentValue = String(controller.val() ?? '');
+
+    $.each(rules, function(field, rule) {
+        if (!rule || !['show', 'hide'].includes(rule.action) || !Array.isArray(rule.values)) {
+            return;
+        }
+
+        let target = form.find(':input').filter(function() {
+            return this.id === field || this.name === field || this.name === field + '[]';
+        }).first();
+
+        if (!target.length) {
+            return;
+        }
+
+        let wrapper = target.closest('.form-group, .row.mb-3');
+        if (!wrapper.length) {
+            return;
+        }
+
+        if (target.data('formToolOriginalRequired') === undefined) {
+            let hasStaticRequiredMarker = wrapper.find('label .text-danger')
+                .not('.form-tool-conditional-required').length > 0;
+            target.data(
+                'formToolOriginalRequired',
+                target.prop('required') || hasStaticRequiredMarker
+            );
+        }
+
+        let matches = rule.values.map(String).includes(currentValue);
+        let shouldShow = rule.action === 'show' ? matches : !matches;
+        let requiredOnShow = Boolean(
+            rule.isRequiredOnShow || target.data('formToolOriginalRequired')
+        );
+
+        wrapper.toggle(shouldShow);
+        target.prop('required', shouldShow && requiredOnShow);
+
+        let label = wrapper.find('label').first();
+        label.find('.form-tool-conditional-required').remove();
+        if (shouldShow && requiredOnShow && !target.data('formToolOriginalRequired')) {
+            label.append(' <span class="text-danger form-tool-conditional-required">*</span>');
+        }
+
+        if (target.hasClass('chosen')) {
+            target.trigger('chosen:updated');
+        }
+    });
+}
 
 function revertSubmit() {
     let form = $('form');

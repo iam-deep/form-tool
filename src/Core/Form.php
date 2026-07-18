@@ -934,6 +934,8 @@ class Form
             $this->request->merge($merge);
         }
 
+        $this->applyVisibilityValidationRules($rules);
+
         $validator = Validator::make($this->request->all(), $rules, $messages, $labels);
 
         if ($validator->fails()) {
@@ -995,6 +997,45 @@ class Form
         $this->postData = $validator->validated();
 
         return true;
+    }
+
+    private function applyVisibilityValidationRules(array &$rules): void
+    {
+        foreach ($this->bluePrint->getInputList() as $controller) {
+            if (! $controller instanceof SelectType) {
+                continue;
+            }
+
+            foreach ($controller->getVisibilityRules() as $field => $visibilityRule) {
+                if (! array_key_exists($field, $rules)) {
+                    throw new FormToolException(
+                        'Visibility target field "'.$field.'" was not found for controller "'
+                        .$controller->getDbField().'".'
+                    );
+                }
+
+                $targetRules = (array) $rules[$field];
+                $isRequiredOnShow = $visibilityRule['isRequiredOnShow'];
+
+                foreach ($targetRules as $key => $rule) {
+                    if ($rule === 'required') {
+                        $isRequiredOnShow = true;
+                        unset($targetRules[$key]);
+                    }
+                }
+
+                if ($isRequiredOnShow) {
+                    $conditionalRule = $visibilityRule['action'] === 'show'
+                        ? 'required_if'
+                        : 'required_unless';
+
+                    $targetRules[] = $conditionalRule.':'.$controller->getDbField().','
+                        .implode(',', $visibilityRule['values']);
+                }
+
+                $rules[$field] = $targetRules;
+            }
+        }
     }
 
     public function invokeEvent(EventType $eventType, $id = null, $data = null)

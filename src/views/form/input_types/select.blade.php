@@ -4,7 +4,8 @@ if ($input->type == 'single') {
 
     if ($input->isQuickAdd) { ?>
         <div class="input-group">
-            <select class="{{ $input->classes }}" id="{{ $input->column }}" name="{{ $input->column.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}>
+            <select class="{{ $input->classes }}" id="{{ $input->column }}" name="{{ $input->column.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}
+                @if ($input->visibilityRules) data-form-tool-visibility="{{ $input->visibilityRules }}" @endif>
                 {!! $input->options !!}
             </select>
             <span class="input-group-btn">
@@ -51,7 +52,8 @@ if ($input->type == 'single') {
         </script>
 
     <?php } else { ?>
-        <select class="{{ $input->classes }}" id="{{ $input->column }}" name="{{ $input->column.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}>
+        <select class="{{ $input->classes }}" id="{{ $input->column }}" name="{{ $input->column.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}
+            @if ($input->visibilityRules) data-form-tool-visibility="{{ $input->visibilityRules }}" @endif>
             {!! $input->options !!}
         </select>
     <?php }
