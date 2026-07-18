@@ -15,18 +15,16 @@ class SelectTypeVisibilityTest extends TestCase
 
         $this->assertInstanceOf(IVisibilityController::class, $input);
 
-        $input->hide(['reason', 'note'], [1, 'pending'], true);
+        $input->hide(['reason', 'note'], [1, 'pending']);
 
         $this->assertSame([
             'reason' => [
                 'action' => 'hide',
                 'values' => ['1', 'pending'],
-                'isRequiredOnShow' => true,
             ],
             'note' => [
                 'action' => 'hide',
                 'values' => ['1', 'pending'],
-                'isRequiredOnShow' => true,
             ],
         ], $input->getVisibilityRules());
     }
@@ -37,24 +35,21 @@ class SelectTypeVisibilityTest extends TestCase
 
         $input
             ->hide('reason', 'active')
-            ->hide('reason', ['pending', 'active'], true)
-            ->show(['approvedBy', 'approvedAt'], ['approved', 'completed'], true);
+            ->hide('reason', ['pending', 'active'])
+            ->show(['approvedBy', 'approvedAt'], ['approved', 'completed']);
 
         $this->assertSame([
             'reason' => [
                 'action' => 'hide',
                 'values' => ['active', 'pending'],
-                'isRequiredOnShow' => true,
             ],
             'approvedBy' => [
                 'action' => 'show',
                 'values' => ['approved', 'completed'],
-                'isRequiredOnShow' => true,
             ],
             'approvedAt' => [
                 'action' => 'show',
                 'values' => ['approved', 'completed'],
-                'isRequiredOnShow' => true,
             ],
         ], $input->getVisibilityRules());
     }
@@ -91,5 +86,74 @@ class SelectTypeVisibilityTest extends TestCase
         $input = (new BluePrint())->select('status')->show('reason', null);
 
         $this->assertSame([''], $input->getVisibilityRules()['reason']['values']);
+    }
+
+    public function test_it_stores_custom_messages_only_for_mapped_target_fields(): void
+    {
+        $input = (new BluePrint())->select('scope')->hide(
+            ['sections', 'note'],
+            1,
+            ['sections' => 'Please select at least one section.']
+        );
+
+        $this->assertSame(
+            'Please select at least one section.',
+            $input->getVisibilityRules()['sections']['message']
+        );
+        $this->assertArrayNotHasKey('message', $input->getVisibilityRules()['note']);
+    }
+
+    public function test_it_rejects_a_message_for_a_field_outside_the_current_targets(): void
+    {
+        $this->expectException(FormToolException::class);
+        $this->expectExceptionMessage(
+            'Visibility message field "unknown" must be included in the target fields.'
+        );
+
+        (new BluePrint())->select('scope')->hide(
+            'sections',
+            1,
+            ['unknown' => 'Invalid mapping.']
+        );
+    }
+
+    public function test_it_rejects_an_empty_visibility_message(): void
+    {
+        $this->expectException(FormToolException::class);
+        $this->expectExceptionMessage(
+            'Visibility message for field "sections" cannot be empty.'
+        );
+
+        (new BluePrint())->select('scope')->hide(
+            'sections',
+            1,
+            ['sections' => '   ']
+        );
+    }
+
+    public function test_it_reuses_the_same_message_for_accumulated_rules(): void
+    {
+        $input = (new BluePrint())->select('scope')
+            ->hide('sections', 1, ['sections' => 'Select sections.'])
+            ->hide('sections', 2, ['sections' => 'Select sections.']);
+
+        $this->assertSame(['1', '2'], $input->getVisibilityRules()['sections']['values']);
+        $this->assertSame(
+            'Select sections.',
+            $input->getVisibilityRules()['sections']['message']
+        );
+    }
+
+    public function test_it_rejects_conflicting_messages_for_the_same_target(): void
+    {
+        $input = (new BluePrint())->select('scope')
+            ->hide('sections', 1, ['sections' => 'Select sections.']);
+
+        $this->expectException(FormToolException::class);
+        $this->expectExceptionMessage(
+            'Visibility message for field "sections" conflicts with an existing message.'
+        );
+
+        $input->hide('sections', 2, ['sections' => 'Choose sections.']);
     }
 }

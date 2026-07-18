@@ -4,8 +4,8 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
+use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Deep\FormTool\Exceptions\FormToolException;
@@ -935,7 +935,7 @@ class Form
             $this->request->merge($merge);
         }
 
-        $this->applyVisibilityValidationRules($rules);
+        $this->applyVisibilityValidationRules($rules, $messages);
 
         $validator = Validator::make($this->request->all(), $rules, $messages, $labels);
 
@@ -1000,7 +1000,7 @@ class Form
         return true;
     }
 
-    private function applyVisibilityValidationRules(array &$rules): void
+    private function applyVisibilityValidationRules(array &$rules, array &$messages): void
     {
         foreach ($this->bluePrint->getInputList() as $controller) {
             if (! $controller instanceof IVisibilityController) {
@@ -1016,22 +1016,26 @@ class Form
                 }
 
                 $targetRules = (array) $rules[$field];
-                $isRequiredOnShow = $visibilityRule['isRequiredOnShow'];
+                $isRequired = false;
 
                 foreach ($targetRules as $key => $rule) {
                     if ($rule === 'required') {
-                        $isRequiredOnShow = true;
+                        $isRequired = true;
                         unset($targetRules[$key]);
                     }
                 }
 
-                if ($isRequiredOnShow) {
+                if ($isRequired) {
                     $conditionalRule = $visibilityRule['action'] === 'show'
                         ? 'required_if'
                         : 'required_unless';
 
                     $targetRules[] = $conditionalRule.':'.$controller->getDbField().','
                         .implode(',', $visibilityRule['values']);
+
+                    if (isset($visibilityRule['message'])) {
+                        $messages[$field.'.'.$conditionalRule] = $visibilityRule['message'];
+                    }
                 }
 
                 $rules[$field] = $targetRules;

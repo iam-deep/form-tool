@@ -15,18 +15,16 @@ class CheckboxTypeVisibilityTest extends TestCase
 
         $this->assertInstanceOf(IVisibilityController::class, $input);
 
-        $input->show(['fieldA', 'fieldB'], 1, true);
+        $input->show(['fieldA', 'fieldB'], 1);
 
         $this->assertSame([
             'fieldA' => [
                 'action' => 'show',
                 'values' => ['1'],
-                'isRequiredOnShow' => true,
             ],
             'fieldB' => [
                 'action' => 'show',
                 'values' => ['1'],
-                'isRequiredOnShow' => true,
             ],
         ], $input->getVisibilityRules());
     }
@@ -42,10 +40,9 @@ class CheckboxTypeVisibilityTest extends TestCase
     public function test_it_accumulates_rules_and_rejects_conflicting_actions(): void
     {
         $input = new TestCheckboxType();
-        $input->hide('details', 0)->hide('details', false, true);
+        $input->hide('details', 0)->hide('details', false);
 
         $this->assertSame(['0'], $input->getVisibilityRules()['details']['values']);
-        $this->assertTrue($input->getVisibilityRules()['details']['isRequiredOnShow']);
 
         $this->expectException(FormToolException::class);
         $input->show('details', 1);
@@ -73,7 +70,7 @@ class CheckboxTypeVisibilityTest extends TestCase
     {
         $input = (new TestCheckboxType())
             ->values('enabled', 'disabled')
-            ->show(['fieldA', 'fieldB'], 'enabled', true);
+            ->show(['fieldA', 'fieldB'], 'enabled');
 
         $attributes = $input->visibilityAttributes();
 
@@ -89,6 +86,20 @@ class CheckboxTypeVisibilityTest extends TestCase
         $this->expectExceptionMessage('Visibility rules require a single-value controlling checkbox.');
 
         $input->visibilityAttributes();
+    }
+
+    public function test_it_stores_a_custom_message_for_a_checkbox_visibility_target(): void
+    {
+        $input = (new TestCheckboxType())->show(
+            'details',
+            1,
+            ['details' => 'Details are required.']
+        );
+
+        $this->assertSame(
+            'Details are required.',
+            $input->getVisibilityRules()['details']['message']
+        );
     }
 }
 

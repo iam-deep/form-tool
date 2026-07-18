@@ -209,18 +209,11 @@ function applyFormToolVisibility(controller) {
 
         let matches = rule.values.map(String).includes(currentValue);
         let shouldShow = rule.action === 'show' ? matches : !matches;
-        let requiredOnShow = Boolean(
-            rule.isRequiredOnShow || target.data('formToolOriginalRequired')
-        );
+        let isOriginallyRequired = Boolean(target.data('formToolOriginalRequired'));
+        let supportsNativeRequired = !target.hasClass('chosen');
 
         wrapper.toggle(shouldShow);
-        target.prop('required', shouldShow && requiredOnShow);
-
-        let label = wrapper.find('label').first();
-        label.find('.form-tool-conditional-required').remove();
-        if (shouldShow && requiredOnShow && !target.data('formToolOriginalRequired')) {
-            label.append(' <span class="text-danger form-tool-conditional-required">*</span>');
-        }
+        target.prop('required', shouldShow && isOriginallyRequired && supportsNativeRequired);
 
         if (target.hasClass('chosen')) {
             target.trigger('chosen:updated');

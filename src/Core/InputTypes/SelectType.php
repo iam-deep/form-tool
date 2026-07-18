@@ -5,8 +5,8 @@ namespace Deep\FormTool\Core\InputTypes;
 use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\Guard;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
+use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\Options;
 use Deep\FormTool\Core\InputTypes\Common\Saveable;
 use Deep\FormTool\Core\InputTypes\Common\VisibilityRules;
@@ -111,14 +111,14 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
         return $this;
     }
 
-    public function hide(string|array $fields, mixed $values, bool $isRequiredOnShow = false): static
+    public function hide(string|array $fields, mixed $values, array $messages = []): static
     {
-        return $this->addVisibilityRule('hide', $fields, $values, $isRequiredOnShow);
+        return $this->addVisibilityRule('hide', $fields, $values, $messages);
     }
 
-    public function show(string|array $fields, mixed $values, bool $isRequiredOnShow = false): static
+    public function show(string|array $fields, mixed $values, array $messages = []): static
     {
-        return $this->addVisibilityRule('show', $fields, $values, $isRequiredOnShow);
+        return $this->addVisibilityRule('show', $fields, $values, $messages);
     }
 
     // endregion

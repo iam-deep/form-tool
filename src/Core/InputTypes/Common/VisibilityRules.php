@@ -18,10 +18,11 @@ trait VisibilityRules
         string $action,
         string|array $fields,
         mixed $values,
-        bool $isRequiredOnShow
+        array $messages = []
     ): static {
         $fields = $this->normalizeVisibilityFields($fields);
         $values = $this->normalizeVisibilityValues($values);
+        $messages = $this->normalizeVisibilityMessages($messages, $fields);
 
         foreach ($fields as $field) {
             $existing = $this->visibilityRules[$field] ?? null;
@@ -31,11 +32,25 @@ trait VisibilityRules
                 );
             }
 
-            $this->visibilityRules[$field] = [
+            $existingMessage = $existing['message'] ?? null;
+            $newMessage = $messages[$field] ?? null;
+
+            if ($existingMessage !== null && $newMessage !== null && $existingMessage !== $newMessage) {
+                throw new FormToolException(
+                    'Visibility message for field "'.$field.'" conflicts with an existing message.'
+                );
+            }
+
+            $rule = [
                 'action' => $action,
                 'values' => array_values(array_unique(array_merge($existing['values'] ?? [], $values))),
-                'isRequiredOnShow' => ($existing['isRequiredOnShow'] ?? false) || $isRequiredOnShow,
             ];
+
+            if (($newMessage ?? $existingMessage) !== null) {
+                $rule['message'] = $newMessage ?? $existingMessage;
+            }
+
+            $this->visibilityRules[$field] = $rule;
         }
 
         return $this;
@@ -58,6 +73,31 @@ trait VisibilityRules
         }
 
         return array_values(array_unique($normalized));
+    }
+
+    private function normalizeVisibilityMessages(array $messages, array $fields): array
+    {
+        $normalized = [];
+
+        foreach ($messages as $field => $message) {
+            $field = is_string($field) ? trim($field) : '';
+
+            if (! in_array($field, $fields, true)) {
+                throw new FormToolException(
+                    'Visibility message field "'.$field.'" must be included in the target fields.'
+                );
+            }
+
+            if (! is_string($message) || trim($message) === '') {
+                throw new FormToolException(
+                    'Visibility message for field "'.$field.'" cannot be empty.'
+                );
+            }
+
+            $normalized[$field] = $message;
+        }
+
+        return $normalized;
     }
 
     private function normalizeVisibilityValues(mixed $values): array

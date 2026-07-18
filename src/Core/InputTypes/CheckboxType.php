@@ -69,18 +69,18 @@ class CheckboxType extends BaseInputType implements IVisibilityController
         return $this;
     }
 
-    public function hide(string|array $fields, mixed $value, bool $isRequiredOnShow = false): static
+    public function hide(string|array $fields, mixed $value, array $messages = []): static
     {
         $this->validateVisibilityTriggerValue($value);
 
-        return $this->addVisibilityRule('hide', $fields, $value, $isRequiredOnShow);
+        return $this->addVisibilityRule('hide', $fields, $value, $messages);
     }
 
-    public function show(string|array $fields, mixed $value, bool $isRequiredOnShow = false): static
+    public function show(string|array $fields, mixed $value, array $messages = []): static
     {
         $this->validateVisibilityTriggerValue($value);
 
-        return $this->addVisibilityRule('show', $fields, $value, $isRequiredOnShow);
+        return $this->addVisibilityRule('show', $fields, $value, $messages);
     }
     //endregion
 
