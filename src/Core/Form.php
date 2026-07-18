@@ -4,8 +4,8 @@ namespace Deep\FormTool\Core;
 
 use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
-use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
+use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
 use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Deep\FormTool\Exceptions\FormToolException;
