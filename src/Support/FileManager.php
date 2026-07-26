@@ -157,8 +157,7 @@ class FileManager
         ?string $disk = null,
         ?string $visibility = null,
         ?string $destinationDirectory = null,
-    ): ?string
-    {
+    ): ?string {
         if (! is_string($file) || trim($file) === '') {
             return null;
         }

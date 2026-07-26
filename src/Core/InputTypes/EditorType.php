@@ -9,8 +9,8 @@ use Deep\FormTool\Core\InputTypes\Common\ISearchable;
 use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Facades\Validator;
 
 class EditorType extends BaseInputType implements ISearchable, IPluginableType
 {
