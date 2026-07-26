@@ -69,6 +69,46 @@ In key-value format:
 - FormTool reads existing rows by `groupName`
 - update deletes and recreates rows for that group
 
+## Updates, Soft Deletes, And Restore
+
+Normal updates, soft deletes, restores, and permanent deletes use separate model operations.
+
+`BaseModel::updateOne()` updates active rows only when soft delete is enabled. Use `BaseModel::softDelete()` to mark active rows as deleted, `BaseModel::restore()` to restore deleted rows, and `BaseModel::deleteOne()` to permanently remove a row.
+
+The transition methods accept one ID/token or an array. Arrays are updated in one query, and both methods return the affected-row count:
+
+```php
+use Deep\FormTool\Core\Auth;
+
+$deleted = Students::softDelete(
+    [10, 11, 12],
+    ['deletedBy' => Auth::id(), 'deletedAt' => date('Y-m-d H:i:s')]
+);
+
+$restored = Students::restore(
+    [10, 11, 12],
+    ['deletedBy' => null, 'deletedAt' => null]
+);
+```
+
+Pass `true` as the third argument when the supplied values belong to the configured token column:
+
+```php
+Students::softDelete(['token-a', 'token-b'], $deletionData, true);
+Students::restore(['token-a', 'token-b'], $restoreData, true);
+```
+
+Passing an empty array returns `0` without executing an update. Soft delete changes active rows only; restore changes deleted rows only.
+
+`DataModel::restore()` provides the same scalar-or-array restore behavior and fills the configured deletion metadata automatically. `DataModel::updateDelete()` remains available as a deprecated compatibility method and delegates to `BaseModel::softDelete()`.
+
+```php
+$model->updateDelete([10, 11, 12]); // Deprecated compatibility API
+$model->restore([10, 11, 12]);
+```
+
+`DataModel::softDelete(bool)` is not a record-deletion operation. It remains the existing switch used to enable or disable soft-delete behavior for a CRUD definition.
+
 ## Relation Saves With saveAt
 
 Multiple saveable inputs can write selections into a relation table instead of JSON.

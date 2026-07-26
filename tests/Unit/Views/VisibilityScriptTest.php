@@ -2,7 +2,7 @@
 
 namespace Deep\FormTool\Tests\Unit\Views;
 
-use PHPUnit\Framework\TestCase;
+use Deep\FormTool\Tests\TestCase;
 
 class VisibilityScriptTest extends TestCase
 {

@@ -5,7 +5,7 @@ namespace Deep\FormTool\Tests\Unit\Core\InputTypes;
 use Deep\FormTool\Core\InputTypes\CheckboxType;
 use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
 use Deep\FormTool\Exceptions\FormToolException;
-use PHPUnit\Framework\TestCase;
+use Deep\FormTool\Tests\TestCase;
 
 class CheckboxTypeVisibilityTest extends TestCase
 {

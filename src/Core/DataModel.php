@@ -300,7 +300,13 @@ class DataModel
         return $this->setup()::updateOne($id, $data, $isToken ?? $this->isToken);
     }
 
-    public function updateDelete($id)
+    /**
+     * @deprecated Use BaseModel::softDelete() for direct model operations.
+     *
+     * @param  int|string|array  $idOrIds
+     * @return int
+     */
+    public function updateDelete($idOrIds, $isToken = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedBy = ($metaColumns['deletedBy'] ?? 'deletedBy') ?: 'deletedBy';
@@ -310,10 +316,14 @@ class DataModel
         $data[$deletedBy] = Auth::id();
         $data[$deletedAt] = \date('Y-m-d H:i:s');
 
-        return $this->setup()::updateOne($id, $data);
+        return $this->setup()::softDelete($idOrIds, $data, $isToken);
     }
 
-    public function restore($id)
+    /**
+     * @param  int|string|array  $idOrIds
+     * @return int
+     */
+    public function restore($idOrIds, $isToken = false)
     {
         $metaColumns = \config('form-tool.table_meta_columns');
         $deletedBy = ($metaColumns['deletedBy'] ?? 'deletedBy') ?: 'deletedBy';
@@ -323,7 +333,7 @@ class DataModel
         $data[$deletedBy] = null;
         $data[$deletedAt] = null;
 
-        return $this->setup()::updateOne($id, $data);
+        return $this->setup()::restore($idOrIds, $data, $isToken);
     }
 
     public function deleteOne($id, $isToken = null)

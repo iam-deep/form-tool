@@ -5,7 +5,7 @@ namespace Deep\FormTool\Tests\Unit\Core;
 use Deep\FormTool\Core\BluePrint;
 use Deep\FormTool\Core\Form;
 use Deep\FormTool\Exceptions\FormToolException;
-use PHPUnit\Framework\TestCase;
+use Deep\FormTool\Tests\TestCase;
 use ReflectionClass;
 
 class FormVisibilityValidationTest extends TestCase

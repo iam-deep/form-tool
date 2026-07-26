@@ -134,15 +134,46 @@ class BaseModel extends Model
 
     public static function updateOne($id, $data, $isToken = false)
     {
-        // We are not preventing updating of deleted data, otherwise we can't update restore
+        $query = DB::table(static::$tableName);
+        self::applyIdentifier($query, $id, $isToken);
+
+        if (self::$isSoftDelete) {
+            $query->whereNull(self::getDeletedAtColumn());
+        }
+
+        return $query->update($data);
+    }
+
+    /**
+     * @param  int|string|array  $idOrIds
+     * @return int
+     */
+    public static function softDelete($idOrIds, $data, $isToken = false)
+    {
+        if (\is_array($idOrIds) && ! \count($idOrIds)) {
+            return 0;
+        }
 
         $query = DB::table(static::$tableName);
+        self::applyIdentifier($query, $idOrIds, $isToken);
+        $query->whereNull(self::getDeletedAtColumn());
 
-        if ($isToken) {
-            $query->where(static::$token, $id);
-        } else {
-            $query->where(static::$primaryId, $id);
+        return $query->update($data);
+    }
+
+    /**
+     * @param  int|string|array  $idOrIds
+     * @return int
+     */
+    public static function restore($idOrIds, $data, $isToken = false)
+    {
+        if (\is_array($idOrIds) && ! \count($idOrIds)) {
+            return 0;
         }
+
+        $query = DB::table(static::$tableName);
+        self::applyIdentifier($query, $idOrIds, $isToken);
+        $query->whereNotNull(self::getDeletedAtColumn());
 
         return $query->update($data);
     }
@@ -199,6 +230,24 @@ class BaseModel extends Model
                 $query->where($where);
             }
         }
+    }
+
+    protected static function applyIdentifier($query, $idOrIds, $isToken = false)
+    {
+        $column = $isToken ? static::$token : static::$primaryId;
+
+        if (\is_array($idOrIds)) {
+            return $query->whereIn($column, $idOrIds);
+        }
+
+        return $query->where($column, $idOrIds);
+    }
+
+    protected static function getDeletedAtColumn()
+    {
+        $metaColumns = \config('form-tool.table_meta_columns');
+
+        return ($metaColumns['deletedAt'] ?? 'deletedAt') ?: 'deletedAt';
     }
 
     public static function alias()
