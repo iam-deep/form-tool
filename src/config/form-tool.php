@@ -43,6 +43,9 @@ return [
     // Set image cache directory under public folder
     'imageCachePath' => 'cache',
 
+    // Cached derivatives use a public local disk independently of the upload disk.
+    'imageCacheDisk' => env('FORM_TOOL_IMAGE_CACHE_DISK', 'public'),
+
     // Set cache image size in px
     'imageCacheWidth' => 100,
     'imageCacheHeight' => 100,

@@ -267,7 +267,7 @@ class FileType extends BaseInputType
             $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
 
             return '<a href="'.FileManager::url($value, $this->getDisk(), $this->getFileVisibility()).'" target="_blank"><img class="img-thumbnail" '.
-                'src="'.FileManager::url($image, $this->getDisk(), $this->getFileVisibility()).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
+                'src="'.ImageCache::url($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
         } else {
             return '<a href="'.FileManager::url($value, $this->getDisk(), $this->getFileVisibility()).'" target="_blank">
                 <i class="'.FileManager::getFileIcon($value).' fa-3x"></i>
@@ -330,7 +330,7 @@ class FileType extends BaseInputType
                     visibility: $this->getFileVisibility(),
                 );
                 if ($tempCachedImage) {
-                    $imageCache = FileManager::url($tempCachedImage, $this->getDisk(), $this->getFileVisibility());
+                    $imageCache = ImageCache::url($tempCachedImage);
                 }
             }
         }
@@ -389,7 +389,7 @@ class FileType extends BaseInputType
                     visibility: $this->getFileVisibility(),
                 );
                 if ($tempCachedImage) {
-                    $imageCache = FileManager::url($tempCachedImage, $this->getDisk(), $this->getFileVisibility());
+                    $imageCache = ImageCache::url($tempCachedImage);
                 }
             }
         }

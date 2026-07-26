@@ -48,14 +48,19 @@ class ImageCache
         self::getConfigs(null, null);
         [, $cacheImagePath] = self::getPath($imagePath);
 
-        return FileManager::exists($cacheImagePath, $disk) ? $cacheImagePath : null;
+        return FileManager::exists($cacheImagePath, self::cacheDisk()) ? $cacheImagePath : null;
     }
 
     public static function clearCache(?string $disk = null): bool
     {
         self::getConfigs(null, null);
 
-        return FileManager::deleteDirectory(self::$cachePath, $disk);
+        return FileManager::deleteDirectory(self::$cachePath, self::cacheDisk());
+    }
+
+    public static function url(?string $cacheImagePath): string
+    {
+        return FileManager::url($cacheImagePath, self::cacheDisk(), 'public');
     }
 
     private static function transform(
@@ -66,7 +71,10 @@ class ImageCache
         ?string $visibility,
         string $operation,
     ): ?string {
-        if (! is_string($imagePath) || ! FileManager::exists($imagePath, $disk)) {
+        $sourceDisk = FileManager::diskName($disk);
+        $cacheDisk = self::cacheDisk();
+
+        if (! is_string($imagePath) || ! FileManager::exists($imagePath, $sourceDisk)) {
             return null;
         }
 
@@ -77,7 +85,7 @@ class ImageCache
         self::getConfigs($width, $height);
         [, $cacheImagePath] = self::getPath($imagePath);
 
-        if (FileManager::exists($cacheImagePath, $disk)) {
+        if (FileManager::exists($cacheImagePath, $cacheDisk)) {
             return $cacheImagePath;
         }
 
@@ -93,7 +101,7 @@ class ImageCache
 
         try {
             @ini_set('memory_limit', self::$memoryLimit);
-            $source = FileManager::readStream($imagePath, $disk);
+            $source = FileManager::readStream($imagePath, $sourceDisk);
             $destination = fopen($temporaryPath, 'wb');
 
             if (! is_resource($source) || ! is_resource($destination)) {
@@ -117,7 +125,7 @@ class ImageCache
             $extension = strtolower(pathinfo($cacheImagePath, PATHINFO_EXTENSION));
             $contents = (string) $image->encode($extension ?: null);
 
-            if (! FileManager::write($cacheImagePath, $contents, $disk, $visibility)) {
+            if (! FileManager::write($cacheImagePath, $contents, $cacheDisk, 'public')) {
                 throw new \RuntimeException('Unable to write cached image.');
             }
 
@@ -146,6 +154,11 @@ class ImageCache
         $filename = ($pathinfo['filename'] ?? 'image').'-'.self::$width.'x'.self::$height.'.'.($pathinfo['extension'] ?? 'jpg');
 
         return [trim($path, '/'), trim($path.'/'.$filename, '/')];
+    }
+
+    private static function cacheDisk(): string
+    {
+        return FileManager::diskName(config('form-tool.imageCacheDisk', 'public'));
     }
 
     private static function isResizable($file): bool
