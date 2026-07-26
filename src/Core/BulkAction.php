@@ -149,7 +149,10 @@ class BulkAction
         // Let's clone the image
         foreach ($this->table->getBluePrint()->getList() as $input) {
             if ($input instanceof InputTypes\FileType) {
-                $result[$input->getDbField()] = FileManager::copyFile($result[$input->getDbField()]);
+                $result[$input->getDbField()] = $this->copyFileValue(
+                    $input,
+                    $result[$input->getDbField()]
+                );
             }
         }
 
@@ -192,7 +195,10 @@ class BulkAction
                 // Let's clone the image
                 foreach ($input->getList() as $childInput) {
                     if ($childInput instanceof InputTypes\FileType) {
-                        $row[$childInput->getDbField()] = FileManager::copyFile($row[$childInput->getDbField()]);
+                        $row[$childInput->getDbField()] = $this->copyFileValue(
+                            $childInput,
+                            $row[$childInput->getDbField()]
+                        );
                     }
                 }
 
@@ -220,6 +226,15 @@ class BulkAction
         $this->table->crud->getForm()->invokeEvent(EventType::DUPLICATE, $insertId, $result);
 
         return $result;
+    }
+
+    protected function copyFileValue(InputTypes\FileType $input, $value): ?string
+    {
+        return FileManager::copyFile(
+            $value,
+            $input->getDisk(),
+            $input->getFileVisibility(),
+        );
     }
 
     protected function delete($ids)

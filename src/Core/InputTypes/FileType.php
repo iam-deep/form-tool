@@ -12,6 +12,8 @@ class FileType extends BaseInputType
     public string $typeInString = 'file';
 
     private string $path = '';
+    private ?string $disk = null;
+    private ?string $fileVisibility = null;
     private float $maxSizeInKb = 0;
     private $accept = '';
 
@@ -51,6 +53,30 @@ class FileType extends BaseInputType
         $this->path = \trim($path);
 
         return $this;
+    }
+
+    public function disk(string $disk): static
+    {
+        $this->disk = FileManager::diskName($disk);
+
+        return $this;
+    }
+
+    public function visibility(string $visibility): static
+    {
+        $this->fileVisibility = FileManager::visibility($visibility);
+
+        return $this;
+    }
+
+    public function getDisk(): string
+    {
+        return FileManager::diskName($this->disk);
+    }
+
+    public function getFileVisibility(): string
+    {
+        return FileManager::visibility($this->fileVisibility);
     }
 
     public function maxUploadSize(float $maxSizeInKb)
@@ -139,12 +165,24 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path);
+            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
+                $file,
+                $this->path,
+                null,
+                $this->getDisk(),
+                $this->getFileVisibility(),
+            );
 
             return $this->value;
         } else {
             $file = $request->file($this->dbField);
-            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path);
+            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
+                $file,
+                $this->path,
+                null,
+                $this->getDisk(),
+                $this->getFileVisibility(),
+            );
 
             return $this->value;
         }
@@ -161,7 +199,13 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path, $oldFile);
+            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
+                $file,
+                $this->path,
+                $oldFile,
+                $this->getDisk(),
+                $this->getFileVisibility(),
+            );
             if ($filename !== null) {
                 $this->value = $filename;
 
@@ -171,7 +215,13 @@ class FileType extends BaseInputType
             $oldFile = $request->post($this->dbField);
             $file = $request->file($this->dbField);
 
-            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile($file, $this->path, $oldFile);
+            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
+                $file,
+                $this->path,
+                $oldFile,
+                $this->getDisk(),
+                $this->getFileVisibility(),
+            );
             if ($filename !== null) {
                 $this->value = $filename;
 
@@ -191,13 +241,13 @@ class FileType extends BaseInputType
         $newFile = $newData->{$this->dbField} ?? null;
 
         if ($oldFile != $newFile && is_string($oldFile)) {
-            FileManager::deleteFile($oldFile);
+            FileManager::deleteFile($oldFile, $this->getDisk());
         }
     }
 
     public function afterDestroy(object $oldData)
     {
-        FileManager::deleteFile($oldData->{$this->dbField} ?? null);
+        FileManager::deleteFile($oldData->{$this->dbField} ?? null, $this->getDisk());
     }
 
     public function getNiceValue($value)
@@ -207,15 +257,19 @@ class FileType extends BaseInputType
         }
 
         if (FileManager::isImage($value)) {
-            $image = ImageCache::resize($value);
+            $image = ImageCache::resize(
+                $value,
+                disk: $this->getDisk(),
+                visibility: $this->getFileVisibility(),
+            );
 
             $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
             $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
 
-            return '<a href="'.asset($value).'" target="_blank"><img class="img-thumbnail" '.
-                'src="'.asset($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
+            return '<a href="'.FileManager::url($value, $this->getDisk(), $this->getFileVisibility()).'" target="_blank"><img class="img-thumbnail" '.
+                'src="'.FileManager::url($image, $this->getDisk(), $this->getFileVisibility()).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
         } else {
-            return '<a href="'.asset($value).'" target="_blank">
+            return '<a href="'.FileManager::url($value, $this->getDisk(), $this->getFileVisibility()).'" target="_blank">
                 <i class="'.FileManager::getFileIcon($value).' fa-3x"></i>
             </a>';
         }
@@ -233,7 +287,11 @@ class FileType extends BaseInputType
         if ($action == 'update') {
             if ($oldValue != $newValue) {
                 if (FileManager::isImage($oldValue)) {
-                    $oldValue = ImageCache::getCachedImage($oldValue);
+                    $oldValue = ImageCache::getCachedImage(
+                        $oldValue,
+                        $this->getDisk(),
+                        $this->getFileVisibility(),
+                    );
                 }
 
                 return [
@@ -246,7 +304,11 @@ class FileType extends BaseInputType
         }
 
         if ($action == 'destroy' && FileManager::isImage($newValue)) {
-            $newValue = ImageCache::getCachedImage($newValue);
+            $newValue = ImageCache::getCachedImage(
+                $newValue,
+                $this->getDisk(),
+                $this->getFileVisibility(),
+            );
         }
 
         return $newValue !== null ? ['type' => $this->typeInString, 'data' => $newValue] : '';
@@ -262,9 +324,13 @@ class FileType extends BaseInputType
         $isImage = FileManager::isImage($value);
         if ($isImageField || $isImage) {
             if ($value) {
-                $tempCachedImage = ImageCache::resize($value);
+                $tempCachedImage = ImageCache::resize(
+                    $value,
+                    disk: $this->getDisk(),
+                    visibility: $this->getFileVisibility(),
+                );
                 if ($tempCachedImage) {
-                    $imageCache = asset($tempCachedImage);
+                    $imageCache = FileManager::url($tempCachedImage, $this->getDisk(), $this->getFileVisibility());
                 }
             }
         }
@@ -283,7 +349,7 @@ class FileType extends BaseInputType
             'type' => 'single',
             'column' => $this->dbField,
             'rawValue' => $value,
-            'value' => asset($value),
+            'value' => FileManager::url($value, $this->getDisk(), $this->getFileVisibility()),
             'classes' => \implode(' ', $this->classes),
             'raw' => $this->raw.$this->inlineCSS,
 
@@ -317,9 +383,13 @@ class FileType extends BaseInputType
 
         if ($isImageField || $isImage) {
             if ($value) {
-                $tempCachedImage = ImageCache::resize($value);
+                $tempCachedImage = ImageCache::resize(
+                    $value,
+                    disk: $this->getDisk(),
+                    visibility: $this->getFileVisibility(),
+                );
                 if ($tempCachedImage) {
-                    $imageCache = asset($tempCachedImage);
+                    $imageCache = FileManager::url($tempCachedImage, $this->getDisk(), $this->getFileVisibility());
                 }
             }
         }
@@ -348,7 +418,7 @@ class FileType extends BaseInputType
             'index' => $index,
             'column' => $this->dbField,
             'rawValue' => $value,
-            'value' => asset($value),
+            'value' => FileManager::url($value, $this->getDisk(), $this->getFileVisibility()),
             'oldValue' => $oldValue,
             'id' => $id,
             'name' => $name,

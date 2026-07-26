@@ -114,16 +114,16 @@ if (! function_exists('imageThumb')) {
 }
 
 if (! function_exists('imageResize')) {
-    function imageResize($imagePath, $width = null, $height = null)
+    function imageResize($imagePath, $width = null, $height = null, $disk = null, $visibility = null)
     {
-        return \Deep\FormTool\Support\ImageCache::resize($imagePath, $width, $height);
+        return \Deep\FormTool\Support\ImageCache::resize($imagePath, $width, $height, $disk, $visibility);
     }
 }
 
 if (! function_exists('imageFit')) {
-    function imageFit($imagePath, $width = null, $height = null)
+    function imageFit($imagePath, $width = null, $height = null, $disk = null, $visibility = null)
     {
-        return \Deep\FormTool\Support\ImageCache::fit($imagePath, $width, $height);
+        return \Deep\FormTool\Support\ImageCache::fit($imagePath, $width, $height, $disk, $visibility);
     }
 }
 

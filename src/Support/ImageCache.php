@@ -8,24 +8,65 @@ use Intervention\Image\Facades\Image;
 class ImageCache
 {
     protected static string $cachePath = 'cache';
-
     protected static int $width = 150;
     protected static int $height = 150;
-
     protected static string $memoryLimit = '512M';
 
-    private static function getConfigs($width, $height)
+    private static function getConfigs($width, $height): void
     {
-        // Let's get the configs
-        self::$cachePath = removeSlash(\config('form-tool.imageCachePath', self::$cachePath) ?: self::$cachePath);
-        self::$width = $width ?: (\config('form-tool.imageCacheWidth', self::$width) ?: self::$width);
-        self::$height = $height ?: (\config('form-tool.imageCacheHeight', self::$height) ?: self::$height);
-        self::$memoryLimit = \config('form-tool.memoryLimit', self::$memoryLimit) ?: self::$memoryLimit;
+        self::$cachePath = removeSlash(config('form-tool.imageCachePath', self::$cachePath) ?: self::$cachePath);
+        self::$width = $width ?: (config('form-tool.imageCacheWidth', self::$width) ?: self::$width);
+        self::$height = $height ?: (config('form-tool.imageCacheHeight', self::$height) ?: self::$height);
+        self::$memoryLimit = config('form-tool.memoryLimit', self::$memoryLimit) ?: self::$memoryLimit;
     }
 
-    public static function resize($imagePath, $width = null, $height = null)
+    public static function resize(
+        $imagePath,
+        $width = null,
+        $height = null,
+        ?string $disk = null,
+        ?string $visibility = null,
+    ): ?string {
+        return self::transform($imagePath, $width, $height, $disk, $visibility, 'resize');
+    }
+
+    public static function fit(
+        $imagePath,
+        $width = null,
+        $height = null,
+        ?string $disk = null,
+        ?string $visibility = null,
+    ): ?string {
+        return self::transform($imagePath, $width, $height, $disk, $visibility, 'fit');
+    }
+
+    public static function getCachedImage(
+        $imagePath,
+        ?string $disk = null,
+        ?string $visibility = null,
+    ): ?string {
+        self::getConfigs(null, null);
+        [, $cacheImagePath] = self::getPath($imagePath);
+
+        return FileManager::exists($cacheImagePath, $disk) ? $cacheImagePath : null;
+    }
+
+    public static function clearCache(?string $disk = null): bool
     {
-        if (! \file_exists($imagePath)) {
+        self::getConfigs(null, null);
+
+        return FileManager::deleteDirectory(self::$cachePath, $disk);
+    }
+
+    private static function transform(
+        $imagePath,
+        $width,
+        $height,
+        ?string $disk,
+        ?string $visibility,
+        string $operation,
+    ): ?string {
+        if (! is_string($imagePath) || ! FileManager::exists($imagePath, $disk)) {
             return null;
         }
 
@@ -34,144 +75,84 @@ class ImageCache
         }
 
         self::getConfigs($width, $height);
+        [, $cacheImagePath] = self::getPath($imagePath);
 
-        [$path, $cacheImagePath] = self::getPath($imagePath);
-
-        // If file exists let's return
-        if (\file_exists($cacheImagePath)) {
+        if (FileManager::exists($cacheImagePath, $disk)) {
             return $cacheImagePath;
         }
 
-        Directory::create($path);
+        $temporaryPath = tempnam(sys_get_temp_dir(), 'form-tool-image-');
+        if ($temporaryPath === false) {
+            Log::error('Unable to create a temporary file for image processing.');
+
+            return null;
+        }
+
+        $source = null;
+        $destination = null;
 
         try {
-            @\ini_set('memory_limit', self::$memoryLimit);
+            @ini_set('memory_limit', self::$memoryLimit);
+            $source = FileManager::readStream($imagePath, $disk);
+            $destination = fopen($temporaryPath, 'wb');
 
-            // open an image file
-            $img = Image::make($imagePath);
+            if (! is_resource($source) || ! is_resource($destination)) {
+                throw new \RuntimeException('Unable to stream image for processing.');
+            }
 
-            // resize image instance
-            $img->resize(self::$width, self::$height, function ($constraint) {
-                $constraint->aspectRatio();
-            });
+            stream_copy_to_stream($source, $destination);
+            fclose($source);
+            fclose($destination);
+            $source = $destination = null;
 
-            // insert a watermark
-            // $img->insert('public/watermark.png');
+            $image = Image::make($temporaryPath);
+            if ($operation === 'fit') {
+                $image->fit(self::$width, self::$height);
+            } else {
+                $image->resize(self::$width, self::$height, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+            }
 
-            // save image in desired format
-            $img->save($cacheImagePath);
-        } catch (\Exception $e) {
-            Log::error($e->getMessage().' File: '.$imagePath);
-            // throw $e;
+            $extension = strtolower(pathinfo($cacheImagePath, PATHINFO_EXTENSION));
+            $contents = (string) $image->encode($extension ?: null);
 
-            return null;
-        }
+            if (! FileManager::write($cacheImagePath, $contents, $disk, $visibility)) {
+                throw new \RuntimeException('Unable to write cached image.');
+            }
 
-        return $cacheImagePath;
-    }
-
-    public static function fit($imagePath, $width = null, $height = null)
-    {
-        if (! \file_exists($imagePath)) {
-            return null;
-        }
-
-        if (! self::isResizable($imagePath)) {
-            return $imagePath;
-        }
-
-        self::getConfigs($width, $height);
-
-        [$path, $cacheImagePath] = self::getPath($imagePath);
-
-        // If file exists let's return
-        if (\file_exists($cacheImagePath)) {
             return $cacheImagePath;
-        }
-
-        Directory::create($path);
-
-        try {
-            @\ini_set('memory_limit', self::$memoryLimit);
-
-            // open an image file
-            $img = Image::make($imagePath);
-
-            // resize image instance
-            $img->fit(self::$width, self::$height);
-
-            // insert a watermark
-            // $img->insert('public/watermark.png');
-
-            // save image in desired format
-            $img->save($cacheImagePath);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             Log::error($e->getMessage().' File: '.$imagePath);
-            // throw $e;
 
             return null;
+        } finally {
+            if (is_resource($source)) {
+                fclose($source);
+            }
+            if (is_resource($destination)) {
+                fclose($destination);
+            }
+            if (file_exists($temporaryPath)) {
+                unlink($temporaryPath);
+            }
         }
-
-        return $cacheImagePath;
     }
 
-    public static function getCachedImage($imagePath)
+    private static function getPath($imagePath): array
     {
-        self::getConfigs(null, null);
+        $pathinfo = pathinfo($imagePath);
+        $path = self::$cachePath.'/'.($pathinfo['dirname'] ?? '');
+        $filename = ($pathinfo['filename'] ?? 'image').'-'.self::$width.'x'.self::$height.'.'.($pathinfo['extension'] ?? 'jpg');
 
-        [$path, $cacheImagePath] = self::getPath($imagePath);
-
-        // If file exists let's return
-        if (\file_exists($cacheImagePath)) {
-            return $cacheImagePath;
-        }
-
-        return null;
+        return [trim($path, '/'), trim($path.'/'.$filename, '/')];
     }
 
-    private static function getPath($imagePath)
-    {
-        $pathinfo = \pathinfo($imagePath);
-
-        // Create the cache path
-        $path = self::$cachePath.'/'.$pathinfo['dirname'];
-
-        // Create the cache filename
-        $filename = $pathinfo['filename'].'-'.self::$width.'x'.self::$height.'.'.$pathinfo['extension'];
-
-        // Full path of the cache image
-        $cacheImagePath = $path.'/'.$filename;
-
-        return [$path, $cacheImagePath];
-    }
-
-    public static function clearCache()
-    {
-        self::getConfigs(null, null);
-
-        $files = new \RecursiveIteratorIterator(
-            new \RecursiveDirectoryIterator(self::$cachePath, \RecursiveDirectoryIterator::SKIP_DOTS),
-            \RecursiveIteratorIterator::CHILD_FIRST
-        );
-
-        foreach ($files as $fileinfo) {
-            $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-            $todo($fileinfo->getRealPath());
-        }
-
-        \rmdir(self::$cachePath);
-    }
-
-    private static function isResizable($file)
+    private static function isResizable($file): bool
     {
         $exts = 'jpg,jpeg,png,webp,gif,bmp,tif';
+        $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
 
-        $ext = \strtolower(\pathinfo($file, PATHINFO_EXTENSION));
-
-        if ($ext && \in_array($ext, \explode(',', $exts))) {
-            return true;
-        }
-
-        return false;
+        return $ext && in_array($ext, explode(',', $exts), true);
     }
 }

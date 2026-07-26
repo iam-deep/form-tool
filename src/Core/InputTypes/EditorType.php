@@ -10,6 +10,7 @@ use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\URL;
 
 class EditorType extends BaseInputType implements ISearchable, IPluginableType
 {
@@ -17,6 +18,8 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
     public string $typeInString = 'editor';
 
     private string $uploadPath = '';
+    private ?string $disk = null;
+    private ?string $fileVisibility = null;
     private int $limitTableViewLength = 50;
 
     protected string $currentPlugin = 'ckeditor';
@@ -41,6 +44,30 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
         $this->uploadPath = \trim($uploadPath);
 
         return $this;
+    }
+
+    public function disk(string $disk): static
+    {
+        $this->disk = FileManager::diskName($disk);
+
+        return $this;
+    }
+
+    public function visibility(string $visibility): static
+    {
+        $this->fileVisibility = FileManager::visibility($visibility);
+
+        return $this;
+    }
+
+    public function getDisk(): string
+    {
+        return FileManager::diskName($this->disk);
+    }
+
+    public function getFileVisibility(): string
+    {
+        return FileManager::visibility($this->fileVisibility);
     }
 
     public function getNiceValue($value)
@@ -106,13 +133,31 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 
+        $disk = $this->getDisk();
+        $visibility = $this->getFileVisibility();
+        if ($request->query->has('disk') || $request->query->has('visibility')) {
+            if (! $request->hasValidSignature()) {
+                abort(403);
+            }
+
+            $disk = FileManager::diskName($request->query('disk'));
+            $visibility = FileManager::visibility($request->query('visibility'));
+        }
+
         try {
-            $path = FileManager::uploadFile($request->file($fieldName), $request->query('path'));
+            $path = FileManager::uploadFile(
+                $request->file($fieldName),
+                $request->query('path'),
+                disk: $disk,
+                visibility: $visibility,
+            );
             if (! $path) {
                 throw new FormToolException('Something went wrong! Please try again.');
             }
 
-            return response()->json(['url' => asset($path)], 200);
+            return response()->json([
+                'url' => FileManager::url($path, $disk, $visibility),
+            ], 200);
         } catch (\Exception $e) {
             return response()->json(['error' => ['message' => $e->getMessage()]], 400);
         }
@@ -217,7 +262,11 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
     public function setJs(string $selectorId, string $uploadPath = '')
     {
-        $uploadPath = route('form-tool.upload_image', ['path' => $uploadPath]);
+        $uploadPath = URL::signedRoute('form-tool.upload_image', [
+            'path' => $uploadPath,
+            'disk' => $this->getDisk(),
+            'visibility' => $this->getFileVisibility(),
+        ]);
 
         if ($this->currentPlugin == 'ckeditor') {
             Doc::addJs(

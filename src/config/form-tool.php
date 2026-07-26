@@ -15,6 +15,15 @@ return [
     // Possible values: date time format or blank
     'uploadSubDirFormat' => 'm-Y',
 
+    // Laravel filesystem disk and default visibility used for uploaded files.
+    // The consuming project owns all disk credentials and endpoint configuration.
+    'filesystem' => [
+        'disk' => env('FORM_TOOL_FILESYSTEM_DISK', 'local'),
+        'visibility' => env('FORM_TOOL_FILE_VISIBILITY', 'public'),
+        'privateUrlTtlMinutes' => (int) env('FORM_TOOL_PRIVATE_URL_TTL', 5),
+        'privateUrlResolver' => null,
+    ],
+
     // Allowed types for file upload
     'allowedTypes' => 'jpg,jpeg,png,webp,gif,svg,bmp,tif,pdf,docx,doc,xls,xlsx,rtf,txt,ppt,csv,pptx,webm,mkv,flv,vob,'.
         'avi,mov,mp3,mp4,m4p,mpg,mpeg,mp2,svi,3gp,rar,zip,psd,dwg,eps,xlr,db,dbf,mdb,html,tar.gz,zipx',
