@@ -76,7 +76,7 @@ class FileType extends BaseInputType
 
     public function getFileVisibility(): string
     {
-        return FileManager::visibility($this->fileVisibility);
+        return FileManager::visibility($this->fileVisibility, $this->getDisk());
     }
 
     public function maxUploadSize(float $maxSizeInKb)

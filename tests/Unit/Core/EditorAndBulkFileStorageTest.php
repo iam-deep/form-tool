@@ -5,6 +5,7 @@ namespace Deep\FormTool\Tests\Unit\Core;
 use Deep\FormTool\Core\BulkAction;
 use Deep\FormTool\Core\InputTypes\EditorType;
 use Deep\FormTool\Core\InputTypes\FileType;
+use Deep\FormTool\Exceptions\FormToolException;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -43,6 +44,22 @@ class EditorAndBulkFileStorageTest extends TestCase
         Storage::disk('form-tool-content')->assertExists(
             preg_replace('#^/storage/#', '', $payload['url'])
         );
+    }
+
+    public function test_remote_editor_requires_explicit_visibility(): void
+    {
+        config([
+            'filesystems.disks.remote-test' => ['driver' => 's3'],
+            'form-tool.filesystem.disk' => 'remote-test',
+            'form-tool.filesystem.visibility' => 'public',
+        ]);
+
+        $this->expectException(FormToolException::class);
+        $this->expectExceptionMessage(
+            'File visibility must be explicitly set for non-local disk [remote-test].'
+        );
+
+        (new EditorType())->getFileVisibility();
     }
 
     public function test_bulk_file_copy_uses_the_file_fields_disk_and_visibility(): void

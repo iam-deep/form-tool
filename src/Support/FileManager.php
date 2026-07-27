@@ -57,9 +57,19 @@ class FileManager
         return $disk;
     }
 
-    public static function visibility(?string $visibility = null): string
+    public static function visibility(?string $visibility = null, ?string $disk = null): string
     {
-        $visibility = trim((string) ($visibility ?: config('form-tool.filesystem.visibility', 'public')));
+        $disk = self::diskName($disk);
+        $visibility = $visibility === null ? null : trim($visibility);
+
+        if (($visibility === null || $visibility === '')
+            && config('filesystems.disks.'.$disk.'.driver') !== 'local') {
+            throw new FormToolException(
+                'File visibility must be explicitly set for non-local disk ['.$disk.'].'
+            );
+        }
+
+        $visibility = $visibility ?: trim((string) config('form-tool.filesystem.visibility', 'public'));
 
         if (! in_array($visibility, ['public', 'private'], true)) {
             throw new FormToolException('File visibility must be public or private.');
@@ -90,7 +100,7 @@ class FileManager
                 $destinationPath,
                 $filename,
                 self::diskName($disk),
-                self::visibility($visibility),
+                self::visibility($visibility, $disk),
             );
         } catch (Exception $e) {
             if ($e instanceof FileUploadException || $e instanceof FormToolException) {
@@ -202,7 +212,7 @@ class FileManager
 
             Storage::disk($disk)->setVisibility(
                 $copy,
-                $visibility ? self::visibility($visibility) : Storage::disk($disk)->getVisibility($file),
+                $visibility ? self::visibility($visibility, $disk) : Storage::disk($disk)->getVisibility($file),
             );
         } catch (Exception) {
             return null;
@@ -247,10 +257,12 @@ class FileManager
         ?string $disk = null,
         ?string $visibility = null,
     ): bool {
-        return Storage::disk(self::diskName($disk))->put(
+        $disk = self::diskName($disk);
+
+        return Storage::disk($disk)->put(
             self::normalizeKey($path),
             $contents,
-            ['visibility' => self::visibility($visibility)],
+            ['visibility' => self::visibility($visibility, $disk)],
         );
     }
 
@@ -276,7 +288,7 @@ class FileManager
         $path = self::normalizeKey($path);
         $disk = self::diskName($disk);
 
-        if (self::visibility($visibility) === 'public') {
+        if (self::visibility($visibility, $disk) === 'public') {
             return Storage::disk($disk)->url($path);
         }
 

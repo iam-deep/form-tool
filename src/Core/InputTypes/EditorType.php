@@ -67,7 +67,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
     public function getFileVisibility(): string
     {
-        return FileManager::visibility($this->fileVisibility);
+        return FileManager::visibility($this->fileVisibility, $this->getDisk());
     }
 
     public function getNiceValue($value)
@@ -141,7 +141,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
             }
 
             $disk = FileManager::diskName($request->query('disk'));
-            $visibility = FileManager::visibility($request->query('visibility'));
+            $visibility = FileManager::visibility($request->query('visibility'), $disk);
         }
 
         try {

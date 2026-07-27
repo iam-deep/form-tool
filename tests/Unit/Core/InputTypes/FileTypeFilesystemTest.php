@@ -53,6 +53,22 @@ class FileTypeFilesystemTest extends TestCase
         (new BluePrint())->file('invalid')->visibility('shared');
     }
 
+    public function test_remote_file_field_requires_explicit_visibility(): void
+    {
+        config([
+            'filesystems.disks.remote-test' => ['driver' => 's3'],
+            'form-tool.filesystem.disk' => 'remote-test',
+            'form-tool.filesystem.visibility' => 'public',
+        ]);
+
+        $this->expectException(FormToolException::class);
+        $this->expectExceptionMessage(
+            'File visibility must be explicitly set for non-local disk [remote-test].'
+        );
+
+        (new BluePrint())->file('document')->getFileVisibility();
+    }
+
     public function test_public_urls_use_the_selected_laravel_disk_url(): void
     {
         $this->assertSame(
