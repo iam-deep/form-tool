@@ -18,6 +18,7 @@ class ImageCacheFilesystemTest extends TestCase
         config([
             'form-tool.filesystem.disk' => 'form-tool-images',
             'form-tool.filesystem.visibility' => 'private',
+            'form-tool.imageCacheDisk' => 'form-tool-images',
             'form-tool.imageCachePath' => 'cache',
             'form-tool.imageCacheWidth' => 20,
             'form-tool.imageCacheHeight' => 20,

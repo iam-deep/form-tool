@@ -257,17 +257,20 @@ class FileType extends BaseInputType
         }
 
         if (FileManager::isImage($value)) {
-            $image = ImageCache::resize(
+            $visibility = $this->getFileVisibility();
+            $url = FileManager::url($value, $this->getDisk(), $visibility);
+            $cachedImage = ImageCache::resize(
                 $value,
                 disk: $this->getDisk(),
-                visibility: $this->getFileVisibility(),
+                visibility: $visibility,
             );
+            $imageUrl = $cachedImage ? ImageCache::url($cachedImage) : $url;
 
             $maxWidth = config('form-tool.imageThumb.table.maxWidth', '50px');
             $maxHeight = config('form-tool.imageThumb.table.maxHeight', '50px');
 
-            return '<a href="'.FileManager::url($value, $this->getDisk(), $this->getFileVisibility()).'" target="_blank"><img class="img-thumbnail" '.
-                'src="'.ImageCache::url($image).'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
+            return '<a href="'.$url.'" target="_blank"><img class="img-thumbnail" '.
+                'src="'.$imageUrl.'" style="max-height:'.$maxHeight.';max-width:'.$maxWidth.';"></a>';
         } else {
             return '<a href="'.FileManager::url($value, $this->getDisk(), $this->getFileVisibility()).'" target="_blank">
                 <i class="'.FileManager::getFileIcon($value).' fa-3x"></i>
@@ -324,13 +327,16 @@ class FileType extends BaseInputType
         $isImage = FileManager::isImage($value);
         if ($isImageField || $isImage) {
             if ($value) {
+                $visibility = $this->getFileVisibility();
                 $tempCachedImage = ImageCache::resize(
                     $value,
                     disk: $this->getDisk(),
-                    visibility: $this->getFileVisibility(),
+                    visibility: $visibility,
                 );
                 if ($tempCachedImage) {
                     $imageCache = ImageCache::url($tempCachedImage);
+                } elseif ($visibility === 'public') {
+                    $imageCache = FileManager::url($value, $this->getDisk(), 'public');
                 }
             }
         }
@@ -383,13 +389,16 @@ class FileType extends BaseInputType
 
         if ($isImageField || $isImage) {
             if ($value) {
+                $visibility = $this->getFileVisibility();
                 $tempCachedImage = ImageCache::resize(
                     $value,
                     disk: $this->getDisk(),
-                    visibility: $this->getFileVisibility(),
+                    visibility: $visibility,
                 );
                 if ($tempCachedImage) {
                     $imageCache = ImageCache::url($tempCachedImage);
+                } elseif ($visibility === 'public') {
+                    $imageCache = FileManager::url($value, $this->getDisk(), 'public');
                 }
             }
         }

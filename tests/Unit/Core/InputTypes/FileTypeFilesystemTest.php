@@ -8,6 +8,7 @@ use Deep\FormTool\Core\BluePrint;
 use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 use Tests\TestCase;
 
 class TestPrivateFileUrlResolver implements PrivateFileUrlResolver
@@ -32,11 +33,22 @@ class FileTypeFilesystemTest extends TestCase
                 'url' => 'https://cdn.example.test',
                 'visibility' => 'public',
             ],
+            'filesystems.disks.form-tool-cache' => [
+                'driver' => 'local',
+                'root' => storage_path('framework/testing/disks/form-tool-cache'),
+                'url' => 'https://app.example.test/local-cache',
+                'visibility' => 'public',
+            ],
             'form-tool.filesystem.disk' => 'form-tool-public',
             'form-tool.filesystem.visibility' => 'public',
             'form-tool.filesystem.privateUrlTtlMinutes' => 5,
+            'form-tool.imageCacheDisk' => 'form-tool-cache',
+            'form-tool.imageCachePath' => 'cache',
+            'form-tool.imageCacheWidth' => 20,
+            'form-tool.imageCacheHeight' => 20,
         ]);
         Storage::forgetDisk('form-tool-public');
+        Storage::forgetDisk('form-tool-cache');
     }
 
     public function test_file_fields_validate_and_expose_disk_and_visibility_overrides(): void
@@ -75,6 +87,26 @@ class FileTypeFilesystemTest extends TestCase
             'https://cdn.example.test/storage/logo.png',
             FileManager::url('storage/logo.png', 'form-tool-public', 'public')
         );
+    }
+
+    public function test_public_image_field_generates_and_uses_a_local_derivative(): void
+    {
+        $path = 'storage/students/public-photo.png';
+        Storage::disk('form-tool-public')->put($path, (string) Image::canvas(80, 40)->encode('png'));
+        Storage::disk('form-tool-cache')->deleteDirectory('cache');
+
+        $input = (new BluePrint())
+            ->image('photo')
+            ->disk('form-tool-public')
+            ->visibility('public');
+
+        $html = $input->getNiceValue($path);
+
+        $this->assertStringContainsString(
+            'src="https://app.example.test/local-cache/cache/storage/students/public-photo-20x20.png"',
+            $html
+        );
+        Storage::disk('form-tool-cache')->assertExists('cache/storage/students/public-photo-20x20.png');
     }
 
     public function test_private_urls_use_the_configured_resolver_and_expiry(): void

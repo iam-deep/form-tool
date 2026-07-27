@@ -74,7 +74,7 @@ class ImageCache
         $sourceDisk = FileManager::diskName($disk);
         $cacheDisk = self::cacheDisk();
 
-        if (! is_string($imagePath) || ! FileManager::exists($imagePath, $sourceDisk)) {
+        if (! is_string($imagePath)) {
             return null;
         }
 
