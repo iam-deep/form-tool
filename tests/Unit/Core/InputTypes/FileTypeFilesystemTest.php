@@ -133,4 +133,46 @@ class FileTypeFilesystemTest extends TestCase
 
         FileManager::url('storage/students/aadhaar.pdf', 'form-tool-public', 'private');
     }
+
+    public function test_private_file_fields_log_filenames_as_text_without_file_payloads(): void
+    {
+        $input = (new BluePrint())
+            ->file('receipt')
+            ->disk('form-tool-public')
+            ->visibility('private')
+            ->setValue('storage/accounts/receipt.pdf');
+
+        $this->assertSame(
+            'receipt.pdf',
+            $input->getLoggerValue('create')
+        );
+
+        $this->assertSame(
+            [
+                'type' => 'text',
+                'data' => [
+                    'old-receipt.pdf',
+                    'receipt.pdf',
+                ],
+            ],
+            $input->getLoggerValue('update', 'storage/accounts/old-receipt.pdf')
+        );
+    }
+
+    public function test_public_file_fields_keep_file_payloads_in_action_logs(): void
+    {
+        $input = (new BluePrint())
+            ->file('receipt')
+            ->disk('form-tool-public')
+            ->visibility('public')
+            ->setValue('storage/accounts/receipt.pdf');
+
+        $this->assertSame(
+            [
+                'type' => 'file',
+                'data' => 'storage/accounts/receipt.pdf',
+            ],
+            $input->getLoggerValue('create')
+        );
+    }
 }

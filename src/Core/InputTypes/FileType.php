@@ -287,6 +287,10 @@ class FileType extends BaseInputType
     {
         $newValue = $this->value;
 
+        if ($this->getFileVisibility() === 'private') {
+            return $this->getPrivateLoggerValue($action, $oldValue, $newValue);
+        }
+
         if ($action == 'update') {
             if ($oldValue != $newValue) {
                 if (FileManager::isImage($oldValue)) {
@@ -315,6 +319,34 @@ class FileType extends BaseInputType
         }
 
         return $newValue !== null ? ['type' => $this->typeInString, 'data' => $newValue] : '';
+    }
+
+    private function getPrivateLoggerValue(string $action, $oldValue, $newValue)
+    {
+        $oldValue = $this->getLoggerFilename($oldValue);
+        $newValue = $this->getLoggerFilename($newValue);
+
+        if ($action == 'update') {
+            if ($oldValue != $newValue) {
+                return [
+                    'type' => 'text',
+                    'data' => [$oldValue ?? '', $newValue ?? ''],
+                ];
+            }
+
+            return '';
+        }
+
+        return $newValue ?? '';
+    }
+
+    private function getLoggerFilename($value)
+    {
+        if ($value === null || $value === '') {
+            return $value;
+        }
+
+        return basename(str_replace('\\', '/', $value));
     }
 
     public function getHTML()
