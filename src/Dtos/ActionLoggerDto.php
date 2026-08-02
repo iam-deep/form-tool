@@ -118,7 +118,7 @@ class ActionLoggerDto
         return $this;
     }
 
-    public function image($label, $newValue, $oldValue = null)
+    public function image($label, $newValue, $oldValue = null, ?string $disk = null, ?string $visibility = null)
     {
         if (isset($this->items[$label])) {
             throw new \Exception('Label already exists');
@@ -130,7 +130,15 @@ class ActionLoggerDto
             }
         }
 
-        $this->items[$label] = (new \Deep\FormTool\Core\InputTypes\ImageType())->setValue($newValue)
+        $input = new \Deep\FormTool\Core\InputTypes\ImageType();
+        if ($disk !== null) {
+            $input->disk($disk);
+        }
+        if ($visibility !== null) {
+            $input->visibility($visibility);
+        }
+
+        $this->items[$label] = $input->setValue($newValue)
             ->getLoggerValue($this->action->value, $oldValue);
 
         return $this;
