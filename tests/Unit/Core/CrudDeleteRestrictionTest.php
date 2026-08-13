@@ -120,8 +120,7 @@ class CrudDeleteRestrictionTest extends TestCase
         string $title = 'Subjects',
         string $route = 'subjects',
         string $singularTitle = 'Subject'
-    ): object
-    {
+    ): object {
         return (object) [
             'title' => $title,
             'route' => $route,

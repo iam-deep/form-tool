@@ -8,11 +8,11 @@ use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Models\BaseModel;
 use Deep\FormTool\Tests\TestCase;
 use Illuminate\Database\Schema\Blueprint as SchemaBlueprint;
-use Illuminate\Routing\Router;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Router;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\DatabasePresenceVerifier;
 use Illuminate\Validation\Factory;
 
