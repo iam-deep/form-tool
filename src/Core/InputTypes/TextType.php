@@ -64,7 +64,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         if ($this->isUnique) {
             $model = $this->bluePrint->getForm()->getModel();
 
-            if ($type == 'store') {
+            if ($type == 'store' && ! $this->bluePrint->getForm()->isRestoreValidation()) {
                 $rule = Rule::unique($model->getTableName(), $this->dbField);
                 if ($this->uniqueClosure) {
                     $uniqueClosure = $this->uniqueClosure;

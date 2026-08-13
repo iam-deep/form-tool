@@ -298,6 +298,12 @@ class BulkAction
                 }
                 $heroValues[] = $heroValue;
 
+                $validation = $this->table->crud->getForm()->validateRestoreData($pId, $result);
+                if ($validation !== true) {
+                    $errorMessages[] = $validation['message'] ?? ('Error restoring <b>'.($heroValue ?: $id).'</b>');
+                    continue;
+                }
+
                 $response = $this->table->getModel()->restore($pId);
                 if ($response) {
                     $countSuccess++;

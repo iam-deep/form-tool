@@ -20,6 +20,10 @@ trait VisibilityRules
         mixed $values,
         array $messages = []
     ): static {
+        if (! $fields) {
+            return $this;
+        }
+
         $fields = $this->normalizeVisibilityFields($fields);
         $values = $this->normalizeVisibilityValues($values);
         $messages = $this->normalizeVisibilityMessages($messages, $fields);

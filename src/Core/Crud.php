@@ -159,7 +159,11 @@ class Crud
             }
 
             $foreignKey = $commons;
-            $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions($this->deleteRestrictIgnoreColumns));
+            $generatedRestrictionIgnoreColumns = array_unique(array_merge(
+                $this->deleteRestrictIgnoreColumns,
+                $this->form->getDoNotSaveFields()
+            ));
+            $foreignKey = array_merge($foreignKey, $this->bluePrint->getSelectDbOptions($generatedRestrictionIgnoreColumns));
             $foreignKey = array_merge($foreignKey, $this->deleteRestrictForOthers);
         }
 

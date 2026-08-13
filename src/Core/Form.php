@@ -42,6 +42,7 @@ class Form
 
     private $callbackValidation = null;
     private $uniqueColumns = null;
+    private bool $isRestoreValidation = false;
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -109,6 +110,11 @@ class Form
         }
 
         return $this->crud;
+    }
+
+    public function getDoNotSaveFields(): array
+    {
+        return $this->options->doNotSave ?? [];
     }
 
     public function saveOnly($fields): Crud
@@ -965,7 +971,7 @@ class Form
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
             }
 
-            if ($this->formStatus == FormStatus::UPDATE) {
+            if ($this->formStatus == FormStatus::UPDATE || $this->isRestoreValidation) {
                 $where[] = function ($query) {
                     $query->where($this->model->getAlias().$this->model->getPrimaryId(), '!=', $this->editId);
                 };
@@ -998,6 +1004,59 @@ class Form
         $this->postData = $validator->validated();
 
         return true;
+    }
+
+    public function validateRestoreData($id, object $data)
+    {
+        $currentInput = $this->request->request->all();
+        $currentFormStatus = $this->formStatus;
+        $currentEditId = $this->editId;
+        $currentPostData = $this->postData;
+        $currentRestoreValidation = $this->isRestoreValidation;
+
+        $this->formStatus = FormStatus::STORE;
+        $this->editId = $id;
+        $this->postData = [];
+        $this->isRestoreValidation = true;
+
+        try {
+            $this->request->request->replace($this->restoreValidationData($id, $data));
+
+            return $this->validate();
+        } finally {
+            $this->request->request->replace($currentInput);
+            $this->formStatus = $currentFormStatus;
+            $this->editId = $currentEditId;
+            $this->postData = $currentPostData;
+            $this->isRestoreValidation = $currentRestoreValidation;
+        }
+    }
+
+    public function isRestoreValidation(): bool
+    {
+        return $this->isRestoreValidation;
+    }
+
+    private function restoreValidationData($id, object $data): array
+    {
+        $postData = (array) $data;
+
+        foreach ($this->bluePrint->getInputList() as $input) {
+            if (! $input instanceof BluePrint) {
+                continue;
+            }
+
+            if ($input->getModel()) {
+                $postData[$input->getKey()] = MultipleTableModel::init($input->getModel())
+                    ->getAll($id)
+                    ->map(fn ($row) => (array) $row)
+                    ->all();
+            } elseif (isset($postData[$input->getKey()])) {
+                $postData[$input->getKey()] = \json_decode($postData[$input->getKey()], true) ?: [];
+            }
+        }
+
+        return $postData;
     }
 
     private function applyVisibilityValidationRules(array &$rules, array &$messages): void
@@ -1364,6 +1423,11 @@ class Form
 
                 foreach ($data->foreignKey as $option) {
                     if ($option->table == $this->model->getTableName()) {
+                        // this may prevent errors of undeclared fields... need to test this...
+                        if (! DB::connection()->getSchemaBuilder()->hasColumn($data->main->table, $option->column)) {
+                            continue;
+                        }
+
                         $query = DB::table($data->main->table)->where($option->column, $id);
                         if (isset($option->where)) {
                             $query->where((array) $option->where);
