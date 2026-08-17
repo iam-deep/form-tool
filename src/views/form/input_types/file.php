@@ -22,7 +22,11 @@ if ($input->type == 'single') { ?>
                 Browse your file
             </label>
             <input type="file" class="<?php echo $input->classes; ?>" id="<?php echo $input->column; ?>" name="<?php echo $input->column; ?>"
-                accept="<?php echo $input->accept; ?>" style="display:none;" <?php echo $input->raw; ?> />
+                accept="<?php echo $input->accept; ?>" style="display:none;" <?php echo $input->raw; ?>
+                <?php if ($input->hasCrop) { ?>
+                    data-form-tool-crop="1" data-crop-width="<?php echo $input->cropWidth; ?>"
+                    data-crop-height="<?php echo $input->cropHeight; ?>" data-max-size-kb="<?php echo $input->maxSize; ?>"
+                <?php } ?> />
 
             <div style="color:#76787a;font-size:13px;">
                 (File size: max <?php echo $input->maxSize / 1024; ?>MB | Formats: <?php echo $input->formats; ?>)
@@ -48,10 +52,17 @@ if ($input->type == 'single') { ?>
     </div>
 
     <script>
-        $('#<?php echo $input->column; ?>').on('change', function(e) {
+        $(function() {
+        let previewObjectUrl = null;
+
+        $('#<?php echo $input->column; ?>').on('change formtool:cropped', function(e) {
             let image = '<?php echo $input->noImage; ?>';
             let [file] = this.files;
             if (! file) {
+                return;
+            }
+
+            if (e.type === 'change' && <?php echo $input->hasCrop ? 'true' : 'false'; ?>) {
                 return;
             }
 
@@ -63,7 +74,12 @@ if ($input->type == 'single') { ?>
                 }
             <?php } ?>
 
-            image = URL.createObjectURL(file);
+            if (previewObjectUrl) {
+                URL.revokeObjectURL(previewObjectUrl);
+            }
+
+            previewObjectUrl = URL.createObjectURL(file);
+            image = previewObjectUrl;
 
             $('#filename-<?php echo $input->column; ?>').text(file.name);
             $('#image-<?php echo $input->column; ?>').attr('src', image);
@@ -84,6 +100,11 @@ if ($input->type == 'single') { ?>
         });
 
         $('#remove-<?php echo $input->column; ?>').on('click', function(){
+            if (previewObjectUrl) {
+                URL.revokeObjectURL(previewObjectUrl);
+                previewObjectUrl = null;
+            }
+
             let preview = $('#preview-<?php echo $input->column; ?>');
             preview.find('i').hide();
 
@@ -95,6 +116,7 @@ if ($input->type == 'single') { ?>
             $('#hasFile-<?php echo $input->column; ?>').hide();
             $('#noFile-<?php echo $input->column; ?>').show();
         });
+        });
     </script>
 
 <?php } else { ?>
@@ -102,7 +124,11 @@ if ($input->type == 'single') { ?>
     <div class="row">
         <div class="col-sm-3">
             <input type="file" class="<?php echo $input->classes; ?>" id="<?php echo $input->id; ?>"
-                name="<?php echo $input->name; ?>" accept="<?php echo $input->accept; ?>" <?php echo $input->raw; ?> />
+                name="<?php echo $input->name; ?>" accept="<?php echo $input->accept; ?>" <?php echo $input->raw; ?>
+                <?php if ($input->hasCrop) { ?>
+                    data-form-tool-crop="1" data-crop-width="<?php echo $input->cropWidth; ?>"
+                    data-crop-height="<?php echo $input->cropHeight; ?>" data-max-size-kb="<?php echo $input->maxSize; ?>"
+                <?php } ?> />
         </div>
 
         <?php if ($input->rawValue) {

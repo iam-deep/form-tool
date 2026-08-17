@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Core\InputTypes;
 
+use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Support\FileManager;
 use Deep\FormTool\Support\ImageCache;
@@ -91,8 +92,32 @@ class FileType extends BaseInputType
         $this->cropWidth = $width;
         $this->cropHeight = $height;
         $this->cropPosition = $position;
+        $this->setCropperDependencies();
 
         return $this;
+    }
+
+    private function setCropperDependencies(): void
+    {
+        if (InputType::IMAGE != $this->type) {
+            return;
+        }
+
+        Doc::addCssLink('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css');
+        Doc::addJsLink('https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js');
+        Doc::addCss(file_get_contents(__DIR__.'/../../views/form/styles/cropper.css'), 'form-tool-cropper');
+        Doc::addJs(file_get_contents(__DIR__.'/../../views/form/scripts/cropper.js'), 'form-tool-cropper');
+    }
+
+    protected function fileInputCropData(): array
+    {
+        $hasCrop = InputType::IMAGE == $this->type && (int) $this->cropWidth > 0;
+
+        return [
+            'hasCrop' => $hasCrop,
+            'cropWidth' => $hasCrop ? (int) $this->cropWidth : null,
+            'cropHeight' => $hasCrop ? (int) ($this->cropHeight ?: $this->cropWidth) : null,
+        ];
     }
 
     public function imagePlaceholder(string $relativePath)
@@ -383,7 +408,7 @@ class FileType extends BaseInputType
             $accept = implode(',', array_map(fn ($mime) => '.'.$mime, $mimes));
         }
 
-        $data['input'] = (object) [
+        $data['input'] = (object) array_merge([
             'type' => 'single',
             'column' => $this->dbField,
             'rawValue' => $value,
@@ -400,7 +425,7 @@ class FileType extends BaseInputType
             'imageCache' => $imageCache,
             'noImage' => $noImage,
             'icon' => FileManager::getFileIcon($value),
-        ];
+        ], $this->fileInputCropData());
 
         return $this->htmlParentDiv(\view('form-tool::form.input_types.file', $data)->render());
     }
@@ -453,7 +478,7 @@ class FileType extends BaseInputType
             $accept = implode(',', array_map(fn ($mime) => '.'.$mime, $mimes));
         }
 
-        $data['input'] = (object) [
+        $data['input'] = (object) array_merge([
             'type' => 'multiple',
             'key' => $key,
             'index' => $index,
@@ -477,7 +502,7 @@ class FileType extends BaseInputType
             'imageCache' => $imageCache,
             'noImage' => $noImage,
             'icon' => FileManager::getFileIcon($value),
-        ];
+        ], $this->fileInputCropData());
 
         return \view('form-tool::form.input_types.file', $data)->render();
     }
