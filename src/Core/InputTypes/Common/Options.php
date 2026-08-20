@@ -191,6 +191,7 @@ trait Options
                     if ('db' == $type || 'closure' == $type) {
                         $where = [];
                         $dependValue = null;
+                        $patternDbFields = $options->dbPatternFields;
 
                         // We are skipping depend value at the time of table listing to get all the values at once
                         // Otherwise we need to create option every time for each dependent value
@@ -247,9 +248,9 @@ trait Options
                             }
                         }
 
-                        if (isset($options->dbPatternFields[0]) && ! \is_string($options->dbPatternFields[0])) {
+                        if (isset($patternDbFields[0]) && ! \is_string($patternDbFields[0])) {
                             $flag = false;
-                            $condition = $options->dbPatternFields[0];
+                            $condition = $patternDbFields[0];
                             if ($condition instanceof Closure ||
                                 $condition && \is_string($condition[array_key_first($condition)])) {
                                 $where[] = $condition;
@@ -260,7 +261,7 @@ trait Options
                             }
 
                             if ($flag) {
-                                array_shift($options->dbPatternFields);
+                                array_shift($patternDbFields);
                             }
                         }
 
@@ -306,11 +307,11 @@ trait Options
                                     }
                                 }
 
-                                $result = Cache::remember($cacheKey, $this->cacheExpiry, function () use ($where, $options) {
-                                    return $this->getOptionsFromDB($where, $options);
+                                $result = Cache::remember($cacheKey, $this->cacheExpiry, function () use ($where, $options, $patternDbFields) {
+                                    return $this->getOptionsFromDB($where, $options, $patternDbFields);
                                 });
                             } else {
-                                $result = $this->getOptionsFromDB($where, $options);
+                                $result = $this->getOptionsFromDB($where, $options, $patternDbFields);
                             }
                         }
 
@@ -330,7 +331,7 @@ trait Options
                                     ));
                                 }
                             }
-                            if (! $options->dbPatternFields && ! property_exists($result[0], $options->textCol)) {
+                            if (! $patternDbFields && ! property_exists($result[0], $options->textCol)) {
                                 if ('db' == $type) {
                                     throw new \InvalidArgumentException(\sprintf(
                                         'Column "%s" not found in "%s" table',
@@ -349,9 +350,9 @@ trait Options
 
                         foreach ($result as $row) {
                             $text = '';
-                            if ($options->dbPatternFields) {
+                            if ($patternDbFields) {
                                 $values = [];
-                                foreach ($options->dbPatternFields as $field) {
+                                foreach ($patternDbFields as $field) {
                                     $field = \trim($field);
                                     if (\property_exists($row, $field)) {
                                         $values[] = $row->{$field};
@@ -392,12 +393,12 @@ trait Options
         }
     }
 
-    private function getOptionsFromDB($where, $options)
+    private function getOptionsFromDB($where, $options, $patternDbFields)
     {
         $model = (new DataModel())->db($options->table);
 
         // Applying order by default with the text column, if the text column is not pattern
-        if (! $options->orderByCol && ! $options->dbPatternFields) {
+        if (! $options->orderByCol && ! $patternDbFields) {
             $options->orderByCol = $options->textCol;
         }
 
