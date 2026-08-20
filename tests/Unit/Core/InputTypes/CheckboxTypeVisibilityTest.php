@@ -101,6 +101,27 @@ class CheckboxTypeVisibilityTest extends TestCase
             $input->getVisibilityRules()['details']['message']
         );
     }
+
+    public function test_it_checks_an_integer_value_inside_a_multiple_table(): void
+    {
+        $input = new CheckboxType();
+        $input->init(null, 'dependency', 'Dependency');
+        $input->setValue(1);
+
+        $html = $input->getHTMLMultiple('parts', 0, null);
+
+        $this->assertStringContainsString('name="parts[0][dependency]"', $html);
+        $this->assertStringContainsString('value="1" checked', $html);
+    }
+
+    public function test_it_maps_checked_and_unchecked_values_for_multiple_table_rows(): void
+    {
+        $input = new CheckboxType();
+        $input->init(null, 'dependency', 'Dependency');
+
+        $this->assertSame(1, $input->beforeStore((object) ['dependency' => 1]));
+        $this->assertSame('0', $input->beforeStore((object) []));
+    }
 }
 
 class TestCheckboxType extends CheckboxType

@@ -174,7 +174,7 @@ class CheckboxType extends BaseInputType implements IVisibilityController
             foreach ($this->options as $val => $text) {
                 $input .= '<label><input type="checkbox" class="'.\implode(' ', $this->classes).'" id="'.
                     $key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$val.'" '.
-                    (\is_string($value) && $val == $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.
+                    (\is_scalar($value) && (string) $val === (string) $value ? 'checked' : '').' '.$this->raw.$this->inlineCSS.' /> '.
                     $text.'</label> &nbsp; ';
                 break;
             }

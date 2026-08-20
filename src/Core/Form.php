@@ -782,7 +782,7 @@ class Form
                             $dataRow[$dbField] = $response;
                         }
 
-                        if (! $dataRow[$dbField] && $field->getDefaultValue() !== null) {
+                        if ($dataRow[$dbField] === null && $field->getDefaultValue() !== null) {
                             $dataRow[$dbField] = $field->getDefaultValue();
                         }
 
