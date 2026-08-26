@@ -281,6 +281,10 @@ class ActionLogger
             'createdByName' => Auth::user()?->name,
         ];
 
+        if ($bluePrint->getForm()->isOnlyForAdmin()) {
+            $insert['isClassunify'] = true;
+        }
+
         $data['data'] = $data['data'] ? \json_encode($data['data']) : null;
         $insert = array_merge($insert, $data);
 
@@ -298,10 +302,13 @@ class ActionLogger
         $createdByName = Auth::user()?->name;
 
         $insert = [];
+        $isOnlyForAdmin = collect($actions)->contains(
+            fn (ActionLoggerDto $action) => $action->isOnlyForAdmin()
+        );
 
         /** @var ActionLoggerDto $action */
         foreach ($actions as $action) {
-            $insert[] = [
+            $row = [
                 'action' => $action->action,
                 'refId' => $action->id,
                 'token' => $action->token,
@@ -317,6 +324,12 @@ class ActionLogger
                 'createdBy' => $createBy,
                 'createdByName' => $createdByName,
             ];
+
+            if ($isOnlyForAdmin) {
+                $row['isClassunify'] = $action->isOnlyForAdmin();
+            }
+
+            $insert[] = $row;
         }
 
         (new DataModel())->db('action_logs', 'id')->addMany($insert);

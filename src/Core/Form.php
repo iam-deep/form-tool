@@ -39,6 +39,7 @@ class Form
     private $options = null;
 
     private bool $isLogAction = true;
+    private bool $isOnlyForAdmin = false;
 
     private $callbackValidation = null;
     private $uniqueColumns = null;
@@ -132,6 +133,13 @@ class Form
     public function actionLog(bool $flag = true): Crud
     {
         $this->isLogAction = $flag;
+
+        return $this->crud;
+    }
+
+    public function onlyForAdmin(bool $flag = true): Crud
+    {
+        $this->isOnlyForAdmin = $flag;
 
         return $this->crud;
     }
@@ -1765,6 +1773,11 @@ class Form
     public function isLogAction()
     {
         return $this->isLogAction;
+    }
+
+    public function isOnlyForAdmin(): bool
+    {
+        return $this->isOnlyForAdmin;
     }
 
     public function isWantsJson()

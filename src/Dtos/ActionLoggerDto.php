@@ -12,6 +12,7 @@ class ActionLoggerDto
 
     private $bluePrint = null;
     private $bluePrintData = null;
+    private bool $isOnlyForAdmin = false;
 
     public function __construct(
         public readonly ActionLoggerEnum $action,
@@ -36,6 +37,18 @@ class ActionLoggerDto
         }
 
         return json_encode(['data' => $this->items]);
+    }
+
+    public function onlyForAdmin(bool $flag = true): self
+    {
+        $this->isOnlyForAdmin = $flag;
+
+        return $this;
+    }
+
+    public function isOnlyForAdmin(): bool
+    {
+        return $this->isOnlyForAdmin;
     }
 
     public function setBlueprint(BluePrint $bluePrint, $data = null)
