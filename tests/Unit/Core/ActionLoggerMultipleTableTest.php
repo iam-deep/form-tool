@@ -4,8 +4,8 @@ namespace Deep\FormTool\Tests\Unit\Core;
 
 require_once dirname(__DIR__, 2).'/TestCase.php';
 
-use Deep\FormTool\Core\Auth as FormToolAuth;
 use Deep\FormTool\Core\ActionLogger;
+use Deep\FormTool\Core\Auth as FormToolAuth;
 use Deep\FormTool\Core\BluePrint;
 use Deep\FormTool\Core\BulkAction;
 use Deep\FormTool\Core\DataModel;
