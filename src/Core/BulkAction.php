@@ -184,7 +184,7 @@ class BulkAction
             // $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
 
             $model = MultipleTableModel::init($input->getModel());
-            $childResult = $model->getAll($insertId);
+            $childResult = $model->getAll($id);
 
             $insert = [];
             foreach ($childResult as $row) {

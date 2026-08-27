@@ -590,8 +590,14 @@ trait Options
 
     public function getLoggerValue(string $action, $oldValue = null)
     {
+        $newValue = $this->value;
+        if ($action == 'update' && isset($this->firstOption) && $this->firstOption?->value === '') {
+            $oldValue ??= '';
+            $newValue ??= '';
+        }
+
         $oldValue = $this->createNiceValue($oldValue, true);
-        $newValue = $this->createNiceValue($this->value, true);
+        $newValue = $this->createNiceValue($newValue, true);
 
         $type = 'text'.($this->isMultiple ? ':multiple' : '');
 

@@ -543,6 +543,11 @@ class BluePrint
         return $this->key;
     }
 
+    public function getLabel()
+    {
+        return $this->label;
+    }
+
     public function getFullKey($key = '')
     {
         if ($this->parentBluePrint) {

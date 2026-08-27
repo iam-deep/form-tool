@@ -611,6 +611,8 @@ class Form
         //      permission to update
         //      can update this row
 
+        $this->captureMultipleTableLoggerData();
+
         $this->createPostData($this->editId);
 
         if ($this->crud->isDefaultFormat()) {
@@ -1233,6 +1235,20 @@ class Form
         return $postValue;
     }
 
+    private function captureMultipleTableLoggerData(): void
+    {
+        if (! $this->isLogAction) {
+            return;
+        }
+
+        foreach ($this->bluePrint->getInputList() as $input) {
+            if ($input instanceof BluePrint && $input->getModel()) {
+                $this->oldData->{$input->getKey()} = MultipleTableModel::init($input->getModel())
+                    ->getAll($this->editId);
+            }
+        }
+    }
+
     private function parseEditId($id)
     {
         if ($id) {
@@ -1366,7 +1382,9 @@ class Form
 
         foreach ($this->bluePrint->getInputList() as $field) {
             if ($field instanceof BluePrint) {
-                // TODO: Still now not needed
+                if ($field->getModel()) {
+                    $result->{$field->getKey()} = MultipleTableModel::init($field->getModel())->getAll($pId);
+                }
             } else {
                 $field->beforeDestroy($result);
             }
@@ -1381,12 +1399,14 @@ class Form
                     $childResult = [];
                     if ($input->getModel()) {
                         $model = MultipleTableModel::init($input->getModel());
-                        $childResult = $model->getAll($pId);
+                        $childResult = $result->{$input->getKey()} ?? [];
 
                         $model->destroy($pId);
                     } else {
                         $childResult = \json_decode($result->{$input->getKey()});
                     }
+
+                    $result->{$input->getKey()} = $childResult;
 
                     if (is_iterable($childResult)) {
                         foreach ($childResult as $row) {
@@ -1887,6 +1907,8 @@ class Form
         if (! $this->oldData) {
             $this->oldData = $this->model->getOne($this->editId);
         }
+
+        $this->captureMultipleTableLoggerData();
 
         $this->createPostData($this->editId);
 
