@@ -3,16 +3,24 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Core\InputTypes\BaseDateTimeType;
+use Deep\FormTool\Core\InputTypes\CheckboxType;
+use Deep\FormTool\Core\InputTypes\Common\InputType;
+use Deep\FormTool\Core\InputTypes\SelectType;
+use Deep\FormTool\Core\InputTypes\TextType;
+use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Models\MultipleTableModel;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Support\Facades\DB;
-use PhpParser\Parser\Multiple;
+use Illuminate\Support\Str;
+use Throwable;
 
 class BulkAction
 {
     private $request;
     private $callback;
     private Table $table;
+    private ?string $duplicateError = null;
 
     public function setTable($table)
     {
@@ -33,7 +41,7 @@ class BulkAction
         ];
 
         if ('normal' == $group) {
-            if (! \config('form-tool.isDuplicate', true)) {
+            if (! $this->table->crud->isDuplicateEnabled()) {
                 unset($actions['normal']['duplicate']);
             }
             if (! Guard::hasDelete()) {
@@ -92,6 +100,10 @@ class BulkAction
 
     protected function duplicate($ids)
     {
+        if (! $this->table->crud->isDuplicateEnabled()) {
+            return \back()->withErrors('Duplicating is disabled for this module.');
+        }
+
         if (! Guard::hasCreate()) {
             return \back()->withErrors("You don't have enough permission to create!");
         }
@@ -114,7 +126,14 @@ class BulkAction
         foreach ($ids as $id) {
             if (! $callback || true === $callback($id, 'duplicate')) {
                 $filtered[] = $id;
-                $result = $this->doDuplicate($id, $data);
+                $this->duplicateError = null;
+
+                try {
+                    $result = $this->doDuplicate($id, $data);
+                } catch (Throwable $exception) {
+                    $result = false;
+                    $this->duplicateError = $exception->getMessage();
+                }
 
                 if ($result) {
                     $heroValue = '';
@@ -125,7 +144,7 @@ class BulkAction
 
                     $countSuccess++;
                 } else {
-                    $errorMessages[] = 'Error restoring <b>'.$id.'</b>';
+                    $errorMessages[] = $this->duplicateError ?: 'Error duplicating <b>'.$id.'</b>';
                 }
             }
         }
@@ -136,6 +155,12 @@ class BulkAction
     protected function doDuplicate($id, $data)
     {
         $result = $this->table->getModel()->getOne($id);
+        if (! $result) {
+            $this->duplicateError = 'Data not found for duplication.';
+
+            return false;
+        }
+
         $oldData = clone $result;
 
         $primaryIdColumn = $this->table->getModel()->getPrimaryId();
@@ -143,89 +168,228 @@ class BulkAction
         // Let's get the actual id if this is a token
         $id = $this->table->getModel()->isToken() ? $result->{$primaryIdColumn} : $id;
 
-        $result->{$primaryIdColumn} = 0;
-        $result = array_merge((array) $result, $data);
+        $duplicateData = $this->formatDuplicateData(
+            $this->table->getBluePrint(),
+            $this->createDuplicateData($id, $result),
+        );
+        $onDuplicate = $this->table->crud->getOnDuplicate();
 
-        // Let's clone the image
-        foreach ($this->table->getBluePrint()->getList() as $input) {
-            if ($input instanceof InputTypes\FileType) {
-                $result[$input->getDbField()] = $this->copyFileValue(
-                    $input,
-                    $result[$input->getDbField()]
-                );
+        if ($onDuplicate) {
+            $duplicateData = $onDuplicate($duplicateData, $oldData);
+            if (! is_array($duplicateData)) {
+                throw new FormToolException('onDuplicate() must return an array.');
             }
+        } else {
+            $duplicateData = $this->regenerateUniqueValues($duplicateData);
         }
 
-        $insertId = $this->table->getModel()->add($result);
+        $validation = $this->table->crud->getForm()->validateDuplicateData($duplicateData);
+        if ($validation !== true) {
+            $this->duplicateError = $validation['message'] ?? 'Duplicate validation failed.';
 
-        // Creation is not successful let's return
-        if (! $insertId) {
             return false;
         }
 
-        foreach ($this->table->getBluePrint()->getList() as $input) {
-            if (! $input instanceof BluePrint || ! $input->getModel()) {
+        $copiedFiles = [];
+        try {
+            $duplicateData = $this->copyDuplicateFiles(
+                $this->table->getBluePrint(),
+                $duplicateData,
+                $copiedFiles,
+            );
+
+            $stored = DB::transaction(function () use ($duplicateData, $oldData) {
+                $result = $this->table->crud->getForm()->storeDuplicateData($duplicateData, $oldData);
+                if (! $result) {
+                    throw new FormToolException('Failed to insert duplicated data.');
+                }
+
+                return $result;
+            });
+        } catch (Throwable $exception) {
+            $this->deleteCopiedFiles($copiedFiles);
+
+            throw $exception;
+        }
+
+        return $stored['data'];
+    }
+
+    private function copyDuplicateFiles(BluePrint $bluePrint, array $data, array &$copiedFiles): array
+    {
+        foreach ($bluePrint->getInputList() as $input) {
+            if ($input instanceof InputTypes\FileType) {
+                $field = $input->getDbField();
+                $data[$field] = $this->copyDuplicateFile($input, $data[$field] ?? null, $copiedFiles);
+
                 continue;
             }
 
-            // $model = $input->getModel();
-
-            // $foreignKey = null;
-            // if ($model instanceof \stdClass) {
-            //     $foreignKey = $model->foreignKey;
-            // } else {
-            //     if (! isset($model::$foreignKey)) {
-            //         throw new \InvalidArgumentException('$foreignKey property not defined at '.$model);
-            //     }
-
-            //     $foreignKey = $model::$foreignKey;
-            // }
-
-            // $childResult = DB::table($model->table)->where([$foreignKey => $id])->orderBy($model->id, 'asc')->get();
-
-            $model = MultipleTableModel::init($input->getModel());
-            $childResult = $model->getAll($id);
-
-            $insert = [];
-            foreach ($childResult as $row) {
-                $row = (array) $row;
-                $row[$model->getPrimaryCol()] = 0;
-                $row[$model->getForeignCol()] = $insertId;
-
-                // Let's clone the image
-                foreach ($input->getList() as $childInput) {
-                    if ($childInput instanceof InputTypes\FileType) {
-                        $row[$childInput->getDbField()] = $this->copyFileValue(
-                            $childInput,
-                            $row[$childInput->getDbField()]
-                        );
-                    }
-                }
-
-                $insert[] = $row;
+            if (! $input instanceof BluePrint) {
+                continue;
             }
 
-            // $where = [$foreignKey => $insertId];
-            // if ($model instanceof \stdClass) {
-            //     DB::table($model->table)->where($where)->delete();
-            //     if (\count($insert)) {
-            //         DB::table($model->table)->insert($insert);
-            //     }
-            // } else {
-            //     $model::deleteWhere($where);
-            //     if (\count($insert)) {
-            //         $model::addMany($insert);
-            //     }
-            // }
-
-            $model->add($insertId, $insert);
+            $key = $input->getKey();
+            foreach (($data[$key] ?? []) as $index => $row) {
+                $data[$key][$index] = $this->copyDuplicateFiles($input, (array) $row, $copiedFiles);
+            }
         }
 
-        ActionLogger::duplicate($this->table->getBluePrint(), $insertId, (object) $result, $oldData);
+        return $data;
+    }
 
-        $this->table->crud->getForm()->invokeEvent(EventType::DUPLICATE, $insertId, $result);
+    private function copyDuplicateFile(InputTypes\FileType $input, $value, array &$copiedFiles): ?string
+    {
+        if (! is_string($value) || trim($value) === '') {
+            return null;
+        }
 
-        return $result;
+        $copy = $this->copyFileValue($input, $value);
+        if (! $copy) {
+            throw new FormToolException('Failed to copy file "'.$value.'" while duplicating data.');
+        }
+
+        $copiedFiles[] = ['path' => $copy, 'disk' => $input->getDisk()];
+
+        return $copy;
+    }
+
+    private function deleteCopiedFiles(array $copiedFiles): void
+    {
+        foreach (array_reverse($copiedFiles) as $file) {
+            FileManager::deleteFile($file['path'], $file['disk']);
+        }
+    }
+
+    private function createDuplicateData($id, object $result): array
+    {
+        $duplicateData = (array) $result;
+
+        foreach ($this->table->getBluePrint()->getInputList() as $input) {
+            if (! $input instanceof BluePrint) {
+                continue;
+            }
+
+            if ($input->getModel()) {
+                $duplicateData[$input->getKey()] = MultipleTableModel::init($input->getModel())
+                    ->getAll($id)
+                    ->map(fn ($row) => (array) $row)
+                    ->all();
+            } elseif (isset($duplicateData[$input->getKey()])) {
+                $duplicateData[$input->getKey()] = json_decode($duplicateData[$input->getKey()], true) ?: [];
+            }
+        }
+
+        return $duplicateData;
+    }
+
+    private function formatDuplicateData(BluePrint $bluePrint, array $data): array
+    {
+        foreach ($bluePrint->getInputList() as $input) {
+            if ($input instanceof SelectType || $input instanceof CheckboxType) {
+                $field = $input->getDbField();
+                $data[$field] = $input->getDuplicateValue($data[$field] ?? null);
+
+                continue;
+            }
+
+            if ($input instanceof BaseDateTimeType) {
+                $field = $input->getDbField();
+                $data[$field] = $input->getNiceValue($data[$field] ?? null);
+
+                continue;
+            }
+
+            if (! $input instanceof BluePrint) {
+                continue;
+            }
+
+            $key = $input->getKey();
+            foreach (($data[$key] ?? []) as $index => $row) {
+                $data[$key][$index] = $this->formatDuplicateData($input, (array) $row);
+            }
+        }
+
+        return $data;
+    }
+
+    private function regenerateUniqueValues(array $data): array
+    {
+        foreach ($this->table->getBluePrint()->getInputList() as $input) {
+            if (! $input instanceof TextType || ! $input->isUnique()) {
+                continue;
+            }
+
+            $field = $input->getDbField();
+            if (! array_key_exists($field, $data) || $data[$field] === null) {
+                continue;
+            }
+
+            $data[$field] = $this->nextUniqueValue($input, $data[$field] ?? '');
+        }
+
+        $columns = $this->table->crud->getForm()->getUniqueColumns();
+        if ($columns && $this->combinationExists($columns, $data)) {
+            $eligible = null;
+            foreach ($columns as $column) {
+                $column = $this->columnName($column);
+                $input = $this->table->getBluePrint()->getInputTypeByDbField($column);
+                if ($input instanceof TextType && $input->getType() === InputType::TEXT) {
+                    $eligible = $input;
+                }
+            }
+
+            if (! $eligible) {
+                throw new FormToolException(
+                    'Composite unique fields require onDuplicate() because no text field can use Copy N.'
+                );
+            }
+
+            $field = $eligible->getDbField();
+            $original = (string) ($data[$field] ?? '');
+            $copy = 1;
+            do {
+                $data[$field] = $this->copyValue($eligible, $original, $copy++);
+            } while ($this->combinationExists($columns, $data));
+        }
+
+        return $data;
+    }
+
+    private function nextUniqueValue(TextType $input, $value): string
+    {
+        $copy = 1;
+        do {
+            $candidate = $this->copyValue($input, (string) $value, $copy++);
+            $where = [[$input->getDbField() => $candidate]];
+            if ($input->uniqueClosure) {
+                $where[] = $input->uniqueClosure;
+            }
+        } while ($this->table->getModel()->countWhere($where));
+
+        return $candidate;
+    }
+
+    private function copyValue(TextType $input, string $value, int $copy): string
+    {
+        $value = trim($value).' Copy '.$copy;
+
+        return $input->isSlug() ? Str::slug($value) : $value;
+    }
+
+    private function combinationExists(array $columns, array $data): bool
+    {
+        $where = [];
+        foreach ($columns as $column) {
+            $where[] = [$column => $data[$this->columnName($column)] ?? null];
+        }
+
+        return (bool) $this->table->getModel()->countWhere($where);
+    }
+
+    private function columnName(string $column): string
+    {
+        return false !== strpos($column, '.') ? trim(explode('.', $column)[1] ?? '') : trim($column);
     }
 
     protected function copyFileValue(InputTypes\FileType $input, $value): ?string

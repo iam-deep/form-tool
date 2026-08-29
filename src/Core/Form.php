@@ -44,6 +44,7 @@ class Form
     private $callbackValidation = null;
     private $uniqueColumns = null;
     private bool $isRestoreValidation = false;
+    private bool $isDuplicateStore = false;
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -1042,9 +1043,83 @@ class Form
         }
     }
 
+    public function validateDuplicateData(array $data)
+    {
+        $currentInput = $this->request->request->all();
+        $currentFormStatus = $this->formStatus;
+        $currentEditId = $this->editId;
+        $currentPostData = $this->postData;
+
+        $this->formStatus = FormStatus::STORE;
+        $this->editId = null;
+        $this->postData = [];
+
+        try {
+            $this->request->request->replace($data);
+
+            return $this->validate();
+        } finally {
+            $this->request->request->replace($currentInput);
+            $this->formStatus = $currentFormStatus;
+            $this->editId = $currentEditId;
+            $this->postData = $currentPostData;
+        }
+    }
+
+    public function storeDuplicateData(array $data, object $original)
+    {
+        $currentInput = $this->request->request->all();
+        $currentFormStatus = $this->formStatus;
+        $currentEditId = $this->editId;
+        $currentPostData = $this->postData;
+        $currentOldData = $this->oldData;
+        $currentDataAfterSave = $this->dataAfterSave;
+        $currentDuplicateStore = $this->isDuplicateStore;
+
+        $this->formStatus = FormStatus::STORE;
+        $this->editId = null;
+        $this->postData = [];
+        $this->oldData = $original;
+        $this->isDuplicateStore = true;
+
+        try {
+            $this->request->request->replace($data);
+            $this->createPostData();
+
+            $insertId = $this->model->add($this->postData);
+            if (! $insertId) {
+                return false;
+            }
+
+            $this->editId = $insertId;
+            $this->dataAfterSave = $this->postData;
+            $this->dataAfterSave[$this->model->getPrimaryId()] = $insertId;
+
+            $this->afterSave();
+
+            ActionLogger::duplicate($this->bluePrint, $insertId, (object) $this->postData, $original);
+            $this->invokeEvent(EventType::DUPLICATE, $insertId, $this->postData);
+
+            return ['id' => $insertId, 'data' => $this->postData];
+        } finally {
+            $this->request->request->replace($currentInput);
+            $this->formStatus = $currentFormStatus;
+            $this->editId = $currentEditId;
+            $this->postData = $currentPostData;
+            $this->oldData = $currentOldData;
+            $this->dataAfterSave = $currentDataAfterSave;
+            $this->isDuplicateStore = $currentDuplicateStore;
+        }
+    }
+
     public function isRestoreValidation(): bool
     {
         return $this->isRestoreValidation;
+    }
+
+    public function isDuplicateStore(): bool
+    {
+        return $this->isDuplicateStore;
     }
 
     private function restoreValidationData($id, object $data): array
@@ -1711,6 +1786,11 @@ class Form
         }
 
         return $this->request->post();
+    }
+
+    public function getUniqueColumns(): array
+    {
+        return $this->uniqueColumns ?? [];
     }
 
     public function setOldData($data)

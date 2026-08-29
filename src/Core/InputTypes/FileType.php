@@ -184,6 +184,10 @@ class FileType extends BaseInputType
 
     public function beforeStore(object $newData)
     {
+        if ($this->bluePrint->getForm()->isDuplicateStore()) {
+            return $this->value;
+        }
+
         $request = request();
 
         if ($this->isArray) {

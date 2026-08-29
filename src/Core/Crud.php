@@ -22,8 +22,11 @@ class Crud
     protected string $format = 'default';
     protected string $groupName = 'default';
     protected bool $isSoftDelete = true;
+    protected bool $isDuplicate = true;
     protected bool $isWantsJson = false;
     protected bool $isWantsArray = false;
+
+    private ?Closure $onDuplicate = null;
 
     private $deleteRestrictForOthers = [];
     private $deleteRestrictForMe = [];
@@ -53,6 +56,7 @@ class Crud
         $this->table->setCrud($this);
 
         $this->softDelete(\config('form-tool.isSoftDelete', true));
+        $this->isDuplicate(\config('form-tool.isDuplicate', true));
 
         $this->tryGetCurrentState();
 
@@ -118,6 +122,30 @@ class Crud
         $this->model->softDelete($enable);
 
         return $this;
+    }
+
+    public function isDuplicate(bool $isEnabled = true): Crud
+    {
+        $this->isDuplicate = $isEnabled;
+
+        return $this;
+    }
+
+    public function isDuplicateEnabled(): bool
+    {
+        return $this->isDuplicate;
+    }
+
+    public function onDuplicate(Closure $callback): Crud
+    {
+        $this->onDuplicate = $callback;
+
+        return $this;
+    }
+
+    public function getOnDuplicate(): ?Closure
+    {
+        return $this->onDuplicate;
     }
 
     public function wantsJson()

@@ -95,6 +95,17 @@ trait Options
         return $this;
     }
 
+    public function getDuplicateValue($value)
+    {
+        if (! $this->isMultiple || ! is_string($value)) {
+            return $value;
+        }
+
+        $decoded = json_decode($value, true);
+
+        return is_array($decoded) ? $decoded : $value;
+    }
+
     public function min(int $min)
     {
         if ($min > 0) {
