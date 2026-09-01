@@ -2,7 +2,15 @@
 
 if ($input->type == 'single') {
 
-    if ($input->isQuickAdd) { ?>
+    if ($input->plugin == 'virtual') { ?>
+        <div class="{{ $input->classes }}" id="{{ $input->column }}" {!! $input->raw !!}
+            data-name="{{ $input->column.($input->isMultiple ? '[]' : '') }}"
+            data-multiple="{{ $input->isMultiple ? 1 : 0 }}"
+            data-options='@json($input->virtualOptions)'
+            data-selected-value='@json($input->virtualValue)'
+            data-placeholder="{{ $input->virtualPlaceholder }}"
+            @if ($input->visibilityRules) data-form-tool-visibility="{{ $input->visibilityRules }}" @endif></div>
+    <?php } elseif ($input->isQuickAdd) { ?>
         <div class="input-group">
             <select class="{{ $input->classes }}" id="{{ $input->column }}" name="{{ $input->column.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}
                 @if ($input->visibilityRules) data-form-tool-visibility="{{ $input->visibilityRules }}" @endif>
@@ -23,6 +31,7 @@ if ($input->type == 'single') {
                 $('#quickAddModal .submit').hide();
                 $('#quickSelectToUpdate').attr('data-name', '{{ $input->column }}');
                 $('#quickSelectToUpdate').attr('data-is-chosen', '{{ $input->plugin == 'chosen' ? 1 : 0 }}');
+                $('#quickSelectToUpdate').attr('data-is-virtual', '{{ $input->plugin == 'virtual' ? 1 : 0 }}');
                 $('#quickOption').val('{{ $input->quickData->optionData }}');
                 
                 $('#quickAddModal').modal('show');
@@ -60,8 +69,17 @@ if ($input->type == 'single') {
 
 } else { ?>
 
-    <select class="{{ $input->classes.' input-sm' }}" id="{{ $input->id }}" name="{{ $input->name.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}>
-        {!! $input->options !!}
-    </select>
+    @if ($input->plugin == 'virtual')
+        <div class="{{ $input->classes.' input-sm' }}" id="{{ $input->id }}" {!! $input->raw !!}
+            data-name="{{ $input->name.($input->isMultiple ? '[]' : '') }}"
+            data-multiple="{{ $input->isMultiple ? 1 : 0 }}"
+            data-options='@json($input->virtualOptions)'
+            data-selected-value='@json($input->virtualValue)'
+            data-placeholder="{{ $input->virtualPlaceholder }}"></div>
+    @else
+        <select class="{{ $input->classes.' input-sm' }}" id="{{ $input->id }}" name="{{ $input->name.($input->isMultiple ? '[]' : '') }}" {!! $input->raw !!}>
+            {!! $input->options !!}
+        </select>
+    @endif
 
 <?php } ?>

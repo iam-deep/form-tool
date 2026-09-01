@@ -121,10 +121,22 @@ let template = [];
 
                     let selectId = $('#quickSelectToUpdate').attr('data-name');
                     let isChosen = $('#quickSelectToUpdate').attr('data-is-chosen');
+                    let isVirtual = $('#quickSelectToUpdate').attr('data-is-virtual');
 
                     $('#'+selectId).html(json.data.options);
-                    if (isChosen) {
+                    if (isChosen == '1') {
                         $('#'+selectId).trigger("chosen:updated");
+                    }
+                    if (isVirtual == '1' && typeof formToolInitVirtualSelect === 'function') {
+                        var options = $('<select>'+json.data.options+'</select>').find('option').map(function() {
+                            return {
+                                label: $(this).text(),
+                                value: String($(this).attr('value') || '')
+                            };
+                        }).get();
+
+                        $('#'+selectId).attr('data-options', JSON.stringify(options));
+                        formToolInitVirtualSelect('#'+selectId);
                     }
                 } else {
                     alert("Something went wrong! Please refresh the page.");

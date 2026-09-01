@@ -25,7 +25,7 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
     protected bool $isFirstOption = true;
     protected $firstOption = null;
 
-    protected $plugins = ['default', 'chosen'];
+    protected $plugins = ['default', 'chosen', 'virtual'];
     protected string $currentPlugin = '';
 
     private $quickAddClass = null;
@@ -68,7 +68,9 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
     {
         $this->isMultiple = true;
         $this->raw('multiple');
-        $this->plugin('chosen');
+        if (! $this->currentPlugin) {
+            $this->plugin('chosen');
+        }
 
         return $this;
     }
@@ -150,17 +152,26 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
 
     public function setPlugin($isMultiple = false)
     {
-        if ($this->currentPlugin != 'chosen') {
-            return;
+        if ($this->currentPlugin == 'chosen') {
+            $this->setChosenDependencies($isMultiple);
+
+            $this->addClass('chosen');
+            $this->removeRaw('required');
+        } elseif ($this->currentPlugin == 'virtual') {
+            $this->setVirtualDependencies($isMultiple);
+
+            $this->removeClass(\config('form-tool.styleClass.input-field'));
+            $this->addClass('virtual-select');
+            $this->removeRaw('required');
         }
-
-        $this->setDependencies($isMultiple);
-
-        $this->addClass('chosen');
-        $this->removeRaw('required');
     }
 
     public function setDependencies($isMultiple = false)
+    {
+        $this->setChosenDependencies($isMultiple);
+    }
+
+    public function setChosenDependencies($isMultiple = false)
     {
         Doc::addCssLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.min.css');
         Doc::addJsLink('assets/form-tool/plugins/chosen_v1.8.7/chosen.jquery.min.js');
@@ -182,6 +193,52 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
 
         if ($isMultiple) {
             Doc::addJs('$(".chosen").chosen('.\json_encode($config).');', 'chosen-create', 'multiple_after_add');
+        }
+    }
+
+    public function setVirtualDependencies($isMultiple = false)
+    {
+        Doc::addCssLink('assets/form-tool/plugins/virtual-select/virtual-select.min.css');
+        Doc::addJsLink('assets/form-tool/plugins/virtual-select/virtual-select.min.js');
+
+        $script = <<<'JS'
+function formToolInitVirtualSelect(selector) {
+    if (!window.VirtualSelect) {
+        return;
+    }
+
+    document.querySelectorAll(selector).forEach(function(field) {
+        var selectedValue = field.getValue
+            ? field.getValue()
+            : JSON.parse(field.dataset.selectedValue || 'null');
+
+        if (field.destroy) {
+            field.destroy();
+            field.innerHTML = '';
+        } else if (field.virtualSelect) {
+            field.virtualSelect.destroy();
+            field.innerHTML = '';
+        }
+
+        VirtualSelect.init({
+            ele: field,
+            name: field.dataset.name,
+            multiple: field.dataset.multiple === '1',
+            options: JSON.parse(field.dataset.options || '[]'),
+            placeholder: field.dataset.placeholder || '',
+            selectedValue: selectedValue,
+            search: true,
+            setValueAsArray: field.dataset.multiple === '1'
+        });
+    });
+}
+formToolInitVirtualSelect('.virtual-select');
+JS;
+
+        Doc::addJs($script, 'virtual-select');
+
+        if ($isMultiple) {
+            Doc::addJs("formToolInitVirtualSelect('.virtual-select');", 'virtual-select-create', 'multiple_after_add');
         }
     }
 
@@ -211,6 +268,31 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
         }
 
         return $input;
+    }
+
+    public function getVirtualOptions($value)
+    {
+        $this->createOptions();
+
+        $options = [];
+
+        if ($this->isFirstOption && $this->firstOption !== null
+            && ($this->firstOption->value !== '' || $this->firstOption->text !== '')
+        ) {
+            $options[] = [
+                'label' => $this->firstOption->text,
+                'value' => (string) $this->firstOption->value,
+            ];
+        }
+
+        foreach ($this->options as $val => $text) {
+            $options[] = [
+                'label' => $text,
+                'value' => (string) $val,
+            ];
+        }
+
+        return $options;
     }
 
     public function getOptionsForFilter($value)
@@ -276,6 +358,9 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
             'raw' => $this->raw.$this->inlineCSS,
             'isMultiple' => $this->isMultiple,
             'options' => $this->getOptions($value),
+            'virtualOptions' => $this->getVirtualOptions($value),
+            'virtualValue' => $this->virtualValue($value),
+            'virtualPlaceholder' => $this->virtualPlaceholder(),
             'isPlugin' => $this->currentPlugin ? true : false,
             'plugin' => $this->currentPlugin,
             'isQuickAdd' => false,
@@ -327,7 +412,11 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
             'raw' => $this->raw.$this->inlineCSS,
             'isMultiple' => $this->isMultiple,
             'options' => $this->getOptions($value),
+            'virtualOptions' => $this->getVirtualOptions($value),
+            'virtualValue' => $this->virtualValue($value),
+            'virtualPlaceholder' => $this->virtualPlaceholder(),
             'visibilityRules' => null,
+            'plugin' => $this->currentPlugin,
         ];
 
         return \view('form-tool::form.input_types.select', $data)->render();
@@ -368,6 +457,9 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
             'raw' => $this->raw.$this->inlineCSS,
             'isMultiple' => $this->isMultiple,
             'options' => $this->getOptionsForFilter($this->value),
+            'virtualOptions' => $this->getVirtualOptions($this->value),
+            'virtualValue' => $this->virtualValue($this->value),
+            'virtualPlaceholder' => $this->virtualPlaceholder(),
             'isPlugin' => $this->currentPlugin ? true : false,
             'plugin' => $this->currentPlugin,
             'isQuickAdd' => false,
@@ -383,5 +475,27 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
     protected function getDependOptions()
     {
         return $this->getOptions($this->value);
+    }
+
+    private function virtualValue($value)
+    {
+        if ($this->isMultiple) {
+            return array_map('strval', (array) $value);
+        }
+
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (string) $value;
+    }
+
+    private function virtualPlaceholder(): string
+    {
+        if ($this->firstOption !== null && $this->firstOption->text !== '') {
+            return $this->firstOption->text;
+        }
+
+        return '(select '.\strtolower($this->label).')';
     }
 }
