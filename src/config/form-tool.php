@@ -112,6 +112,9 @@ return [
     // This will log actions for create, edit, duplicate, delete, restore, destroy
     'isLogActions' => true,
 
+    // Optional callable that adds application-owned context columns to action logs.
+    'actionLogContextResolver' => null,
+
     // Table meta columns
     'table_meta_columns' => [
         'updatedBy' => 'updatedBy', // Default value must be NULL in MySQL

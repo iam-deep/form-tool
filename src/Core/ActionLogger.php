@@ -4,6 +4,7 @@ namespace Deep\FormTool\Core;
 
 use Deep\FormTool\Dtos\ActionLoggerDto;
 use Deep\FormTool\Enums\ActionLoggerEnum;
+use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Models\MultipleTableModel;
 // use Deep\FormTool\Support\ImageCache;
 use Illuminate\Support\Arr;
@@ -555,13 +556,13 @@ class ActionLogger
     {
         $request = request();
 
-        $insert = [
+        $insert = array_merge(self::context(), [
             'module' => $bluePrint->getForm()->getResource()->title,
             'route' => $bluePrint->getForm()->getResource()->route,
             'ipAddress' => $request->ip(),
             'userAgent' => $request->userAgent(),
             'createdByName' => Auth::user()?->name,
-        ];
+        ]);
 
         if ($bluePrint->getForm()->isOnlyForAdmin()) {
             $insert['isClassunify'] = true;
@@ -582,6 +583,7 @@ class ActionLogger
         $createAt = now();
         $createBy = Auth::id();
         $createdByName = Auth::user()?->name;
+        $context = self::context();
 
         $insert = [];
         $isOnlyForAdmin = collect($actions)->contains(
@@ -590,7 +592,7 @@ class ActionLogger
 
         /** @var ActionLoggerDto $action */
         foreach ($actions as $action) {
-            $row = [
+            $row = array_merge($context, [
                 'action' => $action->action,
                 'refId' => $action->id,
                 'token' => $action->token,
@@ -605,7 +607,7 @@ class ActionLogger
                 'createdAt' => $createAt,
                 'createdBy' => $createBy,
                 'createdByName' => $createdByName,
-            ];
+            ]);
 
             if ($isOnlyForAdmin) {
                 $row['isClassunify'] = $action->isOnlyForAdmin();
@@ -615,6 +617,34 @@ class ActionLogger
         }
 
         (new DataModel())->db('action_logs', 'id')->addMany($insert);
+    }
+
+    private static function context(): array
+    {
+        $resolver = config('form-tool.actionLogContextResolver');
+        if ($resolver === null) {
+            return [];
+        }
+
+        $isContainerCallable = is_string($resolver) && (
+            str_contains($resolver, '@') || (class_exists($resolver) && method_exists($resolver, '__invoke'))
+        );
+        $isClassMethod = is_array($resolver)
+            && count($resolver) === 2
+            && is_string($resolver[0])
+            && class_exists($resolver[0])
+            && method_exists($resolver[0], $resolver[1]);
+
+        if (! is_callable($resolver) && ! $isContainerCallable && ! $isClassMethod) {
+            throw new FormToolException('The action log context resolver must be callable.');
+        }
+
+        $context = app()->call($resolver);
+        if (! is_array($context)) {
+            throw new FormToolException('The action log context resolver must return an array.');
+        }
+
+        return $context;
     }
 
     private static function getToken(BluePrint $bluePrint, $result)

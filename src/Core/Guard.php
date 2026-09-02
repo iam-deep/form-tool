@@ -44,6 +44,7 @@ class Guard
         }
 
         self::$instance->route = $route;
+        self::$instance->action = null;
         self::$instance->getLaravelRoute();
 
         $user = null;
