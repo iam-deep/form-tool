@@ -69,7 +69,7 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
         $this->isMultiple = true;
         $this->raw('multiple');
         if (! $this->currentPlugin) {
-            $this->plugin('chosen');
+            $this->plugin('virtual');
         }
 
         return $this;
@@ -200,6 +200,10 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
     {
         Doc::addCssLink('assets/form-tool/plugins/virtual-select/virtual-select.min.css');
         Doc::addJsLink('assets/form-tool/plugins/virtual-select/virtual-select.min.js');
+        Doc::addCss(
+            '.virtual-select, .virtual-select .vscomp-wrapper { max-width: 100%; width: 100%; }',
+            'virtual-select'
+        );
 
         $script = <<<'JS'
 function formToolInitVirtualSelect(selector) {
@@ -228,6 +232,7 @@ function formToolInitVirtualSelect(selector) {
             placeholder: field.dataset.placeholder || '',
             selectedValue: selectedValue,
             search: true,
+            maxWidth: '100%',
             setValueAsArray: field.dataset.multiple === '1'
         });
     });
