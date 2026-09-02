@@ -66,6 +66,33 @@ class SelectTypePluginTest extends TestCase
         $this->assertNotContains('chosen', $select->exposeClasses());
     }
 
+    public function test_multiple_virtual_select_comma_value_is_stored_as_json_array(): void
+    {
+        $select = (new InspectableSelectType())->setDbField('classIds')->plugin('virtual')->multiple();
+
+        $this->assertSame('["1","2"]', $select->beforeStore((object) [
+            'classIds' => '1,2',
+        ]));
+    }
+
+    public function test_multiple_virtual_select_json_value_is_not_double_encoded(): void
+    {
+        $select = (new InspectableSelectType())->setDbField('classIds')->plugin('virtual')->multiple();
+
+        $this->assertSame('["25","27","13"]', $select->beforeStore((object) [
+            'classIds' => '["25","27","13"]',
+        ]));
+    }
+
+    public function test_multiple_virtual_select_recovers_legacy_double_encoded_values(): void
+    {
+        $select = (new InspectableSelectType())->setDbField('classIds')->plugin('virtual')->multiple();
+
+        $this->assertSame('["25","27","13"]', $select->beforeStore((object) [
+            'classIds' => '["[\\"25\\"","\\"27\\"","\\"13\\"]"]',
+        ]));
+    }
+
     private function docAsset(string $propertyName): array
     {
         $property = new ReflectionProperty(Doc::class, $propertyName);

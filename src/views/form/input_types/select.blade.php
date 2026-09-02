@@ -4,7 +4,7 @@ if ($input->type == 'single') {
 
     if ($input->plugin == 'virtual') { ?>
         <div class="{{ $input->classes }}" id="{{ $input->column }}" {!! $input->raw !!}
-            data-name="{{ $input->column.($input->isMultiple ? '[]' : '') }}"
+            data-name="{{ $input->column }}"
             data-multiple="{{ $input->isMultiple ? 1 : 0 }}"
             data-options='@json($input->virtualOptions)'
             data-selected-value='@json($input->virtualValue)'
@@ -71,7 +71,7 @@ if ($input->type == 'single') {
 
     @if ($input->plugin == 'virtual')
         <div class="{{ $input->classes.' input-sm' }}" id="{{ $input->id }}" {!! $input->raw !!}
-            data-name="{{ $input->name.($input->isMultiple ? '[]' : '') }}"
+            data-name="{{ $input->name }}"
             data-multiple="{{ $input->isMultiple ? 1 : 0 }}"
             data-options='@json($input->virtualOptions)'
             data-selected-value='@json($input->virtualValue)'

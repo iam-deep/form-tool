@@ -143,6 +143,8 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
                 return null;
             }
 
+            $val = $this->normalizeMultipleValue($val);
+
             // If we have multiple options then let's keep it in json
             return \json_encode($val);
         }
@@ -340,11 +342,7 @@ JS;
         if ($value === null) {
             $value = $this->value;
             if ($this->isMultiple && ! $this->isSaveAt()) {
-                if (is_array($this->value)) {
-                    $value = $this->value;
-                } else {
-                    $value = (array) \json_decode($this->value, true);
-                }
+                $value = $this->normalizeMultipleValue($this->value);
             }
         }
 
@@ -394,8 +392,8 @@ JS;
         $this->addScript();
 
         $value = $oldValue ?? $this->value;
-        if ($this->isMultiple && is_string($value)) {
-            $value = (array) \json_decode($this->value, true);
+        if ($this->isMultiple) {
+            $value = $this->normalizeMultipleValue($value);
         }
 
         // This is needed for depend value
@@ -493,6 +491,26 @@ JS;
         }
 
         return (string) $value;
+    }
+
+    private function normalizeMultipleValue($value): array
+    {
+        if (\is_array($value)) {
+            return $value;
+        }
+
+        if (! \is_string($value) || $value === '') {
+            return (array) $value;
+        }
+
+        $decoded = \json_decode($value, true);
+        if (! \is_array($decoded)) {
+            return \explode(',', $value);
+        }
+
+        $legacyDecoded = \json_decode(\implode(',', $decoded), true);
+
+        return \is_array($legacyDecoded) ? $legacyDecoded : $decoded;
     }
 
     private function virtualPlaceholder(): string
