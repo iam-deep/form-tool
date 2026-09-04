@@ -297,6 +297,9 @@ class Crud
         $page->raw = $this->table->getRaw();
         $page->data = $this->table->getData();
         $page->pagination = $this->table->getPagination();
+        $page->listConfiguration = $this->table->getListConfiguration();
+        $page->listSettings = $this->table->getListConfiguration('settings');
+        $page->perPageSelector = $this->table->getListConfiguration('perPage');
 
         $page->style = Doc::getCssLinks().Doc::getCss();
         $page->script = Doc::getJsLinks().Doc::getJs();

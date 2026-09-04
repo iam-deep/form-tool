@@ -124,7 +124,7 @@ class Filter
         }
         unset($option);
 
-        $queries = array_filter($request->except('page'), function ($value) {
+        $queries = array_filter($request->except(['page', 'per_page']), function ($value) {
             return $value !== null && $value !== false && $value !== '';
         });
 

@@ -220,6 +220,18 @@ class TableField
         return null;
     }
 
+    public function showConfiguredColumns(array $available, array $selected): TableField
+    {
+        foreach ($this->cellList as $key => $cell) {
+            $configurationKey = $cell->getConfigurationKey();
+            if (array_key_exists($configurationKey, $available) && ! in_array($configurationKey, $selected, true)) {
+                unset($this->cellList[$key]);
+            }
+        }
+
+        return $this;
+    }
+
     public function bulkActionCheckbox(): CellDefinition
     {
         $cell = CellDefinition::Other($this, '_bulk', '<input type="checkbox" class="selectAll">')

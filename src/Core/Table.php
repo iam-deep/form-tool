@@ -23,6 +23,7 @@ class Table
 
     private $isFromTrash = false;
     private ?string $orderBy = null;
+    private ?ListConfiguration $listConfiguration = null;
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -53,6 +54,7 @@ class Table
         $this->bulkAction->setTable($this);
 
         $this->request = request();
+        $this->setListConfiguration([]);
     }
 
     public function setCrud(Crud $crud)
@@ -142,6 +144,68 @@ class Table
         }
 
         return $this;
+    }
+
+    public function configurable(array $options): Table
+    {
+        $this->setListConfiguration($options);
+
+        if (array_key_exists('columns', $options)) {
+            $this->getFields()->showConfiguredColumns(
+                $this->listConfiguration->columns(),
+                $this->listConfiguration->selectedColumns()
+            );
+        }
+
+        if (array_key_exists('filters', $options)) {
+            $selectedFilters = $this->listConfiguration->selectedFilters();
+            $this->filter = null;
+            if ($selectedFilters) {
+                $this->filter($selectedFilters);
+            }
+        }
+
+        return $this;
+    }
+
+    private function setListConfiguration(array $options): void
+    {
+        $this->listConfiguration = new ListConfiguration($options);
+        $this->model->perPage(
+            $this->listConfiguration->perPageEnabled()
+                ? $this->listConfiguration->perPage($this->request)
+                : null
+        );
+    }
+
+    public function validateConfiguration(array $input): array
+    {
+        if (! $this->listConfiguration) {
+            throw new \LogicException('The table list is not configurable.');
+        }
+
+        return $this->listConfiguration->validate($input);
+    }
+
+    public function getListConfiguration(?string $section = null)
+    {
+        if (! $this->listConfiguration) {
+            return '';
+        }
+
+        if ($section === 'settings' && ! $this->listConfiguration->canUpdate()) {
+            return '';
+        }
+
+        if ($section === 'perPage' && ! $this->listConfiguration->perPageEnabled()) {
+            return '';
+        }
+
+        return view('form-tool::list.configuration', [
+            'configuration' => $this->listConfiguration,
+            'perPage' => $this->listConfiguration->perPage($this->request),
+            'section' => $section,
+        ]);
     }
 
     public function orderBy(string $column, string $direction = 'desc'): Table
@@ -473,7 +537,9 @@ class Table
         $this->table->raw = $data;
         $this->table->data = $this->dataResult;
         $this->table->content = view('form-tool::list.table', $data);
-        $this->table->pagination = $this->dataResult->onEachSide(2)->withQueryString()->links();
+        $this->table->pagination = $this->dataResult->onEachSide(2)->withQueryString()->links(null, [
+            'perPageSelector' => $this->getListConfiguration('perPage'),
+        ]);
 
         return $this->table;
     }

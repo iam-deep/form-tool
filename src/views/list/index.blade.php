@@ -43,7 +43,7 @@ ul.pagination {
                 @endif
             @endif
 
-            @if ($page->buttons->secondaries)
+            @if ($page->buttons->secondaries || $page->listSettings)
                 <button type="button" class="btn btn-success btn-sm btn-flat dropdown-toggle" data-toggle="dropdown">
                     @if ($page->buttons->more->isActive)
                         {!! $page->buttons->more->name !!}
@@ -52,7 +52,7 @@ ul.pagination {
                     <span class="sr-only">Toggle Dropdown</span>
                 </button>
                 <ul class="dropdown-menu dropdown-menu-right" role="menu">
-                    @foreach ($page->buttons->secondaries as $button)
+                    @foreach ($page->buttons->secondaries ?? [] as $button)
                         @if ($button->isDivider())
                             <li class="divider" {!! $button->getHtml() !!}></li>
                         @elseif ($button->isLink())
@@ -62,6 +62,7 @@ ul.pagination {
                             <li>{!! $button->getHtml() !!}</li>
                         @endif
                     @endforeach
+                    {{ $page->listSettings }}
                 </ul>
             @endif
         </div>

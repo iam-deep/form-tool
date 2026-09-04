@@ -128,6 +128,12 @@ return [
     // Default cache expiry
     'defaultCacheExpiry' => 60 * 60 * 24, // 24 hours
 
+    'list' => [
+        'perPageEnabled' => false,
+        'perPageOptions' => [20, 50, 100, 200],
+        'defaultPerPage' => 20,
+    ],
+
     // Styles classes
     'styleClass' => [
         // Global class for most of the input fields

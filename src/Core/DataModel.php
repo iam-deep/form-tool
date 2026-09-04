@@ -2,6 +2,7 @@
 
 namespace Deep\FormTool\Core;
 
+use Closure;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Models\BaseModel;
 use Deep\FormTool\Support\Random;
@@ -17,6 +18,8 @@ class DataModel
 
     protected ?string $orderByCol = null;
     protected string $orderByDirection = 'asc';
+
+    protected ?int $perPage = null;
 
     protected bool $isToken = false;
     protected bool $isSoftDelete = true;
@@ -104,6 +107,13 @@ class DataModel
         return $this;
     }
 
+    public function perPage(?int $perPage)
+    {
+        $this->perPage = $perPage && $perPage > 0 ? $perPage : null;
+
+        return $this;
+    }
+
     public function foreignKey(string $column)
     {
         $this->foreignKey = \trim($column);
@@ -179,7 +189,7 @@ class DataModel
         $this->orderByCol = $orderByCol;
         $this->orderByDirection = $direction;
 
-        $data = $this->setup()::getAll($where);
+        $data = $this->withPerPage(fn ($model) => $model::getAll($where));
 
         if ($data->total()) {
             $inputs = $this->crud->getBluePrint()->getInputList();
@@ -236,7 +246,7 @@ class DataModel
         $this->orderByCol = $orderByCol;
         $this->orderByDirection = $direction;
 
-        return $this->setup()::search($searchTerm, $fields, $where);
+        return $this->withPerPage(fn ($model) => $model::search($searchTerm, $fields, $where));
     }
 
     public function getWhereOne($where = null)
@@ -366,5 +376,22 @@ class DataModel
         $this->model::setSoftDelete($this->isSoftDelete);
 
         return $this->model;
+    }
+
+    private function withPerPage(Closure $callback)
+    {
+        $model = $this->setup();
+        if ($this->perPage === null || ! property_exists($model, 'limit')) {
+            return $callback($model);
+        }
+
+        $originalLimit = $model::$limit;
+        $model::$limit = $this->perPage;
+
+        try {
+            return $callback($model);
+        } finally {
+            $model::$limit = $originalLimit;
+        }
     }
 }

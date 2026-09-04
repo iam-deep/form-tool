@@ -13,6 +13,7 @@ class CellDefinition
     public string $fieldType;
     private ?string $dbField = null;
     private ?string $label = '';
+    private ?string $configurationKey = null;
 
     private bool $orderable = true;
     private ?string $orderByColumn = null;
@@ -142,6 +143,13 @@ class CellDefinition
         return $this;
     }
 
+    public function key(string $key): CellDefinition
+    {
+        $this->configurationKey = trim($key);
+
+        return $this;
+    }
+
     public function concat($pattern = '', ...$dbFields): CellDefinition
     {
         $this->concat = new \stdClass();
@@ -223,6 +231,11 @@ class CellDefinition
         }
 
         return $this->dbField;
+    }
+
+    public function getConfigurationKey(): ?string
+    {
+        return $this->configurationKey ?: $this->getDbField();
     }
 
     public function setValue($value)
