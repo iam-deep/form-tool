@@ -14,8 +14,8 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Translation\ArrayLoader;
 use Illuminate\Translation\Translator;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Validation\Factory as ValidationFactory;
+use Illuminate\Validation\ValidationException;
 
 class ListConfigurationModel extends BaseModel
 {
