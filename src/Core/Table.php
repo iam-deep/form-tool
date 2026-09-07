@@ -626,13 +626,13 @@ class Table
 
         // Let's setup filter first
         $where = [];
-        if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
+        if ($this->crud->isSoftDelete() && $this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
             $this->isFromTrash = true;
 
             $where[] = function ($query) use ($deletedAt) {
                 $query->whereNotNull($this->model->getAlias().$deletedAt);
             };
-        } else {
+        } elseif ($this->crud->isSoftDelete()) {
             $where[] = function ($query) use ($deletedAt) {
                 $query->whereNull($this->model->getAlias().$deletedAt);
             };
