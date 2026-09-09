@@ -33,13 +33,14 @@ class FormRestoreValidationTest extends TestCase
         $this->database->getConnection()->getSchemaBuilder()->create('records', function (SchemaBlueprint $table) {
             $table->increments('recordId');
             $table->string('name');
+            $table->date('date')->nullable();
             $table->dateTime('deleted_at')->nullable();
             $table->unsignedInteger('deleted_by')->nullable();
         });
 
         DB::table('records')->insert([
-            ['recordId' => 1, 'name' => 'Final Exam', 'deleted_at' => null, 'deleted_by' => null],
-            ['recordId' => 2, 'name' => 'Final Exam', 'deleted_at' => '2026-08-01 10:00:00', 'deleted_by' => 7],
+            ['recordId' => 1, 'name' => 'Final Exam', 'date' => '2026-08-01', 'deleted_at' => null, 'deleted_by' => null],
+            ['recordId' => 2, 'name' => 'Final Exam', 'date' => '2026-08-02', 'deleted_at' => '2026-08-01 10:00:00', 'deleted_by' => 7],
         ]);
 
         config([
@@ -79,6 +80,18 @@ class FormRestoreValidationTest extends TestCase
 
         $crud = Doc::create($this->resource(), new DataModel(RestoreValidationFixture::class), function (BluePrint $input) {
             $input->text('name', 'Name')->unique()->required();
+        });
+        $crud->wantsArray();
+
+        $deletedRow = DB::table('records')->where('recordId', 2)->first();
+
+        $this->assertTrue($crud->getForm()->validateRestoreData(2, $deletedRow));
+    }
+
+    public function test_restore_validation_formats_stored_dates_like_create_input(): void
+    {
+        $crud = Doc::create($this->resource(), new DataModel(RestoreValidationFixture::class), function (BluePrint $input) {
+            $input->date('date', 'Date')->required();
         });
         $crud->wantsArray();
 

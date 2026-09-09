@@ -450,6 +450,7 @@ trait Options
             $input->field = $this->dbField;
             $input->dependField = $depend->field;
             $input->isChosen = $this->currentPlugin == 'chosen';
+            $input->isVirtual = $this->currentPlugin == 'virtual';
             $input->route = $this->bluePrint->getForm()->getResource()->route;
             $input->allDependFields = $allDependFields;
 

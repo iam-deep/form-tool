@@ -239,6 +239,43 @@ function formToolInitVirtualSelect(selector) {
         });
     });
 }
+
+function formToolUpdateVirtualSelectOptions(field, optionHtml) {
+    var element = field instanceof jQuery ? field[0] : field;
+    if (!element) {
+        return;
+    }
+
+    var optionContainer = document.createElement('select');
+    optionContainer.innerHTML = optionHtml || '';
+
+    var options = [];
+    var selectedValues = [];
+    Array.from(optionContainer.options).forEach(function(option) {
+        if (option.value === '') {
+            if (option.text) {
+                element.dataset.placeholder = option.text;
+            }
+            return;
+        }
+
+        options.push({
+            label: option.text,
+            value: String(option.value)
+        });
+
+        if (option.selected) {
+            selectedValues.push(String(option.value));
+        }
+    });
+
+    element.dataset.options = JSON.stringify(options);
+    element.dataset.selectedValue = JSON.stringify(
+        element.dataset.multiple === '1' ? selectedValues : (selectedValues[0] || null)
+    );
+
+    formToolInitVirtualSelect('#' + element.id);
+}
 formToolInitVirtualSelect('.virtual-select');
 JS;
 

@@ -3,6 +3,7 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
+use Deep\FormTool\Core\InputTypes\BaseDateTimeType;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
@@ -1127,6 +1128,10 @@ class Form
         $postData = (array) $data;
 
         foreach ($this->bluePrint->getInputList() as $input) {
+            if ($input instanceof BaseDateTimeType && array_key_exists($input->getDbField(), $postData)) {
+                $postData[$input->getDbField()] = $input->getNiceValue($postData[$input->getDbField()]);
+            }
+
             if (! $input instanceof BluePrint) {
                 continue;
             }

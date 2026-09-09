@@ -11,7 +11,9 @@ $("#{{ $input->dependField }}").on("change", function() {
     @endforeach
 
     if (! val) {
-        @if ($input->isFirstOption)
+        @if ($input->isVirtual)
+            formToolUpdateVirtualSelectOptions(field, @json($input->isFirstOption ? '<option value="">'.$input->firstOptionText.'</option>' : ''));
+        @elseif ($input->isFirstOption)
             field.html('<option value="{{ $input->firstOptionValue }}">{{ $input->firstOptionText }}</option>');
         @else
             field.html('');
@@ -24,7 +26,9 @@ $("#{{ $input->dependField }}").on("change", function() {
         return;
     }
     
-    field.html('<option value="">Loading...</option>');
+    @if (! $input->isVirtual)
+        field.html('<option value="">Loading...</option>');
+    @endif
     @if ($input->isChosen)
         field.trigger("chosen:updated");
     @endif
@@ -55,7 +59,11 @@ $("#{{ $input->dependField }}").on("change", function() {
             helpBlock.html(previousHelpText);
         },
         success: function(json) {
-            field.html(json.data);
+            @if ($input->isVirtual)
+                formToolUpdateVirtualSelectOptions(field, json.data);
+            @else
+                field.html(json.data);
+            @endif
         }
     });
 });

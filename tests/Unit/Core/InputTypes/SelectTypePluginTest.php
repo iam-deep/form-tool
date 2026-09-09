@@ -42,6 +42,7 @@ class SelectTypePluginTest extends TestCase
             $this->docAsset('jsLink')
         );
         $this->assertStringContainsString('VirtualSelect.init', Doc::getJs());
+        $this->assertStringContainsString('formToolUpdateVirtualSelectOptions', Doc::getJs());
         $this->assertStringContainsString("maxWidth: '100%'", Doc::getJs());
         $this->assertStringContainsString('width: 100%', Doc::getCss());
     }

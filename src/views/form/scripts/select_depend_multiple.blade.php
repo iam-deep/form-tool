@@ -10,7 +10,9 @@ $("#{{ $input->multipleKey }}").on("change", '.{{ $input->multipleKey }}-{{ $inp
     @endforeach
 
     if (! val) {
-        @if ($input->isFirstOption)
+        @if ($input->isVirtual)
+            formToolUpdateVirtualSelectOptions(field, @json($input->isFirstOption ? '<option value="">'.$input->firstOptionText.'</option>' : ''));
+        @elseif ($input->isFirstOption)
             field.html('<option value="{{ $input->firstOptionValue }}">{{ $input->firstOptionText }}</option>');
         @else
             field.html('');
@@ -23,7 +25,9 @@ $("#{{ $input->multipleKey }}").on("change", '.{{ $input->multipleKey }}-{{ $inp
         return;
     }
 
-    field.html('<option value="">Loading...</option>');
+    @if (! $input->isVirtual)
+        field.html('<option value="">Loading...</option>');
+    @endif
     @if ($input->isChosen)
         field.trigger("chosen:updated");
     @endif
@@ -49,7 +53,11 @@ $("#{{ $input->multipleKey }}").on("change", '.{{ $input->multipleKey }}-{{ $inp
             @if ($input->isChosen) field.trigger("chosen:updated"); @endif
         },
         success: function(json) {
-            field.html(json.data);
+            @if ($input->isVirtual)
+                formToolUpdateVirtualSelectOptions(field, json.data);
+            @else
+                field.html(json.data);
+            @endif
         }
     });
 });
