@@ -208,14 +208,14 @@ class SelectType extends BaseFilterType implements ISaveable, IVisibilityControl
         );
 
         $script = <<<'JS'
-function formToolInitVirtualSelect(selector) {
+function formToolInitVirtualSelect(selector, useDataSelectedValue) {
     if (!window.VirtualSelect) {
         return;
     }
 
     document.querySelectorAll(selector).forEach(function(field) {
-        var selectedValue = field.getValue
-            ? field.getValue()
+        var selectedValue = field.virtualSelect && !useDataSelectedValue
+            ? field.value
             : JSON.parse(field.dataset.selectedValue || 'null');
 
         if (field.destroy) {
@@ -274,7 +274,7 @@ function formToolUpdateVirtualSelectOptions(field, optionHtml) {
         element.dataset.multiple === '1' ? selectedValues : (selectedValues[0] || null)
     );
 
-    formToolInitVirtualSelect('#' + element.id);
+    formToolInitVirtualSelect('#' + element.id, true);
 }
 formToolInitVirtualSelect('.virtual-select');
 JS;
@@ -282,7 +282,7 @@ JS;
         Doc::addJs($script, 'virtual-select');
 
         if ($isMultiple) {
-            Doc::addJs("formToolInitVirtualSelect('.virtual-select');", 'virtual-select-create', 'multiple_after_add');
+            Doc::addJs("formToolInitVirtualSelect('.virtual-select:not(.vscomp-ele)');", 'virtual-select-create', 'multiple_after_add');
         }
     }
 

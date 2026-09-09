@@ -43,6 +43,7 @@ class SelectTypePluginTest extends TestCase
         );
         $this->assertStringContainsString('VirtualSelect.init', Doc::getJs());
         $this->assertStringContainsString('formToolUpdateVirtualSelectOptions', Doc::getJs());
+        $this->assertStringContainsString('field.virtualSelect && !useDataSelectedValue', Doc::getJs());
         $this->assertStringContainsString("maxWidth: '100%'", Doc::getJs());
         $this->assertStringContainsString('width: 100%', Doc::getCss());
     }
@@ -52,7 +53,7 @@ class SelectTypePluginTest extends TestCase
         (new InspectableSelectType())->plugin('virtual')->setPlugin(true);
 
         $this->assertStringContainsString(
-            'formToolInitVirtualSelect',
+            "formToolInitVirtualSelect('.virtual-select:not(.vscomp-ele)')",
             Doc::getJsGroup('multiple_after_add')
         );
     }
