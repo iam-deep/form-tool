@@ -150,7 +150,7 @@ class TableField
         }
 
         foreach ($this->bluePrint->getInputList() as $input) {
-            if (! $except || ! in_array($input->getDbField(), $except)) {
+            if ((! $except || ! in_array($input->getDbField(), $except)) && ! $input instanceof BluePrint) {
                 $this->default($input->getDbField());
             }
         }
