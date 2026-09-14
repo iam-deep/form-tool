@@ -699,7 +699,6 @@ class Table
         $selected = $this->selectedQuickFilter();
         $this->isFromTrash = $selected === 'trash';
         if ($this->isFromTrash) {
-
             $where[] = function ($query) use ($deletedAt) {
                 $query->whereNotNull($this->model->getAlias().$deletedAt);
             };

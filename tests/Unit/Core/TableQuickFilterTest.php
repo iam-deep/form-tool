@@ -9,8 +9,8 @@ use Deep\FormTool\Core\Filter;
 use Deep\FormTool\Core\Form;
 use Deep\FormTool\Core\Guard;
 use Deep\FormTool\Core\InputTypes\BaseFilterType;
-use Deep\FormTool\Core\InputTypes\DateType;
 use Deep\FormTool\Core\InputTypes\Common\ICustomType;
+use Deep\FormTool\Core\InputTypes\DateType;
 use Deep\FormTool\Core\Table;
 use Deep\FormTool\Models\BaseModel;
 use Deep\FormTool\Tests\TestCase;
@@ -50,7 +50,8 @@ class TableQuickFilterTest extends TestCase
         $this->app['config']->set('form-tool.isGuarded', false);
         Guard::$instance = null;
         Guard::init(Request::create('/'));
-        $this->app->instance(\Illuminate\Contracts\View\Factory::class, new class {
+        $this->app->instance(\Illuminate\Contracts\View\Factory::class, new class
+        {
             public function make($view, $data, $mergeData = [])
             {
                 return (object) $data;
