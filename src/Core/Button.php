@@ -11,6 +11,7 @@ class Button
     private ?string $name = null;
     private ?string $icon = null;
     private ?string $link = null;
+    private bool $withQueryString = true;
 
     private string $raw = '';
 
@@ -121,6 +122,13 @@ class Button
     public function link(string $link): Button
     {
         $this->link = trim($link);
+
+        return $this;
+    }
+
+    public function withQueryString(bool $enabled = true): Button
+    {
+        $this->withQueryString = $enabled;
 
         return $this;
     }
@@ -238,9 +246,12 @@ class Button
             if (false === strpos($link, ':')) {
                 // Relative link
 
-                $link .= strpos($link, '?') ? '&' : '?';
-                $link = '{crud_url}'.$link.'{query_string}';
-            } elseif (false !== strpos($link, 'http')) {
+                if ($this->withQueryString) {
+                    $link .= strpos($link, '?') ? '&' : '?';
+                    $link .= '{query_string}';
+                }
+                $link = '{crud_url}'.$link;
+            } elseif ($this->withQueryString && false !== strpos($link, 'http')) {
                 // http link
 
                 $link .= strpos($link, '?') ? '&' : '?';

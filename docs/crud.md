@@ -100,6 +100,56 @@ Buttons respect FormTool guards:
 Button::make('Admission Settings', createUrl('admission-settings'), 'view', 'admission-settings');
 ```
 
+Link buttons append the current page's query string by default. Disable this for
+links that should keep only their explicitly configured parameters:
+
+```php
+Button::make('Activities', createUrl('activities-log?module=Students&id={id}'), 'view', 'activities-log')
+    ->withQueryString(false);
+```
+
+Placeholders such as `{id}` are still replaced.
+
+## Quick Filters
+
+Add tabs between **All** and **Trash** using `quickFilter()` on the CRUD or the
+Table returned by `list()`:
+
+```php
+$this->crud
+    ->quickFilter('active', 'Active', ['status' => 1], default: true)
+    ->quickFilter('inactive', 'Inactive', ['status' => 0])
+    ->quickFilter('pending', 'Pending', ['status' => 2]);
+```
+
+Use your module's actual status values. Each tab displays its own count. The
+default applies when `quick_status` is absent; clicking All explicitly overrides
+it. If several filters specify `default: true`, the last one wins. Without a
+default, All remains selected. Unknown selections fall back to All.
+
+For custom conditions, pass a callback receiving the query and `DataModel`:
+
+```php
+$this->crud->quickFilter('pending', 'Pending', function ($query, $model) {
+    $query->whereNull($model->getAlias().'approvedAt');
+});
+```
+
+Conditions are grouped and apply to normal lists, search, and pagination alongside
+regular filters. Counts follow the existing All/Trash behavior and exclude regular
+filters and search terms. Soft-deleted rows are excluded from custom tabs when
+soft deletion is enabled; Trash retains its existing permission requirement.
+Direct `?id=...` links retain their existing record lookup behavior.
+Keys must start with a letter and contain only letters, numbers, underscores or
+hyphens; `all`, `trash` and `filtered` are reserved. Registering the same key replaces its
+definition. These options configure list views, not access permissions.
+
+When the regular filter form has an applied value, a **Filtered** tab automatically
+appears after the status tabs and becomes active. Its count includes the selected
+status and regular filters across all pages, independently of keyword search.
+The link retains these filters and opens their first page. Empty filters, status
+selection alone, sorting, pagination and direct ID lookups do not show this tab.
+
 ## Saving Flow
 
 On store/update, `Form` generally does this:

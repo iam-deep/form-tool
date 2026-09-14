@@ -50,6 +50,14 @@ class Filter
         $data = new \stdClass();
 
         $data->inputs = [];
+        $data->isApplied = false;
+        $addInput = function (BaseFilterType $field) use ($data) {
+            $data->inputs[] = $field->getFilterHTML();
+            $value = $field->getRawValue();
+            if ($value !== null && $value !== '' && $value !== []) {
+                $data->isApplied = true;
+            }
+        };
         foreach ($this->fieldsToFilter as $key => $option) {
             if (\is_integer($key)) {
                 // column can have alias, remove it
@@ -62,7 +70,7 @@ class Filter
                     $field->required(false);
                     $field->setValue($request->query($field->getDbField()));
 
-                    $data->inputs[] = $field->getFilterHTML();
+                    $addInput($field);
                 } elseif ($field) {
                     throw new \InvalidArgumentException('"'.$option.'" is not a Filter Type.');
                 } else {
@@ -94,17 +102,17 @@ class Filter
                         $fromField->setValue($request->query($dbField.'From'));
                         $toField->setValue($request->query($dbField.'To'));
 
-                        $data->inputs[] = $fromField->setDbField($dbField.'From')->label($label.' From')->getFilterHTML();
-                        $data->inputs[] = $toField->setDbField($dbField.'To')->label($label.' To')->getFilterHTML();
+                        $addInput($fromField->setDbField($dbField.'From')->label($label.' From'));
+                        $addInput($toField->setDbField($dbField.'To')->label($label.' To'));
 
                         $this->dateRangeFields[$dbField]['From'] = $fromField;
                         $this->dateRangeFields[$dbField]['To'] = $toField;
                     } elseif ($option == 'gt') {
                         $field->setValue($request->query($dbField));
-                        $data->inputs[] = $field->label($label.' From')->getFilterHTML();
+                        $addInput($field->label($label.' From'));
                     } elseif ($option == 'lt') {
                         $field->setValue($request->query($dbField));
-                        $data->inputs[] = $field->label($label.' To')->getFilterHTML();
+                        $addInput($field->label($label.' To'));
                     }
                 } elseif ($option instanceof BaseFilterType) {
                     if (! $option->getDbField()) {
@@ -114,7 +122,7 @@ class Filter
                     $option->required(false);
                     $option->setValue($request->query($option->getDbField()));
 
-                    $data->inputs[] = $option->getFilterHTML();
+                    $addInput($option);
                 } elseif ($field || $option instanceof BaseInputType) {
                     throw new \InvalidArgumentException('"'.$key.'" is not a Filter Type.');
                 } else {
@@ -177,8 +185,8 @@ class Filter
                             $field->applyFilter($query, '<=');
                         }
                     } elseif ($option == 'range' && isset($this->dateRangeFields[$key])) {
-                        $this->dateRangeFields[$key]['From']->setDbField($key)->applyFilter($query, '>=');
-                        $this->dateRangeFields[$key]['To']->setDbField($key)->applyFilter($query, '<=');
+                        (clone $this->dateRangeFields[$key]['From'])->setDbField($key)->applyFilter($query, '>=');
+                        (clone $this->dateRangeFields[$key]['To'])->setDbField($key)->applyFilter($query, '<=');
                     } elseif ($option instanceof BaseFilterType) {
                         $val = $request->query($option->getDbField());
                         $option->setValue($val);

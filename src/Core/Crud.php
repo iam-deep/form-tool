@@ -236,6 +236,13 @@ class Crud
         return $this;
     }
 
+    public function quickFilter(string $key, string $label, array|Closure $where, bool $default = false): Crud
+    {
+        $this->table->quickFilter($key, $label, $where, $default);
+
+        return $this;
+    }
+
     public function deleteRestrictForOthers(string $foreignTable, string $column, ?string $label = null): Crud
     {
         // TODO: Validate if table and column is exists or need to create user test script

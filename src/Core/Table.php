@@ -24,6 +24,8 @@ class Table
     private $isFromTrash = false;
     private ?string $orderBy = null;
     private ?ListConfiguration $listConfiguration = null;
+    private array $quickFilters = [];
+    private string $defaultQuickFilter = 'all';
 
     private $tableMetaColumns = [
         'updatedBy' => 'updatedBy',
@@ -144,6 +146,43 @@ class Table
         }
 
         return $this;
+    }
+
+    /** Add a tab between All and Trash. The callback receives the query and DataModel. */
+    public function quickFilter(string $key, string $label, array|Closure $where, bool $default = false): Table
+    {
+        if (! preg_match('/^[a-zA-Z][a-zA-Z0-9_-]*$/D', $key) || in_array($key, ['all', 'trash', 'filtered'], true)) {
+            throw new \InvalidArgumentException('Quick filter keys must start with a letter, contain only letters, numbers, underscores or hyphens, and cannot be all, trash or filtered.');
+        }
+
+        $this->quickFilters[$key] = ['label' => $label, 'where' => $where];
+        if ($default) {
+            $this->defaultQuickFilter = $key;
+        }
+
+        return $this;
+    }
+
+    private function selectedQuickFilter(): string
+    {
+        $key = $this->request->query('quick_status', $this->request->query('id') ? 'all' : $this->defaultQuickFilter);
+        if ($key === 'trash' && $this->crud->isSoftDelete() && Guard::hasDestroy()) {
+            return 'trash';
+        }
+
+        return is_string($key) && isset($this->quickFilters[$key]) ? $key : 'all';
+    }
+
+    private function applyQuickFilter($query, string $key): void
+    {
+        $where = $this->quickFilters[$key]['where'];
+        $query->where(function ($query) use ($where) {
+            if ($where instanceof Closure) {
+                $where($query, $this->model);
+            } else {
+                $query->where($where);
+            }
+        });
     }
 
     public function configurable(array $options): Table
@@ -559,26 +598,37 @@ class Table
 
         $quickFilters = [
             'all' => [
-                'href' => createUrl($this->resource->route),
+                'href' => createUrl($this->resource->route, $this->defaultQuickFilter !== 'all' ? ['quick_status' => 'all'] : []),
                 'label' => 'All',
-                'count' => 0,
-                'active' => false,
-                'separator' => true,
-            ],
-            'trash' => [
-                'href' => createUrl($this->resource->route, ['quick_status' => 'trash']),
-                'label' => 'Trash',
                 'count' => 0,
                 'active' => false,
                 'separator' => true,
             ],
         ];
 
+        foreach ($this->quickFilters as $key => $filter) {
+            $quickFilters[$key] = [
+                'href' => createUrl($this->resource->route, ['quick_status' => $key]),
+                'label' => $filter['label'],
+                'count' => 0,
+                'active' => false,
+                'separator' => true,
+            ];
+        }
+
+        $quickFilters['trash'] = [
+            'href' => createUrl($this->resource->route, ['quick_status' => 'trash']),
+            'label' => 'Trash',
+            'count' => 0,
+            'active' => false,
+            'separator' => true,
+        ];
+
         if (! Guard::hasDestroy() || ! $this->crud->isSoftDelete()) {
             unset($quickFilters['trash']);
         }
 
-        $isAllActive = true;
+        $selected = $this->selectedQuickFilter();
         $countQuickFilters = \count($quickFilters);
         $i = 0;
         foreach ($quickFilters as $key => &$row) {
@@ -592,13 +642,19 @@ class Table
                 $row['count'] = $this->model->countWhere(function ($query, $class) use ($deletedAt) {
                     $query->whereNotNull($this->model->getAlias().$deletedAt);
                 });
+            } else {
+                $row['count'] = $this->model->countWhere(function ($query) use ($deletedAt, $key) {
+                    if ($this->crud->isSoftDelete()) {
+                        $query->whereNull($this->model->getAlias().$deletedAt);
+                    }
+                    $this->applyQuickFilter($query, $key);
+                });
             }
 
-            if ($this->request->query('quick_status') == $key) {
+            if ($selected === $key) {
                 $row['active'] = true;
-                $isAllActive = false;
 
-                if (isset($data['filterData'])) {
+                if (isset($data['filterData']) && ($key !== 'all' || $this->defaultQuickFilter !== 'all')) {
                     $data['filterData']->inputs[] = '<input type="hidden" name="quick_status" value="'.$key.'">';
                 }
             }
@@ -608,8 +664,18 @@ class Table
             }
         }
 
-        if ($isAllActive) {
-            $quickFilters['all']['active'] = true;
+        unset($row);
+
+        if (($data['filterData']->isApplied ?? false) && ! $this->request->query('id')) {
+            $quickFilters[$selected]['active'] = false;
+            $quickFilters[array_key_last($quickFilters)]['separator'] = true;
+            $quickFilters['filtered'] = [
+                'href' => createUrl($this->resource->route, ['quick_status' => $selected] + $this->request->except(['page', 'search'])),
+                'label' => 'Filtered',
+                'count' => $this->model->countWhere($this->setupTable()),
+                'active' => true,
+                'separator' => false,
+            ];
         }
 
         $data['quickFilters'] = $quickFilters;
@@ -630,8 +696,9 @@ class Table
 
         // Let's setup filter first
         $where = [];
-        if ($this->crud->isSoftDelete() && $this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
-            $this->isFromTrash = true;
+        $selected = $this->selectedQuickFilter();
+        $this->isFromTrash = $selected === 'trash';
+        if ($this->isFromTrash) {
 
             $where[] = function ($query) use ($deletedAt) {
                 $query->whereNotNull($this->model->getAlias().$deletedAt);
@@ -647,6 +714,12 @@ class Table
             $where[] = [$this->model->getAlias().$primaryId => $this->request->query('id')];
 
             return $where;
+        }
+
+        if (isset($this->quickFilters[$selected])) {
+            $where[] = function ($query) use ($selected) {
+                $this->applyQuickFilter($query, $selected);
+            };
         }
 
         if ($this->filter) {
@@ -698,9 +771,7 @@ class Table
 
     protected function createBulkAction()
     {
-        if ($this->request->query('quick_status') == 'trash' && Guard::hasDestroy()) {
-            $this->isFromTrash = true;
-        }
+        $this->isFromTrash = $this->selectedQuickFilter() === 'trash';
 
         $bulkGroup = $this->isFromTrash ? 'trash' : 'normal';
         $data['bulkActions'] = $this->bulkAction->getActions($bulkGroup);
