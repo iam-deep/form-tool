@@ -70,6 +70,11 @@ class ActionLoggerMultipleTableTest extends TestCase
             $table->unsignedInteger('enabled');
             $table->foreign('recordId')->references('recordId')->on('records')->cascadeOnDelete();
         });
+        $schema->create('record_tags', function (SchemaBlueprint $table) {
+            $table->increments('id');
+            $table->unsignedInteger('recordId');
+            $table->unsignedInteger('tagId');
+        });
         $schema->create('action_logs', function (SchemaBlueprint $table) {
             $table->increments('id');
             $table->string('action');
@@ -203,6 +208,22 @@ class ActionLoggerMultipleTableTest extends TestCase
         ), $data['data']['Table Parts']);
     }
 
+    public function test_destroy_removes_rows_stored_by_save_at(): void
+    {
+        DB::table('records')->insert(['recordId' => 1]);
+        DB::table('record_tags')->insert([
+            ['recordId' => 1, 'tagId' => 10],
+            ['recordId' => 1, 'tagId' => 20],
+        ]);
+
+        $crud = $this->makeCrud(Request::create('/records/1', 'DELETE'), true);
+
+        $response = $crud->destroy(1);
+
+        $this->assertTrue($response['status']);
+        $this->assertSame(0, DB::table('record_tags')->where('recordId', 1)->count());
+    }
+
     public function test_duplicate_logs_copied_rows_for_both_multiple_storage_modes(): void
     {
         DB::table('records')->insert([
@@ -323,18 +344,22 @@ class ActionLoggerMultipleTableTest extends TestCase
         $this->assertSame([], $diff['rows']);
     }
 
-    private function makeCrud(Request $request)
+    private function makeCrud(Request $request, bool $withSaveAt = false)
     {
         $this->app->instance('request', $request);
         Doc::setState($request->isMethod('PUT') ? CrudState::UPDATE : CrudState::STORE);
 
-        $crud = Doc::create($this->resource(), new DataModel(ActionLoggerMultipleTableFixture::class), function (BluePrint $input) {
+        $crud = Doc::create($this->resource(), new DataModel(ActionLoggerMultipleTableFixture::class), function (BluePrint $input) use ($withSaveAt) {
             $input->multiple('jsonParts', 'JSON Parts', function (BluePrint $part) {
                 $this->addPartFields($part);
             });
             $input->multiple('tableParts', 'Table Parts', function (BluePrint $part) {
                 $this->addPartFields($part);
             })->table('record_parts', 'partId', 'recordId', '');
+
+            if ($withSaveAt) {
+                $input->select('tagId', 'Tags')->multiple()->saveAt('record_tags', 'id');
+            }
         });
         $crud->softDelete(false)->wantsArray();
 

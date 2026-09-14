@@ -1473,6 +1473,8 @@ class Form
         $affected = $this->model->deleteOne($id);
 
         if ($affected > 0) {
+            $this->deleteSaveAtRows($pId);
+
             foreach ($this->bluePrint->getInputList() as $input) {
                 if ($input instanceof BluePrint) {
                     // Let's delete the file and image of sub tables, and data
@@ -1508,6 +1510,16 @@ class Form
         }
 
         return false;
+    }
+
+    private function deleteSaveAtRows($pId): void
+    {
+        foreach ($this->bluePrint->getInputList() as $input) {
+            if ($input instanceof ISaveable && $input->isSaveAt()) {
+                $saveAt = $input->getSaveAt();
+                DB::table($saveAt->table)->where($saveAt->refId, $pId)->delete();
+            }
+        }
     }
 
     private function checkForeignKeyRestriction($id, $dataToDelete)

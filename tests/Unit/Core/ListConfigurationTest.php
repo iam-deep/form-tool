@@ -86,6 +86,30 @@ class ListConfigurationTest extends TestCase
         ]);
     }
 
+    public function test_word_wrap_defaults_to_yes_and_round_trips_saved_choices(): void
+    {
+        $options = ['wordWrapEnabled' => true, 'columns' => ['name' => 'Name'], 'perPageOptions' => [20]];
+        $configuration = new ListConfiguration($options);
+        $this->assertTrue($configuration->wordWrap());
+
+        foreach (['1' => true, '0' => false] as $input => $expected) {
+            $saved = $configuration->validate(['columns' => ['name'], 'perPage' => 20, 'wordWrap' => (string) $input]);
+            $this->assertSame($expected, $saved['wordWrap']);
+            $this->assertSame($expected, (new ListConfiguration($options + ['values' => $saved]))->wordWrap());
+        }
+
+        $unconfigured = new ListConfiguration(['values' => ['wordWrap' => true]]);
+        $this->assertFalse($unconfigured->wordWrapEnabled());
+        $this->assertFalse($unconfigured->wordWrap());
+    }
+
+    public function test_word_wrap_rejects_invalid_choices(): void
+    {
+        $configuration = new ListConfiguration(['wordWrapEnabled' => true, 'columns' => ['name' => 'Name'], 'perPageOptions' => [20]]);
+        $this->expectException(ValidationException::class);
+        $configuration->validate(['columns' => ['name'], 'perPage' => 20, 'wordWrap' => 'invalid']);
+    }
+
     public function test_table_fields_keep_fixed_cells_and_hide_unselected_configurable_columns(): void
     {
         $table = new Table((object) [], new \Deep\FormTool\Core\BluePrint(), new DataModel(ListConfigurationModel::class));
@@ -118,6 +142,7 @@ class ListConfigurationTest extends TestCase
 
     public function test_table_uses_global_page_options_without_module_configuration(): void
     {
+        config()->set('form-tool.list.perPageEnabled', true);
         config()->set('form-tool.list.perPageOptions', [2, 4]);
         config()->set('form-tool.list.defaultPerPage', 2);
         $this->app->instance('request', Request::create('/students', 'GET', ['per_page' => 4]));
