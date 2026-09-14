@@ -16,6 +16,8 @@ class ListConfiguration
     private int $defaultPerPage;
     private ?string $saveUrl;
     private bool $canUpdate;
+    private bool $wordWrapEnabled;
+    private bool $wordWrap;
 
     public function __construct(array $options)
     {
@@ -24,6 +26,10 @@ class ListConfiguration
 
         $defaults = is_array($options['defaults'] ?? null) ? $options['defaults'] : [];
         $values = is_array($options['values'] ?? null) ? $options['values'] : [];
+
+        $this->wordWrapEnabled = (bool) ($options['wordWrapEnabled'] ?? false);
+        $this->wordWrap = $this->wordWrapEnabled
+            && filter_var($values['wordWrap'] ?? $defaults['wordWrap'] ?? true, FILTER_VALIDATE_BOOLEAN);
 
         $defaultColumns = $this->allowedSelection($defaults['columns'] ?? array_keys($this->columns), $this->columns);
         $this->selectedColumns = $this->allowedSelection($values['columns'] ?? $defaultColumns, $this->columns);
@@ -110,6 +116,7 @@ class ListConfiguration
         $columns = $this->allowedSelection($input['columns'] ?? [], $this->columns);
         $filters = $this->allowedSelection($input['filters'] ?? [], $this->filters);
         $perPage = (int) ($input['perPage'] ?? 0);
+        $wordWrap = $input['wordWrap'] ?? $this->wordWrap;
 
         $errors = [];
         if (! $columns) {
@@ -126,6 +133,10 @@ class ListConfiguration
             $errors['perPage'] = 'Select a valid default per-page limit.';
         }
 
+        if ($this->wordWrapEnabled && ! in_array($wordWrap, [true, false, 0, 1, '0', '1'], true)) {
+            $errors['wordWrap'] = 'Select Yes or No for word wrap.';
+        }
+
         if ($errors) {
             throw ValidationException::withMessages($errors);
         }
@@ -134,7 +145,18 @@ class ListConfiguration
             'columns' => $columns,
             'filters' => $filters,
             'perPage' => $perPage,
+            ...($this->wordWrapEnabled ? ['wordWrap' => (bool) $wordWrap] : []),
         ];
+    }
+
+    public function wordWrapEnabled(): bool
+    {
+        return $this->wordWrapEnabled;
+    }
+
+    public function wordWrap(): bool
+    {
+        return $this->wordWrap;
     }
 
     private function normalizeOptions(array $options): array

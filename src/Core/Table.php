@@ -533,6 +533,10 @@ class Table
         // Set paginator base url, needed for search result
         $this->dataResult->withPath($this->resource->route);
 
+        $data['wordWrap'] = $this->listConfiguration?->wordWrapEnabled()
+            ? $this->listConfiguration->wordWrap()
+            : null;
+
         $this->table = new \stdClass();
         $this->table->raw = $data;
         $this->table->data = $this->dataResult;

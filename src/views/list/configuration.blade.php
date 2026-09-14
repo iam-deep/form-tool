@@ -75,6 +75,16 @@
                         </div>
                     @endif
 
+                    @if ($configuration->wordWrapEnabled())
+                        <div class="form-group mb-3">
+                            <label for="formToolWordWrap"><strong>Word Wrap</strong></label>
+                            <select id="formToolWordWrap" name="wordWrap" class="form-control form-select">
+                                <option value="1" @selected($configuration->wordWrap())>Yes</option>
+                                <option value="0" @selected(! $configuration->wordWrap())>No</option>
+                            </select>
+                        </div>
+                    @endif
+
                     <button type="submit" class="btn btn-primary btn-sm rounded-0">Save</button>
                 </form>
             </div>

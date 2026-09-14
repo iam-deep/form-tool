@@ -1,5 +1,7 @@
+@include('form-tool::list.word_wrap')
+
 <div class="table-responsive">
-    <table class="table">
+    <table class="table{{ ($wordWrap ?? null) === false ? ' form-tool-no-wrap' : '' }}">
         <thead>
             <tr class="active">
                 @foreach ($headings as $header)
