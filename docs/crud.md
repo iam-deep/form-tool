@@ -127,6 +127,12 @@ default applies when `quick_status` is absent; clicking All explicitly overrides
 it. If several filters specify `default: true`, the last one wins. Without a
 default, All remains selected. Unknown selections fall back to All.
 
+An explicitly applied regular `status` or `isActive` filter switches the quick
+status to All, including when the request still contains a previous quick status.
+For example, filtering Inactive works even with Active configured as the default.
+Empty status filters keep the current quick status. This applies only to fields
+registered in the regular filter form; other filters retain the quick status.
+
 For custom conditions, pass a callback receiving the query and `DataModel`:
 
 ```php

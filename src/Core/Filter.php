@@ -142,6 +142,29 @@ class Filter
         return $data;
     }
 
+    public function hasAppliedField(string $field): bool
+    {
+        $value = request()->query($field);
+        if ($value === null || $value === '' || $value === []) {
+            return false;
+        }
+
+        foreach ($this->fieldsToFilter as $key => $option) {
+            $column = is_int($key) ? $option : $key;
+            if ($option instanceof BaseFilterType) {
+                $column = $option->getDbField() ?: $key;
+            }
+            if (is_string($column)) {
+                $parts = explode('.', $column);
+                if (end($parts) === $field) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function apply()
     {
         $this->initialize();

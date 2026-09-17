@@ -165,6 +165,10 @@ class Table
 
     private function selectedQuickFilter(): string
     {
+        if ($this->filter && ($this->filter->hasAppliedField('status') || $this->filter->hasAppliedField('isActive'))) {
+            return 'all';
+        }
+
         $key = $this->request->query('quick_status', $this->request->query('id') ? 'all' : $this->defaultQuickFilter);
         if ($key === 'trash' && $this->crud->isSoftDelete() && Guard::hasDestroy()) {
             return 'trash';

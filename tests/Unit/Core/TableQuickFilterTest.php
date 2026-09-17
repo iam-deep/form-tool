@@ -61,12 +61,14 @@ class TableQuickFilterTest extends TestCase
             $table->increments('id');
             $table->string('name');
             $table->integer('status');
+            $table->integer('isActive');
             $table->dateTime('deletedAt')->nullable();
         });
         foreach ([1, 1, 0, 2, 1, 2] as $index => $status) {
             DB::table('quick_filter_records')->insert([
                 'name' => 'Record '.($index + 1),
                 'status' => $status,
+                'isActive' => $status === 1 ? 1 : 0,
                 'deletedAt' => $index >= 4 ? '2026-01-01 00:00:00' : null,
             ]);
         }
@@ -217,19 +219,28 @@ class TableQuickFilterTest extends TestCase
         $this->assertSame('/records?quick_status=all&status=0&per_page=20', $tabs['filtered']['href']);
     }
 
-    public function test_filtered_count_uses_status_scope_and_shows_zero_matches(): void
+    public function test_explicit_status_filter_overrides_quick_status_in_lists_search_and_counts(): void
     {
-        foreach ([['quick_status' => 'all'], ['quick_status' => 'trash'], []] as $params) {
-            $table = $this->table($params + ['status' => 0]);
+        foreach ([['quick_status' => 'all'], ['quick_status' => 'active'], ['quick_status' => 'pending'], ['quick_status' => 'trash'], []] as $params) {
+            $table = $this->table($params + ['status' => '0']);
             $this->regularFilter($table);
-            $tabs = $table->getFilter()->quickFilter->quickFilters;
-            $this->assertSame(($params['quick_status'] ?? '') === 'all' ? 1 : 0, $tabs['filtered']['count']);
+            $where = $table->conditions();
+            $page = $table->getModel()->getAll($where);
+            $this->assertSame(1, $page->total());
+            $this->assertSame(0, (int) $page->items()[0]->status);
+            $this->assertSame(1, $table->getModel()->search('Record', ['name'], $where)->total());
+            $filter = $table->getFilter();
+            $tabs = $filter->quickFilter->quickFilters;
+            $this->assertSame(1, $tabs['filtered']['count']);
+            $this->assertSame('/records?quick_status=all&status=0', $tabs['filtered']['href']);
+            $this->assertContains('<input type="hidden" name="quick_status" value="all">', $filter->filter->filterData->inputs);
+            $this->assertFalse($tabs['active']['active']);
         }
         $table = $this->table(['status' => 1, 'search' => 'Record 1', 'page' => 2]);
         $this->regularFilter($table);
         $tabs = $table->getFilter()->quickFilter->quickFilters;
         $this->assertSame(2, $tabs['filtered']['count']);
-        $this->assertSame('/records?quick_status=active&status=1', $tabs['filtered']['href']);
+        $this->assertSame('/records?quick_status=all&status=1', $tabs['filtered']['href']);
     }
 
     public function test_empty_filters_and_navigation_do_not_show_filtered_tab(): void
@@ -237,7 +248,9 @@ class TableQuickFilterTest extends TestCase
         foreach ([null, '', []] as $empty) {
             $table = $this->table(['status' => $empty, 'page' => 2, 'per_page' => 50, 'orderby' => 'name', 'search' => 'Record', 'unknown' => 'value']);
             $this->regularFilter($table);
-            $this->assertArrayNotHasKey('filtered', $table->getFilter()->quickFilter->quickFilters);
+            $tabs = $table->getFilter()->quickFilter->quickFilters;
+            $this->assertArrayNotHasKey('filtered', $tabs);
+            $this->assertTrue($tabs['active']['active']);
         }
         $table = $this->table(['id' => 3, 'status' => 1]);
         $this->regularFilter($table);
@@ -254,5 +267,36 @@ class TableQuickFilterTest extends TestCase
         $this->assertSame(2, $tabs['filtered']['count']);
         $this->assertSame(2, $table->getModel()->getAll($table->conditions())->total());
         $this->assertSame(2, $table->getFilter()->quickFilter->quickFilters['filtered']['count']);
+    }
+
+    public function test_is_active_filter_overrides_the_active_default(): void
+    {
+        $table = $this->table(['isActive' => '0', 'quick_status' => 'active']);
+        $table->quickFilter('active', 'Active', ['isActive' => 1], default: true);
+        $this->regularFilter($table, 'isActive');
+        $this->assertSame(2, $table->getModel()->getAll($table->conditions())->total());
+        $tabs = $table->getFilter()->quickFilter->quickFilters;
+        $this->assertSame(2, $tabs['filtered']['count']);
+        $this->assertSame('/records?quick_status=all&isActive=0', $tabs['filtered']['href']);
+    }
+
+    public function test_other_filters_keep_quick_status_even_with_an_unregistered_status_parameter(): void
+    {
+        $table = $this->table(['name' => 'Record 3', 'status' => 0]);
+        $this->regularFilter($table, 'name');
+        $this->assertSame(0, $table->getModel()->getAll($table->conditions())->total());
+        $tabs = $table->getFilter()->quickFilter->quickFilters;
+        $this->assertSame(0, $tabs['filtered']['count']);
+        $this->assertStringContainsString('quick_status=active', $tabs['filtered']['href']);
+    }
+
+    public function test_applied_field_detection_supports_named_and_aliased_filter_definitions(): void
+    {
+        $this->app->instance('request', Request::create('/records', 'GET', ['status' => '0']));
+        foreach ([['status'], ['records.status'], ['status' => new BaseFilterType()]] as $fields) {
+            $filter = new Filter($fields);
+            $this->assertTrue($filter->hasAppliedField('status'));
+            $this->assertFalse($filter->hasAppliedField('isActive'));
+        }
     }
 }
