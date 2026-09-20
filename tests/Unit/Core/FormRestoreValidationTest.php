@@ -88,15 +88,74 @@ class FormRestoreValidationTest extends TestCase
         $this->assertTrue($crud->getForm()->validateRestoreData(2, $deletedRow));
     }
 
-    public function test_restore_validation_formats_stored_dates_like_create_input(): void
+    public function test_restore_skips_other_rules_and_callbacks_but_create_still_validates(): void
     {
         $crud = Doc::create($this->resource(), new DataModel(RestoreValidationFixture::class), function (BluePrint $input) {
-            $input->date('date', 'Date')->required();
+            $input->date('date', 'Date')->required()->validations(['after:2099-01-01']);
+            $input->text('mobile', 'Mobile')->required()->validations([function () {
+                $this->fail('Custom field rules must not run during restore.');
+            }]);
+            $input->email('email', 'Email')->required();
+        })->callbackValidation(function () {
+            $this->fail('Custom form validation must not run during restore.');
         });
         $crud->wantsArray();
 
         $deletedRow = DB::table('records')->where('recordId', 2)->first();
 
+        $this->assertTrue($crud->getForm()->validateRestoreData(2, $deletedRow));
+        $this->assertFalse($crud->getForm()->isRestoreValidation());
+        $response = $crud->getForm()->validateDuplicateData(['date' => 'invalid']);
+        $this->assertIsArray($response);
+        $this->assertFalse($response['success']);
+    }
+
+    public function test_restore_checks_slug_conflicts_and_ignores_other_trashed_rows(): void
+    {
+        DB::table('records')->update(['name' => 'final-exam']);
+        $crud = Doc::create($this->resource(), new DataModel(RestoreValidationFixture::class), function (BluePrint $input) {
+            $input->text('name', 'Name')->slug();
+        });
+        $crud->wantsArray();
+        $deletedRow = DB::table('records')->where('recordId', 2)->first();
+        $response = $crud->getForm()->validateRestoreData(2, $deletedRow);
+        $this->assertFalse($response['success']);
+
+        DB::table('records')->where('recordId', 1)->update(['deleted_at' => '2026-08-01 10:00:00']);
+        $this->assertTrue($crud->getForm()->validateRestoreData(2, $deletedRow));
+    }
+
+    public function test_restore_checks_explicit_unique_rules_without_mutating_the_original_rule(): void
+    {
+        foreach (['unique:records,name', \Illuminate\Validation\Rule::unique('records', 'name')] as $rule) {
+            DB::table('records')->where('recordId', 1)->update(['deleted_at' => null]);
+            $before = (string) $rule;
+            $crud = Doc::create($this->resource(), new DataModel(RestoreValidationFixture::class), function (BluePrint $input) use ($rule) {
+                $input->text('name', 'Name')->validations([$rule]);
+            });
+            $crud->wantsArray();
+            $deletedRow = DB::table('records')->where('recordId', 2)->first();
+            $response = $crud->getForm()->validateRestoreData(2, $deletedRow);
+            $this->assertFalse($response['success']);
+            DB::table('records')->where('recordId', 1)->update(['deleted_at' => '2026-08-01 10:00:00']);
+            $this->assertTrue($crud->getForm()->validateRestoreData(2, $deletedRow));
+            $this->assertSame($before, (string) $rule);
+        }
+    }
+
+    public function test_restore_checks_unique_combinations_using_stored_values_and_only_active_rows(): void
+    {
+        DB::table('records')->where('recordId', 1)->update(['date' => '2026-08-02']);
+        $crud = Doc::create($this->resource(), new DataModel(RestoreValidationFixture::class), function (BluePrint $input) {
+            $input->text('name', 'Name');
+            $input->date('date', 'Date');
+        })->unique(['name', 'date']);
+        $crud->wantsArray();
+        $deletedRow = DB::table('records')->where('recordId', 2)->first();
+        $response = $crud->getForm()->validateRestoreData(2, $deletedRow);
+        $this->assertFalse($response['status']);
+        $this->assertStringContainsString('combination', $response['message']);
+        DB::table('records')->where('recordId', 1)->update(['deleted_at' => '2026-08-01 10:00:00']);
         $this->assertTrue($crud->getForm()->validateRestoreData(2, $deletedRow));
     }
 

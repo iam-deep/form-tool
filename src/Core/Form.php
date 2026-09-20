@@ -3,7 +3,6 @@
 namespace Deep\FormTool\Core;
 
 use Closure;
-use Deep\FormTool\Core\InputTypes\BaseDateTimeType;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
@@ -14,6 +13,7 @@ use Deep\FormTool\Models\MultipleTableModel;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Unique;
 
 class Form
 {
@@ -908,6 +908,9 @@ class Form
         $rules = $messages = $labels = $merge = [];
         foreach ($this->bluePrint->getInputList() as $input) {
             if ($input instanceof BluePrint) {
+                if ($this->isRestoreValidation) {
+                    continue;
+                }
                 if ($input->getRequired()) {
                     $rules[$input->getKey()] = 'array|required|min:'.$input->getRequired();
                 } else {
@@ -937,12 +940,17 @@ class Form
                 continue;
             }
 
-            $newValue = $input->beforeValidation($this->request->post($input->getDbField()));
-            if ($newValue !== null) {
-                $merge[$input->getDbField()] = $newValue;
+            if (! $this->isRestoreValidation) {
+                $newValue = $input->beforeValidation($this->request->post($input->getDbField()));
+                if ($newValue !== null) {
+                    $merge[$input->getDbField()] = $newValue;
+                }
             }
 
             $rules[$input->getDbField()] = $input->getValidations($validationType);
+            if ($this->isRestoreValidation) {
+                $rules[$input->getDbField()] = $this->restoreUniqueRules($rules[$input->getDbField()]);
+            }
 
             $messages = array_merge($messages, $input->getValidationMessages());
 
@@ -953,7 +961,9 @@ class Form
             $this->request->merge($merge);
         }
 
-        $this->applyVisibilityValidationRules($rules, $messages);
+        if (! $this->isRestoreValidation) {
+            $this->applyVisibilityValidationRules($rules, $messages);
+        }
 
         $validator = Validator::make($this->request->all(), $rules, $messages, $labels);
 
@@ -977,7 +987,9 @@ class Form
 
                 // Before store is called so that value like date can be converted to db date format
                 $input->setValue($postData->{$column} ?? null);
-                $value = $input->beforeStore($postData) ?? $input->getDefaultValue();
+                $value = $this->isRestoreValidation
+                    ? ($postData->{$column} ?? null)
+                    : ($input->beforeStore($postData) ?? $input->getDefaultValue());
 
                 $where[] = [$alias.$column => $value];
                 $combination[] = $input->getNiceValue($value) ?: $input->getDefaultValue();
@@ -989,13 +1001,19 @@ class Form
                 };
             }
 
+            if ($this->isRestoreValidation) {
+                $where[] = function ($query) {
+                    $query->whereNull($this->model->getAlias().$this->restoreDeletedAtColumn());
+                };
+            }
+
             $count = $this->model->countWhere($where);
             if ($count) {
                 return $this->response(false, \sprintf('The combination of "%s" is already exist!', \implode(', ', array_values($combination))));
             }
         }
 
-        if ($this->callbackValidation) {
+        if ($this->callbackValidation && ! $this->isRestoreValidation) {
             $callbackValidation = $this->callbackValidation;
 
             /**
@@ -1018,6 +1036,34 @@ class Form
         return true;
     }
 
+    private function restoreDeletedAtColumn(): string
+    {
+        return config('form-tool.table_meta_columns.deletedAt') ?: 'deletedAt';
+    }
+
+    private function restoreUniqueRules(array $validations): array
+    {
+        $rules = ['nullable'];
+        foreach ($validations as $validation) {
+            // Support both field unique()/slug() rules and explicitly supplied unique rules.
+            if (is_string($validation) && str_starts_with($validation, 'unique:')) {
+                $parameters = str_getcsv(substr($validation, 7));
+                $validation = new Unique($parameters[0], $parameters[1] ?? 'NULL');
+                for ($index = 4; $index + 1 < count($parameters); $index += 2) {
+                    $validation->where($parameters[$index], $parameters[$index + 1]);
+                }
+            }
+
+            if ($validation instanceof Unique) {
+                $rule = clone $validation;
+                $rule->ignore($this->editId, $this->model->getPrimaryId());
+                $rules[] = $rule->withoutTrashed($this->restoreDeletedAtColumn());
+            }
+        }
+
+        return $rules;
+    }
+
     public function validateRestoreData($id, object $data)
     {
         $currentInput = $this->request->request->all();
@@ -1032,7 +1078,7 @@ class Form
         $this->isRestoreValidation = true;
 
         try {
-            $this->request->request->replace($this->restoreValidationData($id, $data));
+            $this->request->request->replace((array) $data);
 
             return $this->validate();
         } finally {
@@ -1121,32 +1167,6 @@ class Form
     public function isDuplicateStore(): bool
     {
         return $this->isDuplicateStore;
-    }
-
-    private function restoreValidationData($id, object $data): array
-    {
-        $postData = (array) $data;
-
-        foreach ($this->bluePrint->getInputList() as $input) {
-            if ($input instanceof BaseDateTimeType && array_key_exists($input->getDbField(), $postData)) {
-                $postData[$input->getDbField()] = $input->getNiceValue($postData[$input->getDbField()]);
-            }
-
-            if (! $input instanceof BluePrint) {
-                continue;
-            }
-
-            if ($input->getModel()) {
-                $postData[$input->getKey()] = MultipleTableModel::init($input->getModel())
-                    ->getAll($id)
-                    ->map(fn ($row) => (array) $row)
-                    ->all();
-            } elseif (isset($postData[$input->getKey()])) {
-                $postData[$input->getKey()] = \json_decode($postData[$input->getKey()], true) ?: [];
-            }
-        }
-
-        return $postData;
     }
 
     private function applyVisibilityValidationRules(array &$rules, array &$messages): void
