@@ -86,6 +86,11 @@ class EditorAndBulkFileStorageTest extends TestCase
 
     public function test_editor_route_overrides_require_a_valid_signature(): void
     {
+        config([
+            'filesystems.disks.form-tool-content.driver' => 's3',
+            'form-tool.filesystem.disk' => 'form-tool-content',
+        ]);
+
         $signedUrl = URL::signedRoute('form-tool.upload_image', [
             'path' => 'school-info',
             'disk' => 'form-tool-content',
@@ -98,6 +103,10 @@ class EditorAndBulkFileStorageTest extends TestCase
 
         $this->assertSame(200, $response->getStatusCode());
         Storage::disk('form-tool-content')->assertExists('storage/school-info/'.date('m-Y').'/public.png');
+        $this->assertSame(
+            'public',
+            Storage::disk('form-tool-content')->visibility('storage/school-info/'.date('m-Y').'/public.png'),
+        );
 
         $tampered = Request::create($signedUrl.'&visibility=private', 'POST');
         $tampered->files->set('upload', UploadedFile::fake()->image('private.png', 20, 20));

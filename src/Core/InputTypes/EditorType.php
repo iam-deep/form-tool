@@ -133,8 +133,6 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
             ], 400); // 400 being the HTTP code for an invalid request.
         }
 
-        $disk = $this->getDisk();
-        $visibility = $this->getFileVisibility();
         if ($request->query->has('disk') || $request->query->has('visibility')) {
             if (! $request->hasValidSignature()) {
                 abort(403);
@@ -142,6 +140,9 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
             $disk = FileManager::diskName($request->query('disk'));
             $visibility = FileManager::visibility($request->query('visibility'), $disk);
+        } else {
+            $disk = $this->getDisk();
+            $visibility = $this->getFileVisibility();
         }
 
         try {
