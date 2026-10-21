@@ -485,6 +485,10 @@ JS;
     {
         // $this->raw('onChange="form.submit()"');
 
+        if ($this->isMultiple) {
+            $this->value = $this->normalizeMultipleValue($this->value);
+        }
+
         $this->setPlugin();
         $this->addScript();
 

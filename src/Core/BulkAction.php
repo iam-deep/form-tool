@@ -398,6 +398,7 @@ class BulkAction
             $value,
             $input->getDisk(),
             $input->getFileVisibility(),
+            maxPathLength: $input->getMaxPathLength(),
         );
     }
 

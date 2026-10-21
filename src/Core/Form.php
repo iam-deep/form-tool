@@ -6,6 +6,7 @@ use Closure;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISaveable;
 use Deep\FormTool\Core\InputTypes\Common\IVisibilityController;
+use Deep\FormTool\Core\InputTypes\FileType;
 use Deep\FormTool\Core\InputTypes\SelectType;
 use Deep\FormTool\Core\Interfaces\SimpleRestApiInterface;
 use Deep\FormTool\Exceptions\FormToolException;
@@ -537,9 +538,11 @@ class Form
             return $validate;
         }
 
-        $this->createPostData();
+        $insertId = $this->persistWithUploads(function () {
+            $this->createPostData();
 
-        $insertId = $this->model->add($this->postData);
+            return $this->model->add($this->postData) ?: false;
+        });
 
         if ($insertId) {
             $this->editId = $insertId;
@@ -615,19 +618,19 @@ class Form
 
         $this->captureMultipleTableLoggerData();
 
-        $this->createPostData($this->editId);
+        $saved = $this->persistWithUploads(function () use ($callbackBeforeUpdate) {
+            $this->createPostData($this->editId);
 
-        if ($this->crud->isDefaultFormat()) {
-            if ($callbackBeforeUpdate) {
-                $response = $callbackBeforeUpdate($this->postData);
-                if ($response !== null) {
-                    $this->postData = $response;
+            if ($this->crud->isDefaultFormat()) {
+                if ($callbackBeforeUpdate) {
+                    $response = $callbackBeforeUpdate($this->postData);
+                    if ($response !== null) {
+                        $this->postData = $response;
+                    }
                 }
-            }
 
-            $this->model->updateOne($this->editId, $this->postData, false);
-        } else {
-            $this->model->destroyWhere(['groupName' => $this->crud->getGroupName()]);
+                return $this->model->updateOne($this->editId, $this->postData, false);
+            }
 
             $insert = [];
             foreach ($this->postData as $key => $value) {
@@ -641,7 +644,15 @@ class Form
                 }
             }
 
-            $this->model->addMany($insert);
+            return DB::transaction(function () use ($insert) {
+                $this->model->destroyWhere(['groupName' => $this->crud->getGroupName()]);
+
+                return $this->model->addMany($insert);
+            });
+        });
+
+        if ($saved === false) {
+            return $this->response(false, 'Something went wrong! Data not updated successfully!');
         }
 
         $this->afterSave();
@@ -657,6 +668,35 @@ class Form
         }
 
         return $this->response(true, ($this->resource->singularTitle ?? 'Data').$heroValue.' updated successfully!');
+    }
+
+    private function persistWithUploads(callable $save, ?BluePrint $bluePrint = null)
+    {
+        $bluePrint ??= $this->bluePrint;
+
+        try {
+            $result = $save();
+        } catch (\Throwable $exception) {
+            $this->finishFileUploads($bluePrint, false);
+
+            throw $exception;
+        }
+
+        // Files referenced by saved data must survive failures in later hooks or logging.
+        $this->finishFileUploads($bluePrint, $result !== false);
+
+        return $result;
+    }
+
+    private function finishFileUploads(BluePrint $bluePrint, bool $saved): void
+    {
+        foreach ($bluePrint->getInputList() as $input) {
+            if ($input instanceof BluePrint) {
+                $this->finishFileUploads($input, $saved);
+            } elseif ($input instanceof FileType) {
+                $input->finishUploads($saved);
+            }
+        }
     }
 
     private function afterSave()
@@ -769,54 +809,74 @@ class Form
                 }
             }
 
-            $data = [];
-            if ($postData && \is_array($postData)) {
-                foreach ($postData as $index => $row) {
-                    $dataRow = [];
-                    foreach ($input->getInputList() as $field) {
-                        $field->setIndex($input->getKey(), $index);
+            $fileUpdates = [];
+            $saved = $this->persistWithUploads(function () use ($input, $postData, $model, &$fileUpdates) {
+                $data = [];
+                if ($postData && \is_array($postData)) {
+                    foreach ($postData as $index => $row) {
+                        $dataRow = [];
+                        foreach ($input->getInputList() as $field) {
+                            $field->setIndex($input->getKey(), $index);
 
-                        $dbField = $field->getDbField();
+                            $dbField = $field->getDbField();
 
-                        // If we don't have a post data for an field like for an optional file field
-                        $dataRow[$dbField] = $row[$dbField] ?? null;
+                            // If we don't have a post data for an field like for an optional file field
+                            $dataRow[$dbField] = $row[$dbField] ?? null;
 
-                        $field->setValue($dataRow[$dbField]);
+                            $field->setValue($dataRow[$dbField]);
 
-                        $response = null;
-                        if ($this->formStatus == FormStatus::STORE) {
-                            $response = $field->beforeStore((object) $row);
-                        } else {
-                            $response = $field->beforeUpdate((object) $row, (object) $row);
+                            $response = null;
+                            if ($this->formStatus == FormStatus::STORE) {
+                                $response = $field->beforeStore((object) $row);
+                            } else {
+                                $response = $field->beforeUpdate((object) $row, (object) $row);
+                            }
+
+                            if ($response !== null) {
+                                $dataRow[$dbField] = $response;
+                            }
+
+                            if ($dataRow[$dbField] === null && $field->getDefaultValue() !== null) {
+                                $dataRow[$dbField] = $field->getDefaultValue();
+                            }
+
+                            if ($field instanceof FileType) {
+                                $fileUpdates[] = [$field, (object) $row, (object) $dataRow, $index];
+                            } elseif ($this->formStatus == FormStatus::STORE) {
+                                $field->afterStore((object) $dataRow);
+                            } else {
+                                $field->afterUpdate((object) $row, (object) $dataRow);
+                            }
                         }
 
-                        if ($response !== null) {
-                            $dataRow[$dbField] = $response;
+                        if ($model) {
+                            $dataRow[$model->getForeignCol()] = $this->editId;
                         }
 
-                        if ($dataRow[$dbField] === null && $field->getDefaultValue() !== null) {
-                            $dataRow[$dbField] = $field->getDefaultValue();
-                        }
-
-                        if ($this->formStatus == FormStatus::STORE) {
-                            $field->afterStore((object) $dataRow);
-                        } else {
-                            $field->afterUpdate((object) $row, (object) $dataRow);
-                        }
+                        $data[] = $dataRow;
                     }
-
-                    if ($model) {
-                        $dataRow[$model->getForeignCol()] = $this->editId;
-                    }
-
-                    $data[] = $dataRow;
                 }
+
+                if ($model) {
+                    return DB::transaction(fn () => $model->add($this->editId, $data));
+                }
+
+                return $this->model->updateOne($this->editId, [$input->getKey() => json_encode($data)]);
+            }, $input);
+
+            if ($saved === false) {
+                throw new FormToolException('Failed to save multiple field data.');
             }
 
-            if ($model) {
-                $model->add($this->editId, $data);
-            } else {
-                $this->model->updateOne($this->editId, [$input->getKey() => json_encode($data)]);
+            // Remove replaced files only after their new paths have been saved.
+            foreach ($fileUpdates as [$field, $oldRow, $newRow, $index]) {
+                $field->setIndex($input->getKey(), $index);
+                $field->setValue($newRow->{$field->getDbField()} ?? null);
+                if ($this->formStatus == FormStatus::STORE) {
+                    $field->afterStore($newRow);
+                } else {
+                    $field->afterUpdate($oldRow, $newRow);
+                }
             }
         }
     }

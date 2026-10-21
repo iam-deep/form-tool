@@ -84,6 +84,7 @@ class FileManager
         ?string $oldFilePath = null,
         ?string $disk = null,
         ?string $visibility = null,
+        int $maxPathLength = 250,
     ): ?string {
         if (! $file) {
             self::resetCrop();
@@ -101,6 +102,7 @@ class FileManager
                 $filename,
                 self::diskName($disk),
                 self::visibility($visibility, $disk),
+                $maxPathLength,
             );
         } catch (Exception $e) {
             if ($e instanceof FileUploadException || $e instanceof FormToolException) {
@@ -121,9 +123,11 @@ class FileManager
         string $filename,
         string $disk,
         string $visibility,
+        int $maxPathLength,
     ): string {
         $filename = self::uniqueFilename($destinationPath, $filename, $disk, '-');
         $key = self::normalizeKey($destinationPath.$filename);
+        self::validatePathLength($key, $maxPathLength);
 
         try {
             if (self::isImage($filename) && self::$cropWidth) {
@@ -151,7 +155,9 @@ class FileManager
                 $key = self::normalizeKey($stored);
                 Storage::disk($disk)->setVisibility($key, $visibility);
             }
-        } catch (Exception $e) {
+        } catch (\Throwable $e) {
+            self::deleteFile($key, $disk);
+
             if ($e instanceof FileUploadException) {
                 throw $e;
             }
@@ -162,11 +168,23 @@ class FileManager
         return $key;
     }
 
+    public static function validatePathLength(?string $path, int $maxPathLength = 250): void
+    {
+        if ($maxPathLength < 1) {
+            throw new \InvalidArgumentException('Maximum path length must be greater than zero.');
+        }
+
+        if ($path !== null && mb_strlen($path) > $maxPathLength) {
+            throw new FileUploadException('The file path must not exceed '.$maxPathLength.' characters.');
+        }
+    }
+
     public static function copyFile(
         $file,
         ?string $disk = null,
         ?string $visibility = null,
         ?string $destinationDirectory = null,
+        int $maxPathLength = 250,
     ): ?string {
         if (! is_string($file) || trim($file) === '') {
             return null;
@@ -205,8 +223,11 @@ class FileManager
             } while (self::exists($copy, $disk));
         }
 
+        self::validatePathLength($copy, $maxPathLength);
+
         try {
             if (! Storage::disk($disk)->copy($file, $copy)) {
+                self::deleteFile($copy, $disk);
                 return null;
             }
 
@@ -214,7 +235,9 @@ class FileManager
                 $copy,
                 $visibility ? self::visibility($visibility, $disk) : Storage::disk($disk)->getVisibility($file),
             );
-        } catch (Exception) {
+        } catch (\Throwable) {
+            self::deleteFile($copy, $disk);
+
             return null;
         }
 

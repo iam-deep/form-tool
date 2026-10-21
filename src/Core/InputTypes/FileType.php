@@ -6,6 +6,7 @@ use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Support\FileManager;
 use Deep\FormTool\Support\ImageCache;
+use Illuminate\Http\Request;
 
 class FileType extends BaseInputType
 {
@@ -16,6 +17,8 @@ class FileType extends BaseInputType
     private ?string $disk = null;
     private ?string $fileVisibility = null;
     private float $maxSizeInKb = 0;
+    private int $maxPathLength = 250;
+    private array $pendingUploads = [];
     private $accept = '';
 
     private $cropWidth = null;
@@ -87,6 +90,46 @@ class FileType extends BaseInputType
         return $this;
     }
 
+    public function maxPathLength(int $length): static
+    {
+        if ($length < 1) {
+            throw new \InvalidArgumentException('Maximum path length must be greater than zero.');
+        }
+
+        $this->maxPathLength = $length;
+
+        return $this;
+    }
+
+    public function finishUploads(bool $saved): void
+    {
+        if (! $saved) {
+            foreach ($this->pendingUploads as $path) {
+                FileManager::deleteFile($path, $this->getDisk());
+            }
+        }
+
+        $this->pendingUploads = [];
+    }
+
+    public function getMaxPathLength(): int
+    {
+        return $this->maxPathLength;
+    }
+
+    private function upload($file, ?string $oldFile = null): ?string
+    {
+        $path = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
+            $file, $this->path, $oldFile, $this->getDisk(), $this->getFileVisibility(), $this->maxPathLength,
+        );
+
+        if ($path !== null) {
+            $this->pendingUploads[] = $path;
+        }
+
+        return $path;
+    }
+
     public function crop($width, $height = null, $position = 'center')
     {
         $this->cropWidth = $width;
@@ -140,9 +183,9 @@ class FileType extends BaseInputType
         return $this;
     }
 
-    public function getValidations($type)
+    public function getValidations($type, ?Request $request = null)
     {
-        $request = request();
+        $request ??= request();
 
         $validations = parent::getValidations($type);
 
@@ -162,7 +205,7 @@ class FileType extends BaseInputType
                 }
             }
         } else {
-            $validations = [];
+            $validations = ['string', 'max:'.$this->maxPathLength];
         }
 
         if ('store' == $type) {
@@ -194,24 +237,12 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
-                $file,
-                $this->path,
-                null,
-                $this->getDisk(),
-                $this->getFileVisibility(),
-            );
+            $this->value = $this->upload($file);
 
             return $this->value;
         } else {
             $file = $request->file($this->dbField);
-            $this->value = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
-                $file,
-                $this->path,
-                null,
-                $this->getDisk(),
-                $this->getFileVisibility(),
-            );
+            $this->value = $this->upload($file);
 
             return $this->value;
         }
@@ -228,13 +259,7 @@ class FileType extends BaseInputType
             $file = $request->file($this->parentField);
             $file = $file[$this->index][$this->dbField] ?? null;
 
-            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
-                $file,
-                $this->path,
-                $oldFile,
-                $this->getDisk(),
-                $this->getFileVisibility(),
-            );
+            $filename = $this->upload($file, $oldFile);
             if ($filename !== null) {
                 $this->value = $filename;
 
@@ -244,13 +269,7 @@ class FileType extends BaseInputType
             $oldFile = $request->post($this->dbField);
             $file = $request->file($this->dbField);
 
-            $filename = FileManager::setCrop($this->cropWidth, $this->cropHeight, $this->cropPosition)::uploadFile(
-                $file,
-                $this->path,
-                $oldFile,
-                $this->getDisk(),
-                $this->getFileVisibility(),
-            );
+            $filename = $this->upload($file, $oldFile);
             if ($filename !== null) {
                 $this->value = $filename;
 
@@ -260,6 +279,7 @@ class FileType extends BaseInputType
 
         // No files have been uploaded let's return the old file if we have
         $this->value = $oldFile ?? null;
+        FileManager::validatePathLength($this->value, $this->maxPathLength);
 
         return $this->value;
     }

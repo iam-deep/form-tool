@@ -6,6 +6,7 @@ use Deep\FormTool\Core\Doc;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\IPluginableType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Core\InputTypes\Common\LengthValidation;
 use Deep\FormTool\Exceptions\FormToolException;
 use Deep\FormTool\Support\FileManager;
 use Illuminate\Http\Request;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Validator;
 
 class EditorType extends BaseInputType implements ISearchable, IPluginableType
 {
+    use LengthValidation;
+
     public int $type = InputType::EDITOR;
     public string $typeInString = 'editor';
 
@@ -30,6 +33,18 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
         parent::__construct();
 
         $this->classes[] = 'editor';
+    }
+
+    public function getValidations($type)
+    {
+        return $this->lengthValidations(parent::getValidations($type), [
+            'max:65500',
+            function ($attribute, $value, $fail) {
+                if (is_string($value) && strlen($this->encodeHTML($value)) > 65500) {
+                    $fail('The :attribute must not exceed 65,500 bytes of stored editor content.');
+                }
+            },
+        ]);
     }
 
     public function limitTableView(int $length)
@@ -120,7 +135,7 @@ class EditorType extends BaseInputType implements ISearchable, IPluginableType
 
         $fieldName = 'upload';
 
-        $rules[$fieldName] = (new ImageType())->getValidations('store');
+        $rules[$fieldName] = (new ImageType())->setDbField($fieldName)->getValidations('store', $request);
         $labels[$fieldName] = 'Image';
 
         $validator = Validator::make($request->all(), $rules, [], $labels);

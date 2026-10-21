@@ -5,6 +5,7 @@ namespace Deep\FormTool\Core\InputTypes;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Support\FileManager;
 use Deep\FormTool\Support\ImageCache;
+use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 
 class ImageType extends FileType
@@ -50,9 +51,9 @@ class ImageType extends FileType
         return $this;
     }
 
-    public function getValidations($type)
+    public function getValidations($type, ?Request $request = null)
     {
-        $validations = parent::getValidations($type);
+        $validations = parent::getValidations($type, $request);
 
         if (\in_array('file', $validations)) {
             $validations[] = 'image';

@@ -7,11 +7,13 @@ use Deep\FormTool\Core\InputTypes\Common\Encryption;
 use Deep\FormTool\Core\InputTypes\Common\IEncryptable;
 use Deep\FormTool\Core\InputTypes\Common\InputType;
 use Deep\FormTool\Core\InputTypes\Common\ISearchable;
+use Deep\FormTool\Core\InputTypes\Common\LengthValidation;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 
 class TextType extends BaseInputType implements IEncryptable, ISearchable
 {
+    use LengthValidation;
     use Encryption {
         getValue as protected getDecryptedValue;
     }
@@ -69,7 +71,8 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
 
     public function getValidations($type)
     {
-        $validations = parent::getValidations($type);
+        $validations = $this->lengthValidations(parent::getValidations($type),
+            $this->type === InputType::TEXT ? ['max:250'] : []);
 
         if ($this->isUnique) {
             $model = $this->bluePrint->getForm()->getModel();
@@ -130,10 +133,15 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         return $this->beforeStore($newData);
     }
 
+    public function getTableValue()
+    {
+        return e(parent::getTableValue());
+    }
+
     public function getHTML()
     {
         $input = '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).'" id="'.$this->dbField.
-            '" name="'.$this->dbField.'" value="'.old($this->dbField, $this->value).'" '.
+            '" name="'.$this->dbField.'" value="'.e(old($this->dbField, $this->value)).'" '.
             $this->raw.$this->inlineCSS.' />';
 
         return $this->htmlParentDiv($input);
@@ -144,7 +152,7 @@ class TextType extends BaseInputType implements IEncryptable, ISearchable
         $value = $oldValue ?? $this->value;
 
         return '<input type="'.$this->inputType.'" class="'.\implode(' ', $this->classes).' input-sm" id="'
-            .$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.$value.
+            .$key.'-'.$this->dbField.'-'.$index.'" name="'.$key.'['.$index.']['.$this->dbField.']" value="'.e($value).
             '" '.$this->raw.$this->inlineCSS.' />';
     }
 }
