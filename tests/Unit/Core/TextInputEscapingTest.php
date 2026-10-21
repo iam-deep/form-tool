@@ -2,8 +2,8 @@
 
 namespace Deep\FormTool\Tests\Unit\Core;
 
-use Deep\FormTool\Core\InputTypes\TextType;
 use Deep\FormTool\Core\InputTypes\TextareaType;
+use Deep\FormTool\Core\InputTypes\TextType;
 use Tests\TestCase;
 
 class TextInputEscapingTest extends TestCase

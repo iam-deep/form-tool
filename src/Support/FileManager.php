@@ -228,6 +228,7 @@ class FileManager
         try {
             if (! Storage::disk($disk)->copy($file, $copy)) {
                 self::deleteFile($copy, $disk);
+
                 return null;
             }
 
