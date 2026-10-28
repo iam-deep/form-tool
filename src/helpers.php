@@ -140,7 +140,16 @@ if (! function_exists('isSuccess')) {
             return isset($data->status) && $data->status === true;
         }
 
-        return $response instanceof \Illuminate\Http\RedirectResponse && session()->has('success');
+        if (! $response instanceof \Illuminate\Http\RedirectResponse) {
+            return false;
+        }
+
+        // Old flash messages describe the previous request, not this save.
+        $flashKeys = $response->getSession()?->get('_flash.new', []) ?? [];
+
+        return in_array('success', $flashKeys, true)
+            && ! in_array('error', $flashKeys, true)
+            && ! in_array('errors', $flashKeys, true);
     }
 }
 
